@@ -4,27 +4,30 @@ using MediatR.NotificationPublishers;
 using JNJ.MessageBus;
 using Serilog;
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = Host.CreateDefaultBuilder(args)
+    .UseWindowsService()
+    .ConfigureServices((hostContext, services) =>
+    {
+        // Serilog
+        services.AddSerilog(config =>
+        {
+            config.ReadFrom.Configuration(hostContext.Configuration);
+        });
 
-// Serilog
-builder.Services.AddSerilog(config =>
-{
-    config.ReadFrom.Configuration(builder.Configuration);
-});
+        // Modules
+        var mediatrAssemblies = new List<Assembly>();
+        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatrAssemblies);
 
-// Modules
-var mediatrAssemblies = new List<Assembly>();
-builder.Services.AddCheckOCRScreeningStatusModule(builder.Configuration, mediatrAssemblies);
+        // Mediatr
+        services.AddMediatR(c =>
+        {
+            c.RegisterServicesFromAssemblies(mediatrAssemblies.ToArray());
+            c.NotificationPublisher = new TaskWhenAllPublisher();
+        });
 
-// Mediatr
-builder.Services.AddMediatR(c =>
-{
-    c.RegisterServicesFromAssemblies(mediatrAssemblies.ToArray());
-    c.NotificationPublisher = new TaskWhenAllPublisher();
-});
-
-// EventBus
-builder.Services.AddEventBus();
+        // EventBus
+        services.AddEventBus();
+    });
 
 
 var host = builder.Build();

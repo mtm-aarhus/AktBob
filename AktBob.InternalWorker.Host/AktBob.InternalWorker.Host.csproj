@@ -7,10 +7,15 @@
     <UserSecretsId>dotnet-AktBob.InternalWorker.Host-75644e85-5905-4ac2-8b15-c12d6c5f6f89</UserSecretsId>
   </PropertyGroup>
 
+	<PropertyGroup>
+		<ServerGarbageCollection>true</ServerGarbageCollection>
+	</PropertyGroup>
+	
   <ItemGroup>
     <PackageReference Include="JNJ.MessageBus" Version="1.1.1" />
     <PackageReference Include="MediatR" Version="12.3.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
     <PackageReference Include="Serilog" Version="4.0.0" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.1" />

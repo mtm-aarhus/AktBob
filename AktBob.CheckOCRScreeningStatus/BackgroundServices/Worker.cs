@@ -35,11 +35,6 @@ internal class Worker : BackgroundService
         {
             var messages = await _queueService.Queue.GetMessages(maxMessages);
 
-            if (!messages.Any())
-            {
-                _logger.LogInformation("No messages pending");
-            }
-
             foreach (var message in messages)
             {
                 var content = JsonSerializer.Deserialize<QueueMessageBodyDto>(message.Body, _jsonSerializerOptions);
