@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.InternalWorker.Host", "AktBob.InternalWorker.Host\AktBob.InternalWorker.Host.csproj", "{7F27F275-F6CF-45E8-B339-BD5E67752CFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.InternalWorker.Host", "AktBob.InternalWorker.Host\AktBob.InternalWorker.Host.csproj", "{7F27F275-F6CF-45E8-B339-BD5E67752CFD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.CheckOCRScreeningStatus", "AktBob.CheckOCRScreeningStatus\AktBob.CheckOCRScreeningStatus.csproj", "{5A76B308-131B-496C-AECA-8A83C5C6C660}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.CreateOCRScreeningStatus.ExternalQueue", "AktBob.CheckOCRScreeningStatus.ExternalQueue\AktBob.CreateOCRScreeningStatus.ExternalQueue.csproj", "{A8A9B62E-1011-421C-94C1-BB0F42C11107}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Check OCR Screening Status Module", "Check OCR Screening Status Module", "{A480C33B-82F4-4D2D-8113-A1D67E0FE0EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +21,21 @@ Global
 		{7F27F275-F6CF-45E8-B339-BD5E67752CFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F27F275-F6CF-45E8-B339-BD5E67752CFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F27F275-F6CF-45E8-B339-BD5E67752CFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A76B308-131B-496C-AECA-8A83C5C6C660}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A76B308-131B-496C-AECA-8A83C5C6C660}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A76B308-131B-496C-AECA-8A83C5C6C660}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A76B308-131B-496C-AECA-8A83C5C6C660}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8A9B62E-1011-421C-94C1-BB0F42C11107}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8A9B62E-1011-421C-94C1-BB0F42C11107}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8A9B62E-1011-421C-94C1-BB0F42C11107}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8A9B62E-1011-421C-94C1-BB0F42C11107}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5A76B308-131B-496C-AECA-8A83C5C6C660} = {A480C33B-82F4-4D2D-8113-A1D67E0FE0EF}
+		{A8A9B62E-1011-421C-94C1-BB0F42C11107} = {A480C33B-82F4-4D2D-8113-A1D67E0FE0EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}
