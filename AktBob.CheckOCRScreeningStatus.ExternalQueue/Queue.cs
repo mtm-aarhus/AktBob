@@ -1,20 +1,19 @@
 ﻿using Ardalis.GuardClauses;
 using Azure.Storage.Queues;
-using Microsoft.Extensions.Configuration;
 
 namespace AktBob.CreateOCRScreeningStatus.ExternalQueue;
-public class CheckOCRScreeningStatusQueue : ICheckOCRScreeningStatusQueue
+public class Queue : IQueue
 {
     private QueueClient _queue;
-    private readonly IConfiguration _configuration;
+    private readonly int _visibilyTimeoutSeconds;
 
-    public CheckOCRScreeningStatusQueue(IConfiguration configuration)
+    public Queue(string connectionString, string queueName, int visibilyTimeoutSeconds)
     {
-        var connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureStorage"));
-        var queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("AzureQueue:CheckOCRScreeningStatus:QueueName"));
+        Guard.Against.NullOrEmpty(connectionString);
+        Guard.Against.NullOrEmpty(queueName);
 
         _queue = new QueueClient(connectionString, queueName);
-        _configuration = configuration;
+        _visibilyTimeoutSeconds = visibilyTimeoutSeconds;
     }
 
     public async Task<string> CreateMessage(string message)
@@ -25,9 +24,7 @@ public class CheckOCRScreeningStatusQueue : ICheckOCRScreeningStatusQueue
 
     public async Task<IEnumerable<QueueMessageDto>> GetMessages(int maxMessage = 10)
     {
-        var visibilityTimeout = _configuration.GetValue<int?>("AzureQueue:CheckOCRScreeningStatus:VisibilityTimeoutSeconds") ?? 600;
-
-        var response = await _queue.ReceiveMessagesAsync(maxMessage, TimeSpan.FromSeconds(visibilityTimeout));
+        var response = await _queue.ReceiveMessagesAsync(maxMessage, TimeSpan.FromSeconds(_visibilyTimeoutSeconds));
         var messages = response.Value;
 
         var dto = messages.Select(m => new QueueMessageDto(

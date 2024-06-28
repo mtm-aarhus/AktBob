@@ -3,14 +3,14 @@ using System.Reflection;
 using FilArkivCore.Web.Client;
 using Microsoft.Extensions.Configuration;
 using Ardalis.GuardClauses;
-using AktBob.CreateOCRScreeningStatus.ExternalQueue;
-using System.Net.Http.Headers;
 
 namespace AktBob.CheckOCRScreeningStatus;
 public static class ModuleServices
 {
     public static IServiceCollection AddCheckOCRScreeningStatusModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatRAssemblies)
     {
+        services.AddHostedService<BackgroundServices.Worker>();
+
         services.AddSingleton<IData, Data>();
 
         var filArkivUrl = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:BaseAddress"));
@@ -18,12 +18,17 @@ public static class ModuleServices
         var filArkivClientSecret = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientSecret"));
         services.AddFilArkivApiClient(filArkivUrl, filArkivClientId, filArkivClientSecret);
 
-        Guard.Against.NullOrEmpty(configuration.GetValue<string>("AzureQueue:CheckOCRScreeningStatus:QueueName"));
+        Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName"));
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureStorage"));
 
-        services.AddTransient<ICheckOCRScreeningStatusQueue, CheckOCRScreeningStatusQueue>();
-        services.AddTransient<ICheckOCRScreeningStatusService, CheckOCRScreeningStatusService>();
+        services.AddTransient<IQueueService>(serviceProvider =>
+        {
+            var queueConnectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureStorage"));
+            var queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName"));
+            var queueVisibilityTimeoutSeconds = configuration.GetValue<int?>("CheckOCRScreeningStatus:QueueVisibilityTimeoutSeconds") ?? 60;
 
+            return new QueueService(queueConnectionString, queueName, queueVisibilityTimeoutSeconds);
+        });
 
         services.AddScoped<IFilArkiv, FilArkiv>();
 

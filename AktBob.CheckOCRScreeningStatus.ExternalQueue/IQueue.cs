@@ -1,5 +1,5 @@
 ﻿namespace AktBob.CreateOCRScreeningStatus.ExternalQueue;
-public interface ICheckOCRScreeningStatusQueue
+public interface IQueue
 {
     Task<string> CreateMessage(string message);
     Task DeleteMessage(string messageId, string popReciept, CancellationToken cancellationToken = default);
