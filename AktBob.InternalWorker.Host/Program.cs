@@ -3,6 +3,7 @@ using System.Reflection;
 using MediatR.NotificationPublishers;
 using JNJ.MessageBus;
 using Serilog;
+using AktBob.Email;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -17,6 +18,7 @@ var builder = Host.CreateDefaultBuilder(args)
         // Modules
         var mediatrAssemblies = new List<Assembly>();
         services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatrAssemblies);
+        services.AddEmailModuleServices(hostContext.Configuration, mediatrAssemblies);
 
         // Mediatr
         services.AddMediatR(c =>
