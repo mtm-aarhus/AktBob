@@ -3,12 +3,16 @@ using System.Reflection;
 using FilArkivCore.Web.Client;
 using Microsoft.Extensions.Configuration;
 using Ardalis.GuardClauses;
+using AAK.Deskpro;
 
 namespace AktBob.CheckOCRScreeningStatus;
 public static class ModuleServices
 {
     public static IServiceCollection AddCheckOCRScreeningStatusModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatRAssemblies)
     {
+        Guard.Against.NullOrEmpty(configuration.GetSection("Deskpro:PodioItemIdFields").Get<int[]>());
+        Guard.Against.Null(configuration.GetValue<int>("Podio:AppId"));
+
         services.AddHostedService<BackgroundServices.Worker>();
 
         services.AddSingleton<IData, Data>();
@@ -41,6 +45,15 @@ public static class ModuleServices
             client.BaseAddress = new Uri(apiBaseAddress);
             client.DefaultRequestHeaders.Add("ApiKey", apiApiKey);
         });
+
+
+        var deskproOptions = new DeskproOptions
+        {
+            BaseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Deskpro:BaseAddress")),
+            AuthorizationKey = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Deskpro:AuthorizationKey"))
+        };
+
+        services.AddDeskpro(deskproOptions);
 
         mediatRAssemblies.Add(typeof(ModuleServices).Assembly);
         return services;

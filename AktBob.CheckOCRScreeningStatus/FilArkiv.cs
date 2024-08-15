@@ -15,13 +15,13 @@ internal class FilArkiv : IFilArkiv
 
     public FilArkivCoreClient FilArkivCoreClient { get; }
 
-    public async Task GetToken()
-    {
-        var clientId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("FilArkiv:ClientId"));
-        var clientSecret = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("FilArkiv:ClientSecret"));
-        var tokenEndpoint = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("FilArkiv:TokenEndpoint"));
-        var scope = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("FilArkiv:Scope"));
+    //public async Task GetToken()
+    //{
+    //    var clientId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("FilArkiv:ClientId"));
+    //    var clientSecret = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("FilArkiv:ClientSecret"));
+    //    var tokenEndpoint = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("FilArkiv:TokenEndpoint"));
+    //    var scope = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("FilArkiv:Scope"));
 
-        await FilArkivCoreClient.ApplyTokenAsync(clientId, clientSecret, tokenEndpoint, scope);
-    }
+    //    await FilArkivCoreClient.ApplyTokenAsync(clientId, clientSecret, tokenEndpoint, scope);
+    //}
 }
