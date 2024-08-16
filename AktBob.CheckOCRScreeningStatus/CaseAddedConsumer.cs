@@ -103,7 +103,7 @@ internal class CaseAddedConsumer : INotificationHandler<CaseAdded>
                         var queueEmailCommand = new QueueEmailCommand(
                             getAgentResult.Value.Email,
                             $"OCR screening af {sagsnummer} er færdig (aktindsigtsanmodning {aktindsigtssagsnummer})",
-                            $"<p>Hej {getAgentResult.Value.FirstName}</p><p>OCR screening af dokumenterne fra {sagsnummer} på FilArkiv er færdig.</p><p><ul><li>Link til sagen på Podio: {podioItem.Link}</li><li>Link til dokumenterne på FilArkiv: {filArkivLink}</li></ul></p>");
+                            $"<p>Hej {getAgentResult.Value.FirstName}</p><p>OCR screening af dokumenterne fra {sagsnummer} på FilArkiv er færdig.</p><p><ul><li>Link til sagen på Podio: <a href=\"{podioItem.Link}\">{podioItem.Link}</a></li><li>Link til dokumenterne på FilArkiv: <a href=\"{filArkivLink}\">{filArkivLink}</a></li></ul></p>");
                         await _mediator.Send(queueEmailCommand);
 
                         // Post Deskpro agent note
