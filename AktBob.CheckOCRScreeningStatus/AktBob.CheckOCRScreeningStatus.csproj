@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AktBob.CheckOCRScreeningStatus.ExternalQueue\AktBob.CreateOCRScreeningStatus.ExternalQueue.csproj" />
     <ProjectReference Include="..\AktBob.Email.Contracts\AktBob.Email.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.Queue.Contracts\AktBob.Queue.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

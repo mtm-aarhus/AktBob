@@ -12,6 +12,9 @@ public static class ModuleServices
     {
         Guard.Against.NullOrEmpty(configuration.GetSection("Deskpro:PodioItemIdFields").Get<int[]>());
         Guard.Against.Null(configuration.GetValue<int>("Podio:AppId"));
+        Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName"));
+        Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureStorage"));
+
 
         services.AddHostedService<BackgroundServices.Worker>();
 
@@ -21,18 +24,6 @@ public static class ModuleServices
         var filArkivClientId = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientId"));
         var filArkivClientSecret = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientSecret"));
         services.AddFilArkivApiClient(filArkivUrl, filArkivClientId, filArkivClientSecret);
-
-        Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName"));
-        Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureStorage"));
-
-        services.AddTransient<IQueueService>(serviceProvider =>
-        {
-            var queueConnectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureStorage"));
-            var queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName"));
-            var queueVisibilityTimeoutSeconds = configuration.GetValue<int?>("CheckOCRScreeningStatus:QueueVisibilityTimeoutSeconds") ?? 60;
-
-            return new QueueService(queueConnectionString, queueName, queueVisibilityTimeoutSeconds);
-        });
 
         services.AddScoped<IFilArkiv, FilArkiv>();
 
@@ -45,7 +36,6 @@ public static class ModuleServices
             client.BaseAddress = new Uri(apiBaseAddress);
             client.DefaultRequestHeaders.Add("ApiKey", apiApiKey);
         });
-
 
         var deskproOptions = new DeskproOptions
         {
