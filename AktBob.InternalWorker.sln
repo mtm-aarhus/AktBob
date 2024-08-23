@@ -13,9 +13,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Check OCR Screening Status 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Email Module", "Email Module", "{04E88733-1387-4041-AAF2-EA21EC4A1D24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Email", "AktBob.Email\AktBob.Email.csproj", "{57215D5C-7983-4A89-B722-307B8A354BC1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Email", "AktBob.Email\AktBob.Email.csproj", "{57215D5C-7983-4A89-B722-307B8A354BC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Email.Contracts", "AktBob.Email.Contracts\AktBob.Email.Contracts.csproj", "{D87D21C4-BEC3-4B6F-B225-2AD892851FD3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Email.Contracts", "AktBob.Email.Contracts\AktBob.Email.Contracts.csproj", "{D87D21C4-BEC3-4B6F-B225-2AD892851FD3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UiPath Module", "UiPath Module", "{F97E7D5D-2B1F-4AAE-AE73-3434B0B10734}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
