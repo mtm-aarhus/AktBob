@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AktBob.Aktliste\AktBob.Aktliste.csproj" />
     <ProjectReference Include="..\AktBob.CheckOCRScreeningStatus\AktBob.CheckOCRScreeningStatus.csproj" />
     <ProjectReference Include="..\AktBob.Email\AktBob.Email.csproj" />
     <ProjectReference Include="..\AktBob.Queue\AktBob.Queue.csproj" />

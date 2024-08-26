@@ -6,6 +6,7 @@ using Serilog;
 using AktBob.Email;
 using AktBob.Queue;
 using AktBob.UiPath;
+using AktBob.Aktliste;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -23,6 +24,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddEmailModuleServices(hostContext.Configuration, mediatrAssemblies);
         services.AddQueueModule(hostContext.Configuration, mediatrAssemblies);
         services.AddUiPathModule(hostContext.Configuration, mediatrAssemblies);
+        services.AddAktlisteModule(hostContext.Configuration);
 
         // Mediatr
         services.AddMediatR(c =>

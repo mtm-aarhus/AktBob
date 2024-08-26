@@ -34,7 +34,7 @@ internal class Worker : BackgroundService
     {
         var delay = _configuration.GetValue<int?>("CheckOCRScreeningStatus:QueuePollingIntervalSeconds") ?? 60;
         var maxMessages = _configuration.GetValue<int?>("CheckOCRScreeningStatus:QueueMaxMessages") ?? 10;
-        var connectionString = _configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName");
+        var connectionString = _configuration.GetConnectionString("AzureStorage");
         var queueName = _configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName");
 
         using (var scope = ServiceProvider.CreateScope())
