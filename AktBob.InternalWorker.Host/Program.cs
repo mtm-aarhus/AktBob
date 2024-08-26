@@ -5,6 +5,7 @@ using JNJ.MessageBus;
 using Serilog;
 using AktBob.Email;
 using AktBob.Queue;
+using AktBob.UiPath;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -21,6 +22,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatrAssemblies);
         services.AddEmailModuleServices(hostContext.Configuration, mediatrAssemblies);
         services.AddQueueModule(hostContext.Configuration, mediatrAssemblies);
+        services.AddUiPathModule(hostContext.Configuration, mediatrAssemblies);
 
         // Mediatr
         services.AddMediatR(c =>
