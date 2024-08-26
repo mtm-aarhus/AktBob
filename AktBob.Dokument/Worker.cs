@@ -7,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace AktBob.Aktliste;
+namespace AktBob.Dokument;
 internal class Worker : BackgroundService
 {
     private ILogger<Worker> _logger;
@@ -25,9 +25,9 @@ internal class Worker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var connectionString = _configuration.GetConnectionString("AzureStorage");
-        var azureQueueName = _configuration.GetValue<string>("AktlisteModule:AzureQueueName");
-        var uiPathQueueName = _configuration.GetValue<string>("AktlisteModule:UiPathQueueName");
-        var delay = _configuration.GetValue<int>("AktlisteModule:WorkerIntervalSeconds");
+        var azureQueueName = _configuration.GetValue<string>("DokumentModule:AzureQueueName");
+        var uiPathQueueName = _configuration.GetValue<string>("DokumentModule:UiPathQueueName");
+        var delay = _configuration.GetValue<int>("DokumentModule:WorkerIntervalSeconds");
 
         using (var scope = ServiceProvider.CreateScope())
         {
@@ -43,15 +43,15 @@ internal class Worker : BackgroundService
 
                     foreach (var azureQueueMessage in azureQueueMessages.Value)
                     {
-                        var aktlisteQueueItem = JsonSerializer.Deserialize<AktlisteQueueItem>(azureQueueMessage.Body);
+                        var dokumentQueueItem = JsonSerializer.Deserialize<DokumentQueueItem>(azureQueueMessage.Body);
 
-                        if (aktlisteQueueItem == null)
+                        if (dokumentQueueItem == null)
                         {
-                            _logger.LogError("Azure queue item body does not match type of '{type}'", typeof(AktlisteQueueItem));
+                            _logger.LogError("Azure queue item body does not match type of '{type}'", typeof(DokumentQueueItem));
                             continue;
                         }
 
-                        var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName!, azureQueueMessage.Id, aktlisteQueueItem);
+                        var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName!, azureQueueMessage.Id, dokumentQueueItem);
                         await mediator.Send(addUiPathQueueItemCommand);
 
                         var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(connectionString, azureQueueName, azureQueueMessage.Id, azureQueueMessage.PopReceipt);

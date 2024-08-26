@@ -1,2 +1,2 @@
 ﻿namespace AktBob.Aktliste;
-internal record AktlisteQueueItem(string Id, string Reference, object Body);
+internal record AktlisteQueueItem(string Id, string EnkeltId, string SagsNummer, string Email);

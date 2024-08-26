@@ -7,6 +7,7 @@ using AktBob.Email;
 using AktBob.Queue;
 using AktBob.UiPath;
 using AktBob.Aktliste;
+using AktBob.Dokument;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -25,6 +26,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddQueueModule(hostContext.Configuration, mediatrAssemblies);
         services.AddUiPathModule(hostContext.Configuration, mediatrAssemblies);
         services.AddAktlisteModule(hostContext.Configuration);
+        services.AddDokumentModule(hostContext.Configuration);
 
         // Mediatr
         services.AddMediatR(c =>
