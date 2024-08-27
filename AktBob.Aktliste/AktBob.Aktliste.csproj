@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Queue.Contracts\AktBob.Queue.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.UiPath.Contracts\AktBob.UiPath.Contracts.csproj" />
   </ItemGroup>

@@ -1,5 +1,7 @@
-﻿using AktBob.Queue.Contracts;
+﻿using AktBob.Deskpro.Contracts;
+using AktBob.Queue.Contracts;
 using AktBob.UiPath.Contracts;
+using Ardalis.GuardClauses;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,10 +26,10 @@ internal class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var connectionString = _configuration.GetConnectionString("AzureStorage");
-        var azureQueueName = _configuration.GetValue<string>("AktlisteModule:AzureQueueName");
-        var uiPathQueueName = _configuration.GetValue<string>("AktlisteModule:UiPathQueueName");
-        var delay = _configuration.GetValue<int>("AktlisteModule:WorkerIntervalSeconds");
+        var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("AzureStorage"));
+        var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("AktlisteModule:AzureQueueName"));
+        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("AktlisteModule:UiPathQueueName"));
+        var delay = _configuration.GetValue<int?>("AktlisteModule:WorkerIntervalSeconds") ?? 10;
 
         using (var scope = ServiceProvider.CreateScope())
         {
@@ -43,16 +45,57 @@ internal class Worker : BackgroundService
 
                     foreach (var azureQueueMessage in azureQueueMessages.Value)
                     {
-                        var aktlisteQueueItem = JsonSerializer.Deserialize<AktlisteQueueItem>(azureQueueMessage.Body);
+                        var azureQueueItemDto = JsonSerializer.Deserialize<AzureQueueItemDto>(azureQueueMessage.Body);
 
-                        if (aktlisteQueueItem == null)
+                        if (azureQueueItemDto == null)
                         {
-                            _logger.LogError("Azure queue item body does not match type of '{type}'", typeof(AktlisteQueueItem));
+                            _logger.LogError("Azure queue item body does not match type of '{type}'", typeof(AzureQueueItemDto));
                             continue;
                         }
 
-                        var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName!, azureQueueMessage.Id, aktlisteQueueItem);
-                        await mediator.Send(addUiPathQueueItemCommand);
+                        // Get data from Deskpro
+
+                        // Find Deskpro ticket from PodioItemId
+                        var ticketFields = _configuration.GetSection("Deskpro:PodioItemIdFields").Get<int[]>();
+
+                        // Get Deskpro tickets by searching the specified custom fields for the PodioItemId 
+                        var getTicketsQuery = new GetDeskproTicketsByFieldSearchQuery(ticketFields!, azureQueueItemDto.PodioItemId.ToString());
+                        var deskproTickets = await mediator.Send(getTicketsQuery);
+
+                        foreach (var deskproTicket in deskproTickets.Value)
+                        {
+                            // Skip if the Deskpro ticket has no assigned agent
+                            if (deskproTicket.AgentId is null || deskproTicket.AgentId == 0)
+                            {
+                                continue;
+                            }
+
+                            // Get agent email address from Deskpro
+                            var getAgentQuery = new GetDeskproPersonQuery((int)deskproTicket.AgentId);
+                            var getAgentResult = await mediator.Send(getAgentQuery);
+
+                            var agentName = string.Empty;
+                            var agentEmail = string.Empty;
+
+                            if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
+                            {
+                                agentName = getAgentResult.Value.FullName;
+                                agentEmail = getAgentResult.Value.Email;
+                            }
+
+                            var uiPathQueueItemContent = new
+                            {
+                                SagsNummer = azureQueueItemDto.CaseNumber,
+                                Email = agentEmail,
+                                Navn = agentName,
+                                PodioID = azureQueueItemDto.PodioItemId,
+                                DeskproID = deskproTicket.Id,
+                                Titel = deskproTicket.Subject
+                            };
+
+                            var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, azureQueueItemDto.PodioItemId.ToString(), uiPathQueueItemContent);
+                            await mediator.Send(addUiPathQueueItemCommand);
+                        }
 
                         var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(connectionString, azureQueueName, azureQueueMessage.Id, azureQueueMessage.PopReceipt);
                     }
