@@ -1,21 +1,24 @@
 ﻿using AktBob.Queue.Contracts;
+using Ardalis.GuardClauses;
 using Azure.Storage.Queues;
+using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Queue;
 public class Queue : IQueue
 {
-    private readonly int _visibilyTimeoutSeconds;
+    private readonly IConfiguration _configuration;
+    private readonly string _connectionString;
 
-    //public async Task<string> CreateMessage(string connectionString, string queueName, string message, CancellationToken cancellationToken = default)
-    //{
-    //    var queue = new QueueClient(connectionString, queueName);
-    //    var reciept = await queue.SendMessageAsync(message, cancellationToken);
-    //    return reciept.Value.MessageId;
-    //}
-
-    public async Task<IEnumerable<QueueMessageDto>> GetMessages(string connectionString, string queueName, int visibilyTimeoutSeconds = 60, int maxMessage = 10, CancellationToken cancellationToken = default)
+    public Queue(IConfiguration configuration)
     {
-        var queue = new QueueClient(connectionString, queueName);
+        _configuration = configuration;
+        _connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("AzureStorage"));
+
+    }
+
+    public async Task<IEnumerable<QueueMessageDto>> GetMessages(string queueName, int visibilyTimeoutSeconds = 60, int maxMessage = 10, CancellationToken cancellationToken = default)
+    {
+        var queue = new QueueClient(_connectionString, queueName);
 
         var response = await queue.ReceiveMessagesAsync(maxMessage, TimeSpan.FromSeconds(visibilyTimeoutSeconds), cancellationToken);
         var messages = response.Value;
@@ -28,14 +31,9 @@ public class Queue : IQueue
         return dto;
     }
 
-    public async Task DeleteMessage(string connectionString, string queueName, string messageId, string popReciept, CancellationToken cancellationToken = default)
+    public async Task DeleteMessage(string queueName, string messageId, string popReciept, CancellationToken cancellationToken = default)
     {
-        if (connectionString is null)
-        {
-            throw new ArgumentNullException(nameof(connectionString));
-        }
-
-        var queue = new QueueClient(connectionString, queueName);
+        var queue = new QueueClient(_connectionString, queueName);
         await queue.DeleteMessageAsync(messageId, popReciept, cancellationToken);
     }
 }

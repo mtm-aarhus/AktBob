@@ -1,5 +1,6 @@
 ﻿using AktBob.Queue.Contracts;
 using AktBob.UiPath.Contracts;
+using Ardalis.GuardClauses;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,10 +25,9 @@ internal class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var connectionString = _configuration.GetConnectionString("AzureStorage");
-        var azureQueueName = _configuration.GetValue<string>("DokumentModule:AzureQueueName");
-        var uiPathQueueName = _configuration.GetValue<string>("DokumentModule:UiPathQueueName");
-        var delay = _configuration.GetValue<int>("DokumentModule:WorkerIntervalSeconds");
+        var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("DokumentModule:AzureQueueName"));
+        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("DokumentModule:UiPathQueueName"));
+        var delay = _configuration.GetValue<int?>("DokumentModule:WorkerIntervalSeconds") ?? 10;
 
         using (var scope = ServiceProvider.CreateScope())
         {
@@ -35,7 +35,7 @@ internal class Worker : BackgroundService
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var getQueueMessagesQuery = new GetQueueMessagesQuery(connectionString!, azureQueueName!);
+                var getQueueMessagesQuery = new GetQueueMessagesQuery(azureQueueName!);
                 var azureQueueMessages = await mediator.Send(getQueueMessagesQuery);
 
                 if (azureQueueMessages.IsSuccess)
@@ -54,7 +54,7 @@ internal class Worker : BackgroundService
                         var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName!, azureQueueMessage.Id, dokumentQueueItem);
                         await mediator.Send(addUiPathQueueItemCommand);
 
-                        var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(connectionString, azureQueueName, azureQueueMessage.Id, azureQueueMessage.PopReceipt);
+                        var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(azureQueueName, azureQueueMessage.Id, azureQueueMessage.PopReceipt);
                     }
                 }
 

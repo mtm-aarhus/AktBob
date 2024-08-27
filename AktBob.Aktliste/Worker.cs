@@ -26,7 +26,6 @@ internal class Worker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("AzureStorage"));
         var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("AktlisteModule:AzureQueueName"));
         var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("AktlisteModule:UiPathQueueName"));
         var delay = _configuration.GetValue<int?>("AktlisteModule:WorkerIntervalSeconds") ?? 10;
@@ -37,7 +36,7 @@ internal class Worker : BackgroundService
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var getQueueMessagesQuery = new GetQueueMessagesQuery(connectionString!, azureQueueName!);
+                var getQueueMessagesQuery = new GetQueueMessagesQuery(azureQueueName!);
                 var azureQueueMessages = await mediator.Send(getQueueMessagesQuery);
 
                 if (azureQueueMessages.IsSuccess)
@@ -97,7 +96,7 @@ internal class Worker : BackgroundService
                             await mediator.Send(addUiPathQueueItemCommand);
                         }
 
-                        var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(connectionString, azureQueueName, azureQueueMessage.Id, azureQueueMessage.PopReceipt);
+                        var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(azureQueueName, azureQueueMessage.Id, azureQueueMessage.PopReceipt);
                     }
                 }
 

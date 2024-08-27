@@ -2,7 +2,7 @@
 using Ardalis.GuardClauses;
 using MediatR;
 
-namespace AktBob.Queue.UseCases.DeleteQueueMessage;
+namespace AktBob.Queue.UseCases;
 internal class DeleteQueueMessageCommandHandler : IRequestHandler<DeleteQueueMessageCommand>
 {
     private readonly IQueue _queue;
@@ -14,8 +14,7 @@ internal class DeleteQueueMessageCommandHandler : IRequestHandler<DeleteQueueMes
 
     public async Task Handle(DeleteQueueMessageCommand request, CancellationToken cancellationToken)
     {
-        await _queue.DeleteMessage(Guard.Against.NullOrEmpty(request.ConnectionString),
-                                   Guard.Against.NullOrEmpty(request.QueueName),
+        await _queue.DeleteMessage(Guard.Against.NullOrEmpty(request.QueueName),
                                    Guard.Against.NullOrEmpty(request.MessageId),
                                    Guard.Against.NullOrEmpty(request.PopReciept),
                                    cancellationToken);

@@ -34,7 +34,6 @@ internal class Worker : BackgroundService
     {
         var delay = _configuration.GetValue<int?>("CheckOCRScreeningStatus:QueuePollingIntervalSeconds") ?? 60;
         var maxMessages = _configuration.GetValue<int?>("CheckOCRScreeningStatus:QueueMaxMessages") ?? 10;
-        var connectionString = _configuration.GetConnectionString("AzureStorage");
         var queueName = _configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName");
 
         using (var scope = ServiceProvider.CreateScope())
@@ -44,7 +43,6 @@ internal class Worker : BackgroundService
             while (!stoppingToken.IsCancellationRequested)
             {
                 var getMessagesQuery = new GetQueueMessagesQuery(
-                    connectionString!,
                     queueName!,
                     maxMessages);
 
@@ -70,7 +68,6 @@ internal class Worker : BackgroundService
                         _logger.LogInformation("Deleting queue message {id}", message.Id);
 
                         var deleteMessageCommand = new DeleteQueueMessageCommand(
-                            connectionString!,
                             queueName!,
                             message.Id,
                             message.PopReceipt);
