@@ -6,9 +6,8 @@ using Serilog;
 using AktBob.Email;
 using AktBob.Queue;
 using AktBob.UiPath;
-using AktBob.Aktliste;
-using AktBob.Dokument;
 using AktBob.Deskpro;
+using AktBob.PodioHookProcessor;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -26,8 +25,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddEmailModuleServices(hostContext.Configuration, mediatrAssemblies);
         services.AddQueueModule(hostContext.Configuration, mediatrAssemblies);
         services.AddUiPathModule(hostContext.Configuration, mediatrAssemblies);
-        services.AddAktlisteModule(hostContext.Configuration);
-        services.AddDokumentModule(hostContext.Configuration);
+        services.AddPodioHookProcessorModule(hostContext.Configuration);
         services.AddDeskproModule(hostContext.Configuration, mediatrAssemblies);
 
         // Mediatr

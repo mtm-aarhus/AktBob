@@ -24,11 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AktBob.Aktliste\AktBob.Aktliste.csproj" />
     <ProjectReference Include="..\AktBob.CheckOCRScreeningStatus\AktBob.CheckOCRScreeningStatus.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
-    <ProjectReference Include="..\AktBob.Dokument\AktBob.Dokument.csproj" />
     <ProjectReference Include="..\AktBob.Email\AktBob.Email.csproj" />
+    <ProjectReference Include="..\AktBob.PodioHookProcessor\AktBob.PodioHookProcessor.csproj" />
     <ProjectReference Include="..\AktBob.Queue\AktBob.Queue.csproj" />
     <ProjectReference Include="..\AktBob.UiPath\AktBob.UiPath.csproj" />
   </ItemGroup>
