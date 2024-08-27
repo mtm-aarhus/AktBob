@@ -1,5 +1,4 @@
-﻿using AktBob.PodioHookProcessor.UseCases.DocumentListTrigger;
-using Ardalis.GuardClauses;
+﻿using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,7 +17,9 @@ public static class ModuleServices
         Guard.Against.NullOrEmpty(configuration.GetValue<string>($"OCRScreeningTrigger:{tenancyName}:AzureQueueName"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>($"OCRScreeningTrigger:{tenancyName}:UiPathQueueName"));
 
-        services.AddHostedService<BackgroundWorker>();
+        services.AddHostedService<UseCases.DocumentListTrigger.BackgroundWorker>();
+        services.AddHostedService<UseCases.OCRScreeningTrigger.BackgroundWorker>();
+        services.AddHostedService<UseCases.MoveToSharepointTrigger.BackgroundWorker>();
 
         return services;
     }
