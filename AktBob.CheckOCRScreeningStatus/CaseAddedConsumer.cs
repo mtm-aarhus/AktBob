@@ -1,12 +1,11 @@
 ﻿using AktBob.CheckOCRScreeningStatus.Events;
-using AktBob.CheckOCRScreeningStatus.UseCases.GetDeskproPerson;
-using AktBob.CheckOCRScreeningStatus.UseCases.GetDeskproTickets;
 using AktBob.CheckOCRScreeningStatus.UseCases.GetFileStatus;
 using AktBob.CheckOCRScreeningStatus.UseCases.GetPodioItem;
 using AktBob.CheckOCRScreeningStatus.UseCases.PostMessageToDeskproTicket;
 using AktBob.CheckOCRScreeningStatus.UseCases.RegisterDocuments;
 using AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
 using AktBob.CheckOCRScreeningStatus.UseCases.UpdatePodioItem;
+using AktBob.Deskpro.Contracts;
 using AktBob.Email.Contracts;
 using MediatR;
 using Microsoft.Extensions.Configuration;

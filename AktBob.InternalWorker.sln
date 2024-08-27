@@ -19,21 +19,27 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UiPath Module", "UiPath Mod
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Queue Module", "Queue Module", "{5DA13B9A-D290-426C-93BB-781FE2C772C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Queue", "AktBob.Queue\AktBob.Queue.csproj", "{98F0A731-E540-4F0C-9B36-25F304073804}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Queue", "AktBob.Queue\AktBob.Queue.csproj", "{98F0A731-E540-4F0C-9B36-25F304073804}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Queue.Contracts", "AktBob.Queue.Contracts\AktBob.Queue.Contracts.csproj", "{53ABA323-9B86-4623-9213-3FCF6A426BB7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Queue.Contracts", "AktBob.Queue.Contracts\AktBob.Queue.Contracts.csproj", "{53ABA323-9B86-4623-9213-3FCF6A426BB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.UiPath", "AktBob.UiPath\AktBob.UiPath.csproj", "{31FCDE8F-5282-40CD-98CA-90F18218A1D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.UiPath", "AktBob.UiPath\AktBob.UiPath.csproj", "{31FCDE8F-5282-40CD-98CA-90F18218A1D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.UiPath.Contracts", "AktBob.UiPath.Contracts\AktBob.UiPath.Contracts.csproj", "{725024D0-B43E-49D6-AA3B-5CD01C6165A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.UiPath.Contracts", "AktBob.UiPath.Contracts\AktBob.UiPath.Contracts.csproj", "{725024D0-B43E-49D6-AA3B-5CD01C6165A9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aktliste Module", "Aktliste Module", "{203AE367-1A64-4789-9DDB-63BB0E95851C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Aktliste", "AktBob.Aktliste\AktBob.Aktliste.csproj", "{50531AED-04C3-4E8A-A86F-865DCB0B8A51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Aktliste", "AktBob.Aktliste\AktBob.Aktliste.csproj", "{50531AED-04C3-4E8A-A86F-865DCB0B8A51}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dokument Module", "Dokument Module", "{BA5492D1-FF4E-42D1-937F-B4BE5EC1418D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Dokument", "AktBob.Dokument\AktBob.Dokument.csproj", "{2245E6C7-E8F8-4431-84C1-B53E30F3785E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Dokument", "AktBob.Dokument\AktBob.Dokument.csproj", "{2245E6C7-E8F8-4431-84C1-B53E30F3785E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deskpro Module", "Deskpro Module", "{0742853D-117B-49ED-B360-164488F9809B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Deskpro", "AktBob.Deskpro\AktBob.Deskpro.csproj", "{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Deskpro.Contracts", "AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj", "{9C349615-6C43-4FA1-8FA8-849D75374C7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +87,14 @@ Global
 		{2245E6C7-E8F8-4431-84C1-B53E30F3785E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2245E6C7-E8F8-4431-84C1-B53E30F3785E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2245E6C7-E8F8-4431-84C1-B53E30F3785E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C349615-6C43-4FA1-8FA8-849D75374C7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C349615-6C43-4FA1-8FA8-849D75374C7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C349615-6C43-4FA1-8FA8-849D75374C7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C349615-6C43-4FA1-8FA8-849D75374C7D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -95,6 +109,8 @@ Global
 		{725024D0-B43E-49D6-AA3B-5CD01C6165A9} = {F97E7D5D-2B1F-4AAE-AE73-3434B0B10734}
 		{50531AED-04C3-4E8A-A86F-865DCB0B8A51} = {203AE367-1A64-4789-9DDB-63BB0E95851C}
 		{2245E6C7-E8F8-4431-84C1-B53E30F3785E} = {BA5492D1-FF4E-42D1-937F-B4BE5EC1418D}
+		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC} = {0742853D-117B-49ED-B360-164488F9809B}
+		{9C349615-6C43-4FA1-8FA8-849D75374C7D} = {0742853D-117B-49ED-B360-164488F9809B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}

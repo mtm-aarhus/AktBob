@@ -8,6 +8,7 @@ using AktBob.Queue;
 using AktBob.UiPath;
 using AktBob.Aktliste;
 using AktBob.Dokument;
+using AktBob.Deskpro;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -27,6 +28,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddUiPathModule(hostContext.Configuration, mediatrAssemblies);
         services.AddAktlisteModule(hostContext.Configuration);
         services.AddDokumentModule(hostContext.Configuration);
+        services.AddDeskproModule(hostContext.Configuration, mediatrAssemblies);
 
         // Mediatr
         services.AddMediatR(c =>

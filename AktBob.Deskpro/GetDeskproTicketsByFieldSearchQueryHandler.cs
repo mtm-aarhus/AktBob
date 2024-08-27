@@ -1,11 +1,12 @@
 ﻿using AAK.Deskpro;
 using AAK.Deskpro.Models;
+using AktBob.Deskpro.Contracts;
 using Ardalis.Result;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.CheckOCRScreeningStatus.UseCases.GetDeskproTickets;
+namespace AktBob.Deskpro;
 internal class GetDeskproTicketsByFieldSearchQueryHandler : IRequestHandler<GetDeskproTicketsByFieldSearchQuery, Result<IEnumerable<Ticket>>>
 {
     private readonly ILogger<GetDeskproTicketsByFieldSearchQueryHandler> _logger;
@@ -32,7 +33,7 @@ internal class GetDeskproTicketsByFieldSearchQueryHandler : IRequestHandler<GetD
                 ticketsList.AddRange(tickets);
             }
         };
-        
+
         if (ticketsList.Count > 0)
         {
             return Result.Success(ticketsList.AsEnumerable());

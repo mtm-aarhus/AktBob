@@ -4,19 +4,18 @@ using Ardalis.Result;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using AktBob.Deskpro.Contracts;
 
-namespace AktBob.CheckOCRScreeningStatus.UseCases.GetDeskproPerson;
+namespace AktBob.Deskpro;
 internal class GetDeskproPersonQueryHandler : IRequestHandler<GetDeskproPersonQuery, Result<Person>>
 {
-    private readonly IData _data;
     private readonly IDeskproClient _deskpro;
     private readonly IConfiguration _configuration;
     private readonly ILogger<GetDeskproPersonQueryHandler> _logger;
     private readonly IMediator _mediator;
 
-    public GetDeskproPersonQueryHandler(IData data, IDeskproClient deskpro, IConfiguration configuration, ILogger<GetDeskproPersonQueryHandler> logger, IMediator mediator)
+    public GetDeskproPersonQueryHandler(IDeskproClient deskpro, IConfiguration configuration, ILogger<GetDeskproPersonQueryHandler> logger, IMediator mediator)
     {
-        _data = data;
         _deskpro = deskpro;
         _configuration = configuration;
         _logger = logger;
@@ -25,7 +24,7 @@ internal class GetDeskproPersonQueryHandler : IRequestHandler<GetDeskproPersonQu
 
     public async Task<Result<Person>> Handle(GetDeskproPersonQuery request, CancellationToken cancellationToken)
     {
-        var person = await _deskpro.GetPersonById((int)request.PersonId);
+        var person = await _deskpro.GetPersonById(request.PersonId);
 
         if (person is null || string.IsNullOrEmpty(person.Email))
         {
