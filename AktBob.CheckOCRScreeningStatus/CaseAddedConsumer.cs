@@ -74,13 +74,13 @@ internal class CaseAddedConsumer : INotificationHandler<CaseAdded>
             foreach (var deskproTicket in deskproTickets.Value)
             {
                 // Skip if the Deskpro ticket has no assigned agent
-                if (deskproTicket.AgentId is null || deskproTicket.AgentId == 0)
+                if (deskproTicket.Agent is null || deskproTicket.Agent.Id == 0)
                 {
                     continue;
                 }
 
                 // Get agent email address from Deskpro
-                var getAgentQuery = new GetDeskproPersonQuery((int)deskproTicket.AgentId);
+                var getAgentQuery = new GetDeskproPersonQuery((int)deskproTicket.Agent.Id);
                 var getAgentResult = await _mediator.Send(getAgentQuery);
 
                 // Queue email if the Deskpro ticket has an assigned agent

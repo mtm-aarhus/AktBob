@@ -10,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace AktBob.PodioHookProcessor.UseCases.DocumentListTrigger;
+namespace AktBob.PodioHookProcessor.UseCases.GoToFilArkivTrigger;
 internal class BackgroundWorker : BackgroundService
 {
     private ILogger<BackgroundWorker> _logger;
@@ -28,9 +28,9 @@ internal class BackgroundWorker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var tenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
-        var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"DocumentListTrigger:AzureQueueName"));
-        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"DocumentListTrigger:UiPathQueueName:{tenancyName}"));
-        var delay = _configuration.GetValue<int?>("DocumentListTrigger:WorkerIntervalSeconds") ?? 10;
+        var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"GoToFilArkivTrigger:AzureQueueName"));
+        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"GoToFilArkivTrigger:UiPathQueueName:{tenancyName}"));
+        var delay = _configuration.GetValue<int?>("GoToFilArkivTrigger:WorkerIntervalSeconds") ?? 10;
 
         using (var scope = ServiceProvider.CreateScope())
         {
@@ -50,7 +50,7 @@ internal class BackgroundWorker : BackgroundService
 
                         if (azureQueueItem == null)
                         {
-                            _logger.LogError("Azure queue item body does not match type of '{type}'", typeof(AzureQueueItemDto));
+                            _logger.LogError("Azure queue item body does not match type of '{type}' (content: {content})", typeof(AzureQueueItemDto), azureQueueItem);
                             await DeleteQueueItem(azureQueueName, mediator, azureQueueMessage);
                             continue;
                         }
@@ -66,12 +66,19 @@ internal class BackgroundWorker : BackgroundService
                                 _logger.LogWarning("{count} Deskpro ticket found for PodioItemId {podioItemId}. Only processing the first.", getTicketByPodioItemIdQueryResult.Value.Count(), azureQueueItem.PodioItemId);
                             }
 
-                            var ticket = getTicketByPodioItemIdQueryResult.Value.First();
+                            var ticket = getTicketByPodioItemIdQueryResult.Value.FirstOrDefault();
 
+                            if (ticket is null)
+                            {
+                                _logger.LogError("Ticket related to PodioItemId {id} not found in database", azureQueueItem.PodioItemId);
+                                await DeleteQueueItem(azureQueueName, mediator, azureQueueMessage);
+                                continue;
+                            }
+
+                            // Get data from Deskpro
                             var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticket.DeskproId);
                             var getDeskproTicketQueryResult = await mediator.Send(getDeskproTicketQuery);
 
-                            // Get Deskpro data
                             if (getDeskproTicketQueryResult.IsSuccess)
                             {
                                 var agentName = string.Empty;
@@ -81,7 +88,7 @@ internal class BackgroundWorker : BackgroundService
                                 if (getDeskproTicketQueryResult.Value.Agent is not null && getDeskproTicketQueryResult.Value.Agent.Id > 0)
                                 {
                                     // Get agent email address from Deskpro
-                                    var getAgentQuery = new GetDeskproPersonQuery((int)getDeskproTicketQueryResult.Value.Agent.Id!);
+                                    var getAgentQuery = new GetDeskproPersonQuery(getDeskproTicketQueryResult.Value.Agent.Id!);
                                     var getAgentResult = await mediator.Send(getAgentQuery);
 
                                     if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
@@ -100,15 +107,16 @@ internal class BackgroundWorker : BackgroundService
                                     DeskproID = getDeskproTicketQueryResult.Value.Id,
                                     Titel = getDeskproTicketQueryResult.Value.Subject
                                 };
-                                
+
+
                                 // Post UiPath queue item
                                 var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, azureQueueItem.PodioItemId.ToString(), uiPathQueueItemContent);
                                 await mediator.Send(addUiPathQueueItemCommand);
                             }
+
                         }
 
                         await DeleteQueueItem(azureQueueName, mediator, azureQueueMessage);
-
                     }
                 }
 

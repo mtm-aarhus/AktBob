@@ -1,3 +1,3 @@
-﻿namespace AktBob.PodioHookProcessor.UseCases.MoveToFilArkivTrigger;
+﻿namespace AktBob.PodioHookProcessor.UseCases.GoToFilArkivTrigger;
 
 internal record AzureQueueItemDto(long PodioItemId, string CaseNumber);

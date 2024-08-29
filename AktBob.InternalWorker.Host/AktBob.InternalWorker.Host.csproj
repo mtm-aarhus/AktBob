@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AktBob.CheckOCRScreeningStatus\AktBob.CheckOCRScreeningStatus.csproj" />
+    <ProjectReference Include="..\AktBob.DatabaseAPI\AktBob.DatabaseAPI.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
     <ProjectReference Include="..\AktBob.Email\AktBob.Email.csproj" />
     <ProjectReference Include="..\AktBob.PodioHookProcessor\AktBob.PodioHookProcessor.csproj" />

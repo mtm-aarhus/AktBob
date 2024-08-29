@@ -10,11 +10,9 @@ public static class ModuleServices
 {
     public static IServiceCollection AddCheckOCRScreeningStatusModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatRAssemblies)
     {
-        Guard.Against.NullOrEmpty(configuration.GetSection("Deskpro:PodioItemIdFields").Get<int[]>());
         Guard.Against.Null(configuration.GetValue<int>("Podio:AppId"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName"));
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureStorage"));
-
 
         services.AddHostedService<BackgroundServices.Worker>();
 
