@@ -1,4 +1,5 @@
-﻿using AktBob.Deskpro.Contracts;
+﻿using AktBob.DatabaseAPI.Contracts;
+using AktBob.Deskpro.Contracts;
 using AktBob.Queue.Contracts;
 using AktBob.UiPath.Contracts;
 using Ardalis.GuardClauses;
@@ -54,49 +55,52 @@ internal class BackgroundWorker : BackgroundService
                         }
 
                         // Find Deskpro ticket from PodioItemId
-                        var ticketFields = _configuration.GetSection("Deskpro:PodioItemIdFields").Get<int[]>();
+                        var getTicketByPodioItemIdQuery = new GetTicketByPodioItemIdQuery(azureQueueItemDto.PodioItemId);
+                        var getTicketByPodioItemIdQueryResult = await mediator.Send(getTicketByPodioItemIdQuery);
 
-                        // Get Deskpro tickets by searching the specified custom fields for the PodioItemId 
-                        var getTicketsQuery = new GetDeskproTicketsByFieldSearchQuery(ticketFields!, azureQueueItemDto.PodioItemId.ToString());
-                        var deskproTickets = await mediator.Send(getTicketsQuery);
-
-                        foreach (var deskproTicket in deskproTickets.Value)
+                        if (getTicketByPodioItemIdQueryResult.IsSuccess)
                         {
-                            // Skip if the Deskpro ticket has no assigned agent
-                            if (deskproTicket.AgentId is null || deskproTicket.AgentId == 0)
+
+                            foreach (var ticket in getTicketByPodioItemIdQueryResult.Value)
                             {
-                                continue;
+                                var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticket.Id);
+                                var getDeskproTicketQueryResult = await mediator.Send(getDeskproTicketQuery);
+                                var agentName = string.Empty;
+                                var agentEmail = string.Empty;
+
+                                if (getDeskproTicketQueryResult.IsSuccess)
+                                {
+                                    // Skip if the Deskpro ticket has no assigned agent
+                                    if (getDeskproTicketQueryResult.Value.AgentId is not null || getDeskproTicketQueryResult.Value.AgentId > 0)
+                                    {
+                                        // Get agent email address from Deskpro
+                                        var getAgentQuery = new GetDeskproPersonQuery((int)getDeskproTicketQueryResult.Value.AgentId!);
+                                        var getAgentResult = await mediator.Send(getAgentQuery);
+
+                                        if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
+                                        {
+                                            agentName = getAgentResult.Value.FullName;
+                                            agentEmail = getAgentResult.Value.Email;
+                                        }
+                                    }
+
+                                    var uiPathQueueItemContent = new
+                                    {
+                                        SagsNummer = azureQueueItemDto.CaseNumber,
+                                        Email = agentEmail,
+                                        Navn = agentName,
+                                        PodioID = azureQueueItemDto.PodioItemId,
+                                        DeskproID = getDeskproTicketQueryResult.Value.Id,
+                                        Titel = getDeskproTicketQueryResult.Value.Subject
+                                    };
+
+
+                                    // Post UiPath queue item
+                                    var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, azureQueueItemDto.PodioItemId.ToString(), uiPathQueueItemContent);
+                                    await mediator.Send(addUiPathQueueItemCommand);
+                                }
                             }
-
-                            // Get agent email address from Deskpro
-                            var getAgentQuery = new GetDeskproPersonQuery((int)deskproTicket.AgentId);
-                            var getAgentResult = await mediator.Send(getAgentQuery);
-
-                            var agentName = string.Empty;
-                            var agentEmail = string.Empty;
-
-                            if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
-                            {
-                                agentName = getAgentResult.Value.FullName;
-                                agentEmail = getAgentResult.Value.Email;
-                            }
-
-                            var uiPathQueueItemContent = new
-                            {
-                                SagsNummer = azureQueueItemDto.CaseNumber,
-                                Email = agentEmail,
-                                Navn = agentName,
-                                PodioID = azureQueueItemDto.PodioItemId,
-                                DeskproID = deskproTicket.Id,
-                                Titel = deskproTicket.Subject
-                            };
-
-
-                            // Post UiPath queue item
-                            var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, azureQueueItemDto.PodioItemId.ToString(), uiPathQueueItemContent);
-                            await mediator.Send(addUiPathQueueItemCommand);
                         }
-
                         var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(azureQueueName, azureQueueMessage.Id, azureQueueMessage.PopReceipt);
                     }
                 }

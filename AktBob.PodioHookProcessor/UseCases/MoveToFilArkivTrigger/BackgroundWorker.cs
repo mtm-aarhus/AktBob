@@ -1,5 +1,4 @@
 ﻿using AktBob.Queue.Contracts;
-using AktBob.UiPath.Contracts;
 using Ardalis.GuardClauses;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -8,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace AktBob.PodioHookProcessor.UseCases.OCRScreeningTrigger;
+namespace AktBob.PodioHookProcessor.UseCases.MoveToFilArkivTrigger;
 internal class BackgroundWorker : BackgroundService
 {
     private ILogger<BackgroundWorker> _logger;
@@ -53,7 +52,7 @@ internal class BackgroundWorker : BackgroundService
                         }
 
                         // 
-                        
+
                         var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(azureQueueName, azureQueueMessage.Id, azureQueueMessage.PopReceipt);
                     }
                 }
