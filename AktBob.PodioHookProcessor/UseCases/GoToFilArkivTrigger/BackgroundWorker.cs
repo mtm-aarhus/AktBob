@@ -53,10 +53,12 @@ internal class BackgroundWorker : BackgroundService
 
                     foreach (var azureQueueMessage in azureQueueMessages.Value)
                     {
+                        var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(azureQueueName, azureQueueMessage.Id, azureQueueMessage.PopReceipt);
+                        await mediator.Send(deleteAzureQueueItemCommand);
+
                         if (string.IsNullOrEmpty(azureQueueMessage.Body))
                         {
                             _logger.LogError("Azure queue item body is empty. Expected a Podio item Id");
-                            await DeleteQueueItem(azureQueueName, mediator, azureQueueMessage);
                             continue;
                         }
 
@@ -65,7 +67,6 @@ internal class BackgroundWorker : BackgroundService
                         if (!long.TryParse(messageContent, out long podioItemId))
                         {
                             _logger.LogError("Could not parse Azure queue item body as a 'long' data type. Body content: '{body}'", azureQueueMessage.Body);
-                            await DeleteQueueItem(azureQueueName, mediator, azureQueueMessage);
                             continue;
                         }
 
@@ -75,7 +76,6 @@ internal class BackgroundWorker : BackgroundService
                         if (!podioItemQueryResult.IsSuccess)
                         {
                             _logger.LogError("Could not get item {itemId} from Podio", podioItemId);
-                            await DeleteQueueItem(azureQueueName, mediator, azureQueueMessage);
                             continue;
                         }
 
@@ -83,7 +83,6 @@ internal class BackgroundWorker : BackgroundService
                         if (string.IsNullOrEmpty(caseNumber))
                         {
                             _logger.LogError("Could not get case number field value from Podio Item {itemId}", podioItemId);
-                            await DeleteQueueItem(azureQueueName, mediator, azureQueueMessage);
                             continue;
                         }
 
@@ -93,9 +92,15 @@ internal class BackgroundWorker : BackgroundService
 
                         if (getTicketByPodioItemIdQueryResult.IsSuccess)
                         {
+                            if (getTicketByPodioItemIdQueryResult.Value.Count() < 1)
+                            {
+                                _logger.LogError("0 Deskpro tickets found for PodioItemId {podioItemId}.", podioItemId);
+                                continue;
+                            }
+
                             if (getTicketByPodioItemIdQueryResult.Value.Count() > 1)
                             {
-                                _logger.LogWarning("{count} Deskpro ticket found for PodioItemId {podioItemId}. Only processing the first.", getTicketByPodioItemIdQueryResult.Value.Count(), podioItemId);
+                                _logger.LogWarning("{count} Deskpro tickets found for PodioItemId {podioItemId}. Only processing the first.", getTicketByPodioItemIdQueryResult.Value.Count(), podioItemId);
                             }
 
                             var ticket = getTicketByPodioItemIdQueryResult.Value.FirstOrDefault();
@@ -103,7 +108,6 @@ internal class BackgroundWorker : BackgroundService
                             if (ticket is null)
                             {
                                 _logger.LogError("Ticket related to PodioItemId {id} not found in database", podioItemId);
-                                await DeleteQueueItem(azureQueueName, mediator, azureQueueMessage);
                                 continue;
                             }
 
@@ -148,18 +152,11 @@ internal class BackgroundWorker : BackgroundService
 
                         }
 
-                        await DeleteQueueItem(azureQueueName, mediator, azureQueueMessage);
                     }
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(delay));
             }
         }
-    }
-
-    private static async Task DeleteQueueItem(string azureQueueName, IMediator mediator, QueueMessageDto? azureQueueMessage)
-    {
-        var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(azureQueueName, azureQueueMessage.Id, azureQueueMessage.PopReceipt);
-        await mediator.Send(deleteAzureQueueItemCommand);
     }
 }
