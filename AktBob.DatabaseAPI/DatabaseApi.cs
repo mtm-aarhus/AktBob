@@ -1,6 +1,7 @@
 ﻿using AktBob.DatabaseAPI.Contracts;
 using Ardalis.Result;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 
 namespace AktBob.DatabaseAPI;
@@ -39,13 +40,27 @@ internal class DatabaseApi : IDatabaseApi
     {
         try
         {
-            var json = new
+            var jsonValues = new Dictionary<string, object>();
+
+            if (podioItemId != null)
             {
-                podioItemId,
-                filArkivCaseId
+                jsonValues.Add("podioItemId", Convert.ToInt64(podioItemId));
+            }
+
+            if (filArkivCaseId != null)
+            {
+                jsonValues.Add("filArkivCaseId", (Guid)filArkivCaseId);
+            }
+
+            var json = JsonSerializer.Serialize(jsonValues);
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Patch,
+                RequestUri = new Uri($"Database/Cases/{id}", UriKind.Relative),
+                Content = new StringContent(json, encoding: Encoding.UTF8, "application/json")
             };
 
-            var response = await _httpClient.PatchAsJsonAsync(new Uri($"Database/Case/{id}", UriKind.Relative), cancellationToken);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
             var cotent = await response.Content.ReadAsStringAsync();
 
             var @case = JsonSerializer.Deserialize<CaseDto>(cotent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
