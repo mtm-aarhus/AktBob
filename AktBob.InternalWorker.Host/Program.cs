@@ -9,6 +9,7 @@ using AktBob.UiPath;
 using AktBob.Deskpro;
 using AktBob.PodioHookProcessor;
 using AktBob.DatabaseAPI;
+using AktBob.Podio;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -29,6 +30,8 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddPodioHookProcessorModule(hostContext.Configuration);
         services.AddDeskproModule(hostContext.Configuration, mediatrAssemblies);
         services.AddDatabaseApiModule(hostContext.Configuration, mediatrAssemblies);
+        services.AddPodioModule(hostContext.Configuration, mediatrAssemblies);
+
         // Mediatr
         services.AddMediatR(c =>
         {

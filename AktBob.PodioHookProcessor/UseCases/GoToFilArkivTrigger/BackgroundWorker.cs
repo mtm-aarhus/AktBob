@@ -1,6 +1,7 @@
 ﻿using AAK.Podio;
 using AktBob.DatabaseAPI.Contracts;
 using AktBob.Deskpro.Contracts;
+using AktBob.Podio.Contracts;
 using AktBob.Queue.Contracts;
 using AktBob.UiPath.Contracts;
 using Ardalis.GuardClauses;
@@ -72,14 +73,16 @@ internal class BackgroundWorker : BackgroundService
 
 
                         // Get metadata from Podio
-                        var podioItemQueryResult = await _podio.GetItem(podioAppId, podioItemId, stoppingToken);
-                        if (!podioItemQueryResult.IsSuccess)
+                        var getPodioItemQuery = new GetItemQuery(podioAppId, podioItemId);
+                        var getPodioItemQueryResult = await mediator.Send(getPodioItemQuery, stoppingToken);
+
+                        if (!getPodioItemQueryResult.IsSuccess)
                         {
                             _logger.LogError("Could not get item {itemId} from Podio", podioItemId);
                             continue;
                         }
 
-                        var caseNumber = podioItemQueryResult.Value.Fields.FirstOrDefault(x => x.Id == podioFieldCaseNumber.Key)?.Value?.FirstOrDefault();
+                        var caseNumber = getPodioItemQueryResult.Value.Fields.FirstOrDefault(x => x.Id == podioFieldCaseNumber.Key)?.Value?.FirstOrDefault();
                         if (string.IsNullOrEmpty(caseNumber))
                         {
                             _logger.LogError("Could not get case number field value from Podio Item {itemId}", podioItemId);

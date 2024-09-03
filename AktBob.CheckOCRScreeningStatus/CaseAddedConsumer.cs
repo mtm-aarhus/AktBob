@@ -1,12 +1,10 @@
 ﻿using AktBob.CheckOCRScreeningStatus.Events;
 using AktBob.CheckOCRScreeningStatus.UseCases.GetFileStatus;
-using AktBob.CheckOCRScreeningStatus.UseCases.GetPodioItem;
-using AktBob.CheckOCRScreeningStatus.UseCases.PostMessageToDeskproTicket;
 using AktBob.CheckOCRScreeningStatus.UseCases.RegisterDocuments;
 using AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
 using AktBob.CheckOCRScreeningStatus.UseCases.UpdatePodioItem;
-using AktBob.Deskpro.Contracts;
-using AktBob.Email.Contracts;
+using AktBob.DatabaseAPI.Contracts;
+using AktBob.Podio.Contracts;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -44,6 +42,14 @@ internal class CaseAddedConsumer : INotificationHandler<CaseAdded>
             return;
         }
 
+        var updateDatabaseCaseCommand = new UpdateCaseSetFilArkivCaseIdCommand(_data.GetCase(notification.CaseId)!.PodioItemId, notification.CaseId);
+        var updateDatabaseCaseCommandResult = await _mediator.Send(updateDatabaseCaseCommand);
+
+        if (!updateDatabaseCaseCommandResult.IsSuccess)
+        {
+            _logger.LogWarning("Error updating database setting FilArkivCaseId {caseId} for Podio item id {id}", notification.CaseId, _data.GetCase(notification.CaseId)!.PodioItemId);
+        }
+
         await Task.WhenAll(_data.GetCase(notification.CaseId)!.Files.Select(f => _mediator.Send(new GetFileStatusQuery(f.FileId))));
 
         var updatePodioCommand = new UpdatePodioItemCommand(notification.CaseId);
@@ -56,69 +62,16 @@ internal class CaseAddedConsumer : INotificationHandler<CaseAdded>
         }
 
 
-        // ** POST EMAIL AND ADD DESKPRO AGENT NOTE **
+        // ** Post comment on Podio item **
+        var podioAppId = _configuration.GetValue<int>("Podio:AppId");
+        var commentText = "OCR screening af dokumenterne på FilArkiv er færdig.";
 
-        var ticketFields = _configuration.GetSection("Deskpro:PodioItemIdFields").Get<int[]>();
+        var postCommentCommand = new PostItemCommentCommand(podioAppId, _data.GetCase(notification.CaseId)!.PodioItemId, commentText);
+        var postCommentCommandResult = await _mediator.Send(postCommentCommand, cancellationToken);
 
-        if (ticketFields == null)
+        if (!postCommentCommandResult.IsSuccess)
         {
-            _logger.LogError("No PodioItemIdFields found in appsettings.");
-        }
-        else
-        {
-            // Get Deskpro tickets by searching the specified custom fields for the PodioItemId 
-            var getTicketsQuery = new GetDeskproTicketsByFieldSearchQuery(ticketFields, _data.GetCase(notification.CaseId)!.PodioItemId.ToString());
-            var deskproTickets = await _mediator.Send(getTicketsQuery);
-
-            // Queue email
-            foreach (var deskproTicket in deskproTickets.Value)
-            {
-                // Skip if the Deskpro ticket has no assigned agent
-                if (deskproTicket.Agent is null || deskproTicket.Agent.Id == 0)
-                {
-                    continue;
-                }
-
-                // Get agent email address from Deskpro
-                var getAgentQuery = new GetDeskproPersonQuery((int)deskproTicket.Agent.Id);
-                var getAgentResult = await _mediator.Send(getAgentQuery);
-
-                // Queue email if the Deskpro ticket has an assigned agent
-                if (getAgentResult.IsSuccess && !string.IsNullOrEmpty(getAgentResult.Value.Email) && getAgentResult.Value.IsAgent)
-                {
-                    var filArkivCase = _data.GetCase(notification.CaseId);
-
-                    // Get Podio Item
-                    var getPodioItemQuery = new GetPodioItemQuery(_data.GetCase(notification.CaseId)!.PodioItemId);
-                    var getPodioItemResult = await _mediator.Send(getPodioItemQuery);
-
-                    if (getPodioItemResult.IsSuccess)
-                    {
-                        var podioItem = getPodioItemResult.Value;
-                        var sagsnummer = podioItem.Fields.FirstOrDefault(x => x.Id == 262643381)?.Value.FirstOrDefault() ?? string.Empty;
-                        var aktindsigtssagsnummer = podioItem.Fields.FirstOrDefault(x => x.Id == 262643386)?.Value.FirstOrDefault() ?? string.Empty;
-                        var filArkivLink = podioItem.Fields.FirstOrDefault(x => x.Id == 263817471)?.Value.FirstOrDefault() ?? string.Empty;
-
-                        var queueEmailCommand = new QueueEmailCommand(
-                            getAgentResult.Value.Email,
-                            $"OCR screening af {sagsnummer} er færdig (aktindsigtsanmodning {aktindsigtssagsnummer})",
-                            $"<p>Hej {getAgentResult.Value.FirstName}</p><p>OCR screening af dokumenterne fra {sagsnummer} på FilArkiv er færdig.</p><p><ul><li>Link til sagen på Podio: <a href=\"{podioItem.Link}\">{podioItem.Link}</a></li><li>Link til dokumenterne på FilArkiv: <a href=\"{filArkivLink}\">{filArkivLink}</a></li></ul></p>");
-                        await _mediator.Send(queueEmailCommand);
-
-                        // Post Deskpro agent note
-                        foreach (var ticket in deskproTickets.Value)
-                        {
-                            var postMessageToDeskproTicketCommand = new PostMessageToDeskproTicketCommand(
-                                deskproTicket.Id,
-                                $"<p>OCR screening af dokumenterne fra {sagsnummer} på FilArkiv er færdig.</p><p><ul><li>Link til sagen på Podio: <a href=\"{podioItem.Link}\">{podioItem.Link}</a></li><li>Link til dokumenterne på FilArkiv: <a href=\"{filArkivLink}\">{filArkivLink}</a></li></ul></p>",
-                                isAgentNote: true);
-                            await _mediator.Send(postMessageToDeskproTicketCommand);
-                        }
-                        
-                        break;
-                    }
-                }
-            }
+            _logger.LogWarning("Error posting comment on Podio item {id}", _data.GetCase(notification.CaseId)!.PodioItemId);
         }
 
         var removeCaseFromCacheCommand = new RemoveCaseFromCacheCommand(notification.CaseId);

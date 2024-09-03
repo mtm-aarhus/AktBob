@@ -10,9 +10,15 @@ public static class ModuleServices
 {
     public static IServiceCollection AddCheckOCRScreeningStatusModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatRAssemblies)
     {
-        Guard.Against.Null(configuration.GetValue<int>("Podio:AppId"));
+        var podioAppId = Guard.Against.Null(configuration.GetValue<int>("Podio:AppId"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName"));
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureStorage"));
+
+        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => long.Parse(x.Key), x => x.Get<PodioField>())));
+        var podioFieldFilArkivCaseId = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivCaseId"));
+        Guard.Against.Null(podioFieldFilArkivCaseId.Value);
+        var podioFieldFilArkivLink = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivLink"));
+        Guard.Against.Null(podioFieldFilArkivLink.Value);
 
         services.AddHostedService<BackgroundServices.Worker>();
 
@@ -25,15 +31,15 @@ public static class ModuleServices
 
         services.AddScoped<IFilArkiv, FilArkiv>();
 
-        services.AddTransient<IAktBobApi, AktBobApi>();
-        services.AddHttpClient<IAktBobApi, AktBobApi>(client =>
-        {
-            var apiBaseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("AktBobApi:BaseAddress"));
-            var apiApiKey = Guard.Against.NullOrEmpty(configuration.GetValue<string>("AktBobApi:ApiKey"));
+        //services.AddTransient<IAktBobApi, AktBobApi>();
+        //services.AddHttpClient<IAktBobApi, AktBobApi>(client =>
+        //{
+        //    var apiBaseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("AktBobApi:BaseAddress"));
+        //    var apiApiKey = Guard.Against.NullOrEmpty(configuration.GetValue<string>("AktBobApi:ApiKey"));
 
-            client.BaseAddress = new Uri(apiBaseAddress);
-            client.DefaultRequestHeaders.Add("ApiKey", apiApiKey);
-        });
+        //    client.BaseAddress = new Uri(apiBaseAddress);
+        //    client.DefaultRequestHeaders.Add("ApiKey", apiApiKey);
+        //});
 
         var deskproOptions = new DeskproOptions
         {

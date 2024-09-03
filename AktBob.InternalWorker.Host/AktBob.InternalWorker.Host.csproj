@@ -29,6 +29,7 @@
     <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
     <ProjectReference Include="..\AktBob.Email\AktBob.Email.csproj" />
     <ProjectReference Include="..\AktBob.PodioHookProcessor\AktBob.PodioHookProcessor.csproj" />
+    <ProjectReference Include="..\AktBob.Podio\AktBob.Podio.csproj" />
     <ProjectReference Include="..\AktBob.Queue\AktBob.Queue.csproj" />
     <ProjectReference Include="..\AktBob.UiPath\AktBob.UiPath.csproj" />
   </ItemGroup>
