@@ -17,7 +17,7 @@ internal class UpdateCaseSetFilArkivCaseIdCommandHandler : IRequestHandler<Updat
 
     public async Task<Result<CaseDto>> Handle(UpdateCaseSetFilArkivCaseIdCommand request, CancellationToken cancellationToken)
     {
-        var tickets = await _databaseApi.GetTicketByPodioItemId(request.PodioItemId, cancellationToken);
+        var tickets = await _databaseApi.GetTicketsByPodioItemId(request.PodioItemId, cancellationToken);
 
         if (!tickets.IsSuccess || tickets.Value.Count() == 0)
         {

@@ -14,7 +14,29 @@ internal class DatabaseApi : IDatabaseApi
         _httpClient = httpClient;
     }
 
-    public async Task<Result<IEnumerable<TicketDto>>> GetTicketByPodioItemId(long podioItemId, CancellationToken cancellationToken = default)
+    public async Task<Result<IEnumerable<TicketDto>>> GetTicketsByDeskproId(int deskproId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync(new Uri($"Database/Tickets?deskproId={deskproId}", UriKind.Relative), cancellationToken);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var tickets = JsonSerializer.Deserialize<IEnumerable<TicketDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (tickets is null)
+            {
+                return Result.NotFound();
+            }
+
+            return Result.Success(tickets);
+        }
+        catch (Exception)
+        {
+            return Result.Error();
+        }
+    }
+
+    public async Task<Result<IEnumerable<TicketDto>>> GetTicketsByPodioItemId(long podioItemId, CancellationToken cancellationToken = default)
     {
         try
         {

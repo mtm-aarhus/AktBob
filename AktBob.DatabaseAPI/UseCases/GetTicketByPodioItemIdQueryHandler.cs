@@ -12,5 +12,5 @@ internal class GetTicketByPodioItemIdQueryHandler : IRequestHandler<GetTicketByP
         _databaseApi = databaseApi;
     }
 
-    public async Task<Result<IEnumerable<TicketDto>>> Handle(GetTicketByPodioItemIdQuery request, CancellationToken cancellationToken) => await _databaseApi.GetTicketByPodioItemId(request.PodioItemId, cancellationToken);
+    public async Task<Result<IEnumerable<TicketDto>>> Handle(GetTicketByPodioItemIdQuery request, CancellationToken cancellationToken) => await _databaseApi.GetTicketsByPodioItemId(request.PodioItemId, cancellationToken);
 }
