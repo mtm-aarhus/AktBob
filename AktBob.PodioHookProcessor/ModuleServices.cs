@@ -13,6 +13,7 @@ public static class ModuleServices
         services.AddHostedService<UseCases.DocumentListTrigger.BackgroundWorker>();
         services.AddHostedService<UseCases.GoToFilArkivTrigger.BackgroundWorker>();
         services.AddHostedService<UseCases.ToSharepointTrigger.BackgroundWorker>();
+        services.AddHostedService<UseCases.RegisterCase.BackgroundWorker>();
 
         return services;
     }
