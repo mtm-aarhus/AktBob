@@ -77,4 +77,41 @@ internal class DatabaseApi : IDatabaseApi
             return Result.Error();
         }
     }
+
+    public async Task<Result<CaseDto>> PostCase(int ticketId, long? podioItemId, Guid? filArkivCaseId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var body = new
+            {
+                ticketId,
+                podioItemId,
+                filArkivCaseId
+            };
+
+            var json = JsonSerializer.Serialize(body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri($"Database/Cases", UriKind.Relative),
+                Content = new StringContent(json, encoding: Encoding.UTF8, "application/json")
+            };
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var @case = JsonSerializer.Deserialize<CaseDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (@case is null)
+            {
+                return Result.Error();
+            }
+
+            return Result.Success(@case);
+        }
+        catch (Exception)
+        {
+            return Result.Error();
+        }
+    }
 }
