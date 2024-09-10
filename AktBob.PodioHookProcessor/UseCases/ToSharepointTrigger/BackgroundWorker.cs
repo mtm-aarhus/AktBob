@@ -68,72 +68,61 @@ internal class BackgroundWorker : BackgroundService
                         string base64EncodedMessage = azureQueueMessage.Body.ToString();
 
                         // Decode the Base64 message back to a JSON string
-                        string jsonString = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(base64EncodedMessage));
+                        string podioItemIdString = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(base64EncodedMessage));
 
-                        if (jsonString.StartsWith("\"") && jsonString.EndsWith("\""))
+                        if (!long.TryParse(podioItemIdString, out long podioItemId))
                         {
-                            // Strip the surrounding quotes and unescape the string
-                            jsonString = jsonString.Substring(1, jsonString.Length - 2).Replace("\\\"", "\"");
-                        }
-
-                        var jsonObject = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonString);
-                        string cleanedJsonString = JsonSerializer.Serialize(jsonObject);
-
-                        var queueMessageDto = JsonSerializer.Deserialize<QueueBodyDto>(cleanedJsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                        if (queueMessageDto is null)
-                        {
-                            _logger.LogError("Could not parse Azure queue item body as a '{type}' data type. Body content: '{body}'", nameof(QueueBodyDto), azureQueueMessage.Body);
+                            _logger.LogError("Could not parse the string '{string}' as a Podio Item Id", podioItemIdString);
                             continue;
                         }
 
 
                         // Get metadata from Podio
-                        var getPodioItemQuery = new GetItemQuery(podioAppId, queueMessageDto.PodioItemId);
+                        var getPodioItemQuery = new GetItemQuery(podioAppId, podioItemId);
                         var getPodioItemQueryResult = await mediator.Send(getPodioItemQuery, stoppingToken);
 
                         if (!getPodioItemQueryResult.IsSuccess)
                         {
-                            _logger.LogError("Could not get item {itemId} from Podio", queueMessageDto.PodioItemId);
+                            _logger.LogError("Could not get item {itemId} from Podio", podioItemId);
                             continue;
                         }
 
                         var caseNumber = getPodioItemQueryResult.Value.Fields.FirstOrDefault(x => x.Id == podioFieldCaseNumber.Key)?.Value?.FirstOrDefault();
                         if (string.IsNullOrEmpty(caseNumber))
                         {
-                            _logger.LogError("Could not get case number field value from Podio Item {itemId}", queueMessageDto.PodioItemId);
+                            _logger.LogError("Could not get case number field value from Podio Item {itemId}", podioItemId);
                             continue;
                         }
 
                         // Find Deskpro ticket from PodioItemId
-                        var getTicketByPodioItemIdQuery = new GetTicketByPodioItemIdQuery(queueMessageDto.PodioItemId);
+                        var getTicketByPodioItemIdQuery = new GetTicketByPodioItemIdQuery(podioItemId);
                         var getTicketByPodioItemIdQueryResult = await mediator.Send(getTicketByPodioItemIdQuery);
 
                         if (getTicketByPodioItemIdQueryResult.IsSuccess)
                         {
                             if (getTicketByPodioItemIdQueryResult.Value.Count() < 1)
                             {
-                                _logger.LogError("0 Deskpro tickets found for PodioItemId {podioItemId}.", queueMessageDto.PodioItemId);
+                                _logger.LogError("0 Deskpro tickets found for PodioItemId {podioItemId}.", podioItemId);
                                 continue;
                             }
 
                             if (getTicketByPodioItemIdQueryResult.Value.Count() > 1)
                             {
-                                _logger.LogWarning("{count} Deskpro tickets found for PodioItemId {podioItemId}. Only processing the first.", getTicketByPodioItemIdQueryResult.Value.Count(), queueMessageDto.PodioItemId);
+                                _logger.LogWarning("{count} Deskpro tickets found for PodioItemId {podioItemId}. Only processing the first.", getTicketByPodioItemIdQueryResult.Value.Count(), podioItemId);
                             }
 
                             var ticket = getTicketByPodioItemIdQueryResult.Value.FirstOrDefault();
 
                             if (ticket is null)
                             {
-                                _logger.LogError("Ticket related to PodioItemId {id} not found in database", queueMessageDto.PodioItemId);
+                                _logger.LogError("Ticket related to PodioItemId {id} not found in database", podioItemId);
                                 continue;
                             }
 
-                            var filArkivCaseId = ticket.Cases?.FirstOrDefault(c => c.PodioItemId == queueMessageDto.PodioItemId)?.FilArkivCaseId;
+                            var filArkivCaseId = ticket.Cases?.FirstOrDefault(c => c.PodioItemId == podioItemId)?.FilArkivCaseId;
                             if (filArkivCaseId == null)
                             {
-                                _logger.LogError("FilArkivCaseId not found for PodioItemId {podioItemId}", queueMessageDto.PodioItemId);
+                                _logger.LogError("FilArkivCaseId not found for PodioItemId {podioItemId}", podioItemId);
                                 continue;
                             }
 
@@ -164,7 +153,7 @@ internal class BackgroundWorker : BackgroundService
                                     SagsNummer = caseNumber,
                                     Email = agentEmail,
                                     Navn = agentName,
-                                    PodioID = queueMessageDto.PodioItemId,
+                                    PodioID = podioItemId,
                                     DeskproID = getDeskproTicketQueryResult.Value.Id,
                                     Titel = getDeskproTicketQueryResult.Value.Subject,
                                     FilarkivCaseID = filArkivCaseId?.ToString() ?? string.Empty
@@ -172,7 +161,7 @@ internal class BackgroundWorker : BackgroundService
 
 
                                 // Post UiPath queue item
-                                var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, queueMessageDto.PodioItemId.ToString(), uiPathQueueItemContent);
+                                var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, podioItemId.ToString(), uiPathQueueItemContent);
                                 await mediator.Send(addUiPathQueueItemCommand);
                             }
                         }
@@ -183,7 +172,4 @@ internal class BackgroundWorker : BackgroundService
             await Task.Delay(TimeSpan.FromSeconds(delay));
         }
     }
-
-    record QueueBodyDto(long PodioItemId);
-
 }
