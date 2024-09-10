@@ -100,13 +100,14 @@ internal class DatabaseApi : IDatabaseApi
         }
     }
 
-    public async Task<Result<CaseDto>> PostCase(int ticketId, long? podioItemId, Guid? filArkivCaseId, CancellationToken cancellationToken = default)
+    public async Task<Result<CaseDto>> PostCase(int ticketId, string caseNumber, long? podioItemId, Guid? filArkivCaseId, CancellationToken cancellationToken = default)
     {
         try
         {
             var body = new
             {
                 ticketId,
+                caseNumber,
                 podioItemId,
                 filArkivCaseId
             };

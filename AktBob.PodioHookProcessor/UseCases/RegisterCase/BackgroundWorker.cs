@@ -31,6 +31,7 @@ internal class BackgroundWorker : BackgroundService
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
         var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => long.Parse(x.Key), x => x.Get<PodioField>())));
         var podioFieldDeskproId = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "DeskproId"));
+        var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "CaseNumber"));
         Guard.Against.Null(podioFieldDeskproId.Value);
 
         using (var scope = ServiceProvider.CreateScope())
@@ -59,34 +60,58 @@ internal class BackgroundWorker : BackgroundService
                             continue;
                         }
 
-                        var messageContent = JsonSerializer.Deserialize<string>(azureQueueMessage.Body, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        // Retrieve the Base64 encoded message from Azure Queue
+                        string base64EncodedMessage = azureQueueMessage.Body.ToString();
 
-                        if (!long.TryParse(messageContent, out long podioItemId))
+                        // Decode the Base64 message back to a JSON string
+                        string jsonString = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(base64EncodedMessage));
+
+                        if (jsonString.StartsWith("\"") && jsonString.EndsWith("\""))
                         {
-                            _logger.LogError("Could not parse Azure queue item body as a 'long' data type. Body content: '{body}'", azureQueueMessage.Body);
+                            // Strip the surrounding quotes and unescape the string
+                            jsonString = jsonString.Substring(1, jsonString.Length - 2).Replace("\\\"", "\"");
+                        }
+
+                        var jsonObject = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonString);
+                        string cleanedJsonString = JsonSerializer.Serialize(jsonObject);
+
+                        var queueMessageDto = JsonSerializer.Deserialize<QueueBodyDto>(cleanedJsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                        if (queueMessageDto is null)
+                        {
+                            _logger.LogError("Could not parse Azure queue item body as a '{type}' data type. Body content: '{body}'", nameof(QueueBodyDto), azureQueueMessage.Body);
                             continue;
                         }
 
                         // Get metadata from Podio
-                        var getPodioItemQuery = new GetItemQuery(podioAppId, podioItemId);
+                        var getPodioItemQuery = new GetItemQuery(podioAppId, queueMessageDto.PodioItemId);
                         var getPodioItemQueryResult = await mediator.Send(getPodioItemQuery, stoppingToken);
 
                         if (!getPodioItemQueryResult.IsSuccess)
                         {
-                            _logger.LogError("Could not get item {itemId} from Podio", podioItemId);
+                            _logger.LogError("Could not get item {itemId} from Podio", queueMessageDto.PodioItemId);
                             continue;
                         }
 
+                        var caseNumber = getPodioItemQueryResult.Value.Fields.FirstOrDefault(x => x.Id == podioFieldCaseNumber.Key)?.Value?.FirstOrDefault();
+
+                        if (string.IsNullOrEmpty(caseNumber))
+                        {
+                            _logger.LogError("Could not get case number field value from Podio Item {id}", queueMessageDto.PodioItemId);
+                            continue; ;
+                        }
+
+                        // Get metadata from Deskpro
                         var deskproIdString = getPodioItemQueryResult.Value.Fields.FirstOrDefault(x => x.Id == podioFieldDeskproId.Key)?.Value?.FirstOrDefault();
                         if (string.IsNullOrEmpty(deskproIdString))
                         {
-                            _logger.LogError("Could not get Deskpro Id field value from Podio Item {itemId}", podioItemId);
+                            _logger.LogError("Could not get Deskpro Id field value from Podio Item {itemId}", queueMessageDto.PodioItemId);
                             continue;
                         }
 
                         if (!int.TryParse(deskproIdString, out int deskproId))
                         {
-                            _logger.LogError("Could not parse Deskpro Id field value as integer from Podio Item {itemId}", podioItemId);
+                            _logger.LogError("Could not parse Deskpro Id field value as integer from Podio Item {itemId}", queueMessageDto.PodioItemId);
                             continue;
                         }
 
@@ -105,7 +130,8 @@ internal class BackgroundWorker : BackgroundService
                             continue;
                         }
 
-                        var postCaseCommand = new PostCaseCommand(ticketResult.Value.First().Id, podioItemId, null);
+                        // Post case to database
+                        var postCaseCommand = new PostCaseCommand(ticketResult.Value.First().Id, queueMessageDto.PodioItemId, caseNumber, null);
                         var postCaseCommandResult = await mediator.Send(postCaseCommand);
 
                         if (!postCaseCommandResult.IsSuccess)
@@ -122,4 +148,7 @@ internal class BackgroundWorker : BackgroundService
             await Task.Delay(TimeSpan.FromSeconds(delay));
         }
     }
+
+    record QueueBodyDto(long PodioItemId);
+
 }

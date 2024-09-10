@@ -13,5 +13,5 @@ internal class PostCaseCommandHandler : IRequestHandler<PostCaseCommand, Result<
         _databaseApi = databaseApi;
     }
 
-    public async Task<Result<CaseDto>> Handle(PostCaseCommand request, CancellationToken cancellationToken) => await _databaseApi.PostCase(request.TicketId, request.PodioItemId, request.FilArkivCaseId, cancellationToken);
+    public async Task<Result<CaseDto>> Handle(PostCaseCommand request, CancellationToken cancellationToken) => await _databaseApi.PostCase(request.TicketId, request.CaseNumber, request.PodioItemId, request.FilArkivCaseId, cancellationToken);
 }
