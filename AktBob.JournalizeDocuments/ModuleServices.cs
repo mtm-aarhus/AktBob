@@ -8,7 +8,7 @@ using System.Reflection;
 namespace AktBob.JournalizeDocuments;
 public static class ModuleServices
 {
-    public static IServiceCollection AddDocumentGeneratorModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatrAssemblies)
+    public static IServiceCollection AddJournalizeDocumentsModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatrAssemblies)
     {
         // Add GetOrganized service
         var getOrganizedOptions = new GetOrganizedOptions

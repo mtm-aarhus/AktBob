@@ -28,6 +28,7 @@ internal class JournalizeDeskproMessages : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var delaySeconds = _configuration.GetValue<int?>("JournalizeDeskproMessages:WorkerIntervalSeconds") ?? 10;
+        var journalizeAfterUpload = _configuration.GetValue<bool?>("JournalizeDeskproMessages:JournalizeAfterUpload") ?? true;
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -47,10 +48,14 @@ internal class JournalizeDeskproMessages : BackgroundService
                         continue;
                     }
 
-                    if (message.GOJournalizedAt is not null)
+                    if (message.GODocumentId is not null)
                     {
                         continue;
                     }
+
+                    _logger.LogInformation("Deskpro message ready for upload to GetOrganized. DeskproTicketId {deskproTicketId}, DeskproMessageId {deskproMessageId}", message.DeskproTicketId, message.DeskproMessageId);
+
+                    _logger.LogInformation("Getting ticket {id} from Deskpro ...", message.TicketId);
 
                     var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(message.DeskproTicketId);
                     var getDeskproTicketQueryResult = await _mediator.Send(getDeskproTicketQuery);
@@ -63,6 +68,8 @@ internal class JournalizeDeskproMessages : BackgroundService
 
                     var deskproTicket = getDeskproTicketQueryResult.Value;
 
+                    _logger.LogInformation("Getting message {id} from Deskpro ...", message.DeskproMessageId);
+
                     var getDeskproMessageQuery = new GetDeskproMessageByIdQuery(message.DeskproTicketId, message.DeskproMessageId);
                     var getDeskproMessageQueryResult = await _mediator.Send(getDeskproMessageQuery);
 
@@ -74,10 +81,19 @@ internal class JournalizeDeskproMessages : BackgroundService
 
                     var deskproMessage = getDeskproMessageQueryResult.Value;
 
+                    _logger.LogInformation("Getting person {id} from Deskpro ...", deskproMessage.Person.Id);
+
                     var getDeskproPersonQuery = new GetDeskproPersonQuery(deskproMessage.Person.Id);
                     var getDeskproPersonQueryResult = await _mediator.Send(getDeskproPersonQuery);
 
+                    if (!getDeskproPersonQueryResult.IsSuccess)
+                    {
+                        _logger.LogWarning("Error getting person {id} from Deskpro", deskproMessage.Person.Id);
+                    }
+
                     var person = getDeskproPersonQueryResult.Value;
+
+                    _logger.LogInformation("Generating PDF document from message data ...");
 
                     var generateDocumentCommand = new GenerateDeskproMessageDocumentCommand(
                         TicketSubject: deskproTicket?.Subject ?? string.Empty,
@@ -91,16 +107,19 @@ internal class JournalizeDeskproMessages : BackgroundService
 
                     if (!generatorDocumentCommandResult.IsSuccess)
                     {
-                        _logger.LogError("Error generating PDF document for message (database ID {messageId})", message.Id);
+                        _logger.LogError("Error generating PDF document for Deskpro message {messageId}", message.DeskproMessageId);
                         continue;
                     }
 
                     try
                     {
                         // Get message creation time and convert to Danish time zone
+                        var random = new Random(); // TODO: temp
+
                         DateTime createdAtUtc = DateTime.SpecifyKind(deskproMessage.CreatedAt, DateTimeKind.Utc);
                         TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time");
                         DateTime createdAtDanishTime = TimeZoneInfo.ConvertTimeFromUtc(createdAtUtc, tzi);
+                        createdAtDanishTime = createdAtDanishTime.AddHours(random.Next(1, 10)); // TODO: temp
 
                         // Specify GO document metadata
                         var metadata = new UploadDocumentMetadata
@@ -108,25 +127,37 @@ internal class JournalizeDeskproMessages : BackgroundService
                             DocumentDate = createdAtDanishTime
                         };
 
-                        var titel = $"Korrespondance ({deskproMessage.Id}) {(person is not null ? $"fra {person.FullName}" : string.Empty)} ({createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss")}).pdf";
+                        var title = $"Korrespondance ({deskproMessage.Id}) {(person is not null ? $"fra {person.FullName}" : string.Empty)} ({createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss")}).pdf";
 
+                        _logger.LogInformation("Uploading document to GetOrganized (CaseNumber: {caseNumber}, Document title: '{title}', Document date: '{date}', file size (bytes): {filesize}) ...", message.GOCaseNumber, title, createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss"), generatorDocumentCommandResult.Value.Length);
+                        
                         // Upload to GO
                         var uploadResult = await _getOrganizedClient.UploadDocument(
                             bytes: generatorDocumentCommandResult.Value,
                             message.GOCaseNumber,
                             "Dokumenter",
                             null,
-                            titel,
-                            metadata);
+                            title,
+                            metadata,
+                            stoppingToken);
 
                         // Journalize the document
                         if (uploadResult is not null)
                         {
-                            await _getOrganizedClient.JournalizeDocument(uploadResult.DocumentId);
-
                             // Update database
-                            var updateMessageCommand = new UpdateMessageSetJournalizedCommand(message.Id, DateTime.UtcNow, uploadResult.DocumentId);
+                            _logger.LogInformation("Updating message in database ...");
+                            var updateMessageCommand = new UpdateMessageSetGoDocumentIdCommand(message.Id, uploadResult.DocumentId);
                             await _mediator.Send(updateMessageCommand);
+
+                            if (journalizeAfterUpload)
+                            {
+                                _logger.LogInformation("Journalizing document {id} ...", uploadResult.DocumentId);
+                                await _getOrganizedClient.JournalizeDocument(uploadResult.DocumentId);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogError("Error uploading document to GetOrganized (CaseNumber: {caseNumber}, Document title: '{title}', Document date: '{date}', file size (bytes): {filesize})", message.GOCaseNumber, title, createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss"), generatorDocumentCommandResult.Value.Length);
                         }
                     }
                     catch (Exception)

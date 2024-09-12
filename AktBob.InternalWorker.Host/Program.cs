@@ -11,6 +11,7 @@ using AktBob.PodioHookProcessor;
 using AktBob.DatabaseAPI;
 using AktBob.Podio;
 using AktBob.DocumentGenerator;
+using AktBob.JournalizeDocuments;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -33,6 +34,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddDatabaseApiModule(hostContext.Configuration, mediatrAssemblies);
         services.AddPodioModule(hostContext.Configuration, mediatrAssemblies);
         services.AddDocumentGeneratorModule(mediatrAssemblies);
+        services.AddJournalizeDocumentsModule(hostContext.Configuration, mediatrAssemblies);
 
         // Mediatr
         services.AddMediatR(c =>

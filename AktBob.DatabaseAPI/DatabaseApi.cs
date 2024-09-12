@@ -1,6 +1,5 @@
 ﻿using AktBob.DatabaseAPI.Contracts.DTOs;
 using Ardalis.Result;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
@@ -81,16 +80,11 @@ internal class DatabaseApi : IDatabaseApi
         }
     }
 
-    public async Task<Result<MessageDto>> UpdateMessage(int id, DateTime? goJournalizedAt, int? goDocumentId, CancellationToken cancellationToken = default)
+    public async Task<Result<MessageDto>> UpdateMessage(int id, int? goDocumentId, CancellationToken cancellationToken = default)
     {
         try
         {
             var jsonValues = new Dictionary<string, object>();
-
-            if (goJournalizedAt != null)
-            {
-                jsonValues.Add("goJournalizedAt", goJournalizedAt);
-            }
 
             if (goDocumentId != null)
             {

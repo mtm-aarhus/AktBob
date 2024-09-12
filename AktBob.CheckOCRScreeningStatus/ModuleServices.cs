@@ -31,16 +31,6 @@ public static class ModuleServices
 
         services.AddScoped<IFilArkiv, FilArkiv>();
 
-        //services.AddTransient<IAktBobApi, AktBobApi>();
-        //services.AddHttpClient<IAktBobApi, AktBobApi>(client =>
-        //{
-        //    var apiBaseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("AktBobApi:BaseAddress"));
-        //    var apiApiKey = Guard.Against.NullOrEmpty(configuration.GetValue<string>("AktBobApi:ApiKey"));
-
-        //    client.BaseAddress = new Uri(apiBaseAddress);
-        //    client.DefaultRequestHeaders.Add("ApiKey", apiApiKey);
-        //});
-
         var deskproOptions = new DeskproOptions
         {
             BaseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Deskpro:BaseAddress")),
