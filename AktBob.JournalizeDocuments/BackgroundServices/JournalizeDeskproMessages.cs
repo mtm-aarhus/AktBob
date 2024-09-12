@@ -114,12 +114,9 @@ internal class JournalizeDeskproMessages : BackgroundService
                     try
                     {
                         // Get message creation time and convert to Danish time zone
-                        var random = new Random(); // TODO: temp
-
                         DateTime createdAtUtc = DateTime.SpecifyKind(deskproMessage.CreatedAt, DateTimeKind.Utc);
                         TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time");
                         DateTime createdAtDanishTime = TimeZoneInfo.ConvertTimeFromUtc(createdAtUtc, tzi);
-                        createdAtDanishTime = createdAtDanishTime.AddHours(random.Next(1, 10)); // TODO: temp
 
                         // Specify GO document metadata
                         var metadata = new UploadDocumentMetadata
