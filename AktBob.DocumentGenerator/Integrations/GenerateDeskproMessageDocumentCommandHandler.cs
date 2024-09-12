@@ -46,7 +46,7 @@ internal class GenerateDeskproMessageDocumentCommandHandler : IRequestHandler<Ge
         // Add message timestamp
         AddMessageTimestamp(
             section: section,
-            text: request.CreatedAt.ToString("dd-MM-yyyy HH:ss"),
+            text: request.CreatedAt.ToString("dd-MM-yyyy HH:mm:ss"),
             fontName: Constants.FONT_NAME_OPEN_SANS,
             fontSize: Unit.FromPoint(8),
             fontColor: Color.Parse("0xffaaaaaa"));
