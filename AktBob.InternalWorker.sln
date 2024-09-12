@@ -45,9 +45,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.DatabaseAPI.Contract
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Podio Module", "Podio Module", "{34D4F9F7-9C3A-4DCD-B472-A4C522682616}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Podio", "AktBob.Podio\AktBob.Podio.csproj", "{AC88B646-4DB9-45BB-82C2-FD9F55B181C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Podio", "AktBob.Podio\AktBob.Podio.csproj", "{AC88B646-4DB9-45BB-82C2-FD9F55B181C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Podio.Contracts", "AktBob.Podio.Contracts\AktBob.Podio.Contracts.csproj", "{706BC11D-5BBF-42D4-8ABB-605B5B7F7DC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Podio.Contracts", "AktBob.Podio.Contracts\AktBob.Podio.Contracts.csproj", "{706BC11D-5BBF-42D4-8ABB-605B5B7F7DC0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DocumentGenerator", "DocumentGenerator", "{5FC6CF1E-902B-4AB9-A78F-8A77955606DD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.DocumentGenerator", "AktBob.DocumentGenerator\AktBob.DocumentGenerator.csproj", "{B19C08F8-E0B7-4F5D-ACB6-6BD0A00839DD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.DocumentGenerator.Contracts", "AktBob.DocumentGenerator.Contracts\AktBob.DocumentGenerator.Contracts.csproj", "{05EB330D-005F-4BB9-8AB2-A843584BD4E7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Journalize Documents Module", "Journalize Documents Module", "{C9851F2E-765C-4E7E-8CE7-3E5467F2712B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.JournalizeDocuments", "AktBob.JournalizeDocuments\AktBob.JournalizeDocuments.csproj", "{7AD4DBB7-4801-440B-89F1-021C780F831F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -115,6 +125,18 @@ Global
 		{706BC11D-5BBF-42D4-8ABB-605B5B7F7DC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{706BC11D-5BBF-42D4-8ABB-605B5B7F7DC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{706BC11D-5BBF-42D4-8ABB-605B5B7F7DC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B19C08F8-E0B7-4F5D-ACB6-6BD0A00839DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B19C08F8-E0B7-4F5D-ACB6-6BD0A00839DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B19C08F8-E0B7-4F5D-ACB6-6BD0A00839DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B19C08F8-E0B7-4F5D-ACB6-6BD0A00839DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05EB330D-005F-4BB9-8AB2-A843584BD4E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05EB330D-005F-4BB9-8AB2-A843584BD4E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05EB330D-005F-4BB9-8AB2-A843584BD4E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05EB330D-005F-4BB9-8AB2-A843584BD4E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AD4DBB7-4801-440B-89F1-021C780F831F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AD4DBB7-4801-440B-89F1-021C780F831F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AD4DBB7-4801-440B-89F1-021C780F831F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AD4DBB7-4801-440B-89F1-021C780F831F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -134,6 +156,9 @@ Global
 		{E3841063-FC69-45C8-B910-EE4DD4277734} = {7621C68C-8549-48D8-A7BD-0468232FD3D3}
 		{AC88B646-4DB9-45BB-82C2-FD9F55B181C1} = {34D4F9F7-9C3A-4DCD-B472-A4C522682616}
 		{706BC11D-5BBF-42D4-8ABB-605B5B7F7DC0} = {34D4F9F7-9C3A-4DCD-B472-A4C522682616}
+		{B19C08F8-E0B7-4F5D-ACB6-6BD0A00839DD} = {5FC6CF1E-902B-4AB9-A78F-8A77955606DD}
+		{05EB330D-005F-4BB9-8AB2-A843584BD4E7} = {5FC6CF1E-902B-4AB9-A78F-8A77955606DD}
+		{7AD4DBB7-4801-440B-89F1-021C780F831F} = {C9851F2E-765C-4E7E-8CE7-3E5467F2712B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}

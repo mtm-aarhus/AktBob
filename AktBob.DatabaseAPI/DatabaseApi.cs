@@ -1,4 +1,4 @@
-﻿using AktBob.DatabaseAPI.Contracts;
+﻿using AktBob.DatabaseAPI.Contracts.DTOs;
 using Ardalis.Result;
 using System.Net.Http.Json;
 using System.Text;
@@ -58,6 +58,71 @@ internal class DatabaseApi : IDatabaseApi
         }
     }
 
+    public async Task<Result<IEnumerable<MessageDto>>> GetMessagesNotJournalized(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync(new Uri($"Database/Messages?includeJournalized=false", UriKind.Relative), cancellationToken);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var messages = JsonSerializer.Deserialize<IEnumerable<MessageDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (messages is null)
+            {
+                return Result.NotFound();
+            }
+
+            return Result.Success(messages);
+            
+        }
+        catch (Exception)
+        {
+            return Result.Error();
+        }
+    }
+
+    public async Task<Result<MessageDto>> UpdateMessage(int id, DateTime? goJournalizedAt, int? goDocumentId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var jsonValues = new Dictionary<string, object>();
+
+            if (goJournalizedAt != null)
+            {
+                jsonValues.Add("goJournalizedAt", goJournalizedAt);
+            }
+
+            if (goDocumentId != null)
+            {
+                jsonValues.Add("goDocumentId", goDocumentId);
+            }
+
+            var json = JsonSerializer.Serialize(jsonValues);
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Patch,
+                RequestUri = new Uri($"Database/Messages/{id}", UriKind.Relative),
+                Content = new StringContent(json, encoding: Encoding.UTF8, "application/json")
+            };
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var message = JsonSerializer.Deserialize<MessageDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (message is null)
+            {
+                return Result.Error();
+            }
+
+            return Result.Success(message);
+        }
+        catch (Exception)
+        {
+            return Result.Error();
+        }
+    }
+
     public async Task<Result<CaseDto>> UpdateCase(int id, long? podioItemId, Guid? filArkivCaseId, CancellationToken cancellationToken = default)
     {
         try
@@ -83,9 +148,9 @@ internal class DatabaseApi : IDatabaseApi
             };
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
-            var cotent = await response.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadAsStringAsync();
 
-            var @case = JsonSerializer.Deserialize<CaseDto>(cotent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var @case = JsonSerializer.Deserialize<CaseDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (@case is null)
             {

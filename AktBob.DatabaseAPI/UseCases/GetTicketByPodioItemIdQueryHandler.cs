@@ -1,4 +1,5 @@
-﻿using AktBob.DatabaseAPI.Contracts;
+﻿using AktBob.DatabaseAPI.Contracts.DTOs;
+using AktBob.DatabaseAPI.Contracts.Queries;
 using Ardalis.Result;
 using MediatR;
 

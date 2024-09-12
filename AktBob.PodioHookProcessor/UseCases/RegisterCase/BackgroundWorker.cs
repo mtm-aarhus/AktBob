@@ -1,4 +1,5 @@
-﻿using AktBob.DatabaseAPI.Contracts;
+﻿using AktBob.DatabaseAPI.Contracts.Commands;
+using AktBob.DatabaseAPI.Contracts.Queries;
 using AktBob.Podio.Contracts;
 using AktBob.Queue.Contracts;
 using Ardalis.GuardClauses;

@@ -1,4 +1,5 @@
-﻿using AktBob.DatabaseAPI.Contracts;
+﻿using AktBob.DatabaseAPI.Contracts.Commands;
+using AktBob.DatabaseAPI.Contracts.DTOs;
 using Ardalis.Result;
 using MediatR;
 using Microsoft.Extensions.Logging;

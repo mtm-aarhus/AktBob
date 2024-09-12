@@ -1,5 +1,5 @@
 ﻿using AAK.Podio;
-using AktBob.DatabaseAPI.Contracts;
+using AktBob.DatabaseAPI.Contracts.Queries;
 using AktBob.Deskpro.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Queue.Contracts;

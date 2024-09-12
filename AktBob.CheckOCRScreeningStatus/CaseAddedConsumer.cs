@@ -3,7 +3,7 @@ using AktBob.CheckOCRScreeningStatus.UseCases.GetFileStatus;
 using AktBob.CheckOCRScreeningStatus.UseCases.RegisterDocuments;
 using AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
 using AktBob.CheckOCRScreeningStatus.UseCases.UpdatePodioItem;
-using AktBob.DatabaseAPI.Contracts;
+using AktBob.DatabaseAPI.Contracts.Commands;
 using AktBob.Podio.Contracts;
 using MediatR;
 using Microsoft.Extensions.Configuration;

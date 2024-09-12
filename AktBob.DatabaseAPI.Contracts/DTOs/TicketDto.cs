@@ -1,4 +1,4 @@
-﻿namespace AktBob.DatabaseAPI.Contracts;
+﻿namespace AktBob.DatabaseAPI.Contracts.DTOs;
 public record TicketDto
 {
     public int Id { get; set; }

@@ -30,7 +30,7 @@ internal class GetDeskproTicketsByFieldSearchQueryHandler : IRequestHandler<GetD
 
             if (tickets is not null && tickets.Count() > 0)
             {
-                ticketsList.AddRange(tickets);
+                ticketsList.AddRange(tickets!);
             }
         };
 

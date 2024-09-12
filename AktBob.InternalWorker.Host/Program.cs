@@ -10,6 +10,7 @@ using AktBob.Deskpro;
 using AktBob.PodioHookProcessor;
 using AktBob.DatabaseAPI;
 using AktBob.Podio;
+using AktBob.DocumentGenerator;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -31,6 +32,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddDeskproModule(hostContext.Configuration, mediatrAssemblies);
         services.AddDatabaseApiModule(hostContext.Configuration, mediatrAssemblies);
         services.AddPodioModule(hostContext.Configuration, mediatrAssemblies);
+        services.AddDocumentGeneratorModule(mediatrAssemblies);
 
         // Mediatr
         services.AddMediatR(c =>
