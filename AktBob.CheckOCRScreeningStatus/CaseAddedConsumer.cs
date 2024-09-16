@@ -38,7 +38,7 @@ internal class CaseAddedConsumer : INotificationHandler<CaseAdded>
 
         if (!registerFilesResult.IsSuccess)
         {
-            LogErrors(registerFilesResult.Errors);
+            await RemoveFromCache(notification.CaseId);
             return;
         }
 
@@ -57,7 +57,7 @@ internal class CaseAddedConsumer : INotificationHandler<CaseAdded>
 
         if (!updatePodioResult.IsSuccess)
         {
-            LogErrors(updatePodioResult.Errors);
+            await RemoveFromCache(notification.CaseId);
             return;
         }
 
@@ -81,19 +81,15 @@ internal class CaseAddedConsumer : INotificationHandler<CaseAdded>
             _logger.LogWarning("Error posting comment on Podio item {id}: {ex}", _data.GetCase(notification.CaseId)!.PodioItemId, ex.Message);
         }
 
-        var removeCaseFromCacheCommand = new RemoveCaseFromCacheCommand(notification.CaseId);
-        await _mediator.Send(removeCaseFromCacheCommand);
+        await RemoveFromCache(notification.CaseId);
 
-        _logger.LogInformation("Case {id} processed", notification.CaseId);
     }
 
-
-    
-    private void LogErrors(IEnumerable<string> errors)
+    private async Task RemoveFromCache(Guid caseId)
     {
-        foreach (var error in errors)
-        {
-            _logger.LogError(error);
-        }
+        var removeCaseFromCacheCommand = new RemoveCaseFromCacheCommand(caseId);
+        await _mediator.Send(removeCaseFromCacheCommand);
+
+        _logger.LogInformation("FilArkiv case {id} processed", caseId);
     }
 }
