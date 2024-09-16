@@ -63,15 +63,22 @@ internal class CaseAddedConsumer : INotificationHandler<CaseAdded>
 
 
         // ** Post comment on Podio item **
-        var podioAppId = _configuration.GetValue<int>("Podio:AppId");
-        var commentText = "OCR screening af dokumenterne på FilArkiv er færdig.";
-
-        var postCommentCommand = new PostItemCommentCommand(podioAppId, _data.GetCase(notification.CaseId)!.PodioItemId, commentText);
-        var postCommentCommandResult = await _mediator.Send(postCommentCommand, cancellationToken);
-
-        if (!postCommentCommandResult.IsSuccess)
+        try
         {
-            _logger.LogWarning("Error posting comment on Podio item {id}", _data.GetCase(notification.CaseId)!.PodioItemId);
+            var podioAppId = _configuration.GetValue<int>("Podio:AppId");
+            var commentText = "OCR screening af dokumenterne på FilArkiv er færdig.";
+
+            var postCommentCommand = new PostItemCommentCommand(podioAppId, _data.GetCase(notification.CaseId)!.PodioItemId, commentText);
+            var postCommentCommandResult = await _mediator.Send(postCommentCommand, cancellationToken);
+
+            if (!postCommentCommandResult.IsSuccess)
+            {
+                _logger.LogWarning("Error posting comment on Podio item {id}", _data.GetCase(notification.CaseId)!.PodioItemId);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Error posting comment on Podio item {id}: {ex}", _data.GetCase(notification.CaseId)!.PodioItemId, ex.Message);
         }
 
         var removeCaseFromCacheCommand = new RemoveCaseFromCacheCommand(notification.CaseId);

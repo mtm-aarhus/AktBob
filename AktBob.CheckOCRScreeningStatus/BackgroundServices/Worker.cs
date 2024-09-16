@@ -53,7 +53,14 @@ internal class Worker : BackgroundService
 
                     foreach (var message in messages.Value)
                     {
-                        var content = JsonSerializer.Deserialize<QueueMessageBodyDto>(message.Body, _jsonSerializerOptions);
+
+                        // Retrieve the Base64 encoded message from Azure Queue
+                        string base64EncodedMessage = message.Body.ToString();
+
+                        // Decode the Base64 message back to a JSON string
+                        string base64decodedMessage = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(base64EncodedMessage));
+
+                        var content = JsonSerializer.Deserialize<QueueMessageBodyDto>(base64decodedMessage, _jsonSerializerOptions);
 
                         if (content is not null)
                         {
