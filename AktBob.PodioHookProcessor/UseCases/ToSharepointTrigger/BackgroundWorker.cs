@@ -169,7 +169,7 @@ internal class BackgroundWorker : BackgroundService
                 }
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(delay));
+            await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);
         }
     }
 }

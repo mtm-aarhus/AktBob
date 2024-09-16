@@ -41,7 +41,7 @@ internal class JournalizeDeskproMessages : BackgroundService
             }
             else
             {
-                foreach (var message in getMessagesQueryResult.Value)
+                foreach (var message in getMessagesQueryResult.Value.OrderBy(m => m.DeskproMessageId))
                 {
                     if (string.IsNullOrEmpty(message.GOCaseNumber))
                     {
@@ -54,8 +54,6 @@ internal class JournalizeDeskproMessages : BackgroundService
                     }
 
                     _logger.LogInformation("Deskpro message ready for upload to GetOrganized. DeskproTicketId {deskproTicketId}, DeskproMessageId {deskproMessageId}", message.DeskproTicketId, message.DeskproMessageId);
-
-                    _logger.LogInformation("Getting ticket {id} from Deskpro ...", message.TicketId);
 
                     var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(message.DeskproTicketId);
                     var getDeskproTicketQueryResult = await _mediator.Send(getDeskproTicketQuery);
@@ -163,7 +161,7 @@ internal class JournalizeDeskproMessages : BackgroundService
                     }
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+                await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
             }
         }
     }
