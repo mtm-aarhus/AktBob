@@ -1,5 +1,6 @@
 ﻿using AktBob.DatabaseAPI.Contracts.DTOs;
 using Ardalis.Result;
+using Microsoft.Extensions.Logging;
 using System.Text;
 using System.Text.Json;
 
@@ -7,10 +8,12 @@ namespace AktBob.DatabaseAPI;
 internal class DatabaseApi : IDatabaseApi
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<DatabaseApi> _logger;
 
-    public DatabaseApi(HttpClient httpClient)
+    public DatabaseApi(HttpClient httpClient, ILogger<DatabaseApi> logger)
     {
         _httpClient = httpClient;
+        _logger = logger;
     }
 
     public async Task<Result<IEnumerable<TicketDto>>> GetTicketsByDeskproId(int deskproId, CancellationToken cancellationToken = default)
@@ -18,19 +21,26 @@ internal class DatabaseApi : IDatabaseApi
         try
         {
             var response = await _httpClient.GetAsync(new Uri($"Database/Tickets?deskproId={deskproId}", UriKind.Relative), cancellationToken);
-            var content = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
 
+            var content = await response.Content.ReadAsStringAsync();
             var tickets = JsonSerializer.Deserialize<IEnumerable<TicketDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (tickets is null)
             {
-                return Result.NotFound();
+                return Result.Success(Enumerable.Empty<TicketDto>());
             }
 
             return Result.Success(tickets);
         }
-        catch (Exception)
+        catch (HttpRequestException e)
         {
+            _logger.LogError("HttpRequestException requesting API for tickets by Deskpro ID #{deskproId}. StatusCode: {statusCode}. Error: {message}", deskproId, e.StatusCode, e.Message);
+            return Result.Error();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Error requesting API for tickets by Deskpro ID #{deskproId}. Error: {message}", deskproId, e.Message);
             return Result.Error();
         }
     }
@@ -40,19 +50,26 @@ internal class DatabaseApi : IDatabaseApi
         try
         {
             var response = await _httpClient.GetAsync(new Uri($"Database/Tickets?podioItemId={podioItemId}", UriKind.Relative), cancellationToken);
-            var content = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
 
+            var content = await response.Content.ReadAsStringAsync();
             var tickets = JsonSerializer.Deserialize<IEnumerable<TicketDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (tickets is null)
             {
-                return Result.NotFound();
+                return Result.Success(Enumerable.Empty<TicketDto>());
             }
 
             return Result.Success(tickets);
         }
-        catch (Exception)
+        catch (HttpRequestException e)
         {
+            _logger.LogError("HttpRequestException requesting API for tickets by Podio Item ID #{podioItemId}. StatusCode: {statusCode}. Error: {message}", podioItemId, e.StatusCode, e.Message);
+            return Result.Error();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Error requesting API for tickets by by Podio Item ID #{podioItemId}. Error: {message}", podioItemId, e.Message);
             return Result.Error();
         }
     }
@@ -62,20 +79,27 @@ internal class DatabaseApi : IDatabaseApi
         try
         {
             var response = await _httpClient.GetAsync(new Uri($"Database/Messages?includeJournalized=false", UriKind.Relative), cancellationToken);
-            var content = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
 
+            var content = await response.Content.ReadAsStringAsync();
             var messages = JsonSerializer.Deserialize<IEnumerable<MessageDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (messages is null)
             {
-                return Result.NotFound();
+                return Result.Success(Enumerable.Empty<MessageDto>());
             }
 
             return Result.Success(messages);
             
         }
-        catch (Exception)
+        catch (HttpRequestException e)
         {
+            _logger.LogError("HttpRequestException requesting API for messages not journalized. StatusCode: {statusCode}. Error: {message}", e.StatusCode, e.Message);
+            return Result.Error();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Error requesting API for messages not journalized. Error: {message}", e.Message);
             return Result.Error();
         }
     }
@@ -100,8 +124,9 @@ internal class DatabaseApi : IDatabaseApi
             };
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
-            var content = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
 
+            var content = await response.Content.ReadAsStringAsync();
             var message = JsonSerializer.Deserialize<MessageDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (message is null)
@@ -111,8 +136,14 @@ internal class DatabaseApi : IDatabaseApi
 
             return Result.Success(message);
         }
-        catch (Exception)
+        catch (HttpRequestException e)
         {
+            _logger.LogError("HttpRequestException requesting API for updating message #{id}. StatusCode: {statusCode}. Error: {message}", id, e.StatusCode, e.Message);
+            return Result.Error();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Error requesting API for updating message #{id}. Error: {message}", id, e.Message);
             return Result.Error();
         }
     }
@@ -142,8 +173,9 @@ internal class DatabaseApi : IDatabaseApi
             };
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
-            var content = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
 
+            var content = await response.Content.ReadAsStringAsync();
             var @case = JsonSerializer.Deserialize<CaseDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (@case is null)
@@ -153,8 +185,14 @@ internal class DatabaseApi : IDatabaseApi
 
             return Result.Success(@case);
         }
-        catch (Exception)
+        catch (HttpRequestException e)
         {
+            _logger.LogError("HttpRequestException requesting API for updating case #{id}. StatusCode: {statusCode}. Error: {message}", id, e.StatusCode, e.Message);
+            return Result.Error();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Error requesting API for updating case #{id}. Error: {message}", id, e.Message);
             return Result.Error();
         }
     }
@@ -180,8 +218,9 @@ internal class DatabaseApi : IDatabaseApi
             };
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
-            var content = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
 
+            var content = await response.Content.ReadAsStringAsync();
             var @case = JsonSerializer.Deserialize<CaseDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (@case is null)
@@ -191,8 +230,14 @@ internal class DatabaseApi : IDatabaseApi
 
             return Result.Success(@case);
         }
-        catch (Exception)
+        catch (HttpRequestException e)
         {
+            _logger.LogError("HttpRequestException requesting API for positing case (ticketId: {ticketId}, caseNumber: {caseNumber}, FilArkivCaseId: {filArkivCaseId}). StatusCode: {statusCode}. Error: {message}", ticketId, caseNumber, filArkivCaseId.ToString(), e.StatusCode, e.Message);
+            return Result.Error();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Error requesting API for positing case (ticketId: {ticketId}, caseNumber: {caseNumber}, FilArkivCaseId: {filArkivCaseId}). Error: {message}", ticketId, caseNumber, filArkivCaseId.ToString(), e.Message);
             return Result.Error();
         }
     }
