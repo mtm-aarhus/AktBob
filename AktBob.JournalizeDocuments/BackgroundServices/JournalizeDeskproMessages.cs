@@ -95,6 +95,11 @@ internal class JournalizeDeskproMessages : BackgroundService
                     _logger.LogWarning("Error getting person {id} from Deskpro", deskproMessage.Person.Id);
                 }
 
+                if (string.IsNullOrEmpty(getDeskproPersonQueryResult.Value.Email))
+                {
+                    _logger.LogWarning("No email for person {id} in the response from Deskpro", deskproMessage.Person.Id);
+                }
+
                 var person = getDeskproPersonQueryResult.Value;
 
                 _logger.LogInformation("Generating PDF document from message data ...");

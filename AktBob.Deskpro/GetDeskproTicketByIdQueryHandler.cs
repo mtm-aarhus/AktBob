@@ -1,11 +1,11 @@
 ﻿using AAK.Deskpro;
-using AAK.Deskpro.Models;
 using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Contracts.DTOs;
 using Ardalis.Result;
 using MediatR;
 
 namespace AktBob.Deskpro;
-internal class GetDeskproTicketByIdQueryHandler : IRequestHandler<GetDeskproTicketByIdQuery, Result<Ticket>>
+internal class GetDeskproTicketByIdQueryHandler : IRequestHandler<GetDeskproTicketByIdQuery, Result<TicketDto>>
 {
     private readonly IDeskproClient _deskproClient;
 
@@ -14,7 +14,7 @@ internal class GetDeskproTicketByIdQueryHandler : IRequestHandler<GetDeskproTick
         _deskproClient = deskproClient;
     }
 
-    public async Task<Result<Ticket>> Handle(GetDeskproTicketByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<TicketDto>> Handle(GetDeskproTicketByIdQuery request, CancellationToken cancellationToken)
     {
         var ticket = await _deskproClient.GetTicketById(request.Id, cancellationToken);
 
@@ -23,6 +23,25 @@ internal class GetDeskproTicketByIdQueryHandler : IRequestHandler<GetDeskproTick
             return Result.NotFound();
         }
 
-        return ticket;
+        var dto = new TicketDto
+        {
+            Id = ticket.Id,
+            Agent = Mappers.MapPerson(ticket.Agent),
+            Person = Mappers.MapPerson(ticket.Person),
+            AgentTeamId = ticket.AgentTeamId,
+            Auth = ticket.Auth,
+            Department = ticket.Department,
+            Ref = ticket.Ref,
+            Subject = ticket.Subject,
+            Fields = ticket.Fields.Select(f => new FieldDto
+            {
+                Id = f.Id,
+                Values = f.Values
+            })
+        };
+
+        return dto;
     }
+
+    
 }

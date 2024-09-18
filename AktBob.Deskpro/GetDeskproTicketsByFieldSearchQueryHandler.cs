@@ -1,13 +1,14 @@
 ﻿using AAK.Deskpro;
 using AAK.Deskpro.Models;
 using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Contracts.DTOs;
 using Ardalis.Result;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Deskpro;
-internal class GetDeskproTicketsByFieldSearchQueryHandler : IRequestHandler<GetDeskproTicketsByFieldSearchQuery, Result<IEnumerable<Ticket>>>
+internal class GetDeskproTicketsByFieldSearchQueryHandler : IRequestHandler<GetDeskproTicketsByFieldSearchQuery, Result<IEnumerable<TicketDto>>>
 {
     private readonly ILogger<GetDeskproTicketsByFieldSearchQueryHandler> _logger;
     private readonly IConfiguration _configuration;
@@ -20,7 +21,7 @@ internal class GetDeskproTicketsByFieldSearchQueryHandler : IRequestHandler<GetD
         _deskpro = deskpro;
     }
 
-    public async Task<Result<IEnumerable<Ticket>>> Handle(GetDeskproTicketsByFieldSearchQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<TicketDto>>> Handle(GetDeskproTicketsByFieldSearchQuery request, CancellationToken cancellationToken)
     {
         var ticketsList = new List<Ticket>();
 
@@ -36,7 +37,24 @@ internal class GetDeskproTicketsByFieldSearchQueryHandler : IRequestHandler<GetD
 
         if (ticketsList.Count > 0)
         {
-            return Result.Success(ticketsList.AsEnumerable());
+            var dto = ticketsList.Select(t => new TicketDto
+            {
+                Id = t.Id,
+                Agent = Mappers.MapPerson(t.Agent),
+                Person = Mappers.MapPerson(t.Person),
+                AgentTeamId = t.AgentTeamId,
+                Auth = t.Auth,
+                Department = t.Department,
+                Ref = t.Ref,
+                Subject = t.Subject,
+                Fields = t.Fields.Select(f => new FieldDto
+                {
+                    Id = f.Id,
+                    Values = f.Values
+                })
+            });
+
+            return Result.Success(dto);
         }
 
         return Result.NotFound();

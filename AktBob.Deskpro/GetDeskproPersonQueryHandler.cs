@@ -1,13 +1,13 @@
 ﻿using AAK.Deskpro;
-using AAK.Deskpro.Models;
 using Ardalis.Result;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Deskpro;
-internal class GetDeskproPersonQueryHandler : IRequestHandler<GetDeskproPersonQuery, Result<Person>>
+internal class GetDeskproPersonQueryHandler : IRequestHandler<GetDeskproPersonQuery, Result<PersonDto>>
 {
     private readonly IDeskproClient _deskpro;
     private readonly IConfiguration _configuration;
@@ -22,17 +22,27 @@ internal class GetDeskproPersonQueryHandler : IRequestHandler<GetDeskproPersonQu
         _mediator = mediator;
     }
 
-    public async Task<Result<Person>> Handle(GetDeskproPersonQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PersonDto>> Handle(GetDeskproPersonQuery request, CancellationToken cancellationToken)
     {
         var person = await _deskpro.GetPersonById(request.PersonId);
 
-        if (person is null || string.IsNullOrEmpty(person.Email))
+        if (person is null)
         {
-            _logger.LogError("Deskpro did not return any email address for person {personId}", request.PersonId);
-            return Result.Error();
+            return Result.NotFound();
         }
 
-        _logger.LogInformation("Deskpro personId {personId} found", request.PersonId);
-        return Result.Success(person);
+        var dto = new PersonDto
+        {
+            Id = person.Id,
+            IsAgent = person.IsAgent,
+            DisplayName = person.DisplayName,
+            Email = person.Email,
+            FirstName = person.FirstName,
+            LastName = person.LastName,
+            FullName = person.FullName,
+            PhoneNumbers = person.PhoneNumbers
+        };
+
+        return Result.Success(dto);
     }
 }

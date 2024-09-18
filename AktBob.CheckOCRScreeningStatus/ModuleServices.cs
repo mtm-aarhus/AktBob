@@ -3,9 +3,9 @@ using System.Reflection;
 using FilArkivCore.Web.Client;
 using Microsoft.Extensions.Configuration;
 using Ardalis.GuardClauses;
-using AAK.Deskpro;
 
 namespace AktBob.CheckOCRScreeningStatus;
+
 public static class ModuleServices
 {
     public static IServiceCollection AddCheckOCRScreeningStatusModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatRAssemblies)
@@ -30,14 +30,6 @@ public static class ModuleServices
         services.AddFilArkivApiClient(filArkivUrl, filArkivClientId, filArkivClientSecret);
 
         services.AddScoped<IFilArkiv, FilArkiv>();
-
-        var deskproOptions = new DeskproOptions
-        {
-            BaseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Deskpro:BaseAddress")),
-            AuthorizationKey = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Deskpro:AuthorizationKey"))
-        };
-
-        services.AddDeskpro(deskproOptions);
 
         mediatRAssemblies.Add(typeof(ModuleServices).Assembly);
         return services;
