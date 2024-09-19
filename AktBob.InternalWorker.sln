@@ -57,7 +57,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.DocumentGenerator.Co
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Journalize Documents Module", "Journalize Documents Module", "{C9851F2E-765C-4E7E-8CE7-3E5467F2712B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.JournalizeDocuments", "AktBob.JournalizeDocuments\AktBob.JournalizeDocuments.csproj", "{7AD4DBB7-4801-440B-89F1-021C780F831F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.JournalizeDocuments", "AktBob.JournalizeDocuments\AktBob.JournalizeDocuments.csproj", "{7AD4DBB7-4801-440B-89F1-021C780F831F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{68E05508-A190-4AA6-A41E-E0F77C3FF68A}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
