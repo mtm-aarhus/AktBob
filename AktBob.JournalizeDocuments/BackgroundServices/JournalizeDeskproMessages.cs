@@ -32,96 +32,100 @@ internal class JournalizeDeskproMessages : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
 
-            var getMessagesQuery = new GetMessagesNotJournalizedQuery();
-            var getMessagesQueryResult = await _mediator.Send(getMessagesQuery);
-
-            if (getMessagesQueryResult.Status == Ardalis.Result.ResultStatus.NotFound)
+            try
             {
-                continue;
-            }
 
-            if (!getMessagesQueryResult.IsSuccess)
-            {
-                continue;
-            }
+                var getMessagesQuery = new GetMessagesNotJournalizedQuery();
+                var getMessagesQueryResult = await _mediator.Send(getMessagesQuery);
 
-            foreach (var message in getMessagesQueryResult.Value.OrderBy(m => m.DeskproMessageId))
-            {
-                if (string.IsNullOrEmpty(message.GOCaseNumber))
+                if (getMessagesQueryResult.Status == Ardalis.Result.ResultStatus.NotFound)
                 {
                     continue;
                 }
 
-                if (message.GODocumentId is not null)
+                if (!getMessagesQueryResult.IsSuccess)
                 {
                     continue;
                 }
 
-                _logger.LogInformation("Deskpro message ready for upload to GetOrganized. DeskproTicketId {deskproTicketId}, DeskproMessageId {deskproMessageId}", message.DeskproTicketId, message.DeskproMessageId);
-
-                var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(message.DeskproTicketId);
-                var getDeskproTicketQueryResult = await _mediator.Send(getDeskproTicketQuery);
-
-                if (!getDeskproTicketQueryResult.IsSuccess)
+                foreach (var message in getMessagesQueryResult.Value.OrderBy(m => m.DeskproMessageId))
                 {
-                    _logger.LogError("Error requesting Deskpro ticket ID {id}", message.DeskproTicketId);
-                    continue;
-                }
+                    if (string.IsNullOrEmpty(message.GOCaseNumber))
+                    {
+                        continue;
+                    }
 
-                var deskproTicket = getDeskproTicketQueryResult.Value;
+                    if (message.GODocumentId is not null)
+                    {
+                        continue;
+                    }
 
-                _logger.LogInformation("Getting message {id} from Deskpro ...", message.DeskproMessageId);
+                    _logger.LogInformation("Deskpro message ready for upload to GetOrganized. DeskproTicketId {deskproTicketId}, DeskproMessageId {deskproMessageId}", message.DeskproTicketId, message.DeskproMessageId);
 
-                var getDeskproMessageQuery = new GetDeskproMessageByIdQuery(message.DeskproTicketId, message.DeskproMessageId);
-                var getDeskproMessageQueryResult = await _mediator.Send(getDeskproMessageQuery);
+                    var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(message.DeskproTicketId);
+                    var getDeskproTicketQueryResult = await _mediator.Send(getDeskproTicketQuery);
 
-                if (!getDeskproMessageQueryResult.IsSuccess)
-                {
-                    _logger.LogError("Error requesting Deskpro message ID {id}", message.DeskproMessageId);
-                    continue;
-                }
+                    if (!getDeskproTicketQueryResult.IsSuccess)
+                    {
+                        _logger.LogError("Error requesting Deskpro ticket ID {id}", message.DeskproTicketId);
+                        continue;
+                    }
 
-                var deskproMessage = getDeskproMessageQueryResult.Value;
+                    var deskproTicket = getDeskproTicketQueryResult.Value;
 
-                _logger.LogInformation("Getting person {id} from Deskpro ...", deskproMessage.Person.Id);
+                    _logger.LogInformation("Getting message {id} from Deskpro ...", message.DeskproMessageId);
 
-                var getDeskproPersonQuery = new GetDeskproPersonQuery(deskproMessage.Person.Id);
-                var getDeskproPersonQueryResult = await _mediator.Send(getDeskproPersonQuery);
+                    var getDeskproMessageQuery = new GetDeskproMessageByIdQuery(message.DeskproTicketId, message.DeskproMessageId);
+                    var getDeskproMessageQueryResult = await _mediator.Send(getDeskproMessageQuery);
 
-                if (!getDeskproPersonQueryResult.IsSuccess)
-                {
-                    _logger.LogWarning("Error getting person {id} from Deskpro", deskproMessage.Person.Id);
-                }
+                    if (!getDeskproMessageQueryResult.IsSuccess)
+                    {
+                        _logger.LogError("Error requesting Deskpro message ID {id}. Marking as deleted in database.", message.DeskproMessageId);
+                        var deleteMessageCommand = new DeleteMessageCommand(message.Id);
+                        await _mediator.Send(deleteMessageCommand);
 
-                if (string.IsNullOrEmpty(getDeskproPersonQueryResult.Value.Email))
-                {
-                    _logger.LogWarning("No email for person {id} in the response from Deskpro", deskproMessage.Person.Id);
-                }
+                        continue;
+                    }
 
-                var person = getDeskproPersonQueryResult.Value;
+                    var deskproMessage = getDeskproMessageQueryResult.Value;
 
-                _logger.LogInformation("Generating PDF document from message data ...");
+                    _logger.LogInformation("Getting person {id} from Deskpro ...", deskproMessage.Person.Id);
 
-                var generateDocumentCommand = new GenerateDeskproMessageDocumentCommand(
-                    TicketSubject: deskproTicket?.Subject ?? string.Empty,
-                    MessageId: deskproMessage.Id,
-                    MessageContent: deskproMessage.Content,
-                    CreatedAt: deskproMessage.CreatedAt,
-                    PersonName: person?.FullName ?? string.Empty,
-                    PersonEmail: person?.Email ?? string.Empty);
+                    var getDeskproPersonQuery = new GetDeskproPersonQuery(deskproMessage.Person.Id);
+                    var getDeskproPersonQueryResult = await _mediator.Send(getDeskproPersonQuery);
 
-                var generatorDocumentCommandResult = await _mediator.Send(generateDocumentCommand);
+                    if (!getDeskproPersonQueryResult.IsSuccess)
+                    {
+                        _logger.LogWarning("Error getting person {id} from Deskpro", deskproMessage.Person.Id);
+                    }
 
-                if (!generatorDocumentCommandResult.IsSuccess)
-                {
-                    _logger.LogError("Error generating PDF document for Deskpro message {messageId}", message.DeskproMessageId);
-                    continue;
-                }
+                    if (string.IsNullOrEmpty(getDeskproPersonQueryResult.Value.Email))
+                    {
+                        _logger.LogWarning("No email for person {id} in the response from Deskpro", deskproMessage.Person.Id);
+                    }
 
-                try
-                {
+                    var person = getDeskproPersonQueryResult.Value;
+
+                    _logger.LogInformation("Generating PDF document from message data ...");
+
+                    var generateDocumentCommand = new GenerateDeskproMessageDocumentCommand(
+                        TicketSubject: deskproTicket?.Subject ?? string.Empty,
+                        MessageId: deskproMessage.Id,
+                        MessageContent: deskproMessage.Content,
+                        CreatedAt: deskproMessage.CreatedAt,
+                        PersonName: person?.FullName ?? string.Empty,
+                        PersonEmail: person?.Email ?? string.Empty);
+
+                    var generatorDocumentCommandResult = await _mediator.Send(generateDocumentCommand);
+
+                    if (!generatorDocumentCommandResult.IsSuccess)
+                    {
+                        _logger.LogError("Error generating PDF document for Deskpro message {messageId}", message.DeskproMessageId);
+                        continue;
+                    }
+
+
                     // Get message creation time and convert to Danish time zone
                     DateTime createdAtUtc = DateTime.SpecifyKind(deskproMessage.CreatedAt, DateTimeKind.Utc);
                     TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time");
@@ -166,11 +170,14 @@ internal class JournalizeDeskproMessages : BackgroundService
                         _logger.LogError("Error uploading document to GetOrganized (CaseNumber: {caseNumber}, Document title: '{title}', Document date: '{date}', file size (bytes): {filesize})", message.GOCaseNumber, title, createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss"), generatorDocumentCommandResult.Value.Length);
                     }
                 }
-                catch (Exception)
-                {
-                    throw;
-                }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
+
         }
     }
 }

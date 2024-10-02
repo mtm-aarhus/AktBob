@@ -104,6 +104,25 @@ internal class DatabaseApi : IDatabaseApi
         }
     }
 
+    public async Task DeleteMessage(int id, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Delete,
+                RequestUri = new Uri($"Database/Messages/{id}", UriKind.Relative)
+            };
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError("Error requesting API for deleting message #{id}. Error: {message}", id, e.Message);
+        }
+    }
+
+
     public async Task<Result<MessageDto>> UpdateMessage(int id, int? goDocumentId, CancellationToken cancellationToken = default)
     {
         try

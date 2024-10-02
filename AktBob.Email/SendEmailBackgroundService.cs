@@ -64,7 +64,7 @@ internal class SendEmailBackgroundService : BackgroundService
                     await _queueService.Queue.DeleteMessage(message.Id, message.PopReceipt, stoppingToken);
                 }
 
-                await Task.Delay(interval);
+                await Task.Delay(interval, stoppingToken);
             }
         }
     }

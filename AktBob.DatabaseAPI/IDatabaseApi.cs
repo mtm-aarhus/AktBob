@@ -5,6 +5,7 @@ namespace AktBob.DatabaseAPI;
 
 internal interface IDatabaseApi
 {
+    Task DeleteMessage(int id, CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<MessageDto>>> GetMessagesNotJournalized(CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<TicketDto>>> GetTicketsByDeskproId(int deskproId, CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<TicketDto>>> GetTicketsByPodioItemId(long podioItemId, CancellationToken cancellationToken = default);
