@@ -14,6 +14,7 @@ public static class ModuleServices
         services.AddHostedService<UseCases.GoToFilArkivTrigger.BackgroundWorker>();
         services.AddHostedService<UseCases.ToSharepointTrigger.BackgroundWorker>();
         services.AddHostedService<UseCases.RegisterCase.BackgroundWorker>();
+        services.AddHostedService<UseCases.JournalizeEverythingTrigger.BackgroundWorker>();
 
         return services;
     }
