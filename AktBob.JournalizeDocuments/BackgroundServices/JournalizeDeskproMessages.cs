@@ -112,6 +112,7 @@ internal class JournalizeDeskproMessages : BackgroundService
                     var generateDocumentCommand = new GenerateDeskproMessageDocumentCommand(
                         TicketSubject: deskproTicket?.Subject ?? string.Empty,
                         MessageId: deskproMessage.Id,
+                        MessageNumber: message.MessageNumber ?? 0,
                         MessageContent: deskproMessage.Content,
                         CreatedAt: deskproMessage.CreatedAt,
                         PersonName: person?.FullName ?? string.Empty,
@@ -137,7 +138,7 @@ internal class JournalizeDeskproMessages : BackgroundService
                         DocumentDate = createdAtDanishTime
                     };
 
-                    var title = $"Korrespondance ({deskproMessage.Id}) {(person is not null ? $"fra {person.FullName}" : string.Empty)} ({createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss")}).pdf";
+                    var title = $"Besked ({message.MessageNumber.ToString()}) {(person is not null ? $"fra {person.FullName}" : string.Empty)} ({createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss")}).pdf";
 
                     _logger.LogInformation("Uploading document to GetOrganized (CaseNumber: {caseNumber}, Document title: '{title}', Document date: '{date}', file size (bytes): {filesize}) ...", message.GOCaseNumber, title, createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss"), generatorDocumentCommandResult.Value.Length);
 

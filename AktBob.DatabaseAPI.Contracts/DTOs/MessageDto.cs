@@ -9,4 +9,5 @@ public class MessageDto
     public string? GOCaseNumber { get; set; }
     public string? Hash { get; set; }
     public DateTime? QueuedForJournalizationAt { get; set; }
+    public int? MessageNumber { get; set; }
 }

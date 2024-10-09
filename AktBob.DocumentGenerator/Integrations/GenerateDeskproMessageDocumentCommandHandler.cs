@@ -37,7 +37,8 @@ internal class GenerateDeskproMessageDocumentCommandHandler : IRequestHandler<Ge
         // Add message number
         AddMessageNumber(
             section: section,
-            text: request.MessageId.ToString(),
+            messageNumber: request.MessageNumber.ToString(),
+            messageId: request.MessageId.ToString(),
             fontName: Constants.FONT_NAME_OPEN_SANS_SEMIBOLD,
             fontSize: Unit.FromPoint(12),
             fontColor: Color.Parse("0xFF000000"),
@@ -90,13 +91,13 @@ internal class GenerateDeskproMessageDocumentCommandHandler : IRequestHandler<Ge
     }
 
 
-    private void AddMessageNumber(Section section, string text, string fontName, Unit fontSize, Color fontColor, Unit spaceAfter)
+    private void AddMessageNumber(Section section, string messageNumber, string messageId, string fontName, Unit fontSize, Color fontColor, Unit spaceAfter)
     {
         var paragraph = section.AddParagraph();
         paragraph.Format.Font.Name = fontName;
         paragraph.Format.Font.Size = fontSize;
         paragraph.Format.Font.Color = fontColor;
-        paragraph.AddText($"Besked ID: {text}");
+        paragraph.AddText($"Besked nr: {messageNumber} (ID {messageId})");
         paragraph.Format.SpaceAfter = spaceAfter;
     }
 
