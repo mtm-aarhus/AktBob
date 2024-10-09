@@ -7,4 +7,6 @@ public class MessageDto
     public int DeskproMessageId { get; set; }
     public int? GODocumentId { get; set; }
     public string? GOCaseNumber { get; set; }
+    public string? Hash { get; set; }
+    public DateTime? QueuedForJournalizationAt { get; set; }
 }
