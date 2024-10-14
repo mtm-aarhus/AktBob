@@ -10,7 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 
 namespace AktBob.PodioHookProcessor.UseCases.ToSharepointTrigger;
 internal class BackgroundWorker : BackgroundService
@@ -119,6 +118,12 @@ internal class BackgroundWorker : BackgroundService
                                 continue;
                             }
 
+                            var caseSharepointFolderName = ticket.Cases?.FirstOrDefault(x => x.PodioItemId == podioItemId)?.SharepointFolderName;
+                            if (caseSharepointFolderName == null)
+                            {
+                                _logger.LogError("Case related to PodioItemId {id}: SharepointFolderName is null or empty", podioItemId);
+                            }
+
                             var filArkivCaseId = ticket.Cases?.FirstOrDefault(c => c.PodioItemId == podioItemId)?.FilArkivCaseId;
                             if (filArkivCaseId == null)
                             {
@@ -131,37 +136,22 @@ internal class BackgroundWorker : BackgroundService
 
                             if (getDeskproTicketQueryResult.IsSuccess)
                             {
-                                var agentName = string.Empty;
-                                var agentEmail = string.Empty;
+                                (string Name, string Email) agent = new(string.Empty, string.Empty);
 
-                                // Skip if the Deskpro ticket has no assigned agent
+                                // Get Deskpro agent
                                 if (getDeskproTicketQueryResult.Value.Agent is not null && getDeskproTicketQueryResult.Value.Agent.Id > 0)
                                 {
-                                    // Get agent email address from Deskpro
-                                    var getAgentQuery = new GetDeskproPersonQuery(getDeskproTicketQueryResult.Value.Agent.Id!);
-                                    var getAgentResult = await mediator.Send(getAgentQuery);
-
-                                    if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
-                                    {
-                                        agentName = getAgentResult.Value.FullName;
-                                        agentEmail = getAgentResult.Value.Email;
-                                    }
+                                    agent = await GetDeskproAgent(mediator, getDeskproTicketQueryResult.Value.Agent.Id);
+                                }
+                                else
+                                {
+                                    _logger.LogWarning($"Deskpro ticket {ticket.DeskproId} has no agents assigned");
                                 }
 
-                                var uiPathQueueItemContent = new
-                                {
-                                    SagsNummer = caseNumber,
-                                    Email = agentEmail,
-                                    Navn = agentName,
-                                    PodioID = podioItemId,
-                                    DeskproID = getDeskproTicketQueryResult.Value.Id,
-                                    Titel = getDeskproTicketQueryResult.Value.Subject,
-                                    FilarkivCaseID = filArkivCaseId?.ToString() ?? string.Empty
-                                };
-
+                                var queueItem = new UiPathQueueItem(getDeskproTicketQueryResult.Value.Id, podioItemId, caseNumber, ticket.SharepointFolderName, caseSharepointFolderName, getDeskproTicketQueryResult.Value.Subject, agent.Name, agent.Email, filArkivCaseId);
 
                                 // Post UiPath queue item
-                                var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, podioItemId.ToString(), uiPathQueueItemContent);
+                                var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, podioItemId.ToString(), queueItem.Get());
                                 await mediator.Send(addUiPathQueueItemCommand);
                             }
                         }
@@ -171,5 +161,39 @@ internal class BackgroundWorker : BackgroundService
 
             await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);
         }
+    }
+
+    private async Task<(string Name, string Email)> GetDeskproAgent(IMediator mediator, int agentId)
+    {
+        var getAgentQuery = new GetDeskproPersonQuery(agentId);
+        var getAgentResult = await mediator.Send(getAgentQuery);
+
+        if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
+        {
+            return (getAgentResult.Value.FullName, getAgentResult.Value.Email);
+        }
+        else
+        {
+            _logger.LogWarning($"Unable to get agent from Deskpro, agent id {agentId}");
+        }
+
+        return (string.Empty, string.Empty);
+    }
+
+    private record UiPathQueueItem(int deskproId, long podioItemId, string? caseNumber, string? ticketSharepointFolderName, string? caseSharepointFolderName, string title, string agentName, string agentEmail, Guid? filArkivCaseId)
+    {
+        public object Get() =>
+            new
+            {
+                SagsNummer = caseNumber,
+                Email = agentEmail,
+                Navn = agentName,
+                PodioID = podioItemId,
+                DeskproID = deskproId,
+                Titel = title,
+                FilarkivCaseID = filArkivCaseId?.ToString() ?? string.Empty,
+                Overmappenavn = ticketSharepointFolderName,
+                Undermappenavn = caseSharepointFolderName
+            };
     }
 }

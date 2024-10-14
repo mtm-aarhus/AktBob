@@ -128,8 +128,7 @@ internal class BackgroundWorker : BackgroundService
                                     Email = agentEmail,
                                     Navn = agentName,
                                     DeskproID = deskproId,
-                                    OvermappeNavnAktindsigter = ticket.FolderNameAktindsigter,
-                                    OvermappenavnDokumentlister = ticket.FolderNameDocumentLists
+                                    Overmappenavn = ticket.SharepointFolderName
                                 };
 
 
