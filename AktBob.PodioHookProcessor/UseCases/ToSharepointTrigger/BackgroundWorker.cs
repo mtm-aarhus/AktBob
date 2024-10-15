@@ -148,7 +148,16 @@ internal class BackgroundWorker : BackgroundService
                                     _logger.LogWarning($"Deskpro ticket {ticket.DeskproId} has no agents assigned");
                                 }
 
-                                var queueItem = new UiPathQueueItem(getDeskproTicketQueryResult.Value.Id, podioItemId, caseNumber, ticket.SharepointFolderName, caseSharepointFolderName, getDeskproTicketQueryResult.Value.Subject, agent.Name, agent.Email, filArkivCaseId);
+                                var queueItem = new UiPathQueueItem(
+                                    deskproId: getDeskproTicketQueryResult.Value.Id,
+                                    podioItemId: podioItemId,
+                                    caseNumber: caseNumber,
+                                    ticketSharepointFolderName: ticket.SharepointFolderName,
+                                    caseSharepointFolderName: caseSharepointFolderName,
+                                    title: getDeskproTicketQueryResult.Value.Subject,
+                                    agentName: agent.Name,
+                                    agentEmail: agent.Email,
+                                    filArkivCaseId: filArkivCaseId);
 
                                 // Post UiPath queue item
                                 var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, podioItemId.ToString(), queueItem.Get());

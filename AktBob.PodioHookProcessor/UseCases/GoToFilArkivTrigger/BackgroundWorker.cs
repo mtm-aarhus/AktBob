@@ -145,7 +145,16 @@ internal class BackgroundWorker : BackgroundService
                                 }
 
                                 // Post UiPath queue item
-                                var queueItem = new UiPathQueueItem(ticket.DeskproId, podioItemId, caseNumber, ticket.SharepointFolderName, caseSharepointFolderName, agent.Name, getDeskproTicketQueryResult.Value.Subject, agent.Email);
+                                var queueItem = new UiPathQueueItem(
+                                    deskproId: ticket.DeskproId,
+                                    podioItemId: podioItemId,
+                                    caseNumber: caseNumber,
+                                    ticketSharepointFolderName: ticket.SharepointFolderName,
+                                    caseSharepointFolderName: caseSharepointFolderName,
+                                    agentName: agent.Name,
+                                    title: getDeskproTicketQueryResult.Value.Subject,
+                                    agentEmail: agent.Email);
+
                                 var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, podioItemId.ToString(), queueItem.Get());
                                 await mediator.Send(addUiPathQueueItemCommand);
                             }
