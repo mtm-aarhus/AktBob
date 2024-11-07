@@ -89,7 +89,25 @@ internal class JournalizeDeskproMessages : BackgroundService
                             DocumentCategory = deskproMessage.IsAgentNote ? DocumentCategory.Intern : MapDocumentCategoryFromPerson(person)
                         };
 
-                        var title = $"Besked ({message.MessageNumber.ToString()}) {(person is not null ? $"fra {person.FullName}" : string.Empty)} ({createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss")}).pdf";
+                        // Using a list of strings to construct the title so we later can join them with a space separator.
+                        // Just a lazy way for not worry about space seperators manually... 
+                        var titleElements = new List<string> 
+                        {
+                            "Besked"
+                        }; 
+
+                        if (message.MessageNumber.HasValue)
+                        {
+                            titleElements.Add($"({message.MessageNumber?.ToString("D3")})");
+                        }
+
+                        if (person is not null)
+                        {
+                            titleElements.Add(person.FullName);
+                        }
+
+                        titleElements.Add($"({createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss")}).pdf");
+                        var title = string.Join(" ", titleElements);
 
                         _logger.LogInformation("Uploading document to GetOrganized (CaseNumber: {caseNumber}, Document title: '{title}', Document date: '{date}', file size (bytes): {filesize}) ...", message.GOCaseNumber, title, createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss"), documentBytes!.Length);
 
