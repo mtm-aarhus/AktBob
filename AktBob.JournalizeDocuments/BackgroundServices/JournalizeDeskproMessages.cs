@@ -34,122 +34,195 @@ internal class JournalizeDeskproMessages : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
+
             try
             {
-                if (GetMessagesNotJournalized(out var messages))
+                if (!GetMessagesNotJournalized(out var messages))
                 {
-                    foreach (var message in messages.OrderBy(m => m.DeskproMessageId))
+                    continue;
+                }
+                
+                foreach (var message in messages.OrderBy(m => m.DeskproMessageId))
+                {
+                    if (string.IsNullOrEmpty(message.GOCaseNumber))
                     {
-                        if (string.IsNullOrEmpty(message.GOCaseNumber))
-                        {
-                            continue;
-                        }
-
-                        if (message.GODocumentId is not null)
-                        {
-                            continue;
-                        }
-
-                        _logger.LogInformation("Deskpro message ready for upload to GetOrganized. DeskproTicketId {deskproTicketId}, DeskproMessageId {deskproMessageId}", message.DeskproTicketId, message.DeskproMessageId);
-
-
-                        // Get Deskpro ticket
-                        if (!GetDeskproTicket(message, out TicketDto? deskproTicket))
-                        {
-                            continue;
-                        }
-
-
-                        // Get Deskpro message
-                        if (!GetDeskproMessage(message, out MessageDto? deskproMessage))
-                        {
-                            continue;
-                        }
-
-
-                        // Get Deskpro person
-                        PersonDto? person = await GetDeskproPerson(deskproMessage!);
-
-
-                        // Generate PDF document
-                        if (!GenerateDocument(message, deskproTicket!, deskproMessage!, person, out byte[]? documentBytes))
-                        {
-                            continue;
-                        }
-
-                        // Get message creation time and convert to Danish time zone
-                        DateTime createdAtUtc = DateTime.SpecifyKind(deskproMessage!.CreatedAt, DateTimeKind.Utc);
-                        TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time");
-                        DateTime createdAtDanishTime = TimeZoneInfo.ConvertTimeFromUtc(createdAtUtc, tzi);
-
-                        // Specify GO document metadata
-                        var metadata = new UploadDocumentMetadata
-                        {
-                            DocumentDate = createdAtDanishTime,
-                            DocumentCategory = deskproMessage.IsAgentNote ? DocumentCategory.Intern : MapDocumentCategoryFromPerson(person)
-                        };
-
-                        // Using a list of strings to construct the title so we later can join them with a space separator.
-                        // Just a lazy way for not worry about space seperators manually... 
-                        var titleElements = new List<string> 
-                        {
-                            "Besked"
-                        }; 
-
-                        if (message.MessageNumber.HasValue)
-                        {
-                            titleElements.Add($"({message.MessageNumber?.ToString("D3")})");
-                        }
-
-                        if (person is not null)
-                        {
-                            titleElements.Add(person.FullName);
-                        }
-
-                        titleElements.Add($"({createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss")}).pdf");
-                        var title = string.Join(" ", titleElements);
-
-                        _logger.LogInformation("Uploading document to GetOrganized (CaseNumber: {caseNumber}, Document title: '{title}', Document date: '{date}', file size (bytes): {filesize}) ...", message.GOCaseNumber, title, createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss"), documentBytes!.Length);
-
-                        // Upload to GO
-                        var uploadResult = await _getOrganizedClient.UploadDocument(
-                            bytes: documentBytes,
-                            message.GOCaseNumber,
-                            "Dokumenter",
-                            null,
-                            title,
-                            metadata,
-                            stoppingToken);
-
-                        // Journalize the document
-                        if (uploadResult is not null)
-                        {
-                            // Update database
-                            _logger.LogInformation("Updating message in database ...");
-                            var updateMessageCommand = new UpdateMessageSetGoDocumentIdCommand(message.Id, uploadResult.DocumentId);
-                            await _mediator.Send(updateMessageCommand);
-
-                            if (journalizeAfterUpload)
-                            {
-                                _logger.LogInformation("Journalizing document {id} ...", uploadResult.DocumentId);
-                                await _getOrganizedClient.JournalizeDocument(uploadResult.DocumentId);
-                            }
-                        }
-                        else
-                        {
-                            _logger.LogError("Error uploading document to GetOrganized (CaseNumber: {caseNumber}, Document title: '{title}', Document date: '{date}', file size (bytes): {filesize})", message.GOCaseNumber, title, createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss"), documentBytes.Length);
-                        }
+                        continue;
                     }
+
+                    if (message.GODocumentId is not null)
+                    {
+                        continue;
+                    }
+
+                    _logger.LogInformation("Deskpro message ready for upload to GetOrganized. DeskproTicketId {deskproTicketId}, DeskproMessageId {deskproMessageId}", message.DeskproTicketId, message.DeskproMessageId);
+
+
+                    // Get Deskpro ticket
+                    if (!GetDeskproTicket(message, out TicketDto? deskproTicket))
+                    {
+                        continue;
+                    }
+
+
+                    // Get Deskpro message
+                    if (!GetDeskproMessage(message, out MessageDto? deskproMessage))
+                    {
+                        continue;
+                    }
+
+
+                    // Get Deskpro person
+                    PersonDto? person = await GetDeskproPerson(deskproMessage!);
+
+
+                    // Generate PDF document
+                    if (!GenerateDocument(message, deskproTicket!, deskproMessage!, person, out byte[]? documentBytes))
+                    {
+                        continue;
+                    }
+
+                    // Get message creation time and convert to Danish time zone
+                    DateTime createdAtUtc = DateTime.SpecifyKind(deskproMessage!.CreatedAt, DateTimeKind.Utc);
+                    TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time");
+                    DateTime createdAtDanishTime = TimeZoneInfo.ConvertTimeFromUtc(createdAtUtc, tzi);
+
+                    var metadata = new UploadDocumentMetadata
+                    {
+                        DocumentDate = createdAtDanishTime,
+                        DocumentCategory = deskproMessage.IsAgentNote ? DocumentCategory.Intern : MapDocumentCategoryFromPerson(person)
+                    };
+
+                    var fileName = GenerateFileName(message, person, createdAtDanishTime);
+
+
+                    // Upload parent document
+                    if (!UploadDocumentToGO(documentBytes!, message.GOCaseNumber, "Dokumenter", string.Empty, fileName, metadata, out int? parentDocumentId, stoppingToken))
+                    {
+                        continue;
+                    }
+
+
+                    // Update database
+                    var updateMessageCommand = new UpdateMessageSetGoDocumentIdCommand(message.Id, (int)parentDocumentId!);
+                    await _mediator.Send(updateMessageCommand);
+
+
+                    // Handle message attachments
+                    if (deskproMessage.AttachmentIds.Any())
+                    {
+                        await ProcessAttachments(message.DeskproTicketId, message.DeskproMessageId, message.GOCaseNumber, metadata, parentDocumentId, stoppingToken);
+                    }
+
+                    // Finalize the parent document
+                    // IMPORTANT: the parent document must not be finalized before the attachments has been set as children
+                    await _getOrganizedClient.FinalizeDocument((int)parentDocumentId, false, stoppingToken);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
             }
-
-            await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
-
         }
+    }
+
+
+    private async Task ProcessAttachments(int deskproTicketId, int deskproMessageId, string caseNumber, UploadDocumentMetadata metadata, int? parentDocumentId, CancellationToken stoppingToken)
+    {
+        var childrenDocumentIds = new List<int>();
+
+        // Get attachments properties
+        if (!GetDeskproMessageAttachments(deskproTicketId, deskproMessageId, out IEnumerable<AttachmentDto> attachments))
+        {
+            return;
+        }
+
+        foreach (var attachment in attachments)
+        {
+            // Get the individual attachments as a stream
+            using (var stream = new MemoryStream())
+            {
+                var getAttachmentStreamQuery = new GetDeskproMessageAttachmentQuery(attachment.DownloadUrl);
+                var getAttachmentStreamResult = await _mediator.Send(getAttachmentStreamQuery, stoppingToken);
+
+                if (!getAttachmentStreamResult.IsSuccess)
+                {
+                    _logger.LogError("Error downloading attachment '{filename}' from Deskpro message #{messageId}, ticketId {ticketId}", attachment.FileName, deskproMessageId, deskproTicketId);
+                    continue;
+                }
+
+                getAttachmentStreamResult.Value.CopyTo(stream);
+                var attachmentBytes = stream.ToArray();
+
+                // Upload the attachment to GO
+                if (!UploadDocumentToGO(attachmentBytes, caseNumber, "Dokumenter", string.Empty, attachment.FileName, metadata, out int? attachmentDocumentId, stoppingToken))
+                {
+                    continue;
+                }
+
+                // Finalize the attachment
+                await _getOrganizedClient.FinalizeDocument((int)attachmentDocumentId!, false, stoppingToken);
+                childrenDocumentIds.Add((int)attachmentDocumentId!);
+            }
+        }
+
+        // Set attachments as children
+        if (childrenDocumentIds.Count > 0)
+        {
+            await _getOrganizedClient.RelateDocuments((int)parentDocumentId!, childrenDocumentIds.ToArray());
+        }
+    }
+
+
+    private static string GenerateFileName(DatabaseAPI.Contracts.DTOs.MessageDto message, PersonDto? person, DateTime createdAtDanishTime)
+    {
+        // Using a list of strings to construct the title so we later can join them with a space separator.
+        // Just a lazy way for not worry about space seperators manually...
+        var titleElements = new List<string>
+        {
+            "Besked"
+        };
+
+        if (message.MessageNumber.HasValue)
+        {
+            titleElements.Add($"({message.MessageNumber?.ToString("D3")})");
+        }
+
+        if (person is not null)
+        {
+            titleElements.Add(person.FullName);
+        }
+
+        titleElements.Add($"({createdAtDanishTime.ToString("dd-MM-yyyy HH.mm.ss")}).pdf");
+        var title = string.Join(" ", titleElements);
+
+        return title;
+    }
+
+
+    private bool UploadDocumentToGO(byte[] bytes, string caseNumber, string listName, string folderPath, string fileName, UploadDocumentMetadata metadata, out int? documentId, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}', file size (bytes): {filesize}) ...", caseNumber, fileName, bytes.Length);
+
+        documentId = null;
+
+        var uploadResult = _getOrganizedClient.UploadDocument(
+                            bytes,
+                            caseNumber,
+                            listName,
+                            folderPath,
+                            fileName,
+                            metadata,
+                            cancellationToken).GetAwaiter().GetResult();
+
+        if (uploadResult is not null)
+        {
+            documentId = uploadResult.DocumentId;
+            return true;
+        }
+
+        _logger.LogError("Error uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}', file size (bytes): {filesize})", caseNumber, fileName, bytes.Length);
+        return false;
     }
 
 
@@ -262,6 +335,26 @@ internal class JournalizeDeskproMessages : BackgroundService
         }
 
         messageDto = getDeskproMessageQueryResult.Value;
+        return true;
+    }
+
+
+    private bool GetDeskproMessageAttachments(int deskproTicketId, int deskproMessageId, out IEnumerable<AttachmentDto> attachmentDtos)
+    {
+        attachmentDtos = Enumerable.Empty<AttachmentDto>();
+
+        _logger.LogInformation("Getting Deskpro message #{id} attachments", deskproMessageId);
+
+        var getDeskproMessageAttachmentsQuery = new GetDeskproMessageAttachmentsQuery(deskproTicketId, deskproMessageId);
+        var getDeskproMessageAttachmentsResult = _mediator.Send(getDeskproMessageAttachmentsQuery).GetAwaiter().GetResult();
+
+        if (!getDeskproMessageAttachmentsResult.IsSuccess)
+        {
+            _logger.LogError("Error getting attachments for Deskpro message #{id}.", deskproMessageId);
+            return false;
+        }
+
+        attachmentDtos = getDeskproMessageAttachmentsResult.Value;
         return true;
     }
 
