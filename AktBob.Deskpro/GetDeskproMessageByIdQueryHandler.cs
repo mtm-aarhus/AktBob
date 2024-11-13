@@ -32,6 +32,7 @@ internal class GetDeskproMessageByIdQueryHandler : IRequestHandler<GetDeskproMes
                 CreatedAt = message.CreatedAt,
                 IsAgentNote = message.IsAgentNote,
                 Content = message.Content,
+                AttachmentIds = message.AttachmentIds,
                 Person = new PersonDto
                 {
                     Id = message.Person.Id,
