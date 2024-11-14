@@ -22,7 +22,6 @@ internal class RegisterFilesCommandHandler : IRequestHandler<RegisterFilesComman
 
     public async Task<Result> Handle(RegisterFilesCommand request, CancellationToken cancellationToken)
     {
-        var delayBetweenChecks = TimeSpan.FromMilliseconds(_configuration.GetValue<int?>("CheckOCRScreening:DelayBetweenChecksSMilliSeconds") ?? 10000);
         var filesList = new List<File>();
 
         var @case = _data.GetCase(request.CaseId);
@@ -53,8 +52,8 @@ internal class RegisterFilesCommandHandler : IRequestHandler<RegisterFilesComman
 
             if (documentOverview == null)
             {
-                _logger.LogWarning("FilArkiv case {id} not found", request.CaseId);
-                return Result.NotFound();
+                _logger.LogWarning("FilArkiv: case {id} not found", request.CaseId);
+                return Result.Error();
             }
 
             if (!documentOverview.HasNextPage)
@@ -68,7 +67,7 @@ internal class RegisterFilesCommandHandler : IRequestHandler<RegisterFilesComman
             {
                 foreach (var documentFile in document.Files)
                 {
-                    var file = new File(documentFile.Id, delayBetweenChecks);
+                    var file = new File(documentFile.Id);
                     filesList.Add(file);
 
                     _logger.LogInformation($"Case {request.CaseId} File {documentFile.Id} registered. Size: {documentFile.FileSize}, FileName: '{documentFile.FileName}'");
@@ -85,6 +84,6 @@ internal class RegisterFilesCommandHandler : IRequestHandler<RegisterFilesComman
         }
 
         _logger.LogWarning("No files found for Case Id {caseId}", request.CaseId);
-        return Result.NotFound();
+        return Result.Success();
     }
 }

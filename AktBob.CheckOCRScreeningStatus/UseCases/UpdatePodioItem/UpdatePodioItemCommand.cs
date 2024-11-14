@@ -1,5 +1,4 @@
-﻿using Ardalis.Result;
-using MediatR;
+﻿using MediatR;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.UpdatePodioItem;
-internal record UpdatePodioItemCommand(Guid FilArkivCaseId) : IRequest<Result>;
+internal record UpdatePodioItemCommand(Guid FilArkivCaseId) : IRequest;

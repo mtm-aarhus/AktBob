@@ -1,11 +1,10 @@
 ﻿using AktBob.Podio.Contracts;
-using Ardalis.Result;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.UpdatePodioItem;
-internal class UpdatePodioItemCommandHandler : IRequestHandler<UpdatePodioItemCommand, Result>
+internal class UpdatePodioItemCommandHandler : IRequestHandler<UpdatePodioItemCommand>
 {
     private readonly IData _data;
     private readonly IConfiguration _configuration;
@@ -20,19 +19,23 @@ internal class UpdatePodioItemCommandHandler : IRequestHandler<UpdatePodioItemCo
         _logger = logger;
     }
 
-    public async Task<Result> Handle(UpdatePodioItemCommand request, CancellationToken cancellationToken)
+    public async Task Handle(UpdatePodioItemCommand command, CancellationToken cancellationToken)
     {
-        var @case = _data.GetCase(request.FilArkivCaseId);
+        var @case = _data.GetCase(command.FilArkivCaseId);
 
         if (@case == null)
         {
-            return Result.Error(new ErrorList([$"Case {request.FilArkivCaseId} not found"], string.Empty));
+            _logger.LogError("Case {id} not found", command.FilArkivCaseId);
+            return;
         }
 
         if (@case.PodioItemUpdated)
         {
-            return Result.SuccessWithMessage($"Case {request.FilArkivCaseId}: PodioItem already updated");
+            _logger.LogInformation("Case {id}: PodioItem already updated", command.FilArkivCaseId);
+            return;
         }
+
+        _logger.LogInformation("OCRScreeningCompleted: updating Podio item {id}, setting FilArkivCaseId {filarkivCaseId}", @case.PodioItemId, command.FilArkivCaseId);
 
         var podioAppId = Convert.ToInt32(_configuration.GetValue<int?>("Podio:AppId"));
         var podioFields = _configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioField>());
@@ -44,17 +47,12 @@ internal class UpdatePodioItemCommandHandler : IRequestHandler<UpdatePodioItemCo
 
         if (!updateFilArkivCaseIdFieldCommandResult.IsSuccess)
         {
-            return Result.Error();
+            return;
         }
 
         var updateFilArkivLinkFieldCommand = new UpdateItemFieldCommand(podioAppId, @case.PodioItemId, podioFieldFilArkivLink.Key, $"https://aarhus.filarkiv.dk/archives/case/{@case.CaseId.ToString()}");
         var updateFilArkivLinkFieldCommandResult = await _mediator.Send(updateFilArkivLinkFieldCommand, cancellationToken);
 
-        if (!updateFilArkivLinkFieldCommandResult.IsSuccess)
-        {
-            return Result.Error();
-        }
-
-        return Result.Success();
+        return;
     }
 }

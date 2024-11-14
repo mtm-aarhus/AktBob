@@ -2,12 +2,10 @@
 internal class File
 {
     public Guid FileId { get; }
-    public TimeSpan DelayBetweenChecks { get; }
     public bool HasBeenScreened { get; set; } = false;
 
-    public File(Guid fileId, TimeSpan delayBetweenChecks)
+    public File(Guid fileId)
     {
         FileId = fileId;
-        DelayBetweenChecks = delayBetweenChecks;
     }
 }

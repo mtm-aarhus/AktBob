@@ -1,12 +1,11 @@
-﻿using Ardalis.Result;
-using FilArkivCore.Web.Shared.FileProcess;
+﻿using FilArkivCore.Web.Shared.FileProcess;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.GetFileStatus;
-internal class GetFileStatusQueryHandler : IRequestHandler<GetFileStatusQuery, Result>
+internal class GetFileStatusQueryHandler : IRequestHandler<GetFileStatusQuery>
 {
     private readonly IData _data;
     private readonly IConfiguration _configuration;
@@ -22,19 +21,20 @@ internal class GetFileStatusQueryHandler : IRequestHandler<GetFileStatusQuery, R
     }
 
 
-    public async Task<Result> Handle(GetFileStatusQuery request, CancellationToken cancellationToken)
+    public async Task Handle(GetFileStatusQuery query, CancellationToken cancellationToken)
     {
         var random = new Random();
+        var delayTimeOffset = TimeSpan.FromMilliseconds(_configuration.GetValue<int?>("CheckOCRScreening:DelayBetweenChecksSMilliSeconds") ?? 10000);
 
-        var file = _data.GetFile(request.FileId);
+        var file = _data.GetFile(query.FileId);
 
         if (file == null)
         {
-            return Result.Error(new ErrorList([$"File {request.FileId} not found in cache"], string.Empty));
+            _logger.LogError("File {id} not found in cache", query.FileId);
+            return;
         }
 
         var counter = 0;
-
         var stopWatch = new Stopwatch();
         stopWatch.Start();
 
@@ -42,9 +42,9 @@ internal class GetFileStatusQueryHandler : IRequestHandler<GetFileStatusQuery, R
         {
             // Wait before each check to reduce throttling
             var randomDelayTime = TimeSpan.FromMilliseconds(random.Next(0, _configuration.GetValue<int?>("CheckOCRScreening:MaxRandomDelayTimeMilliseconds") ?? 3000));
-            var delay = file.DelayBetweenChecks + randomDelayTime;
+            var delay = delayTimeOffset + randomDelayTime;
             
-            _logger.LogInformation($"File {request.FileId} Waiting {delay.TotalMilliseconds} ms before next check");
+            _logger.LogInformation($"File {query.FileId} Waiting {delay.TotalMilliseconds} ms before next check");
 
             await Task.Delay(delay, cancellationToken);
 
@@ -53,22 +53,22 @@ internal class GetFileStatusQueryHandler : IRequestHandler<GetFileStatusQuery, R
             // Get file status from FilArkiv
             var parameters = new FileProcessStatusFileParameters
             {
-                FileId = request.FileId
+                FileId = query.FileId
             };
 
-            var fileProcessStatus = await _filArkiv.FilArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
+            var response = await _filArkiv.FilArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
 
-            _logger.LogInformation($"File {request.FileId} IsBeingProcessed: {fileProcessStatus.IsBeingProcessed} ('{fileProcessStatus.FileName}')");
+            _logger.LogInformation($"File {query.FileId} IsBeingProcessed: {response.IsBeingProcessed} ('{response.FileName}')");
 
-            if (!fileProcessStatus.IsBeingProcessed)
+            if (!response.IsBeingProcessed && !response.FileProcessStatusResponses.Any(x => x.FinishedAt == null))
             {
-                // File has been screeened
                 _data.FileHasBeenScreened(file);         
             }
         }
 
         stopWatch.Stop();
-        
-        return Result.SuccessWithMessage($"File {request.FileId} has been screened. Elapsed time: {stopWatch.ElapsedMilliseconds} milliseconds. Checked {counter} time{(counter > 1 ? "s" : string.Empty)}.");
+
+        _logger.LogInformation("File {fileId} has been screened. Elapsed time: {milliseconds} milliseconds. Checked {counter} time(s)", query.FileId, stopWatch.ElapsedMilliseconds, counter);
+        return;
     }
 }

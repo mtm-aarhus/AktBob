@@ -1,17 +1,19 @@
-﻿using Ardalis.Result;
-using MediatR;
+﻿using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
-internal class RemoveCaseFromCacheCommandHandler : IRequestHandler<RemoveCaseFromCacheCommand, Result>
+internal class RemoveCaseFromCacheCommandHandler : IRequestHandler<RemoveCaseFromCacheCommand>
 {
     private readonly IData _data;
+    private readonly ILogger<RemoveCaseFromCacheCommandHandler> _logger;
 
-    public RemoveCaseFromCacheCommandHandler(IData data)
+    public RemoveCaseFromCacheCommandHandler(IData data, ILogger<RemoveCaseFromCacheCommandHandler> logger)
     {
         _data = data;
+        _logger = logger;
     }
 
-    public Task<Result> Handle(RemoveCaseFromCacheCommand request, CancellationToken cancellationToken)
+    public Task Handle(RemoveCaseFromCacheCommand request, CancellationToken cancellationToken)
     {
         var @case = _data.GetCase(request.CaseId);
 
@@ -20,6 +22,7 @@ internal class RemoveCaseFromCacheCommandHandler : IRequestHandler<RemoveCaseFro
             _data.RemoveCase(@case);
         }
 
-        return Task.FromResult(Result.SuccessWithMessage($"Case {request.CaseId} has been removed from cache"));
+        _logger.LogInformation("Case {id} has been removed from cache", request.CaseId);
+        return Task.CompletedTask;
     }
 }

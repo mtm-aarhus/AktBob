@@ -42,18 +42,13 @@ internal class Worker : BackgroundService
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var getMessagesQuery = new GetQueueMessagesQuery(
-                    queueName!,
-                    maxMessages);
-
+                var getMessagesQuery = new GetQueueMessagesQuery(queueName!, maxMessages);
                 var messages = await mediator.Send(getMessagesQuery);
                 
                 if (messages.IsSuccess)
                 {
-
                     foreach (var message in messages.Value)
                     {
-
                         // Retrieve the Base64 encoded message from Azure Queue
                         string base64EncodedMessage = message.Body.ToString();
 

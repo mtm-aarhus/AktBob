@@ -1,6 +1,5 @@
-﻿using Ardalis.Result;
-using MediatR;
+﻿using MediatR;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
 
-internal record RemoveCaseFromCacheCommand(Guid CaseId) : IRequest<Result>;
+internal record RemoveCaseFromCacheCommand(Guid CaseId) : IRequest;
