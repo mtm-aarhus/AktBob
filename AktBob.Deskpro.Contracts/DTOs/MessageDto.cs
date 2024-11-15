@@ -4,7 +4,7 @@ public record MessageDto
 {
     public int Id { get; init; }
     public int TicketId { get; init; }
-    public PersonDto Person { get; init; } = new();
+    public PersonDto Person { get; set; } = new();
     public DateTime CreatedAt { get; init; }
     public bool IsAgentNote { get; init; }
     public string Content { get; init; } = string.Empty;
