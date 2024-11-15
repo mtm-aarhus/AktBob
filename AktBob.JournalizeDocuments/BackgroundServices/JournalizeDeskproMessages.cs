@@ -76,8 +76,12 @@ internal class JournalizeDeskproMessages : BackgroundService
                     PersonDto? person = await GetDeskproPerson(deskproMessage!);
 
 
+                    // Get attachments
+                    GetDeskproMessageAttachments(message.DeskproTicketId, message.DeskproMessageId, out IEnumerable<AttachmentDto> attachments);
+                    
+
                     // Generate PDF document
-                    if (!GenerateDocument(message, deskproTicket!, deskproMessage!, person, out byte[]? documentBytes))
+                    if (!GenerateDocument(message, deskproTicket!, deskproMessage!, person, attachments, out byte[]? documentBytes))
                     {
                         continue;
                     }
@@ -102,17 +106,14 @@ internal class JournalizeDeskproMessages : BackgroundService
                         continue;
                     }
 
-
                     // Update database
                     var updateMessageCommand = new UpdateMessageSetGoDocumentIdCommand(message.Id, (int)parentDocumentId!);
                     await _mediator.Send(updateMessageCommand);
 
 
                     // Handle message attachments
-                    if (deskproMessage.AttachmentIds.Any())
-                    {
-                        await ProcessAttachments(message.DeskproTicketId, message.DeskproMessageId, message.GOCaseNumber, metadata, parentDocumentId, stoppingToken);
-                    }
+                    await ProcessAttachments(attachments, message.GOCaseNumber, metadata, parentDocumentId, stoppingToken);
+                    
 
                     // Finalize the parent document
                     // IMPORTANT: the parent document must not be finalized before the attachments has been set as children
@@ -127,15 +128,14 @@ internal class JournalizeDeskproMessages : BackgroundService
     }
 
 
-    private async Task ProcessAttachments(int deskproTicketId, int deskproMessageId, string caseNumber, UploadDocumentMetadata metadata, int? parentDocumentId, CancellationToken stoppingToken)
+    private async Task ProcessAttachments(IEnumerable<AttachmentDto> attachments, string caseNumber, UploadDocumentMetadata metadata, int? parentDocumentId, CancellationToken stoppingToken)
     {
-        var childrenDocumentIds = new List<int>();
-
-        // Get attachments properties
-        if (!GetDeskproMessageAttachments(deskproTicketId, deskproMessageId, out IEnumerable<AttachmentDto> attachments))
+        if (!attachments.Any())
         {
             return;
         }
+
+        var childrenDocumentIds = new List<int>();
 
         foreach (var attachment in attachments)
         {
@@ -147,7 +147,7 @@ internal class JournalizeDeskproMessages : BackgroundService
 
                 if (!getAttachmentStreamResult.IsSuccess)
                 {
-                    _logger.LogError("Error downloading attachment '{filename}' from Deskpro message #{messageId}, ticketId {ticketId}", attachment.FileName, deskproMessageId, deskproTicketId);
+                    _logger.LogError("Error downloading attachment '{filename}' from Deskpro message #{messageId}, ticketId {ticketId}", attachment.FileName, attachment.MessageId, attachment.TicketId);
                     continue;
                 }
 
@@ -260,20 +260,28 @@ internal class JournalizeDeskproMessages : BackgroundService
     }
 
 
-    private bool GenerateDocument(DatabaseAPI.Contracts.DTOs.MessageDto databaseMessageDto, TicketDto deskproTicket, MessageDto deskproMessageDto, PersonDto? person, out byte[]? bytes)
+    private bool GenerateDocument(DatabaseAPI.Contracts.DTOs.MessageDto databaseMessageDto, TicketDto deskproTicket, MessageDto deskproMessageDto, PersonDto? person, IEnumerable<AttachmentDto> attachmentDtos, out byte[]? bytes)
     {
         bytes = null;
 
         _logger.LogInformation("Generating PDF document from Deskpro message #{id}", deskproMessageDto.Id);
 
-        var generateDocumentCommand = new GenerateDeskproMessageDocumentCommand(
-            TicketSubject: deskproTicket?.Subject ?? string.Empty,
+        var attachmentFileNames = attachmentDtos.Select(a => a.FileName) ?? Enumerable.Empty<string>();
+        var messageDetailsDtos = new List<MessageDetailsDto>
+        {
+            new MessageDetailsDto(
             MessageId: deskproMessageDto.Id,
             MessageNumber: databaseMessageDto.MessageNumber ?? 0,
             MessageContent: deskproMessageDto.Content,
             CreatedAt: deskproMessageDto.CreatedAt,
             PersonName: person?.FullName ?? string.Empty,
-            PersonEmail: person?.Email ?? string.Empty);
+            PersonEmail: person?.Email ?? string.Empty,
+            AttachmentFileNames: attachmentFileNames)
+        };
+
+        var generateDocumentCommand = new GenerateDeskproMessageDocumentCommand(
+            TicketSubject: deskproTicket?.Subject ?? string.Empty,
+            MessageDetailsDtos: messageDetailsDtos);
 
         var generatorDocumentCommandResult = _mediator.Send(generateDocumentCommand).GetAwaiter().GetResult();
 

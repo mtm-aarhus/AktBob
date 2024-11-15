@@ -46,6 +46,27 @@ internal static class Helpers
         };
     }
 
+    public static void AddAttachmentList(this Section section, IEnumerable<string> filenames, string fontName, Unit fontSize, Color fontColor, Unit spaceAfter)
+    {
+        if (!filenames.Any())
+        {
+            return;
+        }
+
+        foreach (string filename in filenames)
+        {
+            if (string.IsNullOrWhiteSpace(filename)) continue;
+
+            Paragraph paragraph = section.AddParagraph();
+            paragraph.Format.Font.Name = fontName;
+            paragraph.Format.Font.Size = fontSize;
+            paragraph.Format.Font.Color = fontColor;
+            paragraph.Format.SpaceAfter = spaceAfter;
+            paragraph.AddText(filename);
+        }
+    }
+
+
     public static Section ProcessMessageText(this Section section, string html, string fontName, Unit fontSize, Color fontColor, Color linkColor, Unit spaceAfter)
     {
         // Split the HTML text into paragraphs based on the <p> tags
@@ -202,6 +223,52 @@ internal static class Helpers
                 paragraph.AddLineBreak();
             }
         }
+    }
+
+
+    public static void AddMessageNumber(this Section section, string messageNumber, string messageId, string fontName, Unit fontSize, Color fontColor, Unit spaceAfter)
+    {
+        var paragraph = section.AddParagraph();
+        paragraph.Format.Font.Name = fontName;
+        paragraph.Format.Font.Size = fontSize;
+        paragraph.Format.Font.Color = fontColor;
+        paragraph.AddText($"Besked nr: {messageNumber} (ID {messageId})");
+        paragraph.Format.SpaceAfter = spaceAfter;
+    }
+
+    public static void AddMessageTimestamp(this Section section, string text, string fontName, Unit fontSize, Color fontColor)
+    {
+        var paragraph = section.AddParagraph();
+        paragraph.Format.Font.Name = fontName;
+        paragraph.Format.Font.Size = fontSize;
+        paragraph.Format.Font.Color = fontColor;
+        paragraph.AddText("Tidspunkt:");
+        paragraph.AddTab();
+        paragraph.AddText(text);
+    }
+
+    public static void AddPerson(this Section section, string name, string email, string fontName, string fontNameEmphasis, Unit fontSize, Color fontColor, Unit spaceAfter)
+    {
+        var paragraph = section.AddParagraph();
+        paragraph.Format.Font.Name = fontName;
+        paragraph.Format.Font.Size = fontSize;
+        paragraph.Format.Font.Color = fontColor;
+        paragraph.AddText("Fra:");
+        paragraph.AddTab();
+        paragraph.AddFormattedText(name, new Font(fontNameEmphasis));
+        paragraph.AddSpace(2);
+        paragraph.AddFormattedText($"< {email} >", new Font(fontName));
+        paragraph.Format.SpaceAfter = spaceAfter;
+    }
+
+    public static void AddHeadline(this Section section, string text, string fontName, Unit fontSize, Color fontColor, Unit spaceAfter)
+    {
+        var paragraph = section.AddParagraph();
+        paragraph.Format.Font.Name = fontName;
+        paragraph.Format.Font.Size = fontSize;
+        paragraph.Format.Font.Color = fontColor;
+        paragraph.Format.SpaceAfter = spaceAfter;
+        paragraph.AddText(text);
     }
 
 }
