@@ -77,7 +77,7 @@ internal class JournalizeDeskproMessages : BackgroundService
 
 
                     // Get attachments
-                    GetDeskproMessageAttachments(message.DeskproTicketId, message.DeskproMessageId, out IEnumerable<AttachmentDto> attachments);
+                    GetDeskproMessageAttachments(message.DeskproTicketId, message.DeskproMessageId, deskproMessage?.AttachmentIds.Any() ?? false, out IEnumerable<AttachmentDto> attachments);
                     
 
                     // Generate PDF document
@@ -347,9 +347,14 @@ internal class JournalizeDeskproMessages : BackgroundService
     }
 
 
-    private bool GetDeskproMessageAttachments(int deskproTicketId, int deskproMessageId, out IEnumerable<AttachmentDto> attachmentDtos)
+    private bool GetDeskproMessageAttachments(int deskproTicketId, int deskproMessageId, bool messageHasAttachments, out IEnumerable<AttachmentDto> attachmentDtos)
     {
         attachmentDtos = Enumerable.Empty<AttachmentDto>();
+
+        if (!messageHasAttachments)
+        {
+            return false;
+        }
 
         _logger.LogInformation("Getting Deskpro message #{id} attachments", deskproMessageId);
 
