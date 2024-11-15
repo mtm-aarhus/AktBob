@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /AktBob.InternalWorker.Host/appsettings.Development.json
+/AktBob.ConsoleDevelopment/appsettings.json
