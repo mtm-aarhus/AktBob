@@ -14,7 +14,9 @@ internal static class Helpers
             LeftMargin = Unit.FromPoint(30),
             RightMargin = Unit.FromPoint(30),
             BottomMargin = Unit.FromPoint(30),
-            PageFormat = PageFormat.A4
+            PageFormat = PageFormat.A4,
+            PageWidth = Unit.FromCentimeter(21), // Explicitly set A4 width
+            PageHeight = Unit.FromCentimeter(29.7) // Explicitly set A4 height
         };
     }
 
