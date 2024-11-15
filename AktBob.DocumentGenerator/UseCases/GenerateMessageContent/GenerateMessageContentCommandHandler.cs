@@ -51,14 +51,17 @@ internal class GenerateMessageContentCommandHandler : IRequestHandler<GenerateMe
             spaceAfter: Unit.FromPoint(12));
 
         // Attachments
-        section.AddHeadline("Bilag", Constants.FONT_NAME_OPEN_SANS_SEMIBOLD, Unit.FromPoint(7), Color.Parse("0xff000000"), Unit.FromPoint(0));
+        if (command.MessageDetailsDto.AttachmentFileNames.Any())
+        {
+            section.AddHeadline("Bilag", Constants.FONT_NAME_OPEN_SANS_SEMIBOLD, Unit.FromPoint(7), Color.Parse("0xff000000"), Unit.FromPoint(0));
 
-        section.AddAttachmentList(
-            filenames: message.AttachmentFileNames,
-            fontName: Constants.FONT_NAME_OPEN_SANS,
-            fontSize: Unit.FromPoint(7),
-            fontColor: Color.Parse("0xff555555"),
-            spaceAfter: Unit.FromPoint(2));
+            section.AddAttachmentList(
+                filenames: message.AttachmentFileNames,
+                fontName: Constants.FONT_NAME_OPEN_SANS,
+                fontSize: Unit.FromPoint(7),
+                fontColor: Color.Parse("0xff555555"),
+                spaceAfter: Unit.FromPoint(2));
+        }
 
         var spacer = section.AddParagraph();
         spacer.Format.Font.Name = Constants.FONT_NAME_OPEN_SANS;
