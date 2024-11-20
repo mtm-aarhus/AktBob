@@ -10,21 +10,25 @@ using AAK.GetOrganized;
 using AktBob.DatabaseAPI.Contracts.Commands;
 using AktBob.Deskpro.Contracts.DTOs;
 using Ardalis.Result;
+using System.Text.Json;
+using System.Text;
 
 namespace AktBob.JournalizeDocuments.BackgroundServices;
-internal class JournalizeDeskproMessages : BackgroundService
+internal class JournalizeSingleMessagesBackgroundService : BackgroundService
 {
     private readonly IMediator _mediator;
     private readonly IConfiguration _configuration;
-    private readonly ILogger<JournalizeDeskproMessages> _logger;
+    private readonly ILogger<JournalizeSingleMessagesBackgroundService> _logger;
     private readonly IGetOrganizedClient _getOrganizedClient;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public JournalizeDeskproMessages(IMediator mediator, IConfiguration configuration, ILogger<JournalizeDeskproMessages> logger, IGetOrganizedClient getOrganizedClient)
+    public JournalizeSingleMessagesBackgroundService(IMediator mediator, IConfiguration configuration, ILogger<JournalizeSingleMessagesBackgroundService> logger, IGetOrganizedClient getOrganizedClient, IHttpClientFactory httpClientFactory)
     {
         _mediator = mediator;
         _configuration = configuration;
         _logger = logger;
         _getOrganizedClient = getOrganizedClient;
+        _httpClientFactory = httpClientFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -42,7 +46,7 @@ internal class JournalizeDeskproMessages : BackgroundService
                 {
                     continue;
                 }
-                
+
                 foreach (var message in messages.OrderBy(m => m.DeskproMessageId))
                 {
                     if (string.IsNullOrEmpty(message.GOCaseNumber))
@@ -78,10 +82,11 @@ internal class JournalizeDeskproMessages : BackgroundService
 
                     // Get attachments
                     GetDeskproMessageAttachments(message.DeskproTicketId, message.DeskproMessageId, deskproMessage?.AttachmentIds.Any() ?? false, out IEnumerable<AttachmentDto> attachments);
-                    
+
 
                     // Generate PDF document
-                    if (!GenerateDocument(message, deskproTicket!, deskproMessage!, person, attachments, out byte[]? documentBytes))
+                    var generateDocumentResult = await GenerateDocument(message, deskproTicket!, deskproMessage!, person, attachments);
+                    if (!generateDocumentResult.IsSuccess)
                     {
                         continue;
                     }
@@ -101,7 +106,7 @@ internal class JournalizeDeskproMessages : BackgroundService
 
 
                     // Upload parent document
-                    if (!UploadDocumentToGO(documentBytes!, message.GOCaseNumber, "Dokumenter", string.Empty, fileName, metadata, out int? parentDocumentId, stoppingToken))
+                    if (!UploadDocumentToGO(generateDocumentResult.Value, message.GOCaseNumber, "Dokumenter", string.Empty, fileName, metadata, out int? parentDocumentId, stoppingToken))
                     {
                         continue;
                     }
@@ -113,7 +118,7 @@ internal class JournalizeDeskproMessages : BackgroundService
 
                     // Handle message attachments
                     await ProcessAttachments(attachments, message.GOCaseNumber, metadata, parentDocumentId, stoppingToken);
-                    
+
 
                     // Finalize the parent document
                     // IMPORTANT: the parent document must not be finalized before the attachments has been set as children
@@ -260,39 +265,45 @@ internal class JournalizeDeskproMessages : BackgroundService
     }
 
 
-    private bool GenerateDocument(DatabaseAPI.Contracts.DTOs.MessageDto databaseMessageDto, TicketDto deskproTicket, MessageDto deskproMessageDto, PersonDto? person, IEnumerable<AttachmentDto> attachmentDtos, out byte[]? bytes)
+    private async Task<Result<byte[]>> GenerateDocument(DatabaseAPI.Contracts.DTOs.MessageDto databaseMessageDto, TicketDto deskproTicket, MessageDto deskproMessageDto, PersonDto? person, IEnumerable<AttachmentDto> attachmentDtos, CancellationToken cancellationToken = default)
     {
-        bytes = null;
-
         _logger.LogInformation("Generating PDF document from Deskpro message #{id}", deskproMessageDto.Id);
 
         var attachmentFileNames = attachmentDtos.Select(a => a.FileName) ?? Enumerable.Empty<string>();
-        var messageDetailsDtos = new List<MessageDetailsDto>
+        var dto = new JournalizeMessageDto
         {
-            new MessageDetailsDto(
-            MessageId: deskproMessageDto.Id,
-            MessageNumber: databaseMessageDto.MessageNumber ?? 0,
-            MessageContent: deskproMessageDto.Content,
-            CreatedAt: deskproMessageDto.CreatedAt,
-            PersonName: person?.FullName ?? string.Empty,
-            PersonEmail: person?.Email ?? string.Empty,
-            AttachmentFileNames: attachmentFileNames)
+            Subject = deskproTicket.Subject,
+            MessageId = deskproMessageDto.Id,
+            MessageNumber = databaseMessageDto.MessageNumber ?? 0,
+            CreatedAt = deskproMessageDto.CreatedAt,
+            MessageContent = deskproMessageDto.Content,
+            PersonFromEmail = deskproMessageDto.Person.Email,
+            PersonFromName = deskproMessageDto.Person.FullName,
+            AttachmentFileNames = attachmentDtos.Select(a => a.FileName).ToArray(),
         };
 
-        var generateDocumentCommand = new GenerateDeskproMessageDocumentCommand(
-            TicketSubject: deskproTicket?.Subject ?? string.Empty,
-            MessageDetailsDtos: messageDetailsDtos);
-
-        var generatorDocumentCommandResult = _mediator.Send(generateDocumentCommand).GetAwaiter().GetResult();
-
-        if (!generatorDocumentCommandResult.IsSuccess)
+        try
         {
-            _logger.LogError("Error generating PDF document for Deskpro message #{messageId}", databaseMessageDto.DeskproMessageId);
-            return false;
-        }
+            var httpClient = _httpClientFactory.CreateClient(Constants.DESKPRO_PDF_GENERATOR_HTTP_CLIENT_NAME);
+            var json = JsonSerializer.Serialize(dto, new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+            var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var requestMessage = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri("/Generate/SingleMessage", UriKind.Relative),
+                Content = stringContent
+            };
 
-        bytes = generatorDocumentCommandResult.Value;
-        return true;
+            var response = await httpClient.SendAsync(requestMessage, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error generating PDF document for Deskpro message #{messageId}. Error message: {message}", databaseMessageDto.DeskproMessageId, ex.Message);
+            return Result.Error();
+        }
     }
 
 

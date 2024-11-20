@@ -20,8 +20,14 @@ public static class ModuleServices
         };
 
         services.AddGetOrganizedModule(getOrganizedOptions);
+        services.AddHostedService<JournalizeSingleMessagesBackgroundService>();
 
-        services.AddHostedService<JournalizeDeskproMessages>();
+        
+        services.AddHttpClient(Constants.DESKPRO_PDF_GENERATOR_HTTP_CLIENT_NAME, client =>
+        {
+            client.BaseAddress = new Uri(Guard.Against.NullOrEmpty(configuration.GetValue<string>("DeskproPdfGenerator:BaseUrl")));
+            client.DefaultRequestHeaders.Add("ApiKey", Guard.Against.NullOrEmpty(configuration.GetValue<string>("DeskproPdfGenerator:ApiKey")));
+        });
 
         mediatrAssemblies.Add(typeof(ModuleServices).Assembly);
         return services;
