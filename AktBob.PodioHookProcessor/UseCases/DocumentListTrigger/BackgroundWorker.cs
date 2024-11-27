@@ -240,9 +240,12 @@ internal class BackgroundWorker : BackgroundService
                     _logger.LogWarning("{count} Deskpro tickets found for PodioItemId {podioItemId}. Only processing the first.", getTicketByPodioItemIdQueryResult.Value.Count(), podioItemId);
                 }
 
-                _logger.LogInformation("Try {count}/{retries}: Database API ticket data for PodioIteId {id} found", counter, retriesCount, podioItemId);
-                ticketDto = getTicketByPodioItemIdQueryResult.Value.First();
-                break;
+                if (getTicketByPodioItemIdQueryResult.Value.Count() > 0)
+                {
+                    _logger.LogInformation("Try {count}/{retries}: Database API ticket data for PodioItemId {id} found", counter, retriesCount, podioItemId);
+                    ticketDto = getTicketByPodioItemIdQueryResult.Value.First();
+                    break;
+                }
             }
 
             // No data was found: retry
