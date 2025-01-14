@@ -17,7 +17,7 @@ internal class CreateQueueItemCommandHandler(IConfiguration configuration, ILogg
 
     async Task<Result<Guid>> IRequestHandler<CreateQueueItemCommand, Result<Guid>>.Handle(CreateQueueItemCommand command, CancellationToken cancellationToken)
     {
-        var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("OpenOrcehstratorDb"));
+        var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("OpenOrchestratorDb"));
         Guard.Against.Null(command.Data);
         Guard.Against.NullOrEmpty(command.QueueName);
 
@@ -43,11 +43,13 @@ internal class CreateQueueItemCommandHandler(IConfiguration configuration, ILogg
                     },
                     commandType: System.Data.CommandType.Text);
 
+                _logger.LogInformation("OpenOrchestrator queue item '{id}' created. Data: {data}", id, data);
+
                 return Result.Success(id);
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error creating OpenOrchestrator queue item: {message}", ex.Message);
+                _logger.LogError("Error creating OpenOrchestrator queue item: {message}. Data: {data}", ex.Message, data);
                 return Result.Error();
             }
         }

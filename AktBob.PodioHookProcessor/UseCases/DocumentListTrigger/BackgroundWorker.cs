@@ -2,9 +2,9 @@
 using AktBob.DatabaseAPI.Contracts.Queries;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Queue.Contracts;
-using AktBob.UiPath.Contracts;
 using Ardalis.GuardClauses;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -33,7 +33,9 @@ internal class BackgroundWorker : BackgroundService
     {
         var tenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
         var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"DocumentListTrigger:AzureQueueName"));
-        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"DocumentListTrigger:UiPathQueueName:{tenancyName}"));
+        //var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"DocumentListTrigger:UiPathQueueName:{tenancyName}"));
+        var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("DocumentListTrigger:OpenOrchestratorQueueName"));
+
         var delay = _configuration.GetValue<int?>("DocumentListTrigger:WorkerIntervalSeconds") ?? 10;
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
         var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => long.Parse(x.Key), x => x.Get<PodioField>())));
@@ -80,8 +82,8 @@ internal class BackgroundWorker : BackgroundService
                     // Get Deskpro ticket agent, if any (returns (string.Empty, string.Empty) if there is no agent)
                     GetDeskproTicketAgent(mediator, deskproTicketDto!.Agent, stoppingToken, out (string Name, string Email) agent);
 
-                    // UiPath queue element
-                    await PostUiPathQueueElement(uiPathQueueName, mediator, (long)podioItemId, caseNumber, deskproTicketDto, agent, stoppingToken);
+                    // Create OpenOrchestrator queue item
+                    await CreateOpenOrchestratorQueueItem(mediator, openOrchestratorQueueName, caseNumber, agent, (long)podioItemId, deskproTicketDto, stoppingToken);
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);
@@ -89,9 +91,9 @@ internal class BackgroundWorker : BackgroundService
         }
     }
 
-    private static async Task PostUiPathQueueElement(string uiPathQueueName, IMediator mediator, long podioItemId, string caseNumber, TicketDto deskproTicketDto, (string Name, string Email) agent, CancellationToken stoppingToken)
+    private async Task CreateOpenOrchestratorQueueItem(IMediator mediator, string queueName, string caseNumber, (string Name, string Email) agent, long podioItemId, TicketDto deskproTicketDto, CancellationToken stoppingToken)
     {
-        var uiPathQueueItemContent = new
+        var data = new
         {
             SagsNummer = caseNumber,
             Email = agent.Email,
@@ -101,10 +103,26 @@ internal class BackgroundWorker : BackgroundService
             Titel = deskproTicketDto.Subject
         };
 
-        // Post UiPath queue item
-        var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, podioItemId.ToString(), uiPathQueueItemContent);
-        await mediator.Send(addUiPathQueueItemCommand, stoppingToken);
+        var command = new CreateQueueItemCommand(queueName, data, podioItemId.ToString());
+        await mediator.Send(command, stoppingToken);
     }
+
+    //private static async Task PostUiPathQueueElement(string uiPathQueueName, IMediator mediator, long podioItemId, string caseNumber, TicketDto deskproTicketDto, (string Name, string Email) agent, CancellationToken stoppingToken)
+    //{
+    //    var uiPathQueueItemContent = new
+    //    {
+    //        SagsNummer = caseNumber,
+    //        Email = agent.Email,
+    //        Navn = agent.Name,
+    //        PodioID = podioItemId,
+    //        DeskproID = deskproTicketDto.Id,
+    //        Titel = deskproTicketDto.Subject
+    //    };
+
+    //    // Post UiPath queue item
+    //    var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, podioItemId.ToString(), uiPathQueueItemContent);
+    //    await mediator.Send(addUiPathQueueItemCommand, stoppingToken);
+    //}
 
     private bool GetPodioItemIdFromQueueMessage(QueueMessageDto message, out long? id)
     {
