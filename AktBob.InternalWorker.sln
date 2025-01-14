@@ -64,9 +64,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.ConsoleDevelopment", "AktBob.ConsoleDevelopment\AktBob.ConsoleDevelopment.csproj", "{49802F73-AE7F-4A69-8BAD-E96539421B41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.ConsoleDevelopment", "AktBob.ConsoleDevelopment\AktBob.ConsoleDevelopment.csproj", "{49802F73-AE7F-4A69-8BAD-E96539421B41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Shared", "AktBob.Shared\AktBob.Shared.csproj", "{5B795FD1-81A1-4878-8802-1AF87DEBC4D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Shared", "AktBob.Shared\AktBob.Shared.csproj", "{5B795FD1-81A1-4878-8802-1AF87DEBC4D7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Open Orchestrator Module", "Open Orchestrator Module", "{DBA389E7-9083-440B-9BCA-E30B66858A86}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.OpenOrchestrator", "AktBob.OpenOrchestrator\AktBob.OpenOrchestrator.csproj", "{DF26FC91-4DD2-4500-B955-22F6F522B782}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.OpenOrchestrator.Contracts", "AktBob.OpenOrchestrator.Contracts\AktBob.OpenOrchestrator.Contracts.csproj", "{B7378D07-6FE1-49C7-9BB5-B7D693FE446A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -154,6 +160,14 @@ Global
 		{5B795FD1-81A1-4878-8802-1AF87DEBC4D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B795FD1-81A1-4878-8802-1AF87DEBC4D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B795FD1-81A1-4878-8802-1AF87DEBC4D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF26FC91-4DD2-4500-B955-22F6F522B782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF26FC91-4DD2-4500-B955-22F6F522B782}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF26FC91-4DD2-4500-B955-22F6F522B782}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF26FC91-4DD2-4500-B955-22F6F522B782}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7378D07-6FE1-49C7-9BB5-B7D693FE446A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7378D07-6FE1-49C7-9BB5-B7D693FE446A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7378D07-6FE1-49C7-9BB5-B7D693FE446A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7378D07-6FE1-49C7-9BB5-B7D693FE446A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -176,6 +190,8 @@ Global
 		{B19C08F8-E0B7-4F5D-ACB6-6BD0A00839DD} = {5FC6CF1E-902B-4AB9-A78F-8A77955606DD}
 		{05EB330D-005F-4BB9-8AB2-A843584BD4E7} = {5FC6CF1E-902B-4AB9-A78F-8A77955606DD}
 		{7AD4DBB7-4801-440B-89F1-021C780F831F} = {C9851F2E-765C-4E7E-8CE7-3E5467F2712B}
+		{DF26FC91-4DD2-4500-B955-22F6F522B782} = {DBA389E7-9083-440B-9BCA-E30B66858A86}
+		{B7378D07-6FE1-49C7-9BB5-B7D693FE446A} = {DBA389E7-9083-440B-9BCA-E30B66858A86}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}
