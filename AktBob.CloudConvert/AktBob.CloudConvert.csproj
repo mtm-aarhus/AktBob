@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AktBob.CloudConvert.Contracts\AktBob.CloudConvert.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
+  </ItemGroup>
+
 </Project>
