@@ -1,13 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace AktBob.CloudConvert.Models;
-internal class PostJobResponse
-{
-    [JsonPropertyName("data")]
-    public PostJobResponseData Data { get; set; } = new();
-}
+namespace AktBob.CloudConvert.Models.JobResponse;
 
-internal class PostJobResponseData
+internal class JobResponseData
 {
     [JsonPropertyName("id")]
     public Guid Id { get; set; }
@@ -26,4 +21,7 @@ internal class PostJobResponseData
 
     [JsonPropertyName("ended_at")]
     public DateTime? EndedAt { get; set; }
+
+    [JsonPropertyName("tasks")]
+    public JobResponseTask[] Tasks { get; set; } = Array.Empty<JobResponseTask>();
 }

@@ -1,2 +1,2 @@
-﻿namespace AktBob.CloudConvert.Contracts;
+﻿namespace AktBob.CloudConvert.Contracts.DTOs;
 public record ConvertHtmlToPdfResponseDto(Guid JobId);

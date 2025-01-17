@@ -1,4 +1,5 @@
 ﻿using AktBob.CloudConvert.Contracts;
+using AktBob.CloudConvert.Contracts.DTOs;
 using AktBob.CloudConvert.Models;
 using Ardalis.Result;
 using MediatR;

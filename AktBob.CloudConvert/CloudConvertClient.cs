@@ -1,6 +1,10 @@
-﻿using AktBob.CloudConvert.Models;
+﻿using AktBob.CloudConvert.Contracts;
+using AktBob.CloudConvert.Models.JobResponse;
 using Ardalis.Result;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 
@@ -36,7 +40,7 @@ internal class CloudConvertClient : ICloudConvertClient
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            var data = JsonSerializer.Deserialize<PostJobResponse>(content);
+            var data = JsonSerializer.Deserialize<JobResponseRoot>(content);
 
             if (data?.Data is not null)
             {
@@ -52,5 +56,54 @@ internal class CloudConvertClient : ICloudConvertClient
             _logger.LogError(ex.Message);
             return Result.Error();
         }
+    }
+
+
+    public async Task<Result<JobResponseRoot?>> GetJob(Guid jobId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _httpClient.GetFromJsonAsync<JobResponseRoot>($"jobs/{jobId}", cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error getting job {id}: {error}", jobId, ex);
+            return Result.Error();
+        }
+    }
+
+
+    public async Task<Result<Models.File>> GetFile(string url, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri(url, UriKind.Absolute)
+            };
+
+            _httpClient.DefaultRequestHeaders.Remove("Authorization");
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var contentDisposition = response.Content.Headers.ContentDisposition;
+            var filename = contentDisposition?.FileName ?? string.Empty;
+
+            var file = new Models.File
+            {
+                Filename = filename.Replace("\"",""),
+                Stream = await response.Content.ReadAsStreamAsync()
+            };
+
+            return file;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            return Result.Error();
+        }
+
     }
 }
