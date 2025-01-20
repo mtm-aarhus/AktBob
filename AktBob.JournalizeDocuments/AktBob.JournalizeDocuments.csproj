@@ -15,6 +15,7 @@
     <ProjectReference Include="..\AktBob.DatabaseAPI.Contracts\AktBob.DatabaseAPI.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.DocumentGenerator.Contracts\AktBob.DocumentGenerator.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.Queue.Contracts\AktBob.Queue.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
   </ItemGroup>
 
