@@ -19,8 +19,7 @@
     <ProjectReference Include="..\AktBob.CloudConvert\AktBob.CloudConvert.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
-    <ProjectReference Include="..\AktBob.DocumentGenerator.Contracts\AktBob.DocumentGenerator.Contracts.csproj" />
-    <ProjectReference Include="..\AktBob.DocumentGenerator\AktBob.DocumentGenerator.csproj" />
+    <ProjectReference Include="..\AktBob.JournalizeDocuments\AktBob.JournalizeDocuments.csproj" />
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
   </ItemGroup>
 
