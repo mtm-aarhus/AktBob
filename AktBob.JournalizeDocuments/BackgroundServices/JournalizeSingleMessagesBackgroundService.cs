@@ -9,6 +9,8 @@ using AktBob.DatabaseAPI.Contracts.Commands;
 using AktBob.Deskpro.Contracts.DTOs;
 using Ardalis.Result;
 using System.Text;
+using AktBob.CloudConvert.Contracts;
+using AktBob.Shared;
 
 namespace AktBob.JournalizeDocuments.BackgroundServices;
 internal class JournalizeSingleMessagesBackgroundService : BackgroundService
@@ -123,10 +125,7 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
                     }
 
 
-                    // Get message creation time and convert to Danish time zone
-                    DateTime createdAtUtc = DateTime.SpecifyKind(deskproMessageResult!.Value.CreatedAt, DateTimeKind.Utc);
-                    TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time");
-                    DateTime createdAtDanishTime = TimeZoneInfo.ConvertTimeFromUtc(createdAtUtc, tzi);
+                    DateTime createdAtDanishTime = deskproMessageResult!.Value.CreatedAt.UtcToDanish();
 
                     var metadata = new UploadDocumentMetadata
                     {
@@ -211,24 +210,10 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
         _logger.LogInformation("Generating PDF document from Deskpro message #{id}", deskproMessageDto.Id);
 
         var htmlTemplate = File.ReadAllText("message.html") ?? string.Empty;
-        var attachmentFileNames = attachmentDtos.Select(a => $"<li>{a.FileName}</li>") ?? Enumerable.Empty<string>();
+        var html = _deskproHelpers.GenerateMessageHtml(deskproMessageDto, attachmentDtos, databaseMessageDto.GOCaseNumber ?? string.Empty, deskproTicket.Subject, databaseMessageDto.MessageNumber ?? 0);
+        var bytes = Encoding.UTF8.GetBytes(html);
 
-        var dictionary = new Dictionary<string, string>
-        {
-            { "caseNumber",  databaseMessageDto.GOCaseNumber ?? string.Empty },
-            { "title", deskproTicket.Subject },
-            { "messageNumber", databaseMessageDto.MessageNumber.ToString() ?? string.Empty },
-            { "timestamp", deskproMessageDto.CreatedAt.ToString("dd-MM-yyyy HH:mm:ss") },
-            { "fromName", deskproMessageDto.Person.FullName },
-            { "fromEmail", deskproMessageDto.Person.Email },
-            { "attachments", string.Join("", attachmentFileNames) },
-            { "messageContent", deskproMessageDto.Content }
-        };
-
-        var html = htmlTemplate.ReplacePlaceholders(dictionary);
-        var base64Encoded = Encoding.UTF8.GetBytes(html);
-
-        var convertCommand = new ConvertHtmlToPdfCommand([base64Encoded]);
+        var convertCommand = new ConvertHtmlToPdfCommand([bytes]);
         var convertResult = await _mediator.Send(convertCommand, cancellationToken);
 
         if (!convertResult.IsSuccess)
@@ -237,52 +222,14 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
             return Result.Error();
         }
 
-        var jobStatusQuery = new GetJobQuery(convertResult.Value.JobId);
-        var finished = false;
-
-        while (!finished)
-        {
-            var jobStatusResult = await _mediator.Send(jobStatusQuery, cancellationToken);
-
-            if (!jobStatusResult.IsSuccess)
-            {
-                // TODO
-                finished = true;
-            }
-
-            if (jobStatusResult.Value.Status == "error")
-            {
-                _logger.LogError("Error generating PDF for Deskpro message {id}", deskproMessageDto.Id);
-                finished = true;
-            }
-
-            if (jobStatusResult.Value.Status == "finished" && !string.IsNullOrEmpty(jobStatusResult.Value.Url))
-            {
-                var getFileQuery = new GetFileQuery(jobStatusResult.Value.Url);
-                var getFileResult = await _mediator.Send(getFileQuery, cancellationToken);
-
-                if (!getFileResult.IsSuccess)
-                {
-                    // TODO
-                    _logger.LogError("Error downloading generated PDF for Deskpro message {id}", deskproMessageDto.Id);
-                    finished = true;
-                }
-                else
-                {
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        getFileResult.Value.Stream?.CopyTo(memoryStream);
-                        finished = true;
-
-                        _logger.LogInformation("PDF generated for Deskpro message {id}", deskproMessageDto.Id);
-                        return memoryStream.ToArray();
-                    }
-                }
-            }
-
-            await Task.Delay(5000);
-        }
+        var jobQuery = new GetJobQuery(convertResult.Value.JobId);
+        var jobResult = await _mediator.Send(jobQuery, cancellationToken);
         
-        return Result.Error();
+        if (!jobResult.IsSuccess)
+        {
+            return Result.Error();
+        }
+
+        return jobResult.Value;
     }
 }

@@ -4,6 +4,7 @@ using Ardalis.Result;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace AktBob.JournalizeDocuments;
 internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, IMemoryCache cache)
@@ -63,7 +64,7 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
         }
 
         _cache.Set(cacheKey, result.Value, TimeSpan.FromHours(1));
-        return result.Value;
+        return result.Value!;
     }
 
 
@@ -97,5 +98,59 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
         }
 
         return result;
+    }
+
+    public async Task<IEnumerable<MessageDto>> GetDeskproMessages(int ticketId)
+    {
+        var query = new GetDeskproMessagesQuery(ticketId);
+        var result = await _mediator.Send(query);
+        return result;        
+    }
+
+    public string GenerateHtml(string templateFileName, Dictionary<string, string> dictionary)
+    {
+        var template = File.ReadAllText(templateFileName); // TODO: cache
+        var html = template.ReplacePlaceholders(dictionary);
+        return html;
+    }
+
+    public IEnumerable<string> GenerateListOfFieldValues(int[] fieldIds, TicketDto ticketDto, string templateFileName)
+    {
+        List<string> items = new();
+
+        foreach (var fieldId in fieldIds)
+        {
+            var values = ticketDto.Fields.FirstOrDefault(f => f.Id == fieldId)?.Values ?? Enumerable.Empty<string>();
+            var value = string.Join(", ", values);
+            var kvp = new KeyValuePair<string, string>("value", value);
+            var html = GenerateHtml(templateFileName, kvp.ToDictionary());
+            items.Add(html);
+        }
+
+        return items;
+    }
+
+    public string GenerateMessageHtml(MessageDto deskproMessageDto, IEnumerable<AttachmentDto> attachments, string goCaseNumber, string caseTitle, int messageNumber)
+    {
+        var htmlTemplate = File.ReadAllText("message.html") ?? string.Empty;
+        var attachmentFileNames = attachments.Select(a =>
+            GenerateHtml(
+                "message-attachments.html",
+                new KeyValuePair<string, string>("filename", a.FileName).ToDictionary()));
+
+        var dictionary = new Dictionary<string, string>
+        {
+            { "caseNumber",  goCaseNumber },
+            { "title", caseTitle },
+            { "messageNumber", messageNumber.ToString() ?? string.Empty },
+            { "timestamp", deskproMessageDto.CreatedAt.ToString("dd-MM-yyyy HH:mm:ss") },
+            { "fromName", deskproMessageDto.Person.FullName },
+            { "fromEmail", deskproMessageDto.Person.Email },
+            { "attachments", string.Join("", attachmentFileNames) },
+            { "messageContent", deskproMessageDto.Content }
+        };
+
+        var html = htmlTemplate.ReplacePlaceholders(dictionary);
+        return html;
     }
 }

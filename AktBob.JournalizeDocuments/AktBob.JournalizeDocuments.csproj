@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AktBob.CloudConvert.Contracts\AktBob.CloudConvert.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.DatabaseAPI.Contracts\AktBob.DatabaseAPI.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.DocumentGenerator.Contracts\AktBob.DocumentGenerator.Contracts.csproj" />
@@ -18,7 +19,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="HTMLTemplates\ticket-case-numbers.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="HTMLTemplates\message.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="HTMLTemplates\message-attachments.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="HTMLTemplates\ticket.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -17,7 +17,7 @@ internal class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertCl
 
 
         // Import tasks
-        foreach (var item in command.base64HTMLDocuments)
+        foreach (var item in command.Content)
         {
             var id = Guid.NewGuid();
             var task = new ImportTask
