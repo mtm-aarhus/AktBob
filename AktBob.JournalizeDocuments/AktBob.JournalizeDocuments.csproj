@@ -17,4 +17,10 @@
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="HTMLTemplates\message.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
