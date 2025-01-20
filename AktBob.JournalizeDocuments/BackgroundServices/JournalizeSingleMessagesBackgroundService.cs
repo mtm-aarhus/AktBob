@@ -4,13 +4,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MediatR;
 using AktBob.DatabaseAPI.Contracts.Queries;
-using AktBob.Deskpro.Contracts;
-using AktBob.DocumentGenerator.Contracts;
 using AAK.GetOrganized;
 using AktBob.DatabaseAPI.Contracts.Commands;
 using AktBob.Deskpro.Contracts.DTOs;
 using Ardalis.Result;
-using System.Text.Json;
 using System.Text;
 
 namespace AktBob.JournalizeDocuments.BackgroundServices;
@@ -19,16 +16,21 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
     private readonly IMediator _mediator;
     private readonly IConfiguration _configuration;
     private readonly ILogger<JournalizeSingleMessagesBackgroundService> _logger;
-    private readonly IGetOrganizedClient _getOrganizedClient;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly GetOrganizedHelper _getOrganizedHelpers;
+    private readonly DeskproHelper _deskproHelpers;
 
-    public JournalizeSingleMessagesBackgroundService(IMediator mediator, IConfiguration configuration, ILogger<JournalizeSingleMessagesBackgroundService> logger, IGetOrganizedClient getOrganizedClient, IHttpClientFactory httpClientFactory)
+    public JournalizeSingleMessagesBackgroundService(
+        IMediator mediator,
+        IConfiguration configuration,
+        ILogger<JournalizeSingleMessagesBackgroundService> logger,
+        GetOrganizedHelper getOrganizedHelpers,
+        DeskproHelper deskproHelpers)
     {
         _mediator = mediator;
         _configuration = configuration;
         _logger = logger;
-        _getOrganizedClient = getOrganizedClient;
-        _httpClientFactory = httpClientFactory;
+        _getOrganizedHelpers = getOrganizedHelpers;
+        _deskproHelpers = deskproHelpers;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -42,139 +44,127 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
 
             try
             {
-                if (!GetMessagesNotJournalized(out var messages))
+                // Get new messages from the database
+                var getMessagesQueryResult = await _mediator.Send(new GetMessagesNotJournalizedQuery());
+
+                if (getMessagesQueryResult.Status == ResultStatus.NotFound)
                 {
                     continue;
                 }
 
-                foreach (var message in messages.OrderBy(m => m.DeskproMessageId))
+                if (!getMessagesQueryResult.IsSuccess)
+                {
+                    _logger.LogError("Error requesting database API for messages not journalized");
+                    continue;
+                }
+
+
+                // Loop through each messsage
+                foreach (var message in getMessagesQueryResult.Value.OrderBy(m => m.DeskproMessageId))
                 {
                     if (string.IsNullOrEmpty(message.GOCaseNumber))
                     {
+                        // The Deskpro ticket that holds the message is not yet related to a GO-case -> do nothing
                         continue;
                     }
 
                     if (message.GODocumentId is not null)
                     {
+                        // The message is already journalized -> do nothing
                         continue;
                     }
+
+
+                    // From this point: the message is ready to be journalized
+
 
                     _logger.LogInformation("Deskpro message ready for upload to GetOrganized. DeskproTicketId {deskproTicketId}, DeskproMessageId {deskproMessageId}", message.DeskproTicketId, message.DeskproMessageId);
 
 
                     // Get Deskpro ticket
-                    if (!GetDeskproTicket(message, out TicketDto? deskproTicket))
+                    var deskproTicketResult = await _deskproHelpers.GetDeskproTicket(message.DeskproTicketId);
+                    if (!deskproTicketResult.IsSuccess)
                     {
+                        _logger.LogError("Error getting Deskpro ticket {id}", message.DeskproTicketId);
                         continue;
                     }
 
 
                     // Get Deskpro message
-                    if (!GetDeskproMessage(message, out MessageDto? deskproMessage))
+                    var deskproMessageResult = await _deskproHelpers.GetDeskproMessage(message.TicketId, message.DeskproMessageId);
+                    if (!deskproMessageResult.IsSuccess)
                     {
+                        _logger.LogError("Error requesting Deskpro message #{id}. Message will be marked as 'deleted' in database.", message.Id);
+
+                        var deleteMessageCommand = new DeleteMessageCommand(message.Id);
+                        await _mediator.Send(deleteMessageCommand);
                         continue;
                     }
 
 
                     // Get Deskpro person
-                    PersonDto? person = await GetDeskproPerson(deskproMessage!);
+                    var personResult = await _deskproHelpers.GetDeskproPerson(deskproMessageResult!.Value.Person.Id);
 
 
                     // Get attachments
-                    GetDeskproMessageAttachments(message.DeskproTicketId, message.DeskproMessageId, deskproMessage?.AttachmentIds.Any() ?? false, out IEnumerable<AttachmentDto> attachments);
+                    var attachments = Enumerable.Empty<AttachmentDto>();
+                    if (deskproMessageResult.Value.AttachmentIds.Any())
+                    {
+                        attachments = await _deskproHelpers.GetDeskproMessageAttachments(deskproTicketResult.Value!.Id, deskproMessageResult.Value.Id);
+                    }
 
 
                     // Generate PDF document
-                    var generateDocumentResult = await GenerateDocument(message, deskproTicket!, deskproMessage!, person, attachments);
+                    var generateDocumentResult = await GenerateDocument(message, deskproTicketResult.Value!, deskproMessageResult!, personResult.Value, attachments);
                     if (!generateDocumentResult.IsSuccess)
                     {
+                        _logger.LogError("Error generating the message document for Deskpro message {id}", message.DeskproMessageId);
                         continue;
                     }
 
+
                     // Get message creation time and convert to Danish time zone
-                    DateTime createdAtUtc = DateTime.SpecifyKind(deskproMessage!.CreatedAt, DateTimeKind.Utc);
+                    DateTime createdAtUtc = DateTime.SpecifyKind(deskproMessageResult!.Value.CreatedAt, DateTimeKind.Utc);
                     TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time");
                     DateTime createdAtDanishTime = TimeZoneInfo.ConvertTimeFromUtc(createdAtUtc, tzi);
 
                     var metadata = new UploadDocumentMetadata
                     {
                         DocumentDate = createdAtDanishTime,
-                        DocumentCategory = deskproMessage.IsAgentNote ? DocumentCategory.Intern : MapDocumentCategoryFromPerson(person)
+                        DocumentCategory = deskproMessageResult.Value.IsAgentNote ? DocumentCategory.Intern : MapDocumentCategoryFromPerson(personResult.Value)
                     };
 
-                    var fileName = GenerateFileName(message, person, createdAtDanishTime);
+                    var fileName = GenerateFileName(message, personResult, createdAtDanishTime);
 
 
                     // Upload parent document
-                    if (!UploadDocumentToGO(generateDocumentResult.Value, message.GOCaseNumber, "Dokumenter", string.Empty, fileName, metadata, out int? parentDocumentId, stoppingToken))
+                    var uploadDocumentResult = await _getOrganizedHelpers.UploadDocumentToGO(generateDocumentResult.Value, message.GOCaseNumber, "Dokumenter", string.Empty, fileName, metadata, stoppingToken);
+
+                    if (!uploadDocumentResult.IsSuccess)
                     {
+                        _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", message.DeskproMessageId, message.GOCaseNumber);
                         continue;
                     }
 
+
                     // Update database
-                    var updateMessageCommand = new UpdateMessageSetGoDocumentIdCommand(message.Id, (int)parentDocumentId!);
+                    var updateMessageCommand = new UpdateMessageSetGoDocumentIdCommand(message.Id, uploadDocumentResult.Value);
                     await _mediator.Send(updateMessageCommand);
 
 
                     // Handle message attachments
-                    await ProcessAttachments(attachments, message.GOCaseNumber, metadata, parentDocumentId, stoppingToken);
+                    await _getOrganizedHelpers.ProcessAttachments(attachments, message.GOCaseNumber, metadata, uploadDocumentResult, stoppingToken);
 
 
                     // Finalize the parent document
                     // IMPORTANT: the parent document must not be finalized before the attachments has been set as children
-                    await _getOrganizedClient.FinalizeDocument((int)parentDocumentId, false, stoppingToken);
+                    await _getOrganizedHelpers.FinalizeDocument(uploadDocumentResult.Value, stoppingToken);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
             }
-        }
-    }
-
-
-    private async Task ProcessAttachments(IEnumerable<AttachmentDto> attachments, string caseNumber, UploadDocumentMetadata metadata, int? parentDocumentId, CancellationToken stoppingToken)
-    {
-        if (!attachments.Any())
-        {
-            return;
-        }
-
-        var childrenDocumentIds = new List<int>();
-
-        foreach (var attachment in attachments)
-        {
-            // Get the individual attachments as a stream
-            using (var stream = new MemoryStream())
-            {
-                var getAttachmentStreamQuery = new GetDeskproMessageAttachmentQuery(attachment.DownloadUrl);
-                var getAttachmentStreamResult = await _mediator.Send(getAttachmentStreamQuery, stoppingToken);
-
-                if (!getAttachmentStreamResult.IsSuccess)
-                {
-                    _logger.LogError("Error downloading attachment '{filename}' from Deskpro message #{messageId}, ticketId {ticketId}", attachment.FileName, attachment.MessageId, attachment.TicketId);
-                    continue;
-                }
-
-                getAttachmentStreamResult.Value.CopyTo(stream);
-                var attachmentBytes = stream.ToArray();
-
-                // Upload the attachment to GO
-                if (!UploadDocumentToGO(attachmentBytes, caseNumber, "Dokumenter", string.Empty, attachment.FileName, metadata, out int? attachmentDocumentId, stoppingToken))
-                {
-                    continue;
-                }
-
-                // Finalize the attachment
-                await _getOrganizedClient.FinalizeDocument((int)attachmentDocumentId!, false, stoppingToken);
-                childrenDocumentIds.Add((int)attachmentDocumentId!);
-            }
-        }
-
-        // Set attachments as children
-        if (childrenDocumentIds.Count > 0)
-        {
-            await _getOrganizedClient.RelateDocuments((int)parentDocumentId!, childrenDocumentIds.ToArray());
         }
     }
 
@@ -205,55 +195,6 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
     }
 
 
-    private bool UploadDocumentToGO(byte[] bytes, string caseNumber, string listName, string folderPath, string fileName, UploadDocumentMetadata metadata, out int? documentId, CancellationToken cancellationToken = default)
-    {
-        _logger.LogInformation("Uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}', file size (bytes): {filesize}) ...", caseNumber, fileName, bytes.Length);
-
-        documentId = null;
-
-        var uploadResult = _getOrganizedClient.UploadDocument(
-                            bytes,
-                            caseNumber,
-                            listName,
-                            folderPath,
-                            fileName,
-                            metadata,
-                            cancellationToken).GetAwaiter().GetResult();
-
-        if (uploadResult is not null)
-        {
-            documentId = uploadResult.DocumentId;
-            return true;
-        }
-
-        _logger.LogError("Error uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}', file size (bytes): {filesize})", caseNumber, fileName, bytes.Length);
-        return false;
-    }
-
-
-    private bool GetMessagesNotJournalized(out IEnumerable<DatabaseAPI.Contracts.DTOs.MessageDto> messages)
-    {
-        messages = Enumerable.Empty<DatabaseAPI.Contracts.DTOs.MessageDto>();
-
-        var getMessagesQuery = new GetMessagesNotJournalizedQuery();
-        var getMessagesQueryResult = _mediator.Send(getMessagesQuery).GetAwaiter().GetResult();
-
-        if (getMessagesQueryResult.Status == ResultStatus.NotFound)
-        {
-            return false;
-        }
-
-        if (!getMessagesQueryResult.IsSuccess)
-        {
-            _logger.LogError("Error requesting database API for messages not journalized");
-            return false;
-        }
-
-        messages = getMessagesQueryResult.Value;
-        return true;
-    }
-
-
     private DocumentCategory MapDocumentCategoryFromPerson(PersonDto? person)
     {
         if (person is null)
@@ -269,142 +210,79 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
     {
         _logger.LogInformation("Generating PDF document from Deskpro message #{id}", deskproMessageDto.Id);
 
-        var attachmentFileNames = attachmentDtos.Select(a => a.FileName) ?? Enumerable.Empty<string>();
-        var dto = new JournalizeMessageDto
+        var htmlTemplate = File.ReadAllText("message.html") ?? string.Empty;
+        var attachmentFileNames = attachmentDtos.Select(a => $"<li>{a.FileName}</li>") ?? Enumerable.Empty<string>();
+
+        var dictionary = new Dictionary<string, string>
         {
-            Subject = deskproTicket.Subject,
-            MessageId = deskproMessageDto.Id,
-            MessageNumber = databaseMessageDto.MessageNumber ?? 0,
-            CreatedAt = deskproMessageDto.CreatedAt,
-            MessageContent = deskproMessageDto.Content,
-            PersonFromEmail = deskproMessageDto.Person.Email,
-            PersonFromName = deskproMessageDto.Person.FullName,
-            AttachmentFileNames = attachmentDtos.Select(a => a.FileName).ToArray(),
+            { "caseNumber",  databaseMessageDto.GOCaseNumber ?? string.Empty },
+            { "title", deskproTicket.Subject },
+            { "messageNumber", databaseMessageDto.MessageNumber.ToString() ?? string.Empty },
+            { "timestamp", deskproMessageDto.CreatedAt.ToString("dd-MM-yyyy HH:mm:ss") },
+            { "fromName", deskproMessageDto.Person.FullName },
+            { "fromEmail", deskproMessageDto.Person.Email },
+            { "attachments", string.Join("", attachmentFileNames) },
+            { "messageContent", deskproMessageDto.Content }
         };
 
-        try
-        {
-            var httpClient = _httpClientFactory.CreateClient(Constants.DESKPRO_PDF_GENERATOR_HTTP_CLIENT_NAME);
-            var json = JsonSerializer.Serialize(dto, new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
-            var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
-            var requestMessage = new HttpRequestMessage
-            {
-                Method = HttpMethod.Post,
-                RequestUri = new Uri("/Generate/SingleMessage", UriKind.Relative),
-                Content = stringContent
-            };
+        var html = htmlTemplate.ReplacePlaceholders(dictionary);
+        var base64Encoded = Encoding.UTF8.GetBytes(html);
 
-            var response = await httpClient.SendAsync(requestMessage, cancellationToken);
-            response.EnsureSuccessStatusCode();
+        var convertCommand = new ConvertHtmlToPdfCommand([base64Encoded]);
+        var convertResult = await _mediator.Send(convertCommand, cancellationToken);
 
-            return await response.Content.ReadAsByteArrayAsync();
-        }
-        catch (Exception ex)
+        if (!convertResult.IsSuccess)
         {
-            _logger.LogError("Error generating PDF document for Deskpro message #{messageId}. Error message: {message}", databaseMessageDto.DeskproMessageId, ex.Message);
+            // TODO
             return Result.Error();
         }
-    }
 
+        var jobStatusQuery = new GetJobQuery(convertResult.Value.JobId);
+        var finished = false;
 
-    private async Task<PersonDto?> GetDeskproPerson(MessageDto deskproMessage)
-    {
-        _logger.LogInformation("Getting Deskpro person #{id}", deskproMessage!.Person.Id);
-
-        var getDeskproPersonQuery = new GetDeskproPersonQuery(deskproMessage.Person.Id);
-        var getDeskproPersonQueryResult = await _mediator.Send(getDeskproPersonQuery);
-
-        if (!getDeskproPersonQueryResult.IsSuccess)
+        while (!finished)
         {
-            _logger.LogWarning("Could not get Deskpro getting person #{id}", deskproMessage.Person.Id);
+            var jobStatusResult = await _mediator.Send(jobStatusQuery, cancellationToken);
+
+            if (!jobStatusResult.IsSuccess)
+            {
+                // TODO
+                finished = true;
+            }
+
+            if (jobStatusResult.Value.Status == "error")
+            {
+                _logger.LogError("Error generating PDF for Deskpro message {id}", deskproMessageDto.Id);
+                finished = true;
+            }
+
+            if (jobStatusResult.Value.Status == "finished" && !string.IsNullOrEmpty(jobStatusResult.Value.Url))
+            {
+                var getFileQuery = new GetFileQuery(jobStatusResult.Value.Url);
+                var getFileResult = await _mediator.Send(getFileQuery, cancellationToken);
+
+                if (!getFileResult.IsSuccess)
+                {
+                    // TODO
+                    _logger.LogError("Error downloading generated PDF for Deskpro message {id}", deskproMessageDto.Id);
+                    finished = true;
+                }
+                else
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        getFileResult.Value.Stream?.CopyTo(memoryStream);
+                        finished = true;
+
+                        _logger.LogInformation("PDF generated for Deskpro message {id}", deskproMessageDto.Id);
+                        return memoryStream.ToArray();
+                    }
+                }
+            }
+
+            await Task.Delay(5000);
         }
-
-        if (string.IsNullOrEmpty(getDeskproPersonQueryResult.Value?.Email))
-        {
-            _logger.LogWarning("No email for Deskpro person #{id}", deskproMessage.Person.Id);
-        }
-
-        return getDeskproPersonQueryResult.Value;
-    }
-
-
-    private bool GetDeskproMessage(DatabaseAPI.Contracts.DTOs.MessageDto? message, out MessageDto? messageDto)
-    {
-        messageDto = null;
-
-        if (message == null)
-        {
-            _logger.LogError("Queue message does not contain a valid Deskpro Message Id");
-            return false;
-        }
-
-        _logger.LogInformation("Getting Deskpro message #{id}", message.DeskproMessageId);
-
-        var getDeskproMessageQuery = new GetDeskproMessageByIdQuery(message.DeskproTicketId, message.DeskproMessageId);
-        var getDeskproMessageQueryResult = _mediator.Send(getDeskproMessageQuery).GetAwaiter().GetResult();
-
-        if (!getDeskproMessageQueryResult.IsSuccess)
-        {
-            _logger.LogError("Error requesting Deskpro message #{id}. Message will be marked as 'deleted' in database.", message.DeskproMessageId);
-
-            var deleteMessageCommand = new DeleteMessageCommand(message.Id);
-            _mediator.Send(deleteMessageCommand).GetAwaiter().GetResult();
-
-            return false;
-        }
-
-        messageDto = getDeskproMessageQueryResult.Value;
-        return true;
-    }
-
-
-    private bool GetDeskproMessageAttachments(int deskproTicketId, int deskproMessageId, bool messageHasAttachments, out IEnumerable<AttachmentDto> attachmentDtos)
-    {
-        attachmentDtos = Enumerable.Empty<AttachmentDto>();
-
-        if (!messageHasAttachments)
-        {
-            return false;
-        }
-
-        _logger.LogInformation("Getting Deskpro message #{id} attachments", deskproMessageId);
-
-        var getDeskproMessageAttachmentsQuery = new GetDeskproMessageAttachmentsQuery(deskproTicketId, deskproMessageId);
-        var getDeskproMessageAttachmentsResult = _mediator.Send(getDeskproMessageAttachmentsQuery).GetAwaiter().GetResult();
-
-        if (!getDeskproMessageAttachmentsResult.IsSuccess)
-        {
-            _logger.LogError("Error getting attachments for Deskpro message #{id}.", deskproMessageId);
-            return false;
-        }
-
-        attachmentDtos = getDeskproMessageAttachmentsResult.Value;
-        return true;
-    }
-
-
-    private bool GetDeskproTicket(DatabaseAPI.Contracts.DTOs.MessageDto? message, out TicketDto? ticketDto)
-    {
-        ticketDto = null;
-
-        if (message == null)
-        {
-            _logger.LogError("Queue message does not contain a valid Deskpro Ticket Id");
-            return false;
-        }
-
-        _logger.LogInformation("Getting Deskpro ticket #{id}", message.DeskproTicketId);
-
-        var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(message.DeskproTicketId);
-        var getDeskproTicketQueryResult = _mediator.Send(getDeskproTicketQuery).GetAwaiter().GetResult();
-
-        if (!getDeskproTicketQueryResult.IsSuccess)
-        {
-            _logger.LogError("Error requesting Deskpro ticket #{id}", message.DeskproTicketId);
-            return false;
-        }
-
-        ticketDto = getDeskproTicketQueryResult.Value;
-        return true;
+        
+        return Result.Error();
     }
 }
