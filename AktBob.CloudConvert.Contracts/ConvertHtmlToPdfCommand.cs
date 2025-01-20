@@ -3,4 +3,4 @@ using Ardalis.Result;
 using MediatR;
 
 namespace AktBob.CloudConvert.Contracts;
-public record ConvertHtmlToPdfCommand(string[] base64HTMLDocuments) : IRequest<Result<ConvertHtmlToPdfResponseDto>>;
+public record ConvertHtmlToPdfCommand(IEnumerable<byte[]> base64HTMLDocuments) : IRequest<Result<ConvertHtmlToPdfResponseDto>>;

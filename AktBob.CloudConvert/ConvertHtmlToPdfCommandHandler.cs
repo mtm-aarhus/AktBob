@@ -22,7 +22,7 @@ internal class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertCl
             var id = Guid.NewGuid();
             var task = new ImportTask
             {
-                File = item,
+                File = Convert.ToBase64String(item),
                 Filename = $"{id}.html"
             };
 
