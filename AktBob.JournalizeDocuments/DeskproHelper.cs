@@ -121,6 +121,12 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
         foreach (var fieldId in fieldIds)
         {
             var values = ticketDto.Fields.FirstOrDefault(f => f.Id == fieldId)?.Values ?? Enumerable.Empty<string>();
+
+            if (values.Count() == 0)
+            {
+                continue;
+            }
+
             var value = string.Join(", ", values);
             var kvp = new KeyValuePair<string, string>("value", value);
             var html = GenerateHtml(templateFileName, kvp.ToDictionary());
@@ -132,11 +138,11 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
 
     public string GenerateMessageHtml(MessageDto deskproMessageDto, IEnumerable<AttachmentDto> attachments, string goCaseNumber, string caseTitle, int messageNumber)
     {
-        var htmlTemplate = File.ReadAllText("message.html") ?? string.Empty;
+        var htmlTemplate = File.ReadAllText("HTMLTemplates/message.html") ?? string.Empty;
         var attachmentFileNames = attachments.Select(a =>
             GenerateHtml(
-                "message-attachments.html",
-                new KeyValuePair<string, string>("filename", a.FileName).ToDictionary()));
+                "HTMLTemplates/message-attachments.html",
+                new KeyValuePair<string, string>("value", a.FileName).ToDictionary()));
 
         var dictionary = new Dictionary<string, string>
         {

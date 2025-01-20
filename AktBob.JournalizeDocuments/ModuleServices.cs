@@ -20,7 +20,9 @@ public static class ModuleServices
         };
 
         services.AddGetOrganizedModule(getOrganizedOptions);        
-        services.AddHostedService<JournalizeSingleMessagesBackgroundService>();
+        //services.AddHostedService<JournalizeSingleMessagesBackgroundService>();
+        services.AddHostedService<JournalizeFullTicketDocumentBackgroundService>();
+
 
         services.AddTransient<DeskproHelper>();
         services.AddTransient<GetOrganizedHelper>();

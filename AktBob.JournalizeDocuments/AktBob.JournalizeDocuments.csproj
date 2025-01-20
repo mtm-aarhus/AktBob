@@ -20,6 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="HTMLTemplates\custom-field.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="HTMLTemplates\ticket-case-numbers.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

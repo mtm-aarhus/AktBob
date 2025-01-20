@@ -20,6 +20,7 @@
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
     <ProjectReference Include="..\AktBob.JournalizeDocuments\AktBob.JournalizeDocuments.csproj" />
+    <ProjectReference Include="..\AktBob.Queue\AktBob.Queue.csproj" />
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
   </ItemGroup>
 

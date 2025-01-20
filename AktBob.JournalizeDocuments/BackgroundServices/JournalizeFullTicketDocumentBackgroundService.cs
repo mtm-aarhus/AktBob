@@ -39,7 +39,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var delaySeconds = _configuration.GetValue<int?>("JournalizeFullDeskproTicket:WorkerIntervalSeconds") ?? 300;
-        var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"DocumentListTrigger:AzureQueueName"));
+        var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"JournalizeFullDeskproTicket:AzureQueueName"));
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -47,7 +47,9 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
 
             foreach (var queueItem in queueItems)
             {
-                var item = JsonSerializer.Deserialize<JournalizeFullTicketQueueItemDto>(queueItem.Body);
+                var body = queueItem.Body.ToString();
+                var bodyDecoded = Encoding.UTF8.GetString(Convert.FromBase64String(body));
+                var item = JsonSerializer.Deserialize<JournalizeFullTicketQueueItemDto>(bodyDecoded, new JsonSerializerOptions {  PropertyNameCaseInsensitive = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
 
                 if (item == null)
                 {
@@ -77,7 +79,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
 
                     // Get custom fields specification
                     var ticketCustomFieldsQuery = new GetDeskproCustomFieldSpecificationsQuery();
-                    var ticketCustomFieldsResult = await _mediator.Send(ticketCustomFieldsQuery, stoppingToken);
+                    var ticketCustomFieldsResult = await _mediator.Send(ticketCustomFieldsQuery, stoppingToken); // TODO: Cache
 
                     if (!ticketCustomFieldsResult.IsSuccess)
                     {
@@ -103,7 +105,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
 
                     // Map ticket fields
                     var customFields = GenerateCustomFieldValues(item.CustomFieldIds, ticketCustomFieldsResult.Value, ticket);
-                    var caseNumbers = _deskproHelper.GenerateListOfFieldValues(item.CaseNumberFieldIds, ticket, "ticket-case-numbers.html");
+                    var caseNumbers = _deskproHelper.GenerateListOfFieldValues(item.CaseNumberFieldIds, ticket, "HTMLTemplates/ticket-case-numbers.html");
 
                     var ticketDictionary = new Dictionary<string, string>
                 {
@@ -117,7 +119,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
                     { "caseNumbers", string.Join("", caseNumbers) }
                 };
 
-                    var ticketHtml = _deskproHelper.GenerateHtml("ticket.html", ticketDictionary);
+                    var ticketHtml = _deskproHelper.GenerateHtml("HTMLTemplates/ticket.html", ticketDictionary);
                     content.Add(Encoding.UTF8.GetBytes(ticketHtml));
 
 
@@ -204,7 +206,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
                 { "value", value }
             };
 
-            var html = _deskproHelper.GenerateHtml("custom-field.html", dictionary);
+            var html = _deskproHelper.GenerateHtml("HTMLTemplates/custom-field.html", dictionary);
             items.Add(html);
         }
 
