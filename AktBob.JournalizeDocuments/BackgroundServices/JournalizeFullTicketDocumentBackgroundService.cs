@@ -47,6 +47,9 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
 
             foreach (var queueItem in queueItems)
             {
+                var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(azureQueueName, queueItem.Id, queueItem.PopReceipt);
+                await _mediator.Send(deleteAzureQueueItemCommand);
+
                 var body = queueItem.Body.ToString();
                 var bodyDecoded = Encoding.UTF8.GetString(Convert.FromBase64String(body));
                 var item = JsonSerializer.Deserialize<JournalizeFullTicketQueueItemDto>(bodyDecoded, new JsonSerializerOptions {  PropertyNameCaseInsensitive = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
@@ -244,6 +247,6 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
             return Enumerable.Empty<QueueMessageDto>();
         }
 
-        return getQueueMessagesResult.Value;
+       return getQueueMessagesResult.Value;
     }
 }
