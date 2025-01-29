@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using AktBob.DatabaseAPI.Contracts.Queries;
 using AktBob.Deskpro.Contracts;
+using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Queue.Contracts;
 using AktBob.UiPath.Contracts;
 using Ardalis.GuardClauses;
@@ -15,6 +16,7 @@ internal class BackgroundWorker : BackgroundService
 {
     private readonly IConfiguration _configuration;
     private readonly ILogger<BackgroundWorker> _logger;
+    private readonly string _configurationObjectName = "JournalizeEverythingTrigger";
 
     public IServiceProvider ServiceProvider { get; }
 
@@ -27,25 +29,32 @@ internal class BackgroundWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var tenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
-        var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"JournalizeEverythingTrigger:AzureQueueName"));
-        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"JournalizeEverythingTrigger:UiPathQueueName:{tenancyName}"));
-        var delay = _configuration.GetValue<int?>("JournalizeEverythingTrigger:WorkerIntervalSeconds") ?? 10;
+        // Background service variables
+        var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:AzureQueueName"));
+        var delay = _configuration.GetValue<int?>($"{_configurationObjectName}:WorkerIntervalSeconds") ?? 10;
 
+        // UiPath variables
+        var uiPathTenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
+        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:UiPathQueueName:{uiPathTenancyName}"));
+
+        // OpenOrchestrator variables
+        var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:OpenOrchestratorQueueName"));
+        var useOpenOrchestrator = _configuration.GetValue<bool>($"{_configurationObjectName}:UseOpenOrchestrator");
+        
         using (var scope = ServiceProvider.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var getQueueMessagesQuery = new GetQueueMessagesQuery(azureQueueName!);
-                var azureQueueMessages = await mediator.Send(getQueueMessagesQuery);
+                var getAzureQueueMessagesQuery = new GetQueueMessagesQuery(azureQueueName);
+                var getAzureQueueMessagesResult = await mediator.Send(getAzureQueueMessagesQuery);
 
-                if (azureQueueMessages.IsSuccess)
+                if (getAzureQueueMessagesResult.IsSuccess)
                 {
-
-                    foreach (var azureQueueMessage in azureQueueMessages.Value)
+                    foreach (var azureQueueMessage in getAzureQueueMessagesResult.Value)
                     {
+                        // Delete queue item from Azure queue
                         var deleteAzureQueueItemCommand = new DeleteQueueMessageCommand(azureQueueName, azureQueueMessage.Id, azureQueueMessage.PopReceipt);
                         await mediator.Send(deleteAzureQueueItemCommand);
 
@@ -54,6 +63,10 @@ internal class BackgroundWorker : BackgroundService
                             _logger.LogError("Azure queue item body is empty. Expected a Deskpro ticket Id");
                             continue;
                         }
+
+
+
+                        // GET CONTENT OF QUEUE ITEM
 
                         // Retrieve the Base64 encoded message from Azure Queue
                         string base64EncodedMessage = azureQueueMessage.Body.ToString();
@@ -68,24 +81,26 @@ internal class BackgroundWorker : BackgroundService
                         }
 
 
-                        
-                        var getTicketByPodioItemIdQuery = new GetTicketByDeskproIdQuery(deskproId);
-                        var getTicketByPodioItemIdQueryResult = await mediator.Send(getTicketByPodioItemIdQuery);
 
-                        if (getTicketByPodioItemIdQueryResult.IsSuccess)
+
+                        // GET DATA FROM API DATABASE
+                        var getDataFromApiDatabaseQuery = new GetTicketByDeskproIdQuery(deskproId);
+                        var getDataFromApiDatabaseResult = await mediator.Send(getDataFromApiDatabaseQuery);
+
+                        if (getDataFromApiDatabaseResult.IsSuccess)
                         {
-                            if (getTicketByPodioItemIdQueryResult.Value.Count() < 1)
+                            if (getDataFromApiDatabaseResult.Value.Count() < 1)
                             {
                                 _logger.LogError("0 Deskpro tickets found for id {id}.", deskproId);
                                 continue;
                             }
 
-                            if (getTicketByPodioItemIdQueryResult.Value.Count() > 1)
+                            if (getDataFromApiDatabaseResult.Value.Count() > 1)
                             {
-                                _logger.LogWarning("{count} Deskpro tickets found for id {id}. Only processing the first.", getTicketByPodioItemIdQueryResult.Value.Count(), deskproId);
+                                _logger.LogWarning("{count} Deskpro tickets found for id {id}. Only processing the first.", getDataFromApiDatabaseResult.Value.Count(), deskproId);
                             }
 
-                            var ticket = getTicketByPodioItemIdQueryResult.Value.FirstOrDefault();
+                            var ticket = getDataFromApiDatabaseResult.Value.FirstOrDefault();
 
                             if (ticket is null)
                             {
@@ -99,7 +114,9 @@ internal class BackgroundWorker : BackgroundService
                                 continue;
                             }
 
-                            // Get data from Deskpro
+
+
+                            // GET DATA FROM DESKPRO
                             var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticket.DeskproId);
                             var getDeskproTicketQueryResult = await mediator.Send(getDeskproTicketQuery);
 
@@ -122,23 +139,43 @@ internal class BackgroundWorker : BackgroundService
                                     }
                                 }
 
-                                var uiPathQueueItemContent = new
+
+
+                                // CREATE QUEUE ITEM FOR UIPATH/OPENORCHESTRATOR
+
+                                if (useOpenOrchestrator)
                                 {
-                                    Aktindsigtssag = ticket.CaseNumber,
-                                    Email = agentEmail,
-                                    Navn = agentName,
-                                    DeskproID = deskproId,
-                                    Overmappenavn = ticket.SharepointFolderName
-                                };
+                                    // Create OpenOrchestrator queue item
+                                    var data = new
+                                    {
+                                        Aktindsigtssag = ticket.CaseNumber,
+                                        Email = agentEmail,
+                                        Navn = agentName,
+                                        DeskproID = deskproId,
+                                        Overmappenavn = ticket.SharepointFolderName
+                                    };
 
+                                    var command = new CreateQueueItemCommand(openOrchestratorQueueName, data, $"Deskpro ID {deskproId}");
+                                    await mediator.Send(command, stoppingToken);
+                                }
+                                else
+                                {
+                                    // Create UiPath queue item
+                                    var uiPathQueueItemContent = new
+                                    {
+                                        Aktindsigtssag = ticket.CaseNumber,
+                                        Email = agentEmail,
+                                        Navn = agentName,
+                                        DeskproID = deskproId,
+                                        Overmappenavn = ticket.SharepointFolderName
+                                    };
 
-                                // Post UiPath queue item
-                                var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, $"DeskproId {deskproId.ToString()}", uiPathQueueItemContent);
-                                await mediator.Send(addUiPathQueueItemCommand);
+                                    var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, $"DeskproId {deskproId.ToString()}", uiPathQueueItemContent);
+                                    await mediator.Send(addUiPathQueueItemCommand);
+                                }
                             }
 
                         }
-
                     }
                 }
 
