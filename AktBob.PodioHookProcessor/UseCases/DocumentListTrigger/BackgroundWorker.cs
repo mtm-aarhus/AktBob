@@ -19,6 +19,7 @@ internal class BackgroundWorker : BackgroundService
     private ILogger<BackgroundWorker> _logger;
     private IConfiguration _configuration;
     private readonly IPodio _podio;
+    private readonly string _configurationObjectName = "DocumentListTrigger";
 
     public IServiceProvider ServiceProvider { get; }
 
@@ -32,17 +33,23 @@ internal class BackgroundWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Background service variables
+        var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:AzureQueueName"));
+        var delay = _configuration.GetValue<int?>($"{_configurationObjectName}:WorkerIntervalSeconds") ?? 10;
+
+        // UiPath variables
         var tenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
-        var azureQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"DocumentListTrigger:AzureQueueName"));
-        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"DocumentListTrigger:UiPathQueueName:{tenancyName}"));
-        var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("DocumentListTrigger:OpenOrchestratorQueueName"));
-        var useOpenOrchestrator = _configuration.GetValue<bool>("DocumentListTrigger:UseOpenOrchestrator");
+        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:UiPathQueueName:{tenancyName}"));
 
+        // OpenOrchestrator variables
+        var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:OpenOrchestratorQueueName"));
+        var useOpenOrchestrator = _configuration.GetValue<bool>($"{_configurationObjectName}:UseOpenOrchestrator");
 
-        var delay = _configuration.GetValue<int?>("DocumentListTrigger:WorkerIntervalSeconds") ?? 10;
+        // Podio variables
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
         var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => long.Parse(x.Key), x => x.Get<PodioField>())));
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "CaseNumber"));
+
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
         using (var scope = ServiceProvider.CreateScope())
