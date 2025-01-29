@@ -1,5 +1,4 @@
-﻿using AAK.Podio;
-using AktBob.DatabaseAPI.Contracts.Queries;
+﻿using AktBob.DatabaseAPI.Contracts.Queries;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.OpenOrchestrator.Contracts;
@@ -18,17 +17,15 @@ internal class BackgroundWorker : BackgroundService
 {
     private ILogger<BackgroundWorker> _logger;
     private IConfiguration _configuration;
-    private readonly IPodio _podio;
     private readonly string _configurationObjectName = "DocumentListTrigger";
 
     public IServiceProvider ServiceProvider { get; }
 
-    public BackgroundWorker(ILogger<BackgroundWorker> logger, IConfiguration configuration, IServiceProvider serviceProvider, IPodio podio)
+    public BackgroundWorker(ILogger<BackgroundWorker> logger, IConfiguration configuration, IServiceProvider serviceProvider)
     {
         _logger = logger;
         _configuration = configuration;
         ServiceProvider = serviceProvider;
-        _podio = podio;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
