@@ -137,7 +137,14 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
 
 
                     // Upload parent document
-                    var uploadDocumentResult = await _getOrganizedHelpers.UploadDocumentToGO(generateDocumentResult.Value, message.GOCaseNumber, fileName, metadata, stoppingToken);
+                    var uploadDocumentResult = await _getOrganizedHelpers.UploadDocumentToGO(
+                        bytes: generateDocumentResult.Value,
+                        caseNumber: message.GOCaseNumber,
+                        fileName: fileName,
+                        metadata: metadata,
+                        overwrite: false,
+                        cancellationToken: stoppingToken);
+
                     if (!uploadDocumentResult.IsSuccess)
                     {
                         _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", message.DeskproMessageId, message.GOCaseNumber);

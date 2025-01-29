@@ -26,7 +26,6 @@
     <ProjectReference Include="..\AktBob.CloudConvert\AktBob.CloudConvert.csproj" />
     <ProjectReference Include="..\AktBob.DatabaseAPI\AktBob.DatabaseAPI.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
-    <ProjectReference Include="..\AktBob.DocumentGenerator\AktBob.DocumentGenerator.csproj" />
     <ProjectReference Include="..\AktBob.Email\AktBob.Email.csproj" />
     <ProjectReference Include="..\AktBob.JournalizeDocuments\AktBob.JournalizeDocuments.csproj" />
     <ProjectReference Include="..\AktBob.OpenOrchestrator\AktBob.OpenOrchestrator.csproj" />

@@ -7,14 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AAK.GetOrganized" Version="1.4.0" />
+    <PackageReference Include="AAK.GetOrganized" Version="1.4.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AktBob.CloudConvert.Contracts\AktBob.CloudConvert.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.DatabaseAPI.Contracts\AktBob.DatabaseAPI.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
-    <ProjectReference Include="..\AktBob.DocumentGenerator.Contracts\AktBob.DocumentGenerator.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Queue.Contracts\AktBob.Queue.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
   </ItemGroup>

@@ -15,10 +15,10 @@ internal class GetOrganizedHelper(ILogger<GetOrganizedHelper> logger, IGetOrgani
     private readonly IMediator _mediator = mediator;
     private readonly IConfiguration _configuration = configuration;
 
-    public async Task<Result<int>> UploadDocumentToGO(byte[] bytes, string caseNumber, string fileName, UploadDocumentMetadata metadata, CancellationToken cancellationToken = default)
+    public async Task<Result<int>> UploadDocumentToGO(byte[] bytes, string caseNumber, string fileName, UploadDocumentMetadata metadata, bool overwrite, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}', file size (bytes): {filesize}) ...", caseNumber, fileName, bytes.Length);
-        var listName = _configuration.GetValue<string>("GetOrganized:DefaultListPath") ?? "Dokumenter";
+        var listName = _configuration.GetValue<string>("GetOrganized:DefaultListName") ?? "Dokumenter";
 
         var result = await _getOrganizedClient.UploadDocument(
                             bytes,
@@ -27,14 +27,16 @@ internal class GetOrganizedHelper(ILogger<GetOrganizedHelper> logger, IGetOrgani
                             string.Empty,
                             fileName,
                             metadata,
+                            overwrite,
                             cancellationToken);
 
         if (result is not null)
         {
+            _logger.LogInformation("Document uploaded to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}').", caseNumber, fileName);
             return result.DocumentId;
         }
 
-        _logger.LogError("Error uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}', file size (bytes): {filesize})", caseNumber, fileName, bytes.Length);
+        _logger.LogError("Error uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}')", caseNumber, fileName);
         return Result.Error();
     }
 
@@ -67,7 +69,7 @@ internal class GetOrganizedHelper(ILogger<GetOrganizedHelper> logger, IGetOrgani
                 var attachmentBytes = stream.ToArray();
 
                 // Upload the attachment to GO
-                var uploadDocumentResult = await UploadDocumentToGO(attachmentBytes, caseNumber, attachment.FileName, metadata, cancellationToken);
+                var uploadDocumentResult = await UploadDocumentToGO(attachmentBytes, caseNumber, attachment.FileName, metadata, overwrite: false, cancellationToken); // TODO: make unique filenames independent from possible file already uploaded with same file name
                 if (!uploadDocumentResult.IsSuccess)
                 {
                     continue;

@@ -10,7 +10,6 @@ using AktBob.Deskpro;
 using AktBob.PodioHookProcessor;
 using AktBob.DatabaseAPI;
 using AktBob.Podio;
-using AktBob.DocumentGenerator;
 using AktBob.JournalizeDocuments;
 using AktBob.OpenOrchestrator;
 using AktBob.CloudConvert;
@@ -35,7 +34,6 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddDeskproModule(hostContext.Configuration, mediatrAssemblies);
         services.AddDatabaseApiModule(hostContext.Configuration, mediatrAssemblies);
         services.AddPodioModule(hostContext.Configuration, mediatrAssemblies);
-        services.AddDocumentGeneratorModule(mediatrAssemblies);
         services.AddJournalizeDocumentsModule(hostContext.Configuration, mediatrAssemblies);
         services.AddOpenOrchestratorModule(hostContext.Configuration, mediatrAssemblies);
         services.AddCloudConvertModule(hostContext.Configuration, mediatrAssemblies);
