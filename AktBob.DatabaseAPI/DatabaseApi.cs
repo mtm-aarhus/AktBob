@@ -104,6 +104,36 @@ internal class DatabaseApi : IDatabaseApi
         }
     }
 
+    public async Task<Result<IEnumerable<MessageDto>>> GetMessageByDeskproMessageId(int deskproMessageId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync(new Uri($"Database/Messages?deskproMessageId={deskproMessageId}", UriKind.Relative), cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var messages = JsonSerializer.Deserialize<IEnumerable<MessageDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (messages is null)
+            {
+                return Result.Success(Enumerable.Empty<MessageDto>());
+            }
+
+            return Result.Success(messages);
+
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError("HttpRequestException requesting API for message by Deskpro Message Id. StatusCode: {statusCode}. Error: {message}", e.StatusCode, e.Message);
+            return Result.Error();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Error requesting API for message by Deskpro Message Id. Error: {message}", e.Message);
+            return Result.Error();
+        }
+    }
+
     public async Task DeleteMessage(int id, CancellationToken cancellationToken = default)
     {
         try

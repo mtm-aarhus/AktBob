@@ -13,6 +13,7 @@ using AktBob.Podio;
 using AktBob.DocumentGenerator;
 using AktBob.JournalizeDocuments;
 using AktBob.OpenOrchestrator;
+using AktBob.CloudConvert;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -37,6 +38,8 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddDocumentGeneratorModule(mediatrAssemblies);
         services.AddJournalizeDocumentsModule(hostContext.Configuration, mediatrAssemblies);
         services.AddOpenOrchestratorModule(hostContext.Configuration, mediatrAssemblies);
+        services.AddCloudConvertModule(hostContext.Configuration, mediatrAssemblies);
+
 
         // Mediatr
         services.AddMediatR(c =>

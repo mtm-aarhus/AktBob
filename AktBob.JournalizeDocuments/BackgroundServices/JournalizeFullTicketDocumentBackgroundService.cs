@@ -105,7 +105,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
 
                     // Map ticket fields
                     var customFields = GenerateCustomFieldValues(item.CustomFieldIds, ticketCustomFieldsResult.Value, ticket);
-                    var caseNumbers = HtmlHelper.GenerateListOfFieldValues(item.CaseNumberFieldIds, ticket, "HTMLTemplates/ticket-case-numbers.html");
+                    var caseNumbers = HtmlHelper.GenerateListOfFieldValues(item.CaseNumberFieldIds, ticket, "ticket-case-numbers.html");
 
                     var ticketDictionary = new Dictionary<string, string>
                 {
@@ -119,7 +119,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
                     { "caseNumbers", string.Join("", caseNumbers) }
                 };
 
-                    var ticketHtml = HtmlHelper.GenerateHtml("HTMLTemplates/ticket.html", ticketDictionary);
+                    var ticketHtml = HtmlHelper.GenerateHtml("ticket.html", ticketDictionary);
                     content.Add(Encoding.UTF8.GetBytes(ticketHtml));
 
 
@@ -136,7 +136,21 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
                             attachments = await _deskproHelper.GetDeskproMessageAttachments(ticket.Id, message.Id);
                         }
 
-                        var messageHtml = HtmlHelper.GenerateMessageHtml(message, attachments, item.GOCaseNumber, ticket.Subject, 0); // TODO: fix message number
+                        // Get message number from API database
+                        var messageNumber = 0;
+                        var getMessageFromApiDatabaseQuery = new DatabaseAPI.Contracts.Queries.GetMessageByDeskproMessageIdQuery(message.Id);
+                        var getMessageFromApiDatabaseResult = await _mediator.Send(getMessageFromApiDatabaseQuery, stoppingToken);
+                        
+                        if (!getMessageFromApiDatabaseResult.IsSuccess)
+                        {
+                            _logger.LogWarning("No message found in API database for Deskpro message ID {id}", message.Id);
+                        }
+                        else
+                        {
+                            messageNumber = getMessageFromApiDatabaseResult.Value.MessageNumber ?? 0;
+                        }
+                        
+                        var messageHtml = HtmlHelper.GenerateMessageHtml(message, attachments, item.GOCaseNumber, ticket.Subject, messageNumber); // TODO: fix message number
                         content.Add(Encoding.UTF8.GetBytes(messageHtml));
                     }
 
@@ -169,7 +183,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
 
                     var fileName = "Samlet korrespondance.pdf";
 
-                    var uploadDocumentResult = await _getOrganizedHelper.UploadDocumentToGO(getJobResult.Value, item.GOCaseNumber, string.Empty, fileName, metadata, stoppingToken);
+                    var uploadDocumentResult = await _getOrganizedHelper.UploadDocumentToGO(getJobResult.Value, item.GOCaseNumber, fileName, metadata, stoppingToken);
 
                     if (!uploadDocumentResult.IsSuccess)
                     {
@@ -206,7 +220,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
                 { "value", value }
             };
 
-            var html = HtmlHelper.GenerateHtml("HTMLTemplates/custom-field.html", dictionary);
+            var html = HtmlHelper.GenerateHtml("custom-field.html", dictionary);
             items.Add(html);
         }
 

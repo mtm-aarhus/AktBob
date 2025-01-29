@@ -5,7 +5,9 @@ internal static class HtmlHelper
 {
     public static string GenerateHtml(string templateFileName, Dictionary<string, string> dictionary)
     {
-        var template = File.ReadAllText(templateFileName); // TODO: cache
+        string appRoot = AppDomain.CurrentDomain.BaseDirectory;
+        string templatePath = Path.Combine(appRoot, "HtmlTemplates", templateFileName);
+        var template = File.ReadAllText(templatePath); // TODO: cache
         var html = template.ReplacePlaceholders(dictionary);
         return html;
     }
@@ -34,10 +36,13 @@ internal static class HtmlHelper
 
     public static string GenerateMessageHtml(MessageDto deskproMessageDto, IEnumerable<AttachmentDto> attachments, string goCaseNumber, string caseTitle, int messageNumber)
     {
-        var htmlTemplate = File.ReadAllText("HTMLTemplates/message.html") ?? string.Empty;
+        string appRoot = AppDomain.CurrentDomain.BaseDirectory;
+        string messageTemplatePath = Path.Combine(appRoot, "HtmlTemplates", "message.html");
+        var messageTemplate = File.ReadAllText(messageTemplatePath);
+
         var attachmentFileNames = attachments.Select(a =>
             GenerateHtml(
-                "HTMLTemplates/message-attachments.html",
+                "message-attachments.html",
                 new KeyValuePair<string, string>("value", a.FileName).ToDictionary()));
 
         var dictionary = new Dictionary<string, string>
@@ -52,7 +57,7 @@ internal static class HtmlHelper
             { "messageContent", deskproMessageDto.Content }
         };
 
-        var html = htmlTemplate.ReplacePlaceholders(dictionary);
+        var html = messageTemplate.ReplacePlaceholders(dictionary);
         return html;
     }
 }

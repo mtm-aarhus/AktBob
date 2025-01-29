@@ -137,7 +137,7 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
 
 
                     // Upload parent document
-                    var uploadDocumentResult = await _getOrganizedHelpers.UploadDocumentToGO(generateDocumentResult.Value, message.GOCaseNumber, string.Empty, fileName, metadata, stoppingToken);
+                    var uploadDocumentResult = await _getOrganizedHelpers.UploadDocumentToGO(generateDocumentResult.Value, message.GOCaseNumber, fileName, metadata, stoppingToken);
                     if (!uploadDocumentResult.IsSuccess)
                     {
                         _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", message.DeskproMessageId, message.GOCaseNumber);
@@ -208,7 +208,6 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
     {
         _logger.LogInformation("Generating PDF document from Deskpro message #{id}", deskproMessageDto.Id);
 
-        var htmlTemplate = File.ReadAllText("message.html") ?? string.Empty;
         var html = HtmlHelper.GenerateMessageHtml(deskproMessageDto, attachmentDtos, databaseMessageDto.GOCaseNumber ?? string.Empty, deskproTicket.Subject, databaseMessageDto.MessageNumber ?? 0);
         var bytes = Encoding.UTF8.GetBytes(html);
 
