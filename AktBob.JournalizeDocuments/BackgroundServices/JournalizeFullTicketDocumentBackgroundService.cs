@@ -169,7 +169,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
 
                     var fileName = "Samlet korrespondance.pdf";
 
-                    var uploadDocumentResult = await _getOrganizedHelper.UploadDocumentToGO(getJobResult.Value, item.GOCaseNumber, "Dokumenter", string.Empty, fileName, metadata, stoppingToken);
+                    var uploadDocumentResult = await _getOrganizedHelper.UploadDocumentToGO(getJobResult.Value, item.GOCaseNumber, string.Empty, fileName, metadata, stoppingToken);
 
                     if (!uploadDocumentResult.IsSuccess)
                     {

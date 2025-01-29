@@ -5,23 +5,26 @@ using Microsoft.Extensions.Logging;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Deskpro.Contracts;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 
 namespace AktBob.JournalizeDocuments;
-internal class GetOrganizedHelper(ILogger<GetOrganizedHelper> logger, IGetOrganizedClient getOrganizedClient, IMediator mediator)
+internal class GetOrganizedHelper(ILogger<GetOrganizedHelper> logger, IGetOrganizedClient getOrganizedClient, IMediator mediator, IConfiguration configuration)
 {
     private readonly ILogger<GetOrganizedHelper> _logger = logger;
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
     private readonly IMediator _mediator = mediator;
+    private readonly IConfiguration _configuration = configuration;
 
     public async Task<Result<int>> UploadDocumentToGO(byte[] bytes, string caseNumber, string listName, string fileName, UploadDocumentMetadata metadata, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}', file size (bytes): {filesize}) ...", caseNumber, fileName, bytes.Length);
+        var folderPath = _configuration.GetValue<string>("GetOrganized:DefaultFolderPath") ?? "Dokumenter";
 
         var result = await _getOrganizedClient.UploadDocument(
                             bytes,
                             caseNumber,
                             listName,
-                            "Dokumenter",
+                            folderPath,
                             fileName,
                             metadata,
                             cancellationToken);
@@ -64,7 +67,7 @@ internal class GetOrganizedHelper(ILogger<GetOrganizedHelper> logger, IGetOrgani
                 var attachmentBytes = stream.ToArray();
 
                 // Upload the attachment to GO
-                var uploadDocumentResult = await UploadDocumentToGO(attachmentBytes, caseNumber, "Dokumenter", string.Empty, attachment.FileName, metadata, cancellationToken);
+                var uploadDocumentResult = await UploadDocumentToGO(attachmentBytes, caseNumber, string.Empty, attachment.FileName, metadata, cancellationToken);
                 if (!uploadDocumentResult.IsSuccess)
                 {
                     continue;
