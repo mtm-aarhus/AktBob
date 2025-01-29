@@ -105,7 +105,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
 
                     // Map ticket fields
                     var customFields = GenerateCustomFieldValues(item.CustomFieldIds, ticketCustomFieldsResult.Value, ticket);
-                    var caseNumbers = _deskproHelper.GenerateListOfFieldValues(item.CaseNumberFieldIds, ticket, "HTMLTemplates/ticket-case-numbers.html");
+                    var caseNumbers = HtmlHelper.GenerateListOfFieldValues(item.CaseNumberFieldIds, ticket, "HTMLTemplates/ticket-case-numbers.html");
 
                     var ticketDictionary = new Dictionary<string, string>
                 {
@@ -119,7 +119,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
                     { "caseNumbers", string.Join("", caseNumbers) }
                 };
 
-                    var ticketHtml = _deskproHelper.GenerateHtml("HTMLTemplates/ticket.html", ticketDictionary);
+                    var ticketHtml = HtmlHelper.GenerateHtml("HTMLTemplates/ticket.html", ticketDictionary);
                     content.Add(Encoding.UTF8.GetBytes(ticketHtml));
 
 
@@ -136,7 +136,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
                             attachments = await _deskproHelper.GetDeskproMessageAttachments(ticket.Id, message.Id);
                         }
 
-                        var messageHtml = _deskproHelper.GenerateMessageHtml(message, attachments, item.GOCaseNumber, ticket.Subject, 0); // TODO: fix message number
+                        var messageHtml = HtmlHelper.GenerateMessageHtml(message, attachments, item.GOCaseNumber, ticket.Subject, 0); // TODO: fix message number
                         content.Add(Encoding.UTF8.GetBytes(messageHtml));
                     }
 
@@ -206,7 +206,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
                 { "value", value }
             };
 
-            var html = _deskproHelper.GenerateHtml("HTMLTemplates/custom-field.html", dictionary);
+            var html = HtmlHelper.GenerateHtml("HTMLTemplates/custom-field.html", dictionary);
             items.Add(html);
         }
 

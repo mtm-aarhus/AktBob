@@ -13,7 +13,7 @@ internal class GetOrganizedHelper(ILogger<GetOrganizedHelper> logger, IGetOrgani
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
     private readonly IMediator _mediator = mediator;
 
-    public async Task<Result<int>> UploadDocumentToGO(byte[] bytes, string caseNumber, string listName, string folderPath, string fileName, UploadDocumentMetadata metadata, CancellationToken cancellationToken = default)
+    public async Task<Result<int>> UploadDocumentToGO(byte[] bytes, string caseNumber, string listName, string fileName, UploadDocumentMetadata metadata, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}', file size (bytes): {filesize}) ...", caseNumber, fileName, bytes.Length);
 
@@ -21,7 +21,7 @@ internal class GetOrganizedHelper(ILogger<GetOrganizedHelper> logger, IGetOrgani
                             bytes,
                             caseNumber,
                             listName,
-                            folderPath,
+                            "Dokumenter",
                             fileName,
                             metadata,
                             cancellationToken);
