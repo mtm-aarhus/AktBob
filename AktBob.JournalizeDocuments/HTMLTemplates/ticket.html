@@ -112,7 +112,8 @@
                     Aktindsigtsansvarlig
                 </td>
                 <td>
-                    {{agentName}}
+                    <em>{{agentName}}</em><br />
+                    <span class="text-small">Email: {{agentEmail}}</span>
                 </td>
             </tr>
 
@@ -125,8 +126,17 @@
                 </td>
             </tr>
 
-            {{custom-fields}}
+            <tr>
+                <td class="parameter-name">
+                    Sagssystem ID
+                </td>
+                <td>
+                    {{ticketId}}
+                </td>
+            </tr>
 
+            {{custom-fields}}
+            
             <tr>
                 <td class="parameter-name">
                     Vedrører følgende sager i GO/Nova

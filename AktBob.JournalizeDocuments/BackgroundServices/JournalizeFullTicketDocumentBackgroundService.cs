@@ -111,16 +111,17 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
                     var caseNumbers = HtmlHelper.GenerateListOfFieldValues(item.CaseNumberFieldIds, ticket, "ticket-case-numbers.html");
 
                     var ticketDictionary = new Dictionary<string, string>
-                {
-                    { "ticketId", ticket.Id.ToString() },
-                    { "caseTitle", ticket.Subject },
-                    { "userName", userResult.Value.FullName },
-                    { "userEmail", userResult.Value.Email },
-                    { "userPhone", string.Join(", ", userResult.Value.PhoneNumbers) },
-                    { "agentName", agentResult.Value.FullName },
-                    { "custom-fields", string.Join("", customFields) },
-                    { "caseNumbers", string.Join("", caseNumbers) }
-                };
+                    {
+                        { "ticketId", ticket.Id.ToString() },
+                        { "caseTitle", ticket.Subject },
+                        { "userName", userResult.Value.FullName },
+                        { "userEmail", userResult.Value.Email },
+                        { "userPhone", string.Join(", ", userResult.Value.PhoneNumbers) },
+                        { "agentName", agentResult.Value.FullName },
+                        { "agentEmail", agentResult.Value.Email },
+                        { "custom-fields", string.Join("", customFields) },
+                        { "caseNumbers", string.Join("", caseNumbers) }
+                    };
 
                     var ticketHtml = HtmlHelper.GenerateHtml("ticket.html", ticketDictionary);
                     content.Add(Encoding.UTF8.GetBytes(ticketHtml));
