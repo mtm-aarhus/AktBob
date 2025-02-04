@@ -129,34 +129,39 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
 
 
                     // Messages
-                    var messages = await _deskproHelper.GetDeskproMessages(ticket.Id);
-                    foreach (var message in messages)
+                    var getMessagesQuery = new GetDeskproMessagesQuery(ticket.Id);
+                    var getMessagesResult  = await _mediator.SendRequest(getMessagesQuery);
+
+                    if (getMessagesResult.IsSuccess)
                     {
-                        var person = await _deskproHelper.GetDeskproPerson(message.Person?.Id);
-                        message.Person = person.Value;
+                        foreach (var message in getMessagesResult.Value)
+                        {
+                            var person = await _deskproHelper.GetDeskproPerson(message.Person?.Id);
+                            message.Person = person.Value;
 
-                        var attachments = Enumerable.Empty<AttachmentDto>();
-                        if (message.AttachmentIds.Any())
-                        {
-                            attachments = await _deskproHelper.GetDeskproMessageAttachments(ticket.Id, message.Id);
-                        }
+                            var attachments = Enumerable.Empty<AttachmentDto>();
+                            if (message.AttachmentIds.Any())
+                            {
+                                attachments = await _deskproHelper.GetDeskproMessageAttachments(ticket.Id, message.Id);
+                            }
 
-                        // Get message number from API database
-                        var messageNumber = 0;
-                        var getMessageFromApiDatabaseQuery = new DatabaseAPI.Contracts.Queries.GetMessageByDeskproMessageIdQuery(message.Id);
-                        var getMessageFromApiDatabaseResult = await _mediator.SendRequest(getMessageFromApiDatabaseQuery, stoppingToken);
+                            // Get message number from API database
+                            var messageNumber = 0;
+                            var getMessageFromApiDatabaseQuery = new DatabaseAPI.Contracts.Queries.GetMessageByDeskproMessageIdQuery(message.Id);
+                            var getMessageFromApiDatabaseResult = await _mediator.SendRequest(getMessageFromApiDatabaseQuery, stoppingToken);
                         
-                        if (!getMessageFromApiDatabaseResult.IsSuccess)
-                        {
-                            _logger.LogWarning("No message found in API database for Deskpro message ID {id}", message.Id);
-                        }
-                        else
-                        {
-                            messageNumber = getMessageFromApiDatabaseResult.Value.MessageNumber ?? 0;
-                        }
+                            if (!getMessageFromApiDatabaseResult.IsSuccess)
+                            {
+                                _logger.LogWarning("No message found in API database for Deskpro message ID {id}", message.Id);
+                            }
+                            else
+                            {
+                                messageNumber = getMessageFromApiDatabaseResult.Value.MessageNumber ?? 0;
+                            }
                         
-                        var messageHtml = HtmlHelper.GenerateMessageHtml(message, attachments, item.GOCaseNumber, ticket.Subject, messageNumber); // TODO: fix message number
-                        content.Add(Encoding.UTF8.GetBytes(messageHtml));
+                            var messageHtml = HtmlHelper.GenerateMessageHtml(message, attachments, item.GOCaseNumber, ticket.Subject, messageNumber); // TODO: fix message number
+                            content.Add(Encoding.UTF8.GetBytes(messageHtml));
+                        }
                     }
 
 

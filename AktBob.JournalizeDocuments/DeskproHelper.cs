@@ -99,11 +99,4 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
 
         return result;
     }
-
-    public async Task<IEnumerable<MessageDto>> GetDeskproMessages(int ticketId)
-    {
-        var query = new GetDeskproMessagesQuery(ticketId);
-        var result = await _mediator.SendRequest(query);
-        return result;        
-    }
 }

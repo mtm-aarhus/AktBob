@@ -1,5 +1,6 @@
 ﻿using AktBob.Deskpro.Contracts.DTOs;
+using Ardalis.Result;
 using MassTransit.Mediator;
 
 namespace AktBob.Deskpro.Contracts;
-public record GetDeskproMessagesQuery(int TicketId) : Request<IEnumerable<MessageDto>>;
+public record GetDeskproMessagesQuery(int TicketId) : Request<Result<IEnumerable<MessageDto>>>;

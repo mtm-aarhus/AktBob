@@ -1,29 +1,30 @@
 ﻿using AAK.Deskpro;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
+using Ardalis.Result;
 using MassTransit;
 using MassTransit.Mediator;
 
 namespace AktBob.Deskpro;
-public class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator mediator) : MediatorRequestHandler<GetDeskproMessagesQuery, IEnumerable<MessageDto>>
+public class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator mediator) : MediatorRequestHandler<GetDeskproMessagesQuery, Result<IEnumerable<MessageDto>>>
 {
     private readonly IDeskproClient _deskpro = deskpro;
     private readonly IMediator _mediator = mediator;
 
-    protected override async Task<IEnumerable<MessageDto>> Handle(GetDeskproMessagesQuery query, CancellationToken cancellationToken)
+    protected override async Task<Result<IEnumerable<MessageDto>>> Handle(GetDeskproMessagesQuery query, CancellationToken cancellationToken)
     {
         var count = 10;
         var page = 1;
         var totalPages = 1;
-        var dtos = new List<MessageDto>();
+        var messages = new List<MessageDto>();
 
         do
         {
-            var messages = await _deskpro.GetTicketMessages(query.TicketId, page, count, cancellationToken);
+            var deskproMessages = await _deskpro.GetTicketMessages(query.TicketId, page, count, cancellationToken);
 
-            if (messages != null)
+            if (deskproMessages != null)
             {
-                dtos.AddRange(messages.Data.Select(x => new MessageDto
+                messages.AddRange(deskproMessages.Data.Select(x => new MessageDto
                 {
                     AttachmentIds = x.AttachmentIds,
                     CreatedAt = x.CreatedAt,
@@ -37,7 +38,7 @@ public class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator me
                     TicketId = x.TicketId
                 }));
                 
-                totalPages = messages.Pagination.TotalPages;
+                totalPages = deskproMessages.Pagination.TotalPages;
             }
 
             page++;
@@ -46,15 +47,15 @@ public class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator me
 
 
         // Add people to the messages 
-        foreach (var dto in dtos)
+        foreach (var message in messages)
         {
-            var getPersonQuery = new GetDeskproPersonQuery(dto.Person.Id);
+            var getPersonQuery = new GetDeskproPersonQuery(message.Person.Id);
             var getPersonResult = await _mediator.SendRequest(getPersonQuery, cancellationToken);
 
             var person = getPersonResult.Value;
             if (person != null)
             {
-                dto.Person = new PersonDto
+                message.Person = new PersonDto
                 {
                     IsAgent = person.IsAgent,
                     DisplayName = person.DisplayName,
@@ -68,6 +69,6 @@ public class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator me
             }
         }
 
-        return dtos;
+        return messages;
     }
 }
