@@ -22,7 +22,8 @@ public static class ModuleServices
 
         mediatorHandlers.AddRange([
             typeof(PostItemCommentCommandHandler),
-            typeof(UpdateItemFieldCommandHandler)]);
+            typeof(UpdateItemFieldCommandHandler),
+            typeof(GetItemQueryHandler)]);
 
         return services;
     }

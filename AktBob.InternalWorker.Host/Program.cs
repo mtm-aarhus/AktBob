@@ -1,5 +1,4 @@
 using AktBob.CheckOCRScreeningStatus;
-using System.Reflection;
 using Serilog;
 using AktBob.Email;
 using AktBob.Queue;
@@ -12,6 +11,7 @@ using AktBob.JournalizeDocuments;
 using AktBob.OpenOrchestrator;
 using AktBob.CloudConvert;
 using MassTransit;
+using Hangfire;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -44,12 +44,12 @@ var builder = Host.CreateDefaultBuilder(args)
             cfg.AddConsumers(mediatorHandlers.ToArray());
         });
 
-        // MassTransit
+        // MassTransit (only used by the CheckOCRScreeningStatus modul)
         services.AddMassTransit(cfg =>
         {
             cfg.SetKebabCaseEndpointNameFormatter();
 
-            // Use in-memory transport
+            // Use in-memory transport, that's good enough for this application
             cfg.UsingInMemory((context, config) =>
             {
                 config.ConfigureEndpoints(context);
@@ -57,6 +57,10 @@ var builder = Host.CreateDefaultBuilder(args)
 
             cfg.AddConsumers(massTransitConsumers.ToArray());
         });
+
+        // Hangfire
+        services.AddHangfire(config => config.UseSqlServerStorage(hostContext.Configuration.GetConnectionString("Hangfire")));
+        services.AddHangfireServer();
     });
 
 

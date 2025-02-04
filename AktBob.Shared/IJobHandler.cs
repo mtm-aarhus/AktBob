@@ -1,5 +1,5 @@
 ﻿namespace AktBob.Shared;
 public interface IJobHandler<TJob> where TJob : class
 {
-    Task Handle(TJob job);
+    Task Handle(TJob job, CancellationToken cancellationToken = default);
 }
