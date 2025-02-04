@@ -5,7 +5,8 @@ using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Queue.Contracts;
 using AktBob.UiPath.Contracts;
 using Ardalis.GuardClauses;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -48,7 +49,7 @@ internal class BackgroundWorker : BackgroundService
             while (!stoppingToken.IsCancellationRequested)
             {
                 var getAzureQueueMessagesQuery = new GetQueueMessagesQuery(azureQueueName);
-                var getAzureQueueMessagesResult = await mediator.Send(getAzureQueueMessagesQuery);
+                var getAzureQueueMessagesResult = await mediator.SendRequest(getAzureQueueMessagesQuery);
 
                 if (getAzureQueueMessagesResult.IsSuccess)
                 {
@@ -85,7 +86,7 @@ internal class BackgroundWorker : BackgroundService
 
                         // GET DATA FROM API DATABASE
                         var getDataFromApiDatabaseQuery = new GetTicketByDeskproIdQuery(deskproId);
-                        var getDataFromApiDatabaseResult = await mediator.Send(getDataFromApiDatabaseQuery);
+                        var getDataFromApiDatabaseResult = await mediator.SendRequest(getDataFromApiDatabaseQuery);
 
                         if (getDataFromApiDatabaseResult.IsSuccess)
                         {
@@ -118,7 +119,7 @@ internal class BackgroundWorker : BackgroundService
 
                             // GET DATA FROM DESKPRO
                             var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticket.DeskproId);
-                            var getDeskproTicketQueryResult = await mediator.Send(getDeskproTicketQuery);
+                            var getDeskproTicketQueryResult = await mediator.SendRequest(getDeskproTicketQuery);
 
                             if (getDeskproTicketQueryResult.IsSuccess)
                             {
@@ -130,7 +131,7 @@ internal class BackgroundWorker : BackgroundService
                                 {
                                     // Get agent email address from Deskpro
                                     var getAgentQuery = new GetDeskproPersonQuery(getDeskproTicketQueryResult.Value.Agent.Id!);
-                                    var getAgentResult = await mediator.Send(getAgentQuery);
+                                    var getAgentResult = await mediator.SendRequest(getAgentQuery);
 
                                     if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
                                     {

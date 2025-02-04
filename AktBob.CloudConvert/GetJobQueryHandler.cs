@@ -1,16 +1,17 @@
 ﻿using AktBob.CloudConvert.Contracts;
 using Ardalis.Result;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CloudConvert;
-internal class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogger<GetJobQueryHandler> logger, IMediator mediator) : IRequestHandler<GetJobQuery, Result<byte[]>>
+internal class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogger<GetJobQueryHandler> logger, IMediator mediator) : MediatorRequestHandler<GetJobQuery, Result<byte[]>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
     private readonly ILogger<GetJobQueryHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
 
-    public async Task<Result<byte[]>> Handle(GetJobQuery request, CancellationToken cancellationToken)
+    protected override async Task<Result<byte[]>> Handle(GetJobQuery request, CancellationToken cancellationToken)
     {
         var finished = false;
 
@@ -36,7 +37,7 @@ internal class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogge
             if (getJobResult.Value!.Data.Status == "finished" && !string.IsNullOrEmpty(file?.Url))
             {
                 var getFileQuery = new GetFileQuery(file.Url);
-                var getFileResult = await _mediator.Send(getFileQuery, cancellationToken);
+                var getFileResult = await _mediator.SendRequest(getFileQuery, cancellationToken);
 
                 if (!getFileResult.IsSuccess)
                 {

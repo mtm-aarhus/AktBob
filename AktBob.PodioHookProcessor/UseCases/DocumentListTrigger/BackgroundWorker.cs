@@ -6,7 +6,8 @@ using AktBob.Podio.Contracts;
 using AktBob.Queue.Contracts;
 using AktBob.UiPath.Contracts;
 using Ardalis.GuardClauses;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -164,7 +165,7 @@ internal class BackgroundWorker : BackgroundService
     private async Task<IEnumerable<QueueMessageDto>> GetQueueMessages(IMediator mediator, string queueName, CancellationToken cancellationToken)
     {
         var getQueueMessagesQuery = new GetQueueMessagesQuery(queueName);
-        var getQueueMessagesResult = await mediator.Send(getQueueMessagesQuery, cancellationToken);
+        var getQueueMessagesResult = await mediator.SendRequest(getQueueMessagesQuery, cancellationToken);
 
         if (!getQueueMessagesResult.IsSuccess)
         {
@@ -179,7 +180,7 @@ internal class BackgroundWorker : BackgroundService
         caseNumber = string.Empty;
 
         var getPodioItemQuery = new GetItemQuery(podioAppId, podioItemId);
-        var getPodioItemQueryResult = mediator.Send(getPodioItemQuery, cancellationToken).GetAwaiter().GetResult();
+        var getPodioItemQueryResult = mediator.SendRequest(getPodioItemQuery, cancellationToken).GetAwaiter().GetResult();
 
         if (!getPodioItemQueryResult.IsSuccess)
         {
@@ -216,7 +217,7 @@ internal class BackgroundWorker : BackgroundService
         }
 
         var getAgentQuery = new GetDeskproPersonQuery(person.Id);
-        var getAgentResult = mediator.Send(getAgentQuery, cancellationToken).GetAwaiter().GetResult();
+        var getAgentResult = mediator.SendRequest(getAgentQuery, cancellationToken).GetAwaiter().GetResult();
 
         if (getAgentResult.IsSuccess
             && getAgentResult.Value is not null
@@ -235,7 +236,7 @@ internal class BackgroundWorker : BackgroundService
         ticketDto = null;
 
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(deskproId);
-        var getDeskproTicketQueryResult = mediator.Send(getDeskproTicketQuery, cancellationToken).GetAwaiter().GetResult();
+        var getDeskproTicketQueryResult = mediator.SendRequest(getDeskproTicketQuery, cancellationToken).GetAwaiter().GetResult();
 
         if (!getDeskproTicketQueryResult.IsSuccess)
         {
@@ -262,7 +263,7 @@ internal class BackgroundWorker : BackgroundService
         // after 10 retries something else is wrong.
         while (counter <= retriesCount || !cancellationToken.IsCancellationRequested)
         {
-            var getTicketByPodioItemIdQueryResult = mediator.Send(getTicketByPodioItemIdQuery, cancellationToken).GetAwaiter().GetResult();
+            var getTicketByPodioItemIdQueryResult = mediator.SendRequest(getTicketByPodioItemIdQuery, cancellationToken).GetAwaiter().GetResult();
 
             // We have data: Exit the while loop
             if (getTicketByPodioItemIdQueryResult.IsSuccess)

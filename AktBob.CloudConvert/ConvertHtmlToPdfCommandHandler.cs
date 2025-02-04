@@ -2,14 +2,14 @@
 using AktBob.CloudConvert.Contracts.DTOs;
 using AktBob.CloudConvert.Models;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.CloudConvert;
-internal class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClient) : IRequestHandler<ConvertHtmlToPdfCommand, Result<ConvertHtmlToPdfResponseDto>>
+internal class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClient) : MediatorRequestHandler<ConvertHtmlToPdfCommand, Result<ConvertHtmlToPdfResponseDto>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
 
-    public async Task<Result<ConvertHtmlToPdfResponseDto>> Handle(ConvertHtmlToPdfCommand command, CancellationToken cancellationToken)
+    protected override async Task<Result<ConvertHtmlToPdfResponseDto>> Handle(ConvertHtmlToPdfCommand command, CancellationToken cancellationToken)
     {
         var importTasks = new Dictionary<Guid, ImportTask>();
         var convertTasks = new Dictionary<Guid, ConvertTask>();

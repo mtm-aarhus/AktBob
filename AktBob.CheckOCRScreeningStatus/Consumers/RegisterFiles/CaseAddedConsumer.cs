@@ -2,7 +2,8 @@
 using AktBob.CheckOCRScreeningStatus.UseCases.RegisterDocuments;
 using AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
 using JNJ.MessageBus;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.Consumers.RegisterFiles;
@@ -27,7 +28,7 @@ internal class CaseAddedConsumer : INotificationHandler<CaseAdded>
         _logger.LogInformation("Registering files for case {id}", notification.CaseId);
 
         var registerFilesCommand = new RegisterFilesCommand(notification.CaseId);
-        var registerFilesResult = await _mediator.Send(registerFilesCommand);
+        var registerFilesResult = await _mediator.SendRequest(registerFilesCommand);
 
         _logger.LogInformation("Files registered for case {id}", notification.CaseId);
 

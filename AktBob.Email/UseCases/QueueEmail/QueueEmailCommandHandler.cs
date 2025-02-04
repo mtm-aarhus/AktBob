@@ -1,22 +1,17 @@
 ﻿using AktBob.Email.Contracts;
-using MediatR;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace AktBob.Email.UseCases.QueueEmail;
-internal class QueueEmailCommandHandler : IRequestHandler<QueueEmailCommand>
+public class QueueEmailCommandHandler(IQueueService queueService, ILogger<QueueEmailCommandHandler> logger) : MediatorRequestHandler<QueueEmailCommand>
 {
-    private readonly IQueueService _queueService;
-    private readonly ILogger<QueueEmailCommandHandler> _logger;
+    private readonly IQueueService _queueService = queueService;
+    private readonly ILogger<QueueEmailCommandHandler> _logger = logger;
+
     private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
-    public QueueEmailCommandHandler(IQueueService queueService, ILogger<QueueEmailCommandHandler> logger)
-    {
-        _queueService = queueService;
-        _logger = logger;
-    }
-
-    public async Task Handle(QueueEmailCommand request, CancellationToken cancellationToken)
+    protected override async Task Handle(QueueEmailCommand request, CancellationToken cancellationToken)
     {
         var dto = new EmailMessageDto(request.To, request.Subject, request.Body);
         var message = JsonSerializer.Serialize(dto, _jsonSerializerOptions);

@@ -1,17 +1,12 @@
 ﻿using AktBob.UiPath.Contracts;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.UiPath;
-internal class AddQueueItemCommandHandler : IRequestHandler<AddQueueItemCommand>
+public class AddQueueItemCommandHandler(IUiPathOrchestratorApi uiPathOrchestratorApi) : MediatorRequestHandler<AddQueueItemCommand>
 {
-    private readonly IUiPathOrchestratorApi _uiPathOrchestratorApi;
+    private readonly IUiPathOrchestratorApi _uiPathOrchestratorApi = uiPathOrchestratorApi;
 
-    public AddQueueItemCommandHandler(IUiPathOrchestratorApi uiPathOrchestratorApi)
-    {
-        _uiPathOrchestratorApi = uiPathOrchestratorApi;
-    }
-
-    public async Task Handle(AddQueueItemCommand request, CancellationToken cancellationToken)
+    protected override async Task Handle(AddQueueItemCommand request, CancellationToken cancellationToken)
     {
         await _uiPathOrchestratorApi.AddQueueItem(
             request.QueueName,

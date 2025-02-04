@@ -1,16 +1,12 @@
 ﻿using AktBob.DatabaseAPI.Contracts.DTOs;
 using AktBob.DatabaseAPI.Contracts.Queries;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.UseCases;
-internal class GetMessagesNotJournalizedQueryHandler : IRequestHandler<GetMessagesNotJournalizedQuery, Result<IEnumerable<MessageDto>>>
+internal class GetMessagesNotJournalizedQueryHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<GetMessagesNotJournalizedQuery, Result<IEnumerable<MessageDto>>>
 {
-    private readonly IDatabaseApi _databaseApi;
+    private readonly IDatabaseApi _databaseApi = databaseApi;
 
-    public GetMessagesNotJournalizedQueryHandler(IDatabaseApi databaseApi)
-    {
-        _databaseApi = databaseApi;
-    }
-    public async Task<Result<IEnumerable<MessageDto>>> Handle(GetMessagesNotJournalizedQuery request, CancellationToken cancellationToken) => await _databaseApi.GetMessagesNotJournalized();
+    protected override async Task<Result<IEnumerable<MessageDto>>> Handle(GetMessagesNotJournalizedQuery request, CancellationToken cancellationToken) => await _databaseApi.GetMessagesNotJournalized();
 }

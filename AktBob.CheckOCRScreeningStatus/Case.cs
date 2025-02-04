@@ -1,5 +1,5 @@
 ﻿namespace AktBob.CheckOCRScreeningStatus;
-internal class Case
+public class Case
 {
     public Guid CaseId { get; }
     public long PodioItemId { get; }

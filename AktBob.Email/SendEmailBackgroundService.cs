@@ -1,6 +1,6 @@
 ﻿using AktBob.Email.Contracts;
 using AktBob.Email.UseCases.SendEmail;
-using MediatR;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

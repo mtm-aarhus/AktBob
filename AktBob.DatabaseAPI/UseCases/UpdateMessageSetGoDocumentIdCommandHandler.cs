@@ -1,15 +1,10 @@
 ﻿using AktBob.DatabaseAPI.Contracts.Commands;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.UseCases;
-internal class UpdateMessageSetGoDocumentIdCommandHandler : IRequestHandler<UpdateMessageSetGoDocumentIdCommand>
+internal class UpdateMessageSetGoDocumentIdCommandHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<UpdateMessageSetGoDocumentIdCommand>
 {
-    private readonly IDatabaseApi _databaseApi;
+    private readonly IDatabaseApi _databaseApi = databaseApi;
 
-    public UpdateMessageSetGoDocumentIdCommandHandler(IDatabaseApi databaseApi)
-    {
-        _databaseApi = databaseApi;
-    }
-
-    public async Task Handle(UpdateMessageSetGoDocumentIdCommand request, CancellationToken cancellationToken) => await _databaseApi.UpdateMessage(request.Id, request.GoDocumentId, cancellationToken);
+    protected override async Task Handle(UpdateMessageSetGoDocumentIdCommand request, CancellationToken cancellationToken) => await _databaseApi.UpdateMessage(request.Id, request.GoDocumentId, cancellationToken);
 }

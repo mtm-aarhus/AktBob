@@ -2,19 +2,14 @@
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.Deskpro;
-internal class GetDeskproTicketByIdQueryHandler : IRequestHandler<GetDeskproTicketByIdQuery, Result<TicketDto>>
+internal class GetDeskproTicketByIdQueryHandler(IDeskproClient deskproClient) : MediatorRequestHandler<GetDeskproTicketByIdQuery, Result<TicketDto>>
 {
-    private readonly IDeskproClient _deskproClient;
+    private readonly IDeskproClient _deskproClient = deskproClient;
 
-    public GetDeskproTicketByIdQueryHandler(IDeskproClient deskproClient)
-    {
-        _deskproClient = deskproClient;
-    }
-
-    public async Task<Result<TicketDto>> Handle(GetDeskproTicketByIdQuery request, CancellationToken cancellationToken)
+    protected override async Task<Result<TicketDto>> Handle(GetDeskproTicketByIdQuery request, CancellationToken cancellationToken)
     {
         var ticket = await _deskproClient.GetTicketById(request.Id, cancellationToken);
 

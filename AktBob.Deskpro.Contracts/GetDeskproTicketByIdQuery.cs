@@ -1,6 +1,6 @@
 ﻿using AktBob.Deskpro.Contracts.DTOs;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.Deskpro.Contracts;
-public record GetDeskproTicketByIdQuery(int Id) : IRequest<Result<TicketDto>>;
+public record GetDeskproTicketByIdQuery(int Id) : Request<Result<TicketDto>>;

@@ -1,6 +1,5 @@
 using AktBob.CheckOCRScreeningStatus;
 using System.Reflection;
-using MediatR.NotificationPublishers;
 using JNJ.MessageBus;
 using Serilog;
 using AktBob.Email;
@@ -13,6 +12,7 @@ using AktBob.Podio;
 using AktBob.JournalizeDocuments;
 using AktBob.OpenOrchestrator;
 using AktBob.CloudConvert;
+using MassTransit;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -25,25 +25,23 @@ var builder = Host.CreateDefaultBuilder(args)
         });
 
         // Modules
-        var mediatrAssemblies = new List<Assembly>();
-        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatrAssemblies);
-        services.AddEmailModuleServices(hostContext.Configuration, mediatrAssemblies);
-        services.AddQueueModule(hostContext.Configuration, mediatrAssemblies);
-        services.AddUiPathModule(hostContext.Configuration, mediatrAssemblies);
+        var mediatorAssemblies = new List<Assembly>();
+        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatorAssemblies);
+        services.AddEmailModuleServices(hostContext.Configuration, mediatorAssemblies);
+        services.AddQueueModule(hostContext.Configuration, mediatorAssemblies);
+        services.AddUiPathModule(hostContext.Configuration, mediatorAssemblies);
         services.AddPodioHookProcessorModule(hostContext.Configuration);
-        services.AddDeskproModule(hostContext.Configuration, mediatrAssemblies);
-        services.AddDatabaseApiModule(hostContext.Configuration, mediatrAssemblies);
-        services.AddPodioModule(hostContext.Configuration, mediatrAssemblies);
-        services.AddJournalizeDocumentsModule(hostContext.Configuration, mediatrAssemblies);
-        services.AddOpenOrchestratorModule(hostContext.Configuration, mediatrAssemblies);
-        services.AddCloudConvertModule(hostContext.Configuration, mediatrAssemblies);
+        services.AddDeskproModule(hostContext.Configuration, mediatorAssemblies);
+        services.AddDatabaseApiModule(hostContext.Configuration, mediatorAssemblies);
+        services.AddPodioModule(hostContext.Configuration, mediatorAssemblies);
+        services.AddJournalizeDocumentsModule(hostContext.Configuration, mediatorAssemblies);
+        services.AddOpenOrchestratorModule(hostContext.Configuration, mediatorAssemblies);
+        services.AddCloudConvertModule(hostContext.Configuration, mediatorAssemblies);
 
-
-        // Mediatr
-        services.AddMediatR(c =>
+        // MassTransit Mediator
+        services.AddMediator(cfg =>
         {
-            c.RegisterServicesFromAssemblies(mediatrAssemblies.ToArray());
-            c.NotificationPublisher = new TaskWhenAllPublisher();
+            cfg.AddConsumers(mediatorAssemblies.ToArray());
         });
 
         // EventBus

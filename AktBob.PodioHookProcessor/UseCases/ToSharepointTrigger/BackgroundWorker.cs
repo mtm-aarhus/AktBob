@@ -5,7 +5,8 @@ using AktBob.Podio.Contracts;
 using AktBob.Queue.Contracts;
 using AktBob.UiPath.Contracts;
 using Ardalis.GuardClauses;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -47,7 +48,7 @@ internal class BackgroundWorker : BackgroundService
             {
 
                 var getQueueMessagesQuery = new GetQueueMessagesQuery(azureQueueName!);
-                var azureQueueMessages = await mediator.Send(getQueueMessagesQuery);
+                var azureQueueMessages = await mediator.SendRequest(getQueueMessagesQuery);
 
                 if (azureQueueMessages.IsSuccess)
                 {
@@ -78,7 +79,7 @@ internal class BackgroundWorker : BackgroundService
 
                         // Get metadata from Podio
                         var getPodioItemQuery = new GetItemQuery(podioAppId, podioItemId);
-                        var getPodioItemQueryResult = await mediator.Send(getPodioItemQuery, stoppingToken);
+                        var getPodioItemQueryResult = await mediator.SendRequest(getPodioItemQuery, stoppingToken);
 
                         if (!getPodioItemQueryResult.IsSuccess)
                         {
@@ -95,7 +96,7 @@ internal class BackgroundWorker : BackgroundService
 
                         // Find Deskpro ticket from PodioItemId
                         var getTicketByPodioItemIdQuery = new GetTicketByPodioItemIdQuery(podioItemId);
-                        var getTicketByPodioItemIdQueryResult = await mediator.Send(getTicketByPodioItemIdQuery);
+                        var getTicketByPodioItemIdQueryResult = await mediator.SendRequest(getTicketByPodioItemIdQuery);
 
                         if (getTicketByPodioItemIdQueryResult.IsSuccess)
                         {
@@ -132,7 +133,7 @@ internal class BackgroundWorker : BackgroundService
                             }
 
                             var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticket.DeskproId);
-                            var getDeskproTicketQueryResult = await mediator.Send(getDeskproTicketQuery);
+                            var getDeskproTicketQueryResult = await mediator.SendRequest(getDeskproTicketQuery);
 
                             if (getDeskproTicketQueryResult.IsSuccess)
                             {
@@ -175,7 +176,7 @@ internal class BackgroundWorker : BackgroundService
     private async Task<(string Name, string Email)> GetDeskproAgent(IMediator mediator, int agentId)
     {
         var getAgentQuery = new GetDeskproPersonQuery(agentId);
-        var getAgentResult = await mediator.Send(getAgentQuery);
+        var getAgentResult = await mediator.SendRequest(getAgentQuery);
 
         if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
         {

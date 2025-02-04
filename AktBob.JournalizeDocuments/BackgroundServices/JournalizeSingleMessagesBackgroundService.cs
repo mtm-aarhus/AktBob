@@ -2,7 +2,6 @@
 using AAK.GetOrganized.UploadDocument;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MediatR;
 using AktBob.DatabaseAPI.Contracts.Queries;
 using AAK.GetOrganized;
 using AktBob.DatabaseAPI.Contracts.Commands;
@@ -11,6 +10,8 @@ using Ardalis.Result;
 using System.Text;
 using AktBob.CloudConvert.Contracts;
 using AktBob.Shared;
+using MassTransit.Mediator;
+using MassTransit;
 
 namespace AktBob.JournalizeDocuments.BackgroundServices;
 internal class JournalizeSingleMessagesBackgroundService : BackgroundService
@@ -47,7 +48,7 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
             try
             {
                 // Get new messages from the database
-                var getMessagesQueryResult = await _mediator.Send(new GetMessagesNotJournalizedQuery());
+                var getMessagesQueryResult = await _mediator.SendRequest(new GetMessagesNotJournalizedQuery());
 
                 if (getMessagesQueryResult.Status == ResultStatus.NotFound)
                 {
@@ -219,7 +220,7 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
         var bytes = Encoding.UTF8.GetBytes(html);
 
         var convertCommand = new ConvertHtmlToPdfCommand([bytes]);
-        var convertResult = await _mediator.Send(convertCommand, cancellationToken);
+        var convertResult = await _mediator.SendRequest(convertCommand, cancellationToken);
 
         if (!convertResult.IsSuccess)
         {
@@ -228,7 +229,7 @@ internal class JournalizeSingleMessagesBackgroundService : BackgroundService
         }
 
         var jobQuery = new GetJobQuery(convertResult.Value.JobId);
-        var jobResult = await _mediator.Send(jobQuery, cancellationToken);
+        var jobResult = await _mediator.SendRequest(jobQuery, cancellationToken);
         
         if (!jobResult.IsSuccess)
         {

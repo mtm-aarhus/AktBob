@@ -1,22 +1,16 @@
 ﻿using AktBob.DatabaseAPI.Contracts.Commands;
 using AktBob.DatabaseAPI.Contracts.DTOs;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.DatabaseAPI.UseCases;
-internal class UpdateCaseSetFilArkivCaseIdCommandHandler : IRequestHandler<UpdateCaseSetFilArkivCaseIdCommand, Result<CaseDto>>
+internal class UpdateCaseSetFilArkivCaseIdCommandHandler(IDatabaseApi databaseApi, ILogger<UpdateCaseSetFilArkivCaseIdCommandHandler> logger) : MediatorRequestHandler<UpdateCaseSetFilArkivCaseIdCommand, Result<CaseDto>>
 {
-    private readonly IDatabaseApi _databaseApi;
-    private readonly ILogger<UpdateCaseSetFilArkivCaseIdCommandHandler> _logger;
+    private readonly IDatabaseApi _databaseApi = databaseApi;
+    private readonly ILogger<UpdateCaseSetFilArkivCaseIdCommandHandler> _logger = logger;
 
-    public UpdateCaseSetFilArkivCaseIdCommandHandler(IDatabaseApi databaseApi, ILogger<UpdateCaseSetFilArkivCaseIdCommandHandler> logger)
-    {
-        _databaseApi = databaseApi;
-        _logger = logger;
-    }
-
-    public async Task<Result<CaseDto>> Handle(UpdateCaseSetFilArkivCaseIdCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result<CaseDto>> Handle(UpdateCaseSetFilArkivCaseIdCommand request, CancellationToken cancellationToken)
     {
         var tickets = await _databaseApi.GetTicketsByPodioItemId(request.PodioItemId, cancellationToken);
 

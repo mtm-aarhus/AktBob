@@ -1,18 +1,13 @@
 ﻿using AktBob.DatabaseAPI.Contracts.Commands;
 using AktBob.DatabaseAPI.Contracts.DTOs;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.UseCases;
 
-internal class PostCaseCommandHandler : IRequestHandler<PostCaseCommand, Result<CaseDto>>
+internal class PostCaseCommandHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<PostCaseCommand, Result<CaseDto>>
 {
-    private readonly IDatabaseApi _databaseApi;
+    private readonly IDatabaseApi _databaseApi = databaseApi;
 
-    public PostCaseCommandHandler(IDatabaseApi databaseApi)
-    {
-        _databaseApi = databaseApi;
-    }
-
-    public async Task<Result<CaseDto>> Handle(PostCaseCommand request, CancellationToken cancellationToken) => await _databaseApi.PostCase(request.TicketId, request.CaseNumber, request.PodioItemId, request.FilArkivCaseId, cancellationToken);
+    protected override async Task<Result<CaseDto>> Handle(PostCaseCommand request, CancellationToken cancellationToken) => await _databaseApi.PostCase(request.TicketId, request.CaseNumber, request.PodioItemId, request.FilArkivCaseId, cancellationToken);
 }

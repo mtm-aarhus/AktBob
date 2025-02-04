@@ -6,8 +6,9 @@ using JNJ.MessageBus;
 using AktBob.CheckOCRScreeningStatus.Events;
 using Microsoft.Extensions.Configuration;
 using AktBob.Queue.Contracts;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using MassTransit.Mediator;
+using MassTransit;
 
 namespace AktBob.CheckOCRScreeningStatus.BackgroundServices;
 internal class Worker : BackgroundService
@@ -43,7 +44,7 @@ internal class Worker : BackgroundService
             while (!stoppingToken.IsCancellationRequested)
             {
                 var getMessagesQuery = new GetQueueMessagesQuery(queueName!, maxMessages);
-                var messages = await mediator.Send(getMessagesQuery);
+                var messages = await mediator.SendRequest(getMessagesQuery);
                 
                 if (messages.IsSuccess)
                 {

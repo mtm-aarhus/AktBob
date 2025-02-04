@@ -4,8 +4,9 @@ using Ardalis.Result;
 using Microsoft.Extensions.Logging;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Deskpro.Contracts;
-using MediatR;
 using Microsoft.Extensions.Configuration;
+using MassTransit.Mediator;
+using MassTransit;
 
 namespace AktBob.JournalizeDocuments;
 internal class GetOrganizedHelper(ILogger<GetOrganizedHelper> logger, IGetOrganizedClient getOrganizedClient, IMediator mediator, IConfiguration configuration)
@@ -57,7 +58,7 @@ internal class GetOrganizedHelper(ILogger<GetOrganizedHelper> logger, IGetOrgani
             using (var stream = new MemoryStream())
             {
                 var getAttachmentStreamQuery = new GetDeskproMessageAttachmentQuery(attachment.DownloadUrl);
-                var getAttachmentStreamResult = await _mediator.Send(getAttachmentStreamQuery, cancellationToken);
+                var getAttachmentStreamResult = await _mediator.SendRequest(getAttachmentStreamQuery, cancellationToken);
 
                 if (!getAttachmentStreamResult.IsSuccess)
                 {

@@ -1,6 +1,6 @@
 ﻿using AktBob.DatabaseAPI.Contracts.DTOs;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.Contracts.Queries;
-public record GetMessagesNotJournalizedQuery() : IRequest<Result<IEnumerable<MessageDto>>>;
+public record GetMessagesNotJournalizedQuery() : Request<Result<IEnumerable<MessageDto>>>;

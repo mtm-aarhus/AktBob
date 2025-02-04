@@ -1,11 +1,11 @@
 ﻿using FilArkivCore.Web.Shared.FileProcess;
-using MediatR;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.GetFileStatus;
-internal class GetFileStatusQueryHandler : IRequestHandler<GetFileStatusQuery>
+public class GetFileStatusQueryHandler : MediatorRequestHandler<GetFileStatusQuery>
 {
     private readonly IData _data;
     private readonly IConfiguration _configuration;
@@ -21,7 +21,7 @@ internal class GetFileStatusQueryHandler : IRequestHandler<GetFileStatusQuery>
     }
 
 
-    public async Task Handle(GetFileStatusQuery query, CancellationToken cancellationToken)
+    protected override async Task Handle(GetFileStatusQuery query, CancellationToken cancellationToken)
     {
         var random = new Random();
         var delayTimeOffset = TimeSpan.FromMilliseconds(_configuration.GetValue<int?>("CheckOCRScreening:DelayBetweenChecksSMilliSeconds") ?? 10000);

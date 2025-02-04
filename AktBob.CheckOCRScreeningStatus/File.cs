@@ -1,5 +1,5 @@
 ﻿namespace AktBob.CheckOCRScreeningStatus;
-internal class File
+public class File
 {
     public Guid FileId { get; }
     public bool HasBeenScreened { get; set; } = false;

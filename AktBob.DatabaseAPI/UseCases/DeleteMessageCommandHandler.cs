@@ -1,8 +1,8 @@
 ﻿using AktBob.DatabaseAPI.Contracts.Commands;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.UseCases;
-internal class DeleteMessageCommandHandler : IRequestHandler<DeleteMessageCommand>
+internal class DeleteMessageCommandHandler : MediatorRequestHandler<DeleteMessageCommand>
 {
     private readonly IDatabaseApi _databaseApi;
 
@@ -11,5 +11,5 @@ internal class DeleteMessageCommandHandler : IRequestHandler<DeleteMessageComman
         _databaseApi = databaseApi;
     }
 
-    public async Task Handle(DeleteMessageCommand request, CancellationToken cancellationToken) => await _databaseApi.DeleteMessage(request.Id, cancellationToken);
+    protected override async Task Handle(DeleteMessageCommand request, CancellationToken cancellationToken) => await _databaseApi.DeleteMessage(request.Id, cancellationToken);
 }

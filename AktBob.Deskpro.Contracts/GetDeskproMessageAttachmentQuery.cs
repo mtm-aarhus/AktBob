@@ -1,5 +1,5 @@
 ﻿using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.Deskpro.Contracts;
-public record GetDeskproMessageAttachmentQuery(string DownloadUrl) : IRequest<Result<Stream>>;
+public record GetDeskproMessageAttachmentQuery(string DownloadUrl) : Request<Result<Stream>>;

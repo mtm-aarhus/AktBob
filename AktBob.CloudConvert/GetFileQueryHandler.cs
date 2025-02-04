@@ -1,14 +1,14 @@
 ﻿using AktBob.CloudConvert.Contracts;
 using AktBob.CloudConvert.Contracts.DTOs;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.CloudConvert;
-internal class GetFileQueryHandler(ICloudConvertClient cloudConvertClient) : IRequestHandler<GetFileQuery, Result<FileDto>>
+internal class GetFileQueryHandler(ICloudConvertClient cloudConvertClient) : MediatorRequestHandler<GetFileQuery, Result<FileDto>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
 
-    public async Task<Result<FileDto>> Handle(GetFileQuery query, CancellationToken cancellationToken)
+    protected override async Task<Result<FileDto>> Handle(GetFileQuery query, CancellationToken cancellationToken)
     {
         var result = await _cloudConvertClient.GetFile(query.Url, cancellationToken);
 

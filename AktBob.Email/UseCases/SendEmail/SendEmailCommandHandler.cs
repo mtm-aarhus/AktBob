@@ -1,21 +1,15 @@
-﻿using MediatR;
+﻿using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 
 namespace AktBob.Email.UseCases.SendEmail;
-internal class SendEmailCommandHandler : IRequestHandler<SendEmailCommand>
+internal class SendEmailCommandHandler(IConfiguration configuration, ILogger<SendEmailCommandHandler> logger) : MediatorRequestHandler<SendEmailCommand>
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<SendEmailCommandHandler> _logger;
+    private readonly IConfiguration _configuration = configuration;
+    private readonly ILogger<SendEmailCommandHandler> _logger = logger;
 
-    public SendEmailCommandHandler(IConfiguration configuration, ILogger<SendEmailCommandHandler> logger)
-    {
-        _configuration = configuration;
-        _logger = logger;
-    }
-
-    public async Task Handle(SendEmailCommand request, CancellationToken cancellationToken)
+    protected override async Task Handle(SendEmailCommand request, CancellationToken cancellationToken)
     {
         var from = _configuration.GetValue<string>("EmailModule:From");
         var smtp = _configuration.GetValue<string>("EmailModule:Smtp");

@@ -1,6 +1,6 @@
 ﻿using AktBob.DatabaseAPI.Contracts.DTOs;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.Contracts.Queries;
-public record GetMessageByDeskproMessageIdQuery(int DeskproMessageId) : IRequest<Result<MessageDto>>;
+public record GetMessageByDeskproMessageIdQuery(int DeskproMessageId) : Request<Result<MessageDto>>;

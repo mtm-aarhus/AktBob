@@ -1,26 +1,23 @@
 ﻿using Ardalis.Result;
 using FilArkivCore.Web.Shared.Documents;
-using MediatR;
-using Microsoft.Extensions.Configuration;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.RegisterDocuments;
-internal class RegisterFilesCommandHandler : IRequestHandler<RegisterFilesCommand, Result>
+internal class RegisterFilesCommandHandler : MediatorRequestHandler<RegisterFilesCommand, Result>
 {
     private readonly IData _data;
-    private readonly IConfiguration _configuration;
     private readonly IFilArkiv _filArkiv;
     private readonly ILogger<RegisterFilesCommandHandler> _logger;
 
-    public RegisterFilesCommandHandler(IData data, IConfiguration configuration, IFilArkiv filArkiv, ILogger<RegisterFilesCommandHandler> logger)
+    public RegisterFilesCommandHandler(IData data, IFilArkiv filArkiv, ILogger<RegisterFilesCommandHandler> logger)
     {
         _data = data;
-        _configuration = configuration;
         _filArkiv = filArkiv;
         _logger = logger;
     }
 
-    public async Task<Result> Handle(RegisterFilesCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result> Handle(RegisterFilesCommand request, CancellationToken cancellationToken)
     {
         var filesList = new List<File>();
 

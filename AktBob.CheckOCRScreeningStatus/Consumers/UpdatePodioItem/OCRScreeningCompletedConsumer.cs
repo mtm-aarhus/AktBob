@@ -2,7 +2,8 @@
 using AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
 using AktBob.CheckOCRScreeningStatus.UseCases.UpdatePodioItem;
 using AktBob.Podio.Contracts;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -35,7 +36,7 @@ internal class OCRScreeningCompletedConsumer(IMediator mediator, ILogger<OCRScre
             var commentText = "OCR screening af dokumenterne på FilArkiv er færdig.";
 
             var postCommentCommand = new PostItemCommentCommand(podioAppId, _data.GetCase(notification.CaseId)!.PodioItemId, commentText);
-            var postCommentCommandResult = await _mediator.Send(postCommentCommand, cancellationToken);
+            var postCommentCommandResult = await _mediator.SendRequest(postCommentCommand, cancellationToken);
 
             if (!postCommentCommandResult.IsSuccess)
             {

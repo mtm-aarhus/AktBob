@@ -3,7 +3,8 @@ using AktBob.DatabaseAPI.Contracts.Queries;
 using AktBob.Podio.Contracts;
 using AktBob.Queue.Contracts;
 using Ardalis.GuardClauses;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -42,7 +43,7 @@ internal class BackgroundWorker : BackgroundService
             {
 
                 var getQueueMessagesQuery = new GetQueueMessagesQuery(azureQueueName!);
-                var azureQueueMessages = await mediator.Send(getQueueMessagesQuery);
+                var azureQueueMessages = await mediator.SendRequest(getQueueMessagesQuery);
 
                 if (azureQueueMessages.IsSuccess)
                 {
@@ -74,7 +75,7 @@ internal class BackgroundWorker : BackgroundService
 
                         // Get metadata from Podio
                         var getPodioItemQuery = new GetItemQuery(podioAppId, podioItemId);
-                        var getPodioItemQueryResult = await mediator.Send(getPodioItemQuery, stoppingToken);
+                        var getPodioItemQueryResult = await mediator.SendRequest(getPodioItemQuery, stoppingToken);
 
                         if (!getPodioItemQueryResult.IsSuccess)
                         {
@@ -105,7 +106,7 @@ internal class BackgroundWorker : BackgroundService
                         }
 
                         var ticketQuery = new GetTicketByDeskproIdQuery(deskproId);
-                        var ticketResult = await mediator.Send(ticketQuery);
+                        var ticketResult = await mediator.SendRequest(ticketQuery);
                         
                         if (!ticketResult.IsSuccess || ticketResult.Value.Count() == 0)
                         {
@@ -121,7 +122,7 @@ internal class BackgroundWorker : BackgroundService
 
                         // Post case to database
                         var postCaseCommand = new PostCaseCommand(ticketResult.Value.First().Id, podioItemId, caseNumber, null);
-                        var postCaseCommandResult = await mediator.Send(postCaseCommand);
+                        var postCaseCommandResult = await mediator.SendRequest(postCaseCommand);
 
                         if (!postCaseCommandResult.IsSuccess)
                         {

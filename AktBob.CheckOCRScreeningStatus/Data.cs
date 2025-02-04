@@ -1,6 +1,6 @@
 ﻿namespace AktBob.CheckOCRScreeningStatus;
 
-internal class Data : IData
+public class Data : IData
 {
     private List<Case> _cases;
 

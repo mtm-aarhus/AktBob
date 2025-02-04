@@ -2,7 +2,6 @@
 using AAK.GetOrganized.UploadDocument;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MediatR;
 using AktBob.Deskpro.Contracts;
 using AAK.GetOrganized;
 using AktBob.Deskpro.Contracts.DTOs;
@@ -12,6 +11,8 @@ using AktBob.CloudConvert.Contracts;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using AktBob.Queue.Contracts;
+using MassTransit.Mediator;
+using MassTransit;
 
 namespace AktBob.JournalizeDocuments.BackgroundServices;
 internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
@@ -82,7 +83,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
 
                     // Get custom fields specification
                     var ticketCustomFieldsQuery = new GetDeskproCustomFieldSpecificationsQuery();
-                    var ticketCustomFieldsResult = await _mediator.Send(ticketCustomFieldsQuery, stoppingToken); // TODO: Cache
+                    var ticketCustomFieldsResult = await _mediator.SendRequest(ticketCustomFieldsQuery, stoppingToken); // TODO: Cache
 
                     if (!ticketCustomFieldsResult.IsSuccess)
                     {
@@ -143,7 +144,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
                         // Get message number from API database
                         var messageNumber = 0;
                         var getMessageFromApiDatabaseQuery = new DatabaseAPI.Contracts.Queries.GetMessageByDeskproMessageIdQuery(message.Id);
-                        var getMessageFromApiDatabaseResult = await _mediator.Send(getMessageFromApiDatabaseQuery, stoppingToken);
+                        var getMessageFromApiDatabaseResult = await _mediator.SendRequest(getMessageFromApiDatabaseQuery, stoppingToken);
                         
                         if (!getMessageFromApiDatabaseResult.IsSuccess)
                         {
@@ -162,7 +163,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
 
                     // Generate PDF
                     var convertCommand = new ConvertHtmlToPdfCommand(content);
-                    var convertResult = await _mediator.Send(convertCommand, stoppingToken);
+                    var convertResult = await _mediator.SendRequest(convertCommand, stoppingToken);
 
                     if (!convertResult.IsSuccess)
                     {
@@ -170,7 +171,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
                     }
 
                     var getJobQuery = new GetJobQuery(convertResult.Value.JobId);
-                    var getJobResult = await _mediator.Send(getJobQuery, stoppingToken);
+                    var getJobResult = await _mediator.SendRequest(getJobQuery, stoppingToken);
 
                     if (!getJobResult.IsSuccess)
                     {
@@ -241,7 +242,7 @@ internal class JournalizeFullTicketDocumentBackgroundService : BackgroundService
     private async Task<IEnumerable<QueueMessageDto>> GetQueueItems(string queueName, CancellationToken cancellationToken)
     {
         var getQueueMessagesQuery = new GetQueueMessagesQuery(queueName);
-        var getQueueMessagesResult = await _mediator.Send(getQueueMessagesQuery, cancellationToken);
+        var getQueueMessagesResult = await _mediator.SendRequest(getQueueMessagesQuery, cancellationToken);
 
         if (!getQueueMessagesResult.IsSuccess)
         {

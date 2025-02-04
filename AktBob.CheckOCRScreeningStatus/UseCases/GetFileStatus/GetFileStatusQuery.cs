@@ -1,5 +1,2 @@
-﻿using Ardalis.Result;
-using MediatR;
-
-namespace AktBob.CheckOCRScreeningStatus.UseCases.GetFileStatus;
-internal record GetFileStatusQuery(Guid FileId) : IRequest;
+﻿namespace AktBob.CheckOCRScreeningStatus.UseCases.GetFileStatus;
+public record GetFileStatusQuery(Guid FileId);

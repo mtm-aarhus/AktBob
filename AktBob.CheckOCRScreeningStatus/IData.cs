@@ -1,7 +1,6 @@
-﻿
-namespace AktBob.CheckOCRScreeningStatus;
+﻿namespace AktBob.CheckOCRScreeningStatus;
 
-internal interface IData
+public interface IData
 {
     bool AddCase(Guid caseId, long podioItemId);
     void AddFilesToCase(Case @case, IEnumerable<File> files);

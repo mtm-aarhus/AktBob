@@ -1,7 +1,8 @@
 ﻿using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using Ardalis.Result;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
@@ -17,7 +18,7 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
         _logger.LogInformation("Getting Deskpro ticket #{id}", ticketId);
 
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticketId);
-        var getDeskproTicketQueryResult = await _mediator.Send(getDeskproTicketQuery);
+        var getDeskproTicketQueryResult = await _mediator.SendRequest(getDeskproTicketQuery);
 
         if (!getDeskproTicketQueryResult.IsSuccess)
         {
@@ -49,7 +50,7 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
         _logger.LogInformation("Getting Deskpro person #{id}", personId);
 
         var query = new GetDeskproPersonQuery((int)personId);
-        var result = await _mediator.Send(query);
+        var result = await _mediator.SendRequest(query);
 
         if (!result.IsSuccess)
         {
@@ -72,7 +73,7 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
         _logger.LogInformation("Getting Deskpro message #{id} attachments", deskproMessageId);
 
         var query = new GetDeskproMessageAttachmentsQuery(deskproTicketId, deskproMessageId);
-        var result = await _mediator.Send(query);
+        var result = await _mediator.SendRequest(query);
 
         if (!result.IsSuccess)
         {
@@ -89,7 +90,7 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
         _logger.LogInformation("Getting Deskpro message #{id}", messageId);
 
         var query = new GetDeskproMessageByIdQuery(ticketId, messageId);
-        var result = await _mediator.Send(query);
+        var result = await _mediator.SendRequest(query);
 
         if (!result.IsSuccess)
         {
@@ -102,7 +103,7 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
     public async Task<IEnumerable<MessageDto>> GetDeskproMessages(int ticketId)
     {
         var query = new GetDeskproMessagesQuery(ticketId);
-        var result = await _mediator.Send(query);
+        var result = await _mediator.SendRequest(query);
         return result;        
     }
 }

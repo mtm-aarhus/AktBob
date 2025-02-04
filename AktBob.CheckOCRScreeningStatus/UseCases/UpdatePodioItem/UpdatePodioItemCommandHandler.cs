@@ -1,10 +1,11 @@
 ﻿using AktBob.Podio.Contracts;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.UpdatePodioItem;
-internal class UpdatePodioItemCommandHandler : IRequestHandler<UpdatePodioItemCommand>
+internal class UpdatePodioItemCommandHandler : MediatorRequestHandler<UpdatePodioItemCommand>
 {
     private readonly IData _data;
     private readonly IConfiguration _configuration;
@@ -19,7 +20,7 @@ internal class UpdatePodioItemCommandHandler : IRequestHandler<UpdatePodioItemCo
         _logger = logger;
     }
 
-    public async Task Handle(UpdatePodioItemCommand command, CancellationToken cancellationToken)
+    protected override async Task Handle(UpdatePodioItemCommand command, CancellationToken cancellationToken)
     {
         var @case = _data.GetCase(command.FilArkivCaseId);
 
@@ -43,7 +44,7 @@ internal class UpdatePodioItemCommandHandler : IRequestHandler<UpdatePodioItemCo
         var podioFieldFilArkivLink = podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivLink");
 
         var updateFilArkivCaseIdFieldCommand = new UpdateItemFieldCommand(podioAppId, @case.PodioItemId, podioFieldFilArkivCaseId.Key, @case.CaseId.ToString());
-        var updateFilArkivCaseIdFieldCommandResult = await _mediator.Send(updateFilArkivCaseIdFieldCommand, cancellationToken);
+        var updateFilArkivCaseIdFieldCommandResult = await _mediator.SendRequest(updateFilArkivCaseIdFieldCommand, cancellationToken);
 
         if (!updateFilArkivCaseIdFieldCommandResult.IsSuccess)
         {
@@ -51,7 +52,7 @@ internal class UpdatePodioItemCommandHandler : IRequestHandler<UpdatePodioItemCo
         }
 
         var updateFilArkivLinkFieldCommand = new UpdateItemFieldCommand(podioAppId, @case.PodioItemId, podioFieldFilArkivLink.Key, $"https://aarhus.filarkiv.dk/archives/case/{@case.CaseId.ToString()}");
-        var updateFilArkivLinkFieldCommandResult = await _mediator.Send(updateFilArkivLinkFieldCommand, cancellationToken);
+        var updateFilArkivLinkFieldCommandResult = await _mediator.SendRequest(updateFilArkivLinkFieldCommand, cancellationToken);
 
         return;
     }

@@ -1,18 +1,13 @@
 ﻿using AktBob.Queue.Contracts;
 using Ardalis.GuardClauses;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.Queue.UseCases;
-internal class DeleteQueueMessageCommandHandler : IRequestHandler<DeleteQueueMessageCommand>
+internal class DeleteQueueMessageCommandHandler(IQueue queue) : MediatorRequestHandler<DeleteQueueMessageCommand>
 {
-    private readonly IQueue _queue;
+    private readonly IQueue _queue = queue;
 
-    public DeleteQueueMessageCommandHandler(IQueue queue)
-    {
-        _queue = queue;
-    }
-
-    public async Task Handle(DeleteQueueMessageCommand request, CancellationToken cancellationToken)
+    protected override async Task Handle(DeleteQueueMessageCommand request, CancellationToken cancellationToken)
     {
         await _queue.DeleteMessage(Guard.Against.NullOrEmpty(request.QueueName),
                                    Guard.Against.NullOrEmpty(request.MessageId),

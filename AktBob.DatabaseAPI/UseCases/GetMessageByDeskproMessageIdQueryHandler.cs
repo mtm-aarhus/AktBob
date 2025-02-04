@@ -1,14 +1,14 @@
 ﻿using AktBob.DatabaseAPI.Contracts.DTOs;
 using AktBob.DatabaseAPI.Contracts.Queries;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.UseCases;
-internal class GetMessageByDeskproMessageIdQueryHandler(IDatabaseApi databaseApi) : IRequestHandler<GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
+internal class GetMessageByDeskproMessageIdQueryHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
 {
     private readonly IDatabaseApi _databaseApi = databaseApi;
 
-    public async Task<Result<MessageDto>> Handle(GetMessageByDeskproMessageIdQuery request, CancellationToken cancellationToken)
+    protected override async Task<Result<MessageDto>> Handle(GetMessageByDeskproMessageIdQuery request, CancellationToken cancellationToken)
     {
         var result = await _databaseApi.GetMessageByDeskproMessageId(request.DeskproMessageId, cancellationToken);
 

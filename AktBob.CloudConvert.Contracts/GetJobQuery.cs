@@ -1,5 +1,5 @@
 ﻿using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.CloudConvert.Contracts;
-public record GetJobQuery(Guid JobId) : IRequest<Result<byte[]>>;
+public record GetJobQuery(Guid JobId) : Request<Result<byte[]>>;

@@ -1,6 +1,7 @@
 ﻿using AktBob.CheckOCRScreeningStatus.Events;
 using AktBob.DatabaseAPI.Contracts.Commands;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.Consumers.UpdateDatabase;
@@ -15,7 +16,7 @@ internal class FilesRegisteredConsumer(IData data, IMediator mediator, ILogger<F
         var podioItemId = _data.GetCase(notification.CaseId)!.PodioItemId;
         
         var updateDatabaseCaseCommand = new UpdateCaseSetFilArkivCaseIdCommand(podioItemId, notification.CaseId);
-        var updateDatabaseCaseCommandResult = await _mediator.Send(updateDatabaseCaseCommand);
+        var updateDatabaseCaseCommandResult = await _mediator.SendRequest(updateDatabaseCaseCommand);
 
         if (!updateDatabaseCaseCommandResult.IsSuccess)
         {

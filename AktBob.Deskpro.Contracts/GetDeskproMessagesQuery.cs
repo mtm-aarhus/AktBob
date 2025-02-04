@@ -1,5 +1,5 @@
 ﻿using AktBob.Deskpro.Contracts.DTOs;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.Deskpro.Contracts;
-public record GetDeskproMessagesQuery(int TicketId) : IRequest<IEnumerable<MessageDto>>;
+public record GetDeskproMessagesQuery(int TicketId) : Request<IEnumerable<MessageDto>>;

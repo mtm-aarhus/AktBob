@@ -1,15 +1,16 @@
 ﻿using AAK.Deskpro;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 
 namespace AktBob.Deskpro;
-internal class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator mediator) : IRequestHandler<GetDeskproMessagesQuery, IEnumerable<MessageDto>>
+internal class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator mediator) : MediatorRequestHandler<GetDeskproMessagesQuery, IEnumerable<MessageDto>>
 {
     private readonly IDeskproClient _deskpro = deskpro;
     private readonly IMediator _mediator = mediator;
 
-    public async Task<IEnumerable<MessageDto>> Handle(GetDeskproMessagesQuery query, CancellationToken cancellationToken)
+    protected override async Task<IEnumerable<MessageDto>> Handle(GetDeskproMessagesQuery query, CancellationToken cancellationToken)
     {
         var count = 10;
         var page = 1;
@@ -48,7 +49,7 @@ internal class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator 
         foreach (var dto in dtos)
         {
             var getPersonQuery = new GetDeskproPersonQuery(dto.Person.Id);
-            var getPersonResult = await _mediator.Send(getPersonQuery, cancellationToken);
+            var getPersonResult = await _mediator.SendRequest(getPersonQuery, cancellationToken);
 
             var person = getPersonResult.Value;
             if (person != null)

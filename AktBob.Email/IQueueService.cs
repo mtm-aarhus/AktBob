@@ -1,5 +1,5 @@
 ﻿namespace AktBob.Email;
-internal interface IQueueService
+public interface IQueueService
 {
     IQueue Queue { get; }
 }

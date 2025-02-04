@@ -1,9 +1,9 @@
 ﻿using Ardalis.GuardClauses;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.RegisterDocuments;
-internal record RegisterFilesCommand : IRequest<Result>
+internal record RegisterFilesCommand : Request<Result>
 {
     public Guid CaseId { get; }
 

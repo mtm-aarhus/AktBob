@@ -1,5 +1,5 @@
 ﻿using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.Podio.Contracts;
-public record PostItemCommentCommand(int AppId, long ItemId, string Comment) : IRequest<Result>;
+public record PostItemCommentCommand(int AppId, long ItemId, string Comment) : Request<Result>;
