@@ -3,7 +3,7 @@ using Ardalis.GuardClauses;
 using MassTransit.Mediator;
 
 namespace AktBob.Queue.UseCases;
-internal class DeleteQueueMessageCommandHandler(IQueue queue) : MediatorRequestHandler<DeleteQueueMessageCommand>
+public class DeleteQueueMessageCommandHandler(IQueue queue) : MediatorRequestHandler<DeleteQueueMessageCommand>
 {
     private readonly IQueue _queue = queue;
 

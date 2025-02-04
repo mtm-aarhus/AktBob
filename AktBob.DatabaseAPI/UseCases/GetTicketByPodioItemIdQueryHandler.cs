@@ -4,7 +4,7 @@ using Ardalis.Result;
 using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.UseCases;
-internal class GetTicketByPodioItemIdQueryHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<GetTicketByPodioItemIdQuery, Result<IEnumerable<TicketDto>>>
+public class GetTicketByPodioItemIdQueryHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<GetTicketByPodioItemIdQuery, Result<IEnumerable<TicketDto>>>
 {
     private readonly IDatabaseApi _databaseApi = databaseApi;
 

@@ -2,7 +2,7 @@
 
 namespace AktBob.CloudConvert.Models.JobResponse;
 
-internal class JobResponseData
+public class JobResponseData
 {
     [JsonPropertyName("id")]
     public Guid Id { get; set; }

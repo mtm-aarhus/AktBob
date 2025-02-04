@@ -2,7 +2,7 @@
 using Ardalis.Result;
 
 namespace AktBob.CloudConvert;
-internal interface ICloudConvertClient
+public interface ICloudConvertClient
 {
     Task<Result<Guid>> CreateJob(object payload, CancellationToken cancellationToken);
     Task<Result<Models.File>> GetFile(string url, CancellationToken cancellationToken = default);

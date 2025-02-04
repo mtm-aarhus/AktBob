@@ -2,7 +2,7 @@
 using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.UseCases;
-internal class UpdateMessageSetGoDocumentIdCommandHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<UpdateMessageSetGoDocumentIdCommand>
+public class UpdateMessageSetGoDocumentIdCommandHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<UpdateMessageSetGoDocumentIdCommand>
 {
     private readonly IDatabaseApi _databaseApi = databaseApi;
 

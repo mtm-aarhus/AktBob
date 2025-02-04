@@ -4,7 +4,7 @@ using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.CheckOCRScreeningStatus.Consumers.CheckOCRStatus;
+namespace AktBob.CheckOCRScreeningStatus.Consumers.CheckFileStatus;
 public class FilesRegisteredConsumer(IData data, IMediator mediator, ILogger<FilesRegistered> logger) : IConsumer<FilesRegistered>
 {
     private readonly IData _data = data;

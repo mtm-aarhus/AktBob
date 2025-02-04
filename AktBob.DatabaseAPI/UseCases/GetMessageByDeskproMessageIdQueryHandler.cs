@@ -4,7 +4,7 @@ using Ardalis.Result;
 using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.UseCases;
-internal class GetMessageByDeskproMessageIdQueryHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
+public class GetMessageByDeskproMessageIdQueryHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
 {
     private readonly IDatabaseApi _databaseApi = databaseApi;
 

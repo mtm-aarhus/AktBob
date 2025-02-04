@@ -4,7 +4,7 @@ using Ardalis.Result;
 using MassTransit.Mediator;
 
 namespace AktBob.Queue.UseCases;
-internal class GetQueueMessagesQueryHandler(IQueue queue) : MediatorRequestHandler<GetQueueMessagesQuery, Result<IEnumerable<QueueMessageDto>>>
+public class GetQueueMessagesQueryHandler(IQueue queue) : MediatorRequestHandler<GetQueueMessagesQuery, Result<IEnumerable<QueueMessageDto>>>
 {
     private readonly IQueue _queue = queue;
 

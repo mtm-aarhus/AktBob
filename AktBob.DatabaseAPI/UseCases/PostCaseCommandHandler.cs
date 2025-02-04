@@ -5,7 +5,7 @@ using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.UseCases;
 
-internal class PostCaseCommandHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<PostCaseCommand, Result<CaseDto>>
+public class PostCaseCommandHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<PostCaseCommand, Result<CaseDto>>
 {
     private readonly IDatabaseApi _databaseApi = databaseApi;
 

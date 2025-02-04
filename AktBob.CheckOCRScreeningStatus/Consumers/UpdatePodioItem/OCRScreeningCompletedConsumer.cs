@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.Consumers.UpdatePodioItem;
-internal class OCRScreeningCompletedConsumer(IMediator mediator, ILogger<OCRScreeningCompletedConsumer> logger, IData data, IConfiguration configuration) : IConsumer<OCRSceeningCompleted>
+public class OCRScreeningCompletedConsumer(IMediator mediator, ILogger<OCRScreeningCompletedConsumer> logger, IData data, IConfiguration configuration) : IConsumer<OCRSceeningCompleted>
 {
     private readonly IMediator _mediator = mediator;
     private readonly ILogger<OCRScreeningCompletedConsumer> _logger = logger;

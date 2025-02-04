@@ -2,7 +2,7 @@
 
 namespace AktBob.CloudConvert.Models.JobResponse;
 
-internal class JobResponseTask
+public class JobResponseTask
 {
     [JsonPropertyName("operation")]
     public string Operation { get; set; } = string.Empty;

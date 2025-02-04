@@ -3,7 +3,7 @@ using FilArkivCore.Web.Shared.Documents;
 using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.CheckOCRScreeningStatus.UseCases.RegisterDocuments;
+namespace AktBob.CheckOCRScreeningStatus.UseCases.RegisterFiles;
 public class RegisterFilesCommandHandler : MediatorRequestHandler<RegisterFilesCommand, Result>
 {
     private readonly IData _data;
@@ -38,7 +38,7 @@ public class RegisterFilesCommandHandler : MediatorRequestHandler<RegisterFilesC
 
             pageIndex++; // First page = pageIndex = 1
 
-            var documentOverviewParameters = new DocumentOverviewParameters 
+            var documentOverviewParameters = new DocumentOverviewParameters
             {
                 CaseId = request.CaseId.ToString(),
                 PageIndex = pageIndex,

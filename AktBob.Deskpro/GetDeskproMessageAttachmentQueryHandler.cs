@@ -4,7 +4,7 @@ using Ardalis.Result;
 using MassTransit.Mediator;
 
 namespace AktBob.Deskpro;
-internal class GetDeskproMessageAttachmentQueryHandler(IDeskproClient deskproClient) : MediatorRequestHandler<GetDeskproMessageAttachmentQuery, Result<Stream>>
+public class GetDeskproMessageAttachmentQueryHandler(IDeskproClient deskproClient) : MediatorRequestHandler<GetDeskproMessageAttachmentQuery, Result<Stream>>
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
 

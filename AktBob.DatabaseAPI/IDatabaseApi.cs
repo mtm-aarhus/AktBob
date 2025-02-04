@@ -3,7 +3,7 @@ using Ardalis.Result;
 
 namespace AktBob.DatabaseAPI;
 
-internal interface IDatabaseApi
+public interface IDatabaseApi
 {
     Task DeleteMessage(int id, CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<MessageDto>>> GetMessageByDeskproMessageId(int deskproMessageId, CancellationToken cancellationToken = default);

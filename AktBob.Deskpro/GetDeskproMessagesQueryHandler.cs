@@ -5,7 +5,7 @@ using MassTransit;
 using MassTransit.Mediator;
 
 namespace AktBob.Deskpro;
-internal class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator mediator) : MediatorRequestHandler<GetDeskproMessagesQuery, IEnumerable<MessageDto>>
+public class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator mediator) : MediatorRequestHandler<GetDeskproMessagesQuery, IEnumerable<MessageDto>>
 {
     private readonly IDeskproClient _deskpro = deskpro;
     private readonly IMediator _mediator = mediator;

@@ -5,7 +5,7 @@ using Ardalis.Result;
 using MassTransit.Mediator;
 
 namespace AktBob.CloudConvert;
-internal class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClient) : MediatorRequestHandler<ConvertHtmlToPdfCommand, Result<ConvertHtmlToPdfResponseDto>>
+public class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClient) : MediatorRequestHandler<ConvertHtmlToPdfCommand, Result<ConvertHtmlToPdfResponseDto>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
 

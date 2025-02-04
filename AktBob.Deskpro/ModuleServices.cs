@@ -2,13 +2,12 @@
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace AktBob.Deskpro;
 
 public static class ModuleServices
 {
-    public static IServiceCollection AddDeskproModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatRAssemblies)
+    public static IServiceCollection AddDeskproModule(this IServiceCollection services, IConfiguration configuration, List<Type> mediatorHandlers)
     {
         var deskproOptions = new DeskproOptions
         {
@@ -18,7 +17,15 @@ public static class ModuleServices
 
         services.AddDeskpro(deskproOptions);
 
-        mediatRAssemblies.Add(typeof(ModuleServices).Assembly);
+        mediatorHandlers.AddRange([
+            typeof(GetDeskproCustomFieldSpecificationsQueryHandler),
+            typeof(GetDeskproMessageAttachmentQueryHandler),
+            typeof(GetDeskproMessageAttachmentsQueryHandler),
+            typeof(GetDeskproMessageByIdQueryHandler),
+            typeof(GetDeskproMessagesQueryHandler),
+            typeof(GetDeskproPersonQueryHandler),
+            typeof(GetDeskproTicketByIdQueryHandler),
+            typeof(GetDeskproTicketsByFieldSearchQueryHandler)]);
 
         return services;
     }

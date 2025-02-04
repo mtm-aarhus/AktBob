@@ -5,7 +5,7 @@ using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CloudConvert;
-internal class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogger<GetJobQueryHandler> logger, IMediator mediator) : MediatorRequestHandler<GetJobQuery, Result<byte[]>>
+public class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogger<GetJobQueryHandler> logger, IMediator mediator) : MediatorRequestHandler<GetJobQuery, Result<byte[]>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
     private readonly ILogger<GetJobQueryHandler> _logger = logger;

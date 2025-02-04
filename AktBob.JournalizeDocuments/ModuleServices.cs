@@ -3,12 +3,11 @@ using AktBob.JournalizeDocuments.BackgroundServices;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace AktBob.JournalizeDocuments;
 public static class ModuleServices
 {
-    public static IServiceCollection AddJournalizeDocumentsModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatrAssemblies)
+    public static IServiceCollection AddJournalizeDocumentsModule(this IServiceCollection services, IConfiguration configuration)
     {
         // Add GetOrganized service
         var getOrganizedOptions = new GetOrganizedOptions
@@ -23,11 +22,9 @@ public static class ModuleServices
         services.AddHostedService<JournalizeSingleMessagesBackgroundService>();
         services.AddHostedService<JournalizeFullTicketDocumentBackgroundService>();
 
-
         services.AddTransient<DeskproHelper>();
         services.AddTransient<GetOrganizedHelper>();
 
-        mediatrAssemblies.Add(typeof(ModuleServices).Assembly);
         return services;
     }
 }

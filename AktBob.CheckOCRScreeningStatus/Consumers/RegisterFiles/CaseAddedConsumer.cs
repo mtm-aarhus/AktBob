@@ -1,12 +1,13 @@
 ﻿using AktBob.CheckOCRScreeningStatus.Events;
-using AktBob.CheckOCRScreeningStatus.UseCases.RegisterDocuments;
+using AktBob.CheckOCRScreeningStatus.UseCases.RegisterFiles;
 using AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.Consumers.RegisterFiles;
-internal class CaseAddedConsumer(ILogger<CaseAddedConsumer> logger, IMediator mediator) : IConsumer<CaseAdded>
+
+public class CaseAddedConsumer(ILogger<CaseAddedConsumer> logger, IMediator mediator) : IConsumer<CaseAdded>
 {
     private readonly ILogger<CaseAddedConsumer> _logger = logger;
     private readonly IMediator _mediator = mediator;

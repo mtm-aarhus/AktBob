@@ -1,13 +1,13 @@
-﻿using Ardalis.GuardClauses;
+﻿using AktBob.DatabaseAPI.UseCases;
+using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace AktBob.DatabaseAPI;
 
 public static class ModuleServices
 {
-    public static IServiceCollection AddDatabaseApiModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatRAssemblies)
+    public static IServiceCollection AddDatabaseApiModule(this IServiceCollection services, IConfiguration configuration, List<Type> mediatorHandlers)
     {
         services.AddTransient<IDatabaseApi, DatabaseApi>();
         services.AddHttpClient<IDatabaseApi, DatabaseApi>(client =>
@@ -16,7 +16,15 @@ public static class ModuleServices
             client.DefaultRequestHeaders.Add("ApiKey", Guard.Against.NullOrEmpty(configuration.GetValue<string>("DatabaseApi:ApiKey")));
         });
 
-        mediatRAssemblies.Add(typeof(ModuleServices).Assembly);
+        mediatorHandlers.AddRange([
+            typeof(DeleteMessageCommandHandler),
+            typeof(GetMessageByDeskproMessageIdQueryHandler),
+            typeof(GetMessagesNotJournalizedQueryHandler),
+            typeof(GetTicketByDeskproIdQueryHandler),
+            typeof(GetTicketByPodioItemIdQueryHandler),
+            typeof(PostCaseCommandHandler),
+            typeof(UpdateCaseSetFilArkivCaseIdCommandHandler),
+            typeof(UpdateMessageSetGoDocumentIdCommandHandler)]);
 
         return services;
     }

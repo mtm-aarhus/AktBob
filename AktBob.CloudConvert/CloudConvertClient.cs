@@ -1,10 +1,7 @@
-﻿using AktBob.CloudConvert.Contracts;
-using AktBob.CloudConvert.Models.JobResponse;
+﻿using AktBob.CloudConvert.Models.JobResponse;
 using Ardalis.Result;
 using Microsoft.Extensions.Logging;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 

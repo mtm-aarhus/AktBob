@@ -5,7 +5,7 @@ using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.Consumers.UpdateDatabase;
-internal class FilesRegisteredConsumer(IData data, IMediator mediator, ILogger<FilesRegisteredConsumer> logger) : IConsumer<FilesRegistered>
+public class FilesRegisteredConsumer(IData data, IMediator mediator, ILogger<FilesRegisteredConsumer> logger) : IConsumer<FilesRegistered>
 {
     private readonly IData _data = data;
     private readonly IMediator _mediator = mediator;

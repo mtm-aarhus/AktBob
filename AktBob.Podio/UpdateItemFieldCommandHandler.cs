@@ -5,7 +5,7 @@ using Ardalis.Result;
 using MassTransit.Mediator;
 
 namespace AktBob.Podio;
-internal class UpdateItemFieldCommandHandler(IPodio podio) : MediatorRequestHandler<UpdateItemFieldCommand, Result<ItemUpdateResponseDTO>>
+public class UpdateItemFieldCommandHandler(IPodio podio) : MediatorRequestHandler<UpdateItemFieldCommand, Result<ItemUpdateResponseDTO>>
 {
     private readonly IPodio _podio = podio;
 

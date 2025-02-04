@@ -1,5 +1,4 @@
-﻿using AAK.Podio;
-using AktBob.DatabaseAPI.Contracts.Queries;
+﻿using AktBob.DatabaseAPI.Contracts.Queries;
 using AktBob.Deskpro.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Queue.Contracts;
@@ -17,14 +16,12 @@ internal class BackgroundWorker : BackgroundService
 {
     private readonly ILogger<BackgroundWorker> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IPodio _podio;
 
-    public BackgroundWorker(ILogger<BackgroundWorker> logger, IConfiguration configuration, IServiceProvider serviceProvider, IPodio podio)
+    public BackgroundWorker(ILogger<BackgroundWorker> logger, IConfiguration configuration, IServiceProvider serviceProvider)
     {
         _logger = logger;
         _configuration = configuration;
         ServiceProvider = serviceProvider;
-        _podio = podio;
     }
 
     public IServiceProvider ServiceProvider { get; }

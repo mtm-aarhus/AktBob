@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Net.Mail;
 
 namespace AktBob.Email.UseCases.SendEmail;
-internal class SendEmailCommandHandler(IConfiguration configuration, ILogger<SendEmailCommandHandler> logger) : MediatorRequestHandler<SendEmailCommand>
+public class SendEmailCommandHandler(IConfiguration configuration, ILogger<SendEmailCommandHandler> logger) : MediatorRequestHandler<SendEmailCommand>
 {
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<SendEmailCommandHandler> _logger = logger;

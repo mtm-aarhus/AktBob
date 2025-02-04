@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 using FilArkivCore.Web.Client;
 using Microsoft.Extensions.Configuration;
 using Ardalis.GuardClauses;
@@ -8,7 +7,7 @@ namespace AktBob.CheckOCRScreeningStatus;
 
 public static class ModuleServices
 {
-    public static IServiceCollection AddCheckOCRScreeningStatusModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatRAssemblies, List<Assembly> massTransitConsumers)
+    public static IServiceCollection AddCheckOCRScreeningStatusModule(this IServiceCollection services, IConfiguration configuration, List<Type> mediatorHandlers, List<Type> massTransitConsumers)
     {
         var podioAppId = Guard.Against.Null(configuration.GetValue<int>("Podio:AppId"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName"));
@@ -31,8 +30,18 @@ public static class ModuleServices
 
         services.AddScoped<IFilArkiv, FilArkiv>();
 
-        mediatRAssemblies.Add(typeof(ModuleServices).Assembly);
-        massTransitConsumers.Add(typeof(ModuleServices).Assembly);
+        mediatorHandlers.AddRange([
+            typeof(UseCases.GetFileStatus.GetFileStatusQueryHandler),
+            typeof(UseCases.RegisterFiles.RegisterFilesCommandHandler),
+            typeof(UseCases.RemoveCaseFromCache.RemoveCaseFromCacheCommandHandler),
+            typeof(UseCases.UpdatePodioItem.UpdatePodioItemCommandHandler)]);
+            
+        massTransitConsumers.AddRange([
+                typeof(Consumers.CheckFileStatus.FilesRegisteredConsumer),
+                typeof(Consumers.RegisterFiles.CaseAddedConsumer),
+                typeof(Consumers.UpdateDatabase.FilesRegisteredConsumer),
+                typeof(Consumers.UpdatePodioItem.OCRScreeningCompletedConsumer)]);
+
 
         return services;
     }

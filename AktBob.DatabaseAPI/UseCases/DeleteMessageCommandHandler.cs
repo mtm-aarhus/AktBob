@@ -2,7 +2,7 @@
 using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.UseCases;
-internal class DeleteMessageCommandHandler : MediatorRequestHandler<DeleteMessageCommand>
+public class DeleteMessageCommandHandler : MediatorRequestHandler<DeleteMessageCommand>
 {
     private readonly IDatabaseApi _databaseApi;
 

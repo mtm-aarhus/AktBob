@@ -4,7 +4,7 @@ using Ardalis.Result;
 using MassTransit.Mediator;
 
 namespace AktBob.DatabaseAPI.UseCases;
-internal class GetMessagesNotJournalizedQueryHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<GetMessagesNotJournalizedQuery, Result<IEnumerable<MessageDto>>>
+public class GetMessagesNotJournalizedQueryHandler(IDatabaseApi databaseApi) : MediatorRequestHandler<GetMessagesNotJournalizedQuery, Result<IEnumerable<MessageDto>>>
 {
     private readonly IDatabaseApi _databaseApi = databaseApi;
 

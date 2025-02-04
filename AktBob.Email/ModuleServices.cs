@@ -6,10 +6,7 @@ namespace AktBob.Email;
 
 public static class ModuleServices
 {
-    public static IServiceCollection AddEmailModuleServices(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        List<System.Reflection.Assembly> mediatrAssemblies)
+    public static IServiceCollection AddEmailModuleServices(this IServiceCollection services, IConfiguration configuration, List<Type> mediatorHandlers)
     {
         Guard.Against.Null(configuration.GetValue<int>("EmailModule:IntervalSeconds"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:From"));
@@ -28,7 +25,10 @@ public static class ModuleServices
         services.AddHostedService<SendEmailBackgroundService>();
 
         // Mediatr
-        mediatrAssemblies.Add(typeof(ModuleServices).Assembly);
+        mediatorHandlers.AddRange([
+            typeof(UseCases.QueueEmail.QueueEmailCommandHandler),
+            typeof(UseCases.SendEmail.SendEmailCommandHandler)]);
+
         return services;
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Deskpro;
-internal class GetDeskproCustomFieldSpecificationsQueryHandler(
+public class GetDeskproCustomFieldSpecificationsQueryHandler(
     IDeskproClient deskproClient,
     IMemoryCache cache,
     ILogger<GetDeskproCustomFieldSpecificationsQueryHandler> logger) : MediatorRequestHandler<GetDeskproCustomFieldSpecificationsQuery, Result<IEnumerable<CustomFieldSpecificationDto>>>

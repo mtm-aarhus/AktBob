@@ -5,7 +5,7 @@ using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.DatabaseAPI.UseCases;
-internal class UpdateCaseSetFilArkivCaseIdCommandHandler(IDatabaseApi databaseApi, ILogger<UpdateCaseSetFilArkivCaseIdCommandHandler> logger) : MediatorRequestHandler<UpdateCaseSetFilArkivCaseIdCommand, Result<CaseDto>>
+public class UpdateCaseSetFilArkivCaseIdCommandHandler(IDatabaseApi databaseApi, ILogger<UpdateCaseSetFilArkivCaseIdCommandHandler> logger) : MediatorRequestHandler<UpdateCaseSetFilArkivCaseIdCommand, Result<CaseDto>>
 {
     private readonly IDatabaseApi _databaseApi = databaseApi;
     private readonly ILogger<UpdateCaseSetFilArkivCaseIdCommandHandler> _logger = logger;

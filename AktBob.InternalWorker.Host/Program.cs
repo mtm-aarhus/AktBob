@@ -24,26 +24,27 @@ var builder = Host.CreateDefaultBuilder(args)
         });
 
         // Modules
-        var mediatorAssemblies = new List<Assembly>();
-        var massTransitConsumers = new List<Assembly>();
-        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatorAssemblies, massTransitConsumers);
-        services.AddEmailModuleServices(hostContext.Configuration, mediatorAssemblies);
-        services.AddQueueModule(hostContext.Configuration, mediatorAssemblies);
-        services.AddUiPathModule(hostContext.Configuration, mediatorAssemblies);
+        var mediatorHandlers = new List<Type>();
+        var massTransitConsumers = new List<Type>();
+        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatorHandlers, massTransitConsumers);
+        services.AddEmailModuleServices(hostContext.Configuration, mediatorHandlers);
+        services.AddQueueModule(hostContext.Configuration, mediatorHandlers);
+        services.AddUiPathModule(hostContext.Configuration, mediatorHandlers);
         services.AddPodioHookProcessorModule(hostContext.Configuration);
-        services.AddDeskproModule(hostContext.Configuration, mediatorAssemblies);
-        services.AddDatabaseApiModule(hostContext.Configuration, mediatorAssemblies);
-        services.AddPodioModule(hostContext.Configuration, mediatorAssemblies);
-        services.AddJournalizeDocumentsModule(hostContext.Configuration, mediatorAssemblies);
-        services.AddOpenOrchestratorModule(hostContext.Configuration, mediatorAssemblies);
-        services.AddCloudConvertModule(hostContext.Configuration, mediatorAssemblies);
+        services.AddDeskproModule(hostContext.Configuration, mediatorHandlers);
+        services.AddDatabaseApiModule(hostContext.Configuration, mediatorHandlers);
+        services.AddPodioModule(hostContext.Configuration, mediatorHandlers);
+        services.AddJournalizeDocumentsModule(hostContext.Configuration);
+        services.AddOpenOrchestratorModule(hostContext.Configuration, mediatorHandlers);
+        services.AddCloudConvertModule(hostContext.Configuration, mediatorHandlers);
 
         // MassTransit Mediator
         services.AddMediator(cfg =>
         {
-            cfg.AddConsumers(mediatorAssemblies.ToArray());
+            cfg.AddConsumers(mediatorHandlers.ToArray());
         });
 
+        // MassTransit
         services.AddMassTransit(cfg =>
         {
             cfg.SetKebabCaseEndpointNameFormatter();
