@@ -1,6 +1,5 @@
 using AktBob.CheckOCRScreeningStatus;
 using System.Reflection;
-using JNJ.MessageBus;
 using Serilog;
 using AktBob.Email;
 using AktBob.Queue;
@@ -26,7 +25,8 @@ var builder = Host.CreateDefaultBuilder(args)
 
         // Modules
         var mediatorAssemblies = new List<Assembly>();
-        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatorAssemblies);
+        var massTransitConsumers = new List<Assembly>();
+        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatorAssemblies, massTransitConsumers);
         services.AddEmailModuleServices(hostContext.Configuration, mediatorAssemblies);
         services.AddQueueModule(hostContext.Configuration, mediatorAssemblies);
         services.AddUiPathModule(hostContext.Configuration, mediatorAssemblies);
@@ -44,8 +44,18 @@ var builder = Host.CreateDefaultBuilder(args)
             cfg.AddConsumers(mediatorAssemblies.ToArray());
         });
 
-        // EventBus
-        services.AddEventBus();
+        services.AddMassTransit(cfg =>
+        {
+            cfg.SetKebabCaseEndpointNameFormatter();
+
+            // Use in-memory transport
+            cfg.UsingInMemory((context, config) =>
+            {
+                config.ConfigureEndpoints(context);
+            });
+
+            cfg.AddConsumers(massTransitConsumers.ToArray());
+        });
     });
 
 

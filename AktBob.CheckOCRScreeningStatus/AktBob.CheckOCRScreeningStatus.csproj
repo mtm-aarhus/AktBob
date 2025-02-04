@@ -9,7 +9,6 @@
   <ItemGroup>
     <PackageReference Include="FilArkivCore.Web.Client" Version="1.0.217" />
     <PackageReference Include="FilArkivCore.Web.Shared" Version="1.0.251" />
-    <PackageReference Include="JNJ.MessageBus" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup>

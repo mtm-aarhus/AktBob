@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using JNJ.MessageBus;
 using AktBob.CheckOCRScreeningStatus.Events;
 using Microsoft.Extensions.Configuration;
 using AktBob.Queue.Contracts;
@@ -14,16 +13,16 @@ namespace AktBob.CheckOCRScreeningStatus.BackgroundServices;
 internal class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
-    private readonly IEventBus _eventBus;
+    private readonly IBus _bus;
     private readonly IData _data;
     private readonly IConfiguration _configuration;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
 
-    public Worker(ILogger<Worker> logger, IEventBus eventBus, IData data, IConfiguration configuration, IServiceProvider serviceProvider)
+    public Worker(ILogger<Worker> logger, IBus bus, IData data, IConfiguration configuration, IServiceProvider serviceProvider)
     {
         _logger = logger;
-        _eventBus = eventBus;
+        _bus = bus;
         _data = data;
         _configuration = configuration;
         ServiceProvider = serviceProvider;
@@ -61,7 +60,7 @@ internal class Worker : BackgroundService
                         if (content is not null)
                         {
                             _data.AddCase(content.FilArkivCaseId, content.PodioItemId);
-                            await _eventBus.Publish(new CaseAdded(content.FilArkivCaseId));
+                            await _bus.Publish(new CaseAdded(content.FilArkivCaseId));
                         }
                         else
                         {

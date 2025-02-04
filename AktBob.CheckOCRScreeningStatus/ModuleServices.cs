@@ -8,7 +8,7 @@ namespace AktBob.CheckOCRScreeningStatus;
 
 public static class ModuleServices
 {
-    public static IServiceCollection AddCheckOCRScreeningStatusModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatRAssemblies)
+    public static IServiceCollection AddCheckOCRScreeningStatusModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatRAssemblies, List<Assembly> massTransitConsumers)
     {
         var podioAppId = Guard.Against.Null(configuration.GetValue<int>("Podio:AppId"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName"));
@@ -17,11 +17,11 @@ public static class ModuleServices
         var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => long.Parse(x.Key), x => x.Get<PodioField>())));
         var podioFieldFilArkivCaseId = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivCaseId"));
         Guard.Against.Null(podioFieldFilArkivCaseId.Value);
+
         var podioFieldFilArkivLink = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivLink"));
         Guard.Against.Null(podioFieldFilArkivLink.Value);
 
         services.AddHostedService<BackgroundServices.Worker>();
-
         services.AddSingleton<IData, Data>();
 
         var filArkivUrl = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:BaseAddress"));
@@ -32,6 +32,8 @@ public static class ModuleServices
         services.AddScoped<IFilArkiv, FilArkiv>();
 
         mediatRAssemblies.Add(typeof(ModuleServices).Assembly);
+        massTransitConsumers.Add(typeof(ModuleServices).Assembly);
+
         return services;
     }
 }

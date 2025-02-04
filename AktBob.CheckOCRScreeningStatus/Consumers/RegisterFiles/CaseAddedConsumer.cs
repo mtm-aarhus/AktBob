@@ -1,43 +1,33 @@
 ﻿using AktBob.CheckOCRScreeningStatus.Events;
 using AktBob.CheckOCRScreeningStatus.UseCases.RegisterDocuments;
 using AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
-using JNJ.MessageBus;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.Consumers.RegisterFiles;
-internal class CaseAddedConsumer : INotificationHandler<CaseAdded>
+internal class CaseAddedConsumer(ILogger<CaseAddedConsumer> logger, IMediator mediator) : IConsumer<CaseAdded>
 {
-    private readonly ILogger<CaseAddedConsumer> _logger;
-    private readonly IMediator _mediator;
-    private readonly IEventBus _eventBus;
+    private readonly ILogger<CaseAddedConsumer> _logger = logger;
+    private readonly IMediator _mediator = mediator;
 
-    public CaseAddedConsumer(
-        ILogger<CaseAddedConsumer> logger,
-        IMediator mediator,
-        IEventBus eventBus)
+    public async Task Consume(ConsumeContext<CaseAdded> context)
     {
-        _logger = logger;
-        _mediator = mediator;
-        _eventBus = eventBus;
-    }
+        var message = context.Message;
 
-    public async Task Handle(CaseAdded notification, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Registering files for case {id}", notification.CaseId);
+        _logger.LogInformation("Registering files for case {id}", message.CaseId);
 
-        var registerFilesCommand = new RegisterFilesCommand(notification.CaseId);
-        var registerFilesResult = await _mediator.SendRequest(registerFilesCommand);
+        var registerFilesCommand = new RegisterFilesCommand(message.CaseId);
+        var registerFilesResult = await _mediator.SendRequest(registerFilesCommand, context.CancellationToken);
 
-        _logger.LogInformation("Files registered for case {id}", notification.CaseId);
+        _logger.LogInformation("Files registered for case {id}", message.CaseId);
 
         if (!registerFilesResult.IsSuccess)
         {
-            await _mediator.Send(new RemoveCaseFromCacheCommand(notification.CaseId));
+            await _mediator.Send(new RemoveCaseFromCacheCommand(message.CaseId));
             return;
         }
 
-        await _eventBus.Publish(new FilesRegistered(notification.CaseId));
+        await context.Publish(new FilesRegistered(message.CaseId));
     }
 }

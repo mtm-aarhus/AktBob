@@ -3,7 +3,7 @@ using Ardalis.Result;
 using MassTransit.Mediator;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.RegisterDocuments;
-internal record RegisterFilesCommand : Request<Result>
+public record RegisterFilesCommand : Request<Result>
 {
     public Guid CaseId { get; }
 

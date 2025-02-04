@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.UpdatePodioItem;
-internal class UpdatePodioItemCommandHandler : MediatorRequestHandler<UpdatePodioItemCommand>
+public class UpdatePodioItemCommandHandler : MediatorRequestHandler<UpdatePodioItemCommand>
 {
     private readonly IData _data;
     private readonly IConfiguration _configuration;

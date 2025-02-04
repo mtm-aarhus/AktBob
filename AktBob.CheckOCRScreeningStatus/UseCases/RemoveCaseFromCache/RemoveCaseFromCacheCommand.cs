@@ -1,5 +1,3 @@
-﻿using MediatR;
+﻿namespace AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
 
-namespace AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
-
-internal record RemoveCaseFromCacheCommand(Guid CaseId) : IRequest;
+public record RemoveCaseFromCacheCommand(Guid CaseId);

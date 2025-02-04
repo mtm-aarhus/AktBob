@@ -1,8 +1,8 @@
-﻿using MediatR;
+﻿using MassTransit.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
-internal class RemoveCaseFromCacheCommandHandler : IRequestHandler<RemoveCaseFromCacheCommand>
+public class RemoveCaseFromCacheCommandHandler : MediatorRequestHandler<RemoveCaseFromCacheCommand>
 {
     private readonly IData _data;
     private readonly ILogger<RemoveCaseFromCacheCommandHandler> _logger;
@@ -13,7 +13,7 @@ internal class RemoveCaseFromCacheCommandHandler : IRequestHandler<RemoveCaseFro
         _logger = logger;
     }
 
-    public Task Handle(RemoveCaseFromCacheCommand request, CancellationToken cancellationToken)
+    protected override Task Handle(RemoveCaseFromCacheCommand request, CancellationToken cancellationToken)
     {
         var @case = _data.GetCase(request.CaseId);
 
