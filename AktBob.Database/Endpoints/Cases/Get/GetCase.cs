@@ -2,18 +2,14 @@
 using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Cases.GetCaseById;
 using FastEndpoints;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Cases.Get;
-internal class GetCase : Endpoint<GetCaseRequest, CaseDto>
+internal class GetCase(IMediator mediator) : Endpoint<GetCaseRequest, CaseDto>
 {
-    private readonly IMediator _mediator;
-
-    public GetCase(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     public override void Configure()
     {
@@ -33,7 +29,7 @@ internal class GetCase : Endpoint<GetCaseRequest, CaseDto>
     public override async Task HandleAsync(GetCaseRequest req, CancellationToken ct)
     {
         var getCaseByIdQuery = new GetCaseByIdQuery(req.Id);
-        var result = await _mediator.Send(getCaseByIdQuery);
+        var result = await _mediator.SendRequest(getCaseByIdQuery, ct);
 
         await this.SendResponse(result, r => r.Value.ToDto());
     }

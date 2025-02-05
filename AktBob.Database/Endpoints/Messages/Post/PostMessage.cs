@@ -1,17 +1,12 @@
 ﻿using AktBob.Database.UseCases.Messages.PostMessage;
 using FastEndpoints;
-using MediatR;
+using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Messages.Post;
-internal class PostMessage : Endpoint<PostMessageRequest>
+internal class PostMessage(IMediator mediator) : Endpoint<PostMessageRequest>
 {
-    private readonly IMediator _mediator;
-
-    public PostMessage(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     public override void Configure()
     {

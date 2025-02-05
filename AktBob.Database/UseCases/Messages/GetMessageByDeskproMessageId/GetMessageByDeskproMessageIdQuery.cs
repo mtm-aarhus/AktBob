@@ -1,6 +1,6 @@
 ﻿using AktBob.Database.Entities;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.Database.UseCases.Messages.GetMessageByDeskproMessageId;
-internal record GetMessageByDeskproMessageIdQuery(int DeskproMessageId) : IRequest<Result<IEnumerable<Message>>>;
+internal record GetMessageByDeskproMessageIdQuery(int DeskproMessageId) : Request<Result<IEnumerable<Message>>>;

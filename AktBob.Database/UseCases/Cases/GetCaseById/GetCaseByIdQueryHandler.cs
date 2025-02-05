@@ -1,20 +1,15 @@
 ﻿using AktBob.Database.Entities;
 using Ardalis.Result;
 using Dapper;
-using MediatR;
+using MassTransit.Mediator;
 using System.Data;
 
 namespace AktBob.Database.UseCases.Cases.GetCaseById;
-internal class GetCaseByIdQueryHandler : IRequestHandler<GetCaseByIdQuery, Result<Case>>
+internal class GetCaseByIdQueryHandler(ISqlDataAccess sqlDataAccess) : MediatorRequestHandler<GetCaseByIdQuery, Result<Case>>
 {
-    private readonly ISqlDataAccess _sqlDataAccess;
+    private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
 
-    public GetCaseByIdQueryHandler(ISqlDataAccess sqlDataAccess)
-    {
-        _sqlDataAccess = sqlDataAccess;
-    }
-
-    public async Task<Result<Case>> Handle(GetCaseByIdQuery request, CancellationToken cancellationToken)
+    protected override async Task<Result<Case>> Handle(GetCaseByIdQuery request, CancellationToken cancellationToken)
     {
         var parameters = new DynamicParameters();
         parameters.Add(Constants.T_CASES_ID, request.Id, DbType.Int32, ParameterDirection.Input);

@@ -1,18 +1,12 @@
-﻿using MediatR;
+﻿using MassTransit.Mediator;
 using System.Collections.Concurrent;
 
 namespace AktBob.Database.UseCases.Messages.PostMessage;
-internal class PostMessageCommandHandler : IRequestHandler<PostMessageCommand>
+internal class PostMessageCommandHandler(ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> dictionary) : MediatorRequestHandler<PostMessageCommand>
 {
-    private readonly ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> _dictionary;
+    private readonly ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> _dictionary = dictionary;
 
-    public PostMessageCommandHandler(ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> dictionary)
-    {
-
-        _dictionary = dictionary;
-    }
-
-    public Task Handle(PostMessageCommand request, CancellationToken cancellationToken)
+    protected override Task Handle(PostMessageCommand request, CancellationToken cancellationToken)
     {
         // Deskpro cannot post the message ID directly within its webhook
         // and the newest message is not immediately available from the Deskpro API.

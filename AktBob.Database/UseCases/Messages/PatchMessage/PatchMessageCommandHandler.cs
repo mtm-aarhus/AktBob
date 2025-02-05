@@ -4,29 +4,24 @@ using AktBob.Database.UseCases.Messages.GetMessageById;
 using Ardalis.GuardClauses;
 using Ardalis.Result;
 using Dapper;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Database.UseCases.Messages.PatchMessage;
-internal class PatchMessageCommandHandler : IRequestHandler<PatchMessageCommand, Result<Message>>
+internal class PatchMessageCommandHandler(IConfiguration configuration, IMediator mediator) : MediatorRequestHandler<PatchMessageCommand, Result<Message>>
 {
-    private readonly IConfiguration _configuration;
-    private readonly IMediator _mediator;
+    private readonly IConfiguration _configuration = configuration;
+    private readonly IMediator _mediator = mediator;
 
-    public PatchMessageCommandHandler(IConfiguration configuration, IMediator mediator)
-    {
-        _configuration = configuration;
-        _mediator = mediator;
-    }
-
-    public async Task<Result<Message>> Handle(PatchMessageCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result<Message>> Handle(PatchMessageCommand request, CancellationToken cancellationToken)
     {
         var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("Database"));
 
         // Get the message as it is before update
         var getMessageQuery = new GetMessageByIdQuery(request.Id);
-        var getMessageQueryResult = await _mediator.Send(getMessageQuery, cancellationToken);
+        var getMessageQueryResult = await _mediator.SendRequest(getMessageQuery, cancellationToken);
 
 
         if (!getMessageQueryResult.IsSuccess)
@@ -60,7 +55,7 @@ internal class PatchMessageCommandHandler : IRequestHandler<PatchMessageCommand,
         }
 
         // Get the message again in order to return the actual updated database object
-        getMessageQueryResult = await _mediator.Send(getMessageQuery, cancellationToken);
+        getMessageQueryResult = await _mediator.SendRequest(getMessageQuery, cancellationToken);
 
         if (!getMessageQueryResult.IsSuccess)
         {

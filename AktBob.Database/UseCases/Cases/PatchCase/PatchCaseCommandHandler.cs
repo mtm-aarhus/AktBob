@@ -2,24 +2,19 @@
 using AktBob.Database.UseCases.Cases.GetCaseById;
 using Ardalis.Result;
 using Dapper;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 
 namespace AktBob.Database.UseCases.Cases.PatchCase;
-internal class PatchCaseCommandHandler : IRequestHandler<PatchCaseCommand, Result<Case>>
+internal class PatchCaseCommandHandler(IMediator mediator, ISqlDataAccess sqlDataAccess) : MediatorRequestHandler<PatchCaseCommand, Result<Case>>
 {
-    private readonly IMediator _mediator;
-    private readonly ISqlDataAccess _sqlDataAccess;
+    private readonly IMediator _mediator = mediator;
+    private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
 
-    public PatchCaseCommandHandler(IMediator mediator, ISqlDataAccess sqlDataAccess)
-    {
-        _mediator = mediator;
-        _sqlDataAccess = sqlDataAccess;
-    }
-
-    public async Task<Result<Case>> Handle(PatchCaseCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result<Case>> Handle(PatchCaseCommand request, CancellationToken cancellationToken)
     {
         var getCaseQuery = new GetCaseByIdQuery(request.Id);
-        var getCaseResult = await _mediator.Send(getCaseQuery, cancellationToken);
+        var getCaseResult = await _mediator.SendRequest(getCaseQuery, cancellationToken);
 
         if (!getCaseResult.IsSuccess)
         {

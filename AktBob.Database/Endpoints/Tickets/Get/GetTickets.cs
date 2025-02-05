@@ -2,18 +2,14 @@
 using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Tickets.GetTickets;
 using FastEndpoints;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Tickets.Get;
-internal class GetTickets : Endpoint<GetTicketsRequest, IEnumerable<TicketDto>>
+internal class GetTickets(IMediator mediator) : Endpoint<GetTicketsRequest, IEnumerable<TicketDto>>
 {
-    private readonly IMediator _mediator;
-
-    public GetTickets(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     public override void Configure()
     {
@@ -37,7 +33,7 @@ internal class GetTickets : Endpoint<GetTicketsRequest, IEnumerable<TicketDto>>
             FilArkivCaseId: req.FilArkivCaseId,
             IncludeClosedTickets: req.IncludeClosedTickets);
 
-        var result = await _mediator.Send(query, ct);
+        var result = await _mediator.SendRequest(query, ct);
 
         await this.SendResponse(result, r => r.Value.ToDto());
     }

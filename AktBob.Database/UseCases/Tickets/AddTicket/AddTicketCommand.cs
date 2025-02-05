@@ -1,6 +1,6 @@
 ﻿using AktBob.Database.Entities;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.Database.UseCases.Tickets.AddTicket;
-internal record AddTicketCommand(int DeskproTicketId) : IRequest<Result<Ticket>>;
+internal record AddTicketCommand(int DeskproTicketId) : Request<Result<Ticket>>;

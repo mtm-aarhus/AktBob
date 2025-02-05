@@ -1,6 +1,6 @@
 ﻿using AktBob.Database.Entities;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.Database.UseCases.Messages.GetMessages;
-internal record GetMessagesQuery(bool IncludeJournalized) : IRequest<Result<IEnumerable<Message>>>;
+internal record GetMessagesQuery(bool IncludeJournalized) : Request<Result<IEnumerable<Message>>>;

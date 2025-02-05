@@ -2,18 +2,14 @@
 using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Cases.PatchCase;
 using FastEndpoints;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Cases.Patch;
-internal class PatchCase : Endpoint<PatchCaseRequest, CaseDto>
+internal class PatchCase(IMediator mediator) : Endpoint<PatchCaseRequest, CaseDto>
 {
-    private readonly IMediator _mediator;
-
-    public PatchCase(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     public override void Configure()
     {
@@ -39,7 +35,7 @@ internal class PatchCase : Endpoint<PatchCaseRequest, CaseDto>
             CaseNumber: req.CaseNumber,
             SharepointFolderName: req.SharepointFolderName);
 
-        var result = await _mediator.Send(command);
+        var result = await _mediator.SendRequest(command, ct);
         await this.SendResponse(result, r => r.Value.ToDto());
     }
 }

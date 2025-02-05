@@ -3,25 +3,20 @@ using AktBob.Database.UseCases.Cases.GetCaseById;
 using AktBob.Database.UseCases.Tickets.GetTicketById;
 using Ardalis.Result;
 using Dapper;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using System.Data;
 
 namespace AktBob.Database.UseCases.Cases.AddCase;
-internal class AddCaseCommandHandler : IRequestHandler<AddCaseCommand, Result<Case>>
+internal class AddCaseCommandHandler(ISqlDataAccess sqlDataAccess, IMediator mediator) : MediatorRequestHandler<AddCaseCommand, Result<Case>>
 {
-    private readonly ISqlDataAccess _sqlDataAccess;
-    private readonly IMediator _mediator;
+    private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
+    private readonly IMediator _mediator = mediator;
 
-    public AddCaseCommandHandler(ISqlDataAccess sqlDataAccess, IMediator mediator)
-    {
-        _sqlDataAccess = sqlDataAccess;
-        _mediator = mediator;
-    }
-
-    public async Task<Result<Case>> Handle(AddCaseCommand request, CancellationToken cancellationToken)
+    protected override async Task<Result<Case>> Handle(AddCaseCommand request, CancellationToken cancellationToken)
     {
         var getTicketQuery = new GetTicketByIdQuery(request.TicketId);
-        var ticket = await _mediator.Send(getTicketQuery);
+        var ticket = await _mediator.SendRequest(getTicketQuery, cancellationToken);
 
         if (!ticket.IsSuccess)
         {
@@ -46,7 +41,7 @@ internal class AddCaseCommandHandler : IRequestHandler<AddCaseCommand, Result<Ca
         var caseId = parameters.Get<int>(Constants.T_CASES_ID);
 
         var getCaseQuery = new GetCaseByIdQuery(caseId);
-        var getCaseQueryResult = await _mediator.Send(getCaseQuery, cancellationToken);
+        var getCaseQueryResult = await _mediator.SendRequest(getCaseQuery, cancellationToken);
 
         return getCaseQueryResult;
     }

@@ -1,6 +1,6 @@
 ﻿using AktBob.Database.Entities;
 using Ardalis.Result;
-using MediatR;
+using MassTransit.Mediator;
 
 namespace AktBob.Database.UseCases.Tickets.GetTicketById;
-internal record GetTicketByIdQuery(int Id) : IRequest<Result<Ticket>>;
+internal record GetTicketByIdQuery(int Id) : Request<Result<Ticket>>;

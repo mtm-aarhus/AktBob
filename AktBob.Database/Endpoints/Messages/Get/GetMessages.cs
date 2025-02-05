@@ -3,18 +3,14 @@ using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Messages.GetMessageByDeskproMessageId;
 using AktBob.Database.UseCases.Messages.GetMessages;
 using FastEndpoints;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Messages;
-internal class GetMessages : Endpoint<GetMessagesRequest, IEnumerable<MessageDto>>
+internal class GetMessages(IMediator mediator) : Endpoint<GetMessagesRequest, IEnumerable<MessageDto>>
 {
-    private readonly IMediator _mediator;
-
-    public GetMessages(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     public override void Configure()
     {
@@ -37,7 +33,7 @@ internal class GetMessages : Endpoint<GetMessagesRequest, IEnumerable<MessageDto
         if (req.DeskproMessageId is not null)
         {
             var getMessageByDeskproMessageIdQuery = new GetMessageByDeskproMessageIdQuery((int)req.DeskproMessageId);
-            var getMessageByDeskproMessageIdResult = await _mediator.Send(getMessageByDeskproMessageIdQuery, ct);
+            var getMessageByDeskproMessageIdResult = await _mediator.SendRequest(getMessageByDeskproMessageIdQuery, ct);
 
             if (getMessageByDeskproMessageIdResult.IsSuccess)
             {
@@ -51,7 +47,7 @@ internal class GetMessages : Endpoint<GetMessagesRequest, IEnumerable<MessageDto
         }
 
         var query = new GetMessagesQuery(includeJournalized);
-        var result = await _mediator.Send(query, ct);
+        var result = await _mediator.SendRequest(query, ct);
 
         if (result.IsSuccess)
         {

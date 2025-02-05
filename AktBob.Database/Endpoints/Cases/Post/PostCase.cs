@@ -3,18 +3,14 @@ using AktBob.Database.Endpoints.Cases.Get;
 using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Cases.AddCase;
 using FastEndpoints;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Cases.Post;
-internal class PostCase : Endpoint<PostCaseRequest, CaseDto>
+internal class PostCase(IMediator mediator) : Endpoint<PostCaseRequest, CaseDto>
 {
-    private readonly IMediator _mediator;
-
-    public PostCase(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     public override void Configure()
     {
@@ -39,7 +35,7 @@ internal class PostCase : Endpoint<PostCaseRequest, CaseDto>
             FilArkivCaseId: req.FilArkivCaseId,
             CaseNumber: req.CaseNumber);
 
-        var result = await _mediator.Send(addCaseCommand);
+        var result = await _mediator.SendRequest(addCaseCommand, ct);
 
         if (result.IsSuccess)
         {

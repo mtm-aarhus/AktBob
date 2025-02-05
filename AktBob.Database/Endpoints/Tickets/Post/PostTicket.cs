@@ -4,18 +4,14 @@ using AktBob.Database.Endpoints.Tickets.Get;
 using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Tickets.AddTicket;
 using FastEndpoints;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Entities.Tickets;
-internal class PostTicket : Endpoint<PostTicketRequest, TicketDto>
+internal class PostTicket(IMediator mediator) : Endpoint<PostTicketRequest, TicketDto>
 {
-    private readonly IMediator _mediator;
-
-    public PostTicket(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     public override void Configure()
     {
@@ -35,7 +31,7 @@ internal class PostTicket : Endpoint<PostTicketRequest, TicketDto>
     public override async Task HandleAsync(PostTicketRequest req, CancellationToken ct)
     {
         var command = new AddTicketCommand(req.DeskproId);
-        var result = await _mediator.Send(command);
+        var result = await _mediator.SendRequest(command);
 
         if (result.IsSuccess)
         {

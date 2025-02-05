@@ -2,18 +2,14 @@
 using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Messages.PatchMessage;
 using FastEndpoints;
-using MediatR;
+using MassTransit;
+using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Messages.Patch;
-internal class PatchMessage : Endpoint<PatchMessageRequest, MessageDto>
+internal class PatchMessage(IMediator mediator) : Endpoint<PatchMessageRequest, MessageDto>
 {
-    private readonly IMediator _mediator;
-
-    public PatchMessage(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     public override void Configure()
     {
@@ -32,7 +28,7 @@ internal class PatchMessage : Endpoint<PatchMessageRequest, MessageDto>
     public override async Task HandleAsync(PatchMessageRequest req, CancellationToken ct)
     {
         var command = new PatchMessageCommand(req.Id, req.GoDocumentId);
-        var result = await _mediator.Send(command);
+        var result = await _mediator.SendRequest(command, ct);
 
         if (result.Status == Ardalis.Result.ResultStatus.NotFound)
         {

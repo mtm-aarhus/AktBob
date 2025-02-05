@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using AAK.Deskpro;
 using Microsoft.Extensions.Hosting;
 using System.Data;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using AktBob.Database.Entities;
@@ -16,15 +15,13 @@ internal class PostMessageBackgroundJob : BackgroundService
 {
     private readonly ILogger<PostMessageBackgroundJob> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IMediator _mediator;
     private readonly IDeskproClient _deskproClient;
     private readonly ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> _deskproTicketsWithNewMessage;
 
-    public PostMessageBackgroundJob(ILogger<PostMessageBackgroundJob> logger, IConfiguration configuration, IMediator mediator, IDeskproClient deskproClient, ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> deskproTicketsWithNewMessage)
+    public PostMessageBackgroundJob(ILogger<PostMessageBackgroundJob> logger, IConfiguration configuration, IDeskproClient deskproClient, ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> deskproTicketsWithNewMessage)
     {
         _logger = logger;
         _configuration = configuration;
-        _mediator = mediator;
         _deskproClient = deskproClient;
         _deskproTicketsWithNewMessage = deskproTicketsWithNewMessage;
     }

@@ -1,18 +1,13 @@
 ﻿using AktBob.Database.UseCases.Messages.DeleteMessage;
 using FastEndpoints;
-using MediatR;
+using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Messages.Delete;
 
-internal class DeleteMessage : Endpoint<DeleteMessageRequest>
+internal class DeleteMessage(IMediator mediator) : Endpoint<DeleteMessageRequest>
 {
-    private readonly IMediator _mediator;
-
-    public DeleteMessage(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     public override void Configure()
     {
