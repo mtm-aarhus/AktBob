@@ -1,6 +1,7 @@
 ﻿using AktBob.DatabaseAPI.Contracts.Queries;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.JobHandlers.Utils;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared;
@@ -13,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.PodioHookProcessor.UseCases;
+namespace AktBob.JobHandlers.Handlers;
 internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQueueItemJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateDocumentListQueueItemJob>
 {
     private readonly ILogger<CreateDocumentListQueueItemJobHandler> _logger = logger;
@@ -82,7 +83,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         var data = new
         {
             SagsNummer = caseNumber,
-            Email = agent.Email,
+            agent.Email,
             Navn = agent.Name,
             PodioID = podioItemId,
             DeskproID = deskproTicketDto.Id,
@@ -98,7 +99,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         var uiPathQueueItemContent = new
         {
             SagsNummer = caseNumber,
-            Email = agent.Email,
+            agent.Email,
             Navn = agent.Name,
             PodioID = podioItemId,
             DeskproID = deskproTicketDto.Id,

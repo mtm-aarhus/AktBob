@@ -9,8 +9,6 @@ public static class ModuleServices
 {
     public static IServiceCollection AddPodioModule(this IServiceCollection services, IConfiguration configuration, List<Type> mediatorHandlers)
     {
-        Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureStorage"));
-
         var podioAppTokens = Guard.Against.NullOrEmpty(configuration.GetSection("Podio:AppTokens").GetChildren().ToDictionary(x => x.Key, x => x.Value));
 
         services.AddPodio(new PodioOptions(

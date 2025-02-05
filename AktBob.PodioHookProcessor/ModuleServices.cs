@@ -1,7 +1,4 @@
-﻿using AktBob.PodioHookProcessor.UseCases;
-using AktBob.Shared;
-using AktBob.Shared.Contracts;
-using Ardalis.GuardClauses;
+﻿using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,13 +15,6 @@ public static class ModuleServices
         services.AddHostedService<UseCases.ToSharepointTrigger.BackgroundWorker>();
         services.AddHostedService<UseCases.RegisterCase.BackgroundWorker>();
         services.AddHostedService<UseCases.JournalizeEverythingTrigger.BackgroundWorker>();
-
-        // Job handlers
-        services.AddTransient<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItemJobHandler>();
-        services.AddTransient<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateGoToFilArkivQueueItemJobHandler>();
-        services.AddTransient<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItemJobHandler>();
-        services.AddTransient<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCaseJobHandler>();
-        services.AddTransient<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItemJobHandler>();
 
         return services;
     }

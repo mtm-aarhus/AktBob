@@ -82,6 +82,8 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "AktBob.Database.SQL", "AktB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Database.Contracts", "AktBob.Database.Contracts\AktBob.Database.Contracts.csproj", "{0B15645A-3C85-4B16-82A8-C9AF54A7D12F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.JobHandlers", "AktBob.JobHandlers\AktBob.JobHandlers.csproj", "{F4613B83-FE7B-42F3-9C32-105BF4E8A0BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -190,6 +192,10 @@ Global
 		{0B15645A-3C85-4B16-82A8-C9AF54A7D12F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B15645A-3C85-4B16-82A8-C9AF54A7D12F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B15645A-3C85-4B16-82A8-C9AF54A7D12F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4613B83-FE7B-42F3-9C32-105BF4E8A0BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4613B83-FE7B-42F3-9C32-105BF4E8A0BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4613B83-FE7B-42F3-9C32-105BF4E8A0BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4613B83-FE7B-42F3-9C32-105BF4E8A0BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
