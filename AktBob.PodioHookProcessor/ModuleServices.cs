@@ -1,6 +1,6 @@
 ﻿using AktBob.PodioHookProcessor.UseCases;
 using AktBob.Shared;
-using AktBob.Shared.Jobs;
+using AktBob.Shared.Contracts;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +22,7 @@ public static class ModuleServices
         // Job handlers
         services.AddTransient<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItemJobHandler>();
         services.AddTransient<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateGoToFilArkivQueueItemJobHandler>();
+        services.AddTransient<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItemJobHandler>();
 
         return services;
     }

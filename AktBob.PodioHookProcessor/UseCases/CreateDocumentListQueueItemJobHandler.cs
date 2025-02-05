@@ -4,7 +4,7 @@ using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared;
-using AktBob.Shared.Jobs;
+using AktBob.Shared.Contracts;
 using AktBob.UiPath.Contracts;
 using Ardalis.GuardClauses;
 using MassTransit;

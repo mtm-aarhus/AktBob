@@ -1,2 +1,2 @@
-﻿namespace AktBob.Shared.Jobs;
+﻿namespace AktBob.Shared.Contracts;
 public record CreateGoToFilArkivQueueItemJob(long PodioItemId);
