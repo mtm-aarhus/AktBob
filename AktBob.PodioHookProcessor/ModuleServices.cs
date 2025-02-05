@@ -23,6 +23,7 @@ public static class ModuleServices
         services.AddTransient<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItemJobHandler>();
         services.AddTransient<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateGoToFilArkivQueueItemJobHandler>();
         services.AddTransient<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItemJobHandler>();
+        services.AddTransient<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCaseJobHandler>();
 
         return services;
     }

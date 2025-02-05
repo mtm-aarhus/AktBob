@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.PodioHookProcessor;
+namespace AktBob.PodioHookProcessor.UseCases;
 internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration, ILogger<CreateJournalizeEverythingQueueItemJobHandler> logger) : IJobHandler<CreateJournalizeEverythingQueueItemJob>
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
