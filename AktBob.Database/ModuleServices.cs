@@ -1,5 +1,4 @@
-﻿using AAK.Deskpro;
-using AktBob.Database.UseCases.Messages.PostMessage;
+﻿using AktBob.Database.UseCases.Messages.PostMessage;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,12 +12,6 @@ public static class ModuleServices
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("Database"));
 
         services.AddTransient<ISqlDataAccess, SqlDataAccess>();
-
-        services.AddDeskpro(new DeskproOptions
-        {
-            BaseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Deskpro:BaseAddress")),
-            AuthorizationKey = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Deskpro:AuthorizationKey"))
-        });
 
         services.AddSingleton(serviceProvider =>
         {

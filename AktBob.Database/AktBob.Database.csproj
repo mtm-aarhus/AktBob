@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AAK.Deskpro" Version="1.7.0" />
     <PackageReference Include="Dapper" Version="2.1.35" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AktBob.Database.Contracts\AktBob.Database.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
   </ItemGroup>
 

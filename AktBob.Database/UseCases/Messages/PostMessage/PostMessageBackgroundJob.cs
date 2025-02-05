@@ -2,27 +2,29 @@
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using AAK.Deskpro;
 using Microsoft.Extensions.Hosting;
 using System.Data;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using AktBob.Database.Entities;
 using AktBob.Database.Extensions;
+using AktBob.Deskpro.Contracts;
+using MassTransit.Mediator;
+using MassTransit;
 
 namespace AktBob.Database.UseCases.Messages.PostMessage;
 internal class PostMessageBackgroundJob : BackgroundService
 {
     private readonly ILogger<PostMessageBackgroundJob> _logger;
+    private readonly IMediator _mediator;
     private readonly IConfiguration _configuration;
-    private readonly IDeskproClient _deskproClient;
     private readonly ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> _deskproTicketsWithNewMessage;
 
-    public PostMessageBackgroundJob(ILogger<PostMessageBackgroundJob> logger, IConfiguration configuration, IDeskproClient deskproClient, ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> deskproTicketsWithNewMessage)
+    public PostMessageBackgroundJob(ILogger<PostMessageBackgroundJob> logger, IMediator mediator, IConfiguration configuration, ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> deskproTicketsWithNewMessage)
     {
         _logger = logger;
+        _mediator = mediator;
         _configuration = configuration;
-        _deskproClient = deskproClient;
         _deskproTicketsWithNewMessage = deskproTicketsWithNewMessage;
     }
 
@@ -46,23 +48,16 @@ internal class PostMessageBackgroundJob : BackgroundService
                 }
             }
 
-            var messages = new List<AAK.Deskpro.Models.Message>();
-
             foreach (var deskproTicketId in deskproTicketIds)
             {
-                var page = 1;
-                var messagePerPage = 10;
-                var totalPageCount = 1;
-
-                do
+                var getMessagesQuery = new GetDeskproMessagesQuery(deskproTicketId);
+                var getMessagesResult = await _mediator.SendRequest(getMessagesQuery, stoppingToken);
+                
+                if (!getMessagesResult.IsSuccess)
                 {
-                    AAK.Deskpro.Models.Messages ticketMessages = await _deskproClient.GetTicketMessages(deskproTicketId, page, messagePerPage, stoppingToken);
-                    messages.AddRange(ticketMessages.Data);
-
-                    totalPageCount = ticketMessages.Pagination.TotalPages;
-                    page++;
+                    _logger.LogError("Error getting messages from Deskpro Ticket {id}", deskproTicketId);
+                    continue;
                 }
-                while (page <= totalPageCount);
 
                 // Persist the Deskpro ticket ID and message ID in the database
                 var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("Database"));
@@ -85,7 +80,7 @@ internal class PostMessageBackgroundJob : BackgroundService
 
                         var databaseTicket = databaseTickets.First();
 
-                        foreach (var message in messages)
+                        foreach (var message in getMessagesResult.Value)
                         {
                             // The stored procedure prevents from persisting duplicates, so we don't need to check this before called the database
                             var parameters = new DynamicParameters();
@@ -100,9 +95,6 @@ internal class PostMessageBackgroundJob : BackgroundService
                 }
             }
             
-            // clear the list of messages just for good measure
-            messages.Clear();
-
             await Task.Delay(TimeSpan.FromSeconds(5));
         }
     }
