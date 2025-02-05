@@ -1,4 +1,4 @@
-﻿using AktBob.DatabaseAPI.Contracts.Queries;
+﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Shared;
@@ -34,7 +34,7 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
             // GET DATA FROM API DATABASE
-            var getDataFromApiDatabaseQuery = new GetTicketByDeskproIdQuery(job.DeskproId);
+            var getDataFromApiDatabaseQuery = new GetTicketsQuery(job.DeskproId, null, null);
             var getDataFromApiDatabaseResult = await mediator.SendRequest(getDataFromApiDatabaseQuery, cancellationToken);
 
             if (getDataFromApiDatabaseResult.IsSuccess)

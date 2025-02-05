@@ -1,5 +1,5 @@
-﻿using AktBob.DatabaseAPI.Contracts.Commands;
-using AktBob.DatabaseAPI.Contracts.Queries;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.UseCases.Cases.AddCase;
 using AktBob.Podio.Contracts;
 using AktBob.Queue.Contracts;
 using Ardalis.GuardClauses;
@@ -105,7 +105,7 @@ internal class BackgroundWorker : BackgroundService
                             continue;
                         }
 
-                        var ticketQuery = new GetTicketByDeskproIdQuery(deskproId);
+                        var ticketQuery = new GetTicketsQuery(deskproId, null, null);
                         var ticketResult = await mediator.SendRequest(ticketQuery);
                         
                         if (!ticketResult.IsSuccess || ticketResult.Value.Count() == 0)
@@ -121,7 +121,7 @@ internal class BackgroundWorker : BackgroundService
                         }
 
                         // Post case to database
-                        var postCaseCommand = new PostCaseCommand(ticketResult.Value.First().Id, podioItemId, caseNumber, null);
+                        var postCaseCommand = new AddCaseCommand(ticketResult.Value.First().Id, podioItemId, caseNumber, null);
                         var postCaseCommandResult = await mediator.SendRequest(postCaseCommand);
 
                         if (!postCaseCommandResult.IsSuccess)

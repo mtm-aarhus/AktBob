@@ -1,5 +1,5 @@
-﻿using AktBob.DatabaseAPI.Contracts.Commands;
-using AktBob.DatabaseAPI.Contracts.Queries;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.UseCases.Cases.AddCase;
 using AktBob.JobHandlers.Utils;
 using AktBob.Podio.Contracts;
 using AktBob.Shared;
@@ -62,7 +62,7 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
                 return;
             }
 
-            var ticketQuery = new GetTicketByDeskproIdQuery(deskproId);
+            var ticketQuery = new GetTicketsQuery(deskproId, null, null);
             var ticketResult = await mediator.SendRequest(ticketQuery, cancellationToken);
 
             if (!ticketResult.IsSuccess || ticketResult.Value.Count() == 0)
@@ -78,7 +78,7 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
             }
 
             // Post case to database
-            var postCaseCommand = new PostCaseCommand(ticketResult.Value.First().Id, job.PodioItemId, caseNumber, null);
+            var postCaseCommand = new AddCaseCommand(ticketResult.Value.First().Id, job.PodioItemId, caseNumber, null);
             var postCaseCommandResult = await mediator.SendRequest(postCaseCommand, cancellationToken);
 
             if (!postCaseCommandResult.IsSuccess)

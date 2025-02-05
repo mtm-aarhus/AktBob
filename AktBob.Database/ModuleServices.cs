@@ -1,8 +1,12 @@
-﻿using AktBob.Database.UseCases.Messages.PostMessage;
+﻿using AktBob.Database.UseCases.Cases;
+using AktBob.Database.UseCases.Messages;
+using AktBob.Database.UseCases.Tickets;
+using AktBob.Database.UseCases.Messages.PostMessage;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
+using AktBob.Database.UseCases.Tickets.UpdateTicket;
 
 namespace AktBob.Database;
 public static class ModuleServices
@@ -21,22 +25,22 @@ public static class ModuleServices
         services.AddHostedService<PostMessageBackgroundJob>();
 
         mediatorTypes.AddRange([
-            typeof(UseCases.Cases.AddCase.AddCaseCommandHandler),
+            typeof(AddCaseCommandHandler),
             typeof(UseCases.Cases.GetCaseById.GetCaseByIdQueryHandler),
-            typeof(UseCases.Cases.GetCases.GetCasesQueryHandler),
+            typeof(GetCasesQueryHandler),
             typeof(UseCases.Cases.GetCasesByTicketId.GetCasesByTicketIdQueryHandler),
-            typeof(UseCases.Cases.PatchCase.PatchCaseCommandHandler),
+            typeof(UpdateCaseCommandHandler),
             typeof(UseCases.Messages.ClearQueuedForJournalization.ClearQueuedForJournalizationCommandHandler),
-            typeof(UseCases.Messages.DeleteMessage.DeleteMessageCommandHandler),
-            typeof(UseCases.Messages.GetMessageByDeskproMessageId.GetMessageByDeskproMessageIdQueryHandler),
+            typeof(DeleteMessageCommandHandler),
+            typeof(GetMessageByDeskproMessageIdQueryHandler),
             typeof(UseCases.Messages.GetMessageById.GetMessageByIdQueryHandler),
-            typeof(UseCases.Messages.GetMessages.GetMessagesQueryHandler),
-            typeof(UseCases.Messages.PatchMessage.PatchMessageCommandHandler),
-            typeof(UseCases.Messages.PostMessage.PostMessageCommandHandler),
+            typeof(GetMessagesQueryHandler),
+            typeof(UpdateMessageCommandHandler),
+            typeof(PostMessageCommandHandler),
             typeof(UseCases.Tickets.AddTicket.AddTicketCommandHandler),
             typeof(UseCases.Tickets.GetTicketById.GetTicketByIdQueryHandler),
-            typeof(UseCases.Tickets.GetTickets.GetTicketsQueryHandler),
-            typeof(UseCases.Tickets.PatchTicket.PatchTicketCommandHandler)]);
+            typeof(GetTicketsQueryHandler),
+            typeof(UpdateTicketCommandHandler)]);
 
         return services;
     }

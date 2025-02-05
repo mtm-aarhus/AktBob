@@ -1,6 +1,7 @@
 ﻿using AAK.GetOrganized;
 using AAK.GetOrganized.UploadDocument;
 using AktBob.CloudConvert.Contracts;
+using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
@@ -110,7 +111,7 @@ internal class AddOrUpdateFullDeskproTicketToGetOrganizedJobHandler(
 
                     // Get message number from API database
                     var messageNumber = 0;
-                    var getMessageFromApiDatabaseQuery = new DatabaseAPI.Contracts.Queries.GetMessageByDeskproMessageIdQuery(message.Id);
+                    var getMessageFromApiDatabaseQuery = new GetMessageByDeskproMessageIdQuery(message.Id);
                     var getMessageFromApiDatabaseResult = await _mediator.SendRequest(getMessageFromApiDatabaseQuery, cancellationToken);
 
                     if (!getMessageFromApiDatabaseResult.IsSuccess)

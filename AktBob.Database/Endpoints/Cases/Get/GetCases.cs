@@ -33,6 +33,6 @@ internal class GetCases(IMediator mediator) : Endpoint<GetCasesRequest, IEnumera
             FilArkivCaseId: req.FilArkivCaseId);
 
         var result = await _mediator.SendRequest(query, ct);
-        await this.SendResponse(result, r => r.Value.ToDto());
+        await this.SendResponse(result, r => r.Value);
     }
 }

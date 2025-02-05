@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

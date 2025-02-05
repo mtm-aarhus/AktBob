@@ -1,4 +1,4 @@
-﻿using AktBob.DatabaseAPI.Contracts.Queries;
+﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.JobHandlers.Utils;
 using AktBob.Podio.Contracts;
@@ -50,7 +50,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
             }
 
             // Find Deskpro ticket from PodioItemId
-            var getTicketByPodioItemIdQuery = new GetTicketByPodioItemIdQuery(job.PodioItemId);
+            var getTicketByPodioItemIdQuery = new GetTicketsQuery(null, job.PodioItemId, null);
             var getTicketByPodioItemIdQueryResult = await mediator.SendRequest(getTicketByPodioItemIdQuery, cancellationToken);
 
             if (getTicketByPodioItemIdQueryResult.IsSuccess)

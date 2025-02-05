@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using AktBob.DatabaseAPI.Contracts.Queries;
+using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Queue.Contracts;
@@ -85,7 +85,7 @@ internal class BackgroundWorker : BackgroundService
 
 
                         // GET DATA FROM API DATABASE
-                        var getDataFromApiDatabaseQuery = new GetTicketByDeskproIdQuery(deskproId);
+                        var getDataFromApiDatabaseQuery = new GetTicketsQuery(deskproId, null, null);
                         var getDataFromApiDatabaseResult = await mediator.SendRequest(getDataFromApiDatabaseQuery);
 
                         if (getDataFromApiDatabaseResult.IsSuccess)

@@ -1,4 +1,4 @@
-﻿using AktBob.DatabaseAPI.Contracts.Queries;
+﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Queue.Contracts;
@@ -92,7 +92,7 @@ internal class BackgroundWorker : BackgroundService
                         }
 
                         // Find Deskpro ticket from PodioItemId
-                        var getTicketByPodioItemIdQuery = new GetTicketByPodioItemIdQuery(podioItemId);
+                        var getTicketByPodioItemIdQuery = new GetTicketsQuery(null, podioItemId, null);
                         var getTicketByPodioItemIdQueryResult = await mediator.SendRequest(getTicketByPodioItemIdQuery);
 
                         if (getTicketByPodioItemIdQueryResult.IsSuccess)

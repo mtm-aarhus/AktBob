@@ -5,7 +5,6 @@ using AktBob.Queue;
 using AktBob.UiPath;
 using AktBob.Deskpro;
 using AktBob.PodioHookProcessor;
-using AktBob.DatabaseAPI;
 using AktBob.Podio;
 using AktBob.OpenOrchestrator;
 using AktBob.CloudConvert;
@@ -33,7 +32,6 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddUiPathModule(hostContext.Configuration, mediatorHandlers);
         services.AddPodioHookProcessorModule(hostContext.Configuration);
         services.AddDeskproModule(hostContext.Configuration, mediatorHandlers);
-        services.AddDatabaseApiModule(hostContext.Configuration, mediatorHandlers);
         services.AddPodioModule(hostContext.Configuration, mediatorHandlers);
         services.AddOpenOrchestratorModule(hostContext.Configuration, mediatorHandlers);
         services.AddCloudConvertModule(hostContext.Configuration, mediatorHandlers);

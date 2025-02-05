@@ -1,6 +1,6 @@
-﻿using AktBob.Database.Contracts.Dtos;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.Contracts.Dtos;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Cases.PatchCase;
 using FastEndpoints;
 using MassTransit;
 using MassTransit.Mediator;
@@ -28,7 +28,7 @@ internal class PatchCase(IMediator mediator) : Endpoint<PatchCaseRequest, CaseDt
 
     public override async Task HandleAsync(PatchCaseRequest req, CancellationToken ct)
     {
-        var command = new PatchCaseCommand(
+        var command = new UpdateCaseCommand(
             Id: req.Id,
             PodioItemId: req.PodioItemId,
             FilArkivCaseId: req.FilArkivCaseId,
@@ -36,6 +36,6 @@ internal class PatchCase(IMediator mediator) : Endpoint<PatchCaseRequest, CaseDt
             SharepointFolderName: req.SharepointFolderName);
 
         var result = await _mediator.SendRequest(command, ct);
-        await this.SendResponse(result, r => r.Value.ToDto());
+        await this.SendResponse(result, r => r.Value);
     }
 }

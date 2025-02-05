@@ -1,4 +1,4 @@
-﻿using AktBob.DatabaseAPI.Contracts.Queries;
+﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.OpenOrchestrator.Contracts;
@@ -76,7 +76,7 @@ internal class BackgroundWorker : BackgroundService
                     }
 
                     // Find ticket in database from PodioItemId
-                    if (!GetTicketFromApiDatabaseByPodioItemId(mediator, (long)podioItemId!, stoppingToken, out DatabaseAPI.Contracts.DTOs.TicketDto? databaseTicketDto))
+                    if (!GetTicketFromApiDatabaseByPodioItemId(mediator, (long)podioItemId!, stoppingToken, out Database.Contracts.Dtos.TicketDto? databaseTicketDto))
                     {
                         continue;
                     }
@@ -248,14 +248,14 @@ internal class BackgroundWorker : BackgroundService
         return true;
     }
 
-    private bool GetTicketFromApiDatabaseByPodioItemId(IMediator mediator, long podioItemId, CancellationToken cancellationToken, out DatabaseAPI.Contracts.DTOs.TicketDto? ticketDto)
+    private bool GetTicketFromApiDatabaseByPodioItemId(IMediator mediator, long podioItemId, CancellationToken cancellationToken, out Database.Contracts.Dtos.TicketDto? ticketDto)
     {
         var retriesCount = 10;
         var counter = 1;
         var delay = TimeSpan.FromSeconds(5);
         ticketDto = null;
 
-        var getTicketByPodioItemIdQuery = new GetTicketByPodioItemIdQuery(podioItemId);
+        var getTicketByPodioItemIdQuery = new GetTicketsQuery(null, podioItemId, null);
 
         // Try get some data from the database API based on the provided podioItemId
         // This might fail initially since Podio triggers both the create event and DocumentListTrigger event almost at the same time

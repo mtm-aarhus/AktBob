@@ -31,6 +31,6 @@ internal class GetCase(IMediator mediator) : Endpoint<GetCaseRequest, CaseDto>
         var getCaseByIdQuery = new GetCaseByIdQuery(req.Id);
         var result = await _mediator.SendRequest(getCaseByIdQuery, ct);
 
-        await this.SendResponse(result, r => r.Value.ToDto());
+        await this.SendResponse(result, r => r.Value);
     }
 }

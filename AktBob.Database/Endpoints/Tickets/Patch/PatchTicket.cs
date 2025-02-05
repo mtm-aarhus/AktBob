@@ -1,6 +1,6 @@
 ﻿using AktBob.Database.Contracts.Dtos;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Tickets.PatchTicket;
+using AktBob.Database.UseCases.Tickets.UpdateTicket;
 using FastEndpoints;
 using MassTransit;
 using MassTransit.Mediator;
@@ -28,7 +28,7 @@ internal class PatchTicket(IMediator mediator) : Endpoint<PatchTicketRequest, Ti
 
     public override async Task HandleAsync(PatchTicketRequest req, CancellationToken ct)
     {
-        var command = new PatchTicketCommand(
+        var command = new UpdateTicketCommand(
             Id: req.Id,
             CaseNumber: req.CaseNumber,
             SharepointFolderName: req.SharepointFolderName,

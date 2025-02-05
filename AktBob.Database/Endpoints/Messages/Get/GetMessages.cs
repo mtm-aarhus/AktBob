@@ -1,7 +1,5 @@
-﻿using AktBob.Database.Contracts.Dtos;
-using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Messages.GetMessageByDeskproMessageId;
-using AktBob.Database.UseCases.Messages.GetMessages;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.Contracts.Dtos;
 using FastEndpoints;
 using MassTransit;
 using MassTransit.Mediator;
@@ -37,8 +35,7 @@ internal class GetMessages(IMediator mediator) : Endpoint<GetMessagesRequest, IE
 
             if (getMessageByDeskproMessageIdResult.IsSuccess)
             {
-                var dto = getMessageByDeskproMessageIdResult.Value.Select(m => m.ToDto());
-                await SendOkAsync(dto, ct);
+                await SendOkAsync([getMessageByDeskproMessageIdResult.Value], ct);
                 return;
             }
 
@@ -51,8 +48,7 @@ internal class GetMessages(IMediator mediator) : Endpoint<GetMessagesRequest, IE
 
         if (result.IsSuccess)
         {
-            var dto = result.Value.Select(m => m.ToDto());
-            await SendOkAsync(dto, ct);
+            await SendOkAsync(result.Value, ct);
             return;
         }
         

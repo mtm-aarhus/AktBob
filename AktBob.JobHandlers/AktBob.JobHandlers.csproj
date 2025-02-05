@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AktBob.CloudConvert.Contracts\AktBob.CloudConvert.Contracts.csproj" />
-    <ProjectReference Include="..\AktBob.DatabaseAPI.Contracts\AktBob.DatabaseAPI.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.Database.Contracts\AktBob.Database.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.GetOrganized.Contracts\AktBob.GetOrganized.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.OpenOrchestrator.Contracts\AktBob.OpenOrchestrator.Contracts.csproj" />

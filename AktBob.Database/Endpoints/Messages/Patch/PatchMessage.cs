@@ -1,6 +1,5 @@
-﻿using AktBob.Database.Contracts.Dtos;
-using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Messages.PatchMessage;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.Contracts.Dtos;
 using FastEndpoints;
 using MassTransit;
 using MassTransit.Mediator;
@@ -27,7 +26,7 @@ internal class PatchMessage(IMediator mediator) : Endpoint<PatchMessageRequest, 
 
     public override async Task HandleAsync(PatchMessageRequest req, CancellationToken ct)
     {
-        var command = new PatchMessageCommand(req.Id, req.GoDocumentId);
+        var command = new UpdateMessageCommand(req.Id, req.GoDocumentId);
         var result = await _mediator.SendRequest(command, ct);
 
         if (result.Status == Ardalis.Result.ResultStatus.NotFound)
@@ -42,7 +41,7 @@ internal class PatchMessage(IMediator mediator) : Endpoint<PatchMessageRequest, 
             return;
         }
 
-        var dto = result.Value.ToDto();
+        var dto = result.Value;
 
         await SendOkAsync(dto);
     }

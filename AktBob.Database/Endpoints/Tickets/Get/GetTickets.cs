@@ -1,6 +1,6 @@
-﻿using AktBob.Database.Contracts.Dtos;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.Contracts.Dtos;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Tickets.GetTickets;
 using FastEndpoints;
 using MassTransit;
 using MassTransit.Mediator;
@@ -35,6 +35,6 @@ internal class GetTickets(IMediator mediator) : Endpoint<GetTicketsRequest, IEnu
 
         var result = await _mediator.SendRequest(query, ct);
 
-        await this.SendResponse(result, r => r.Value.ToDto());
+        await this.SendResponse(result, r => r.Value);
     }
 }

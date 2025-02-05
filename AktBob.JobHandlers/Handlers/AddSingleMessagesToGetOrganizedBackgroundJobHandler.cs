@@ -2,9 +2,7 @@
 using AAK.GetOrganized.UploadDocument;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using AktBob.DatabaseAPI.Contracts.Queries;
 using AAK.GetOrganized;
-using AktBob.DatabaseAPI.Contracts.Commands;
 using AktBob.Deskpro.Contracts.DTOs;
 using Ardalis.Result;
 using System.Text;
@@ -15,6 +13,7 @@ using MassTransit;
 using AktBob.JobHandlers.Utils;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Deskpro.Contracts;
+using AktBob.Database.Contracts;
 
 namespace AktBob.JournalizeDocuments.BackgroundServices;
 internal class AddSingleMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
@@ -48,7 +47,7 @@ internal class AddSingleMessagesToGetOrganizedBackgroundJobHandler : BackgroundS
             try
             {
                 // Get new messages from the database
-                var getMessagesQueryResult = await _mediator.SendRequest(new GetMessagesNotJournalizedQuery());
+                var getMessagesQueryResult = await _mediator.SendRequest(new GetMessagesQuery(IncludeJournalized: false));
 
                 if (getMessagesQueryResult.Status == ResultStatus.NotFound)
                 {
@@ -149,7 +148,7 @@ internal class AddSingleMessagesToGetOrganizedBackgroundJobHandler : BackgroundS
 
 
                     // Update database
-                    var updateMessageCommand = new UpdateMessageSetGoDocumentIdCommand(message.Id, uploadDocumentResult.Value);
+                    var updateMessageCommand = new UpdateMessageCommand(message.Id, uploadDocumentResult.Value);
                     await _mediator.Send(updateMessageCommand);
 
 
@@ -220,7 +219,7 @@ internal class AddSingleMessagesToGetOrganizedBackgroundJobHandler : BackgroundS
     }
 
 
-    private static string GenerateFileName(DatabaseAPI.Contracts.DTOs.MessageDto message, PersonDto? person, DateTime createdAtDanishTime)
+    private static string GenerateFileName(Database.Contracts.Dtos.MessageDto message, PersonDto? person, DateTime createdAtDanishTime)
     {
         // Using a list of strings to construct the title so we later can join them with a space separator.
         // Just a lazy way for not worry about space seperators manually...
@@ -257,7 +256,7 @@ internal class AddSingleMessagesToGetOrganizedBackgroundJobHandler : BackgroundS
     }
 
 
-    private async Task<Result<byte[]>> GenerateDocument(DatabaseAPI.Contracts.DTOs.MessageDto databaseMessageDto, TicketDto deskproTicket, MessageDto deskproMessageDto, PersonDto? person, IEnumerable<AttachmentDto> attachmentDtos, CancellationToken cancellationToken = default)
+    private async Task<Result<byte[]>> GenerateDocument(Database.Contracts.Dtos.MessageDto databaseMessageDto, TicketDto deskproTicket, MessageDto deskproMessageDto, PersonDto? person, IEnumerable<AttachmentDto> attachmentDtos, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Generating PDF document from Deskpro message #{id}", deskproMessageDto.Id);
 

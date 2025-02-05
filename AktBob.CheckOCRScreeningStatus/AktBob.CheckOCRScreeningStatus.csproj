@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AktBob.DatabaseAPI.Contracts\AktBob.DatabaseAPI.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.Database.Contracts\AktBob.Database.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Email.Contracts\AktBob.Email.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Podio.Contracts\AktBob.Podio.Contracts.csproj" />

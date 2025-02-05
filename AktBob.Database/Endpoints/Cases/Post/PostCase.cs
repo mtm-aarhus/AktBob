@@ -39,10 +39,10 @@ internal class PostCase(IMediator mediator) : Endpoint<PostCaseRequest, CaseDto>
 
         if (result.IsSuccess)
         {
-            await SendCreatedAtAsync<GetCase>(routeValues: null, responseBody: result.Value.ToDto(), cancellation: ct);
+            await SendCreatedAtAsync<GetCase>(routeValues: null, responseBody: result.Value, cancellation: ct);
             return;
         }
 
-        await this.SendResponse(result, r => r.Value.ToDto());
+        await this.SendResponse(result, r => r.Value);
     }
 }
