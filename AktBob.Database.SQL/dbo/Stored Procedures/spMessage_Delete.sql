@@ -1,0 +1,18 @@
+﻿CREATE PROCEDURE [dbo].[spMessage_Delete]
+	@Id INT
+AS
+BEGIN
+	BEGIN TRY
+		BEGIN TRAN
+			UPDATE [Messages]
+			SET Deleted = 1
+			WHERE Id = @Id
+		COMMIT
+	END TRY
+	BEGIN CATCH
+		IF (@@TRANCOUNT > 0)
+		BEGIN
+			ROLLBACK
+		END
+	END CATCH
+END

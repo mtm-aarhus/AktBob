@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="b399ad09-d5eb-43d3-b06b-e8204291a547" ChangeDateTime="09/24/2024 08:04:46">
+    <Property Name="ElementName" Value="[dbo].[Tickets].[DocumentFolderName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Tickets]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="DocumentListsFolderName" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9d6d3d9b-1e2a-43cd-afc4-b2ee8dc4527a" ChangeDateTime="09/24/2024 08:05:24">
+    <Property Name="ElementName" Value="[dbo].[Tickets].[DocumentListsFolderName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Tickets]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="FolderNameDocumentLists" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e4a857af-f81b-4d18-8fb1-03b4efde2aae" ChangeDateTime="09/24/2024 08:05:32">
+    <Property Name="ElementName" Value="[dbo].[Tickets].[AktindsigtFolderName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Tickets]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="FolderNameAktindsigt" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="768cdb63-a225-4c91-aaa8-9e4d6c8ae838" ChangeDateTime="10/09/2024 07:23:43">
+    <Property Name="ElementName" Value="[dbo].[Messages].[QueuedAt]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Messages]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="QueuedForJournalizationAt" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="00ad9676-a66e-4ddf-b476-14c2c4e20c5f" ChangeDateTime="10/09/2024 11:24:10">
+    <Property Name="ElementName" Value="[dbo].[Messages].[DocumentNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Messages]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="MessageNumber" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8cda30dd-8ac8-4f5c-99bf-c8b96cc573f5" ChangeDateTime="11/20/2024 13:45:09">
+    <Property Name="ElementName" Value="[dbo].[Tickets].[DeskproHash]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Tickets]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Hash" />
+  </Operation>
+</Operations>

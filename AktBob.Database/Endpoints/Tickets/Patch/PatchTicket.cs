@@ -1,0 +1,45 @@
+﻿using AktBob.Database.Contracts.Dtos;
+using AktBob.Database.Extensions;
+using AktBob.Database.UseCases.Tickets.PatchTicket;
+using FastEndpoints;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+
+namespace AktBob.Database.Endpoints.Tickets.Patch;
+internal class PatchTicket : Endpoint<PatchTicketRequest, TicketDto>
+{
+    private readonly IMediator _mediator;
+
+    public PatchTicket(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    public override void Configure()
+    {
+        Patch("/Database/Tickets/{Id}");
+        Options(x => x.WithTags("Database/Tickets"));
+
+        Description(x => x
+           .Produces<TicketDto>(StatusCodes.Status200OK)
+           .ProducesProblem(StatusCodes.Status404NotFound));
+
+        Summary(x =>
+        {
+            x.Description = "Opdaterer en specific ticket i databasen med de angivne felter. Alle felter er valgfrie og ignoreres hvis de enten ikke er angivet eller angivet til null. Returnerer den opdaterede ticket.";
+        });
+    }
+
+    public override async Task HandleAsync(PatchTicketRequest req, CancellationToken ct)
+    {
+        var command = new PatchTicketCommand(
+            Id: req.Id,
+            CaseNumber: req.CaseNumber,
+            SharepointFolderName: req.SharepointFolderName,
+            TicketClosedAt: req.TicketClosedAt,
+            JournalizedAt: req.JournalizedAt);
+
+        var result = await _mediator.Send(command, ct);
+        await this.SendResponse(result, r => r.Value.ToDto());
+    }
+}

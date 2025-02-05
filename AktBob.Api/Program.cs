@@ -5,6 +5,8 @@ using FastEndpoints.Swagger;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication;
 using NSwag;
+using AktBob.Database;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +38,15 @@ builder.Services.SwaggerDocument(o =>
 builder.Services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
 builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Configuration.GetConnectionString("Hangfire")));
 
+// Modules
+var mediatorHandlers = new List<Type>();
+builder.Services.AddDatabaseModule(builder.Configuration, mediatorHandlers);
 
+// MassTransit Mediator
+builder.Services.AddMediator(cfg =>
+{
+    cfg.AddConsumers(mediatorHandlers.ToArray());
+});
 
 
 var app = builder.Build();
