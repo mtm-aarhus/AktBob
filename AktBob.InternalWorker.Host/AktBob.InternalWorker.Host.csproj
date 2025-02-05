@@ -26,8 +26,8 @@
     <ProjectReference Include="..\AktBob.DatabaseAPI\AktBob.DatabaseAPI.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
     <ProjectReference Include="..\AktBob.Email\AktBob.Email.csproj" />
+    <ProjectReference Include="..\AktBob.GetOrganized\AktBob.GetOrganized.csproj" />
     <ProjectReference Include="..\AktBob.JobHandlers\AktBob.JobHandlers.csproj" />
-    <ProjectReference Include="..\AktBob.JournalizeDocuments\AktBob.JournalizeDocuments.csproj" />
     <ProjectReference Include="..\AktBob.OpenOrchestrator\AktBob.OpenOrchestrator.csproj" />
     <ProjectReference Include="..\AktBob.PodioHookProcessor\AktBob.PodioHookProcessor.csproj" />
     <ProjectReference Include="..\AktBob.Podio\AktBob.Podio.csproj" />
