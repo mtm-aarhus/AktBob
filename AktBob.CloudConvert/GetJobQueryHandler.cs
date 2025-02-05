@@ -1,10 +1,4 @@
-﻿using AktBob.CloudConvert.Contracts;
-using Ardalis.Result;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Logging;
-
-namespace AktBob.CloudConvert;
+﻿namespace AktBob.CloudConvert;
 public class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogger<GetJobQueryHandler> logger, IMediator mediator) : MediatorRequestHandler<GetJobQuery, Result<byte[]>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;

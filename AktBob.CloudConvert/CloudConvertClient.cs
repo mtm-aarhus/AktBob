@@ -1,6 +1,4 @@
 ﻿using AktBob.CloudConvert.Models.JobResponse;
-using Ardalis.Result;
-using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;

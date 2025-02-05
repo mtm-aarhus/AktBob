@@ -1,9 +1,4 @@
-﻿using AktBob.CloudConvert.Contracts;
-using AktBob.CloudConvert.Contracts.DTOs;
-using Ardalis.Result;
-using MassTransit.Mediator;
-
-namespace AktBob.CloudConvert;
+﻿namespace AktBob.CloudConvert;
 public class GetFileQueryHandler(ICloudConvertClient cloudConvertClient) : MediatorRequestHandler<GetFileQuery, Result<FileDto>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;

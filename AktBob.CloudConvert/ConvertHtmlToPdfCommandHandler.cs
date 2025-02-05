@@ -1,8 +1,4 @@
-﻿using AktBob.CloudConvert.Contracts;
-using AktBob.CloudConvert.Contracts.DTOs;
-using AktBob.CloudConvert.Models;
-using Ardalis.Result;
-using MassTransit.Mediator;
+﻿using AktBob.CloudConvert.Models;
 
 namespace AktBob.CloudConvert;
 public class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClient) : MediatorRequestHandler<ConvertHtmlToPdfCommand, Result<ConvertHtmlToPdfResponseDto>>

@@ -1,5 +1,4 @@
 ﻿using AktBob.CloudConvert.Models.JobResponse;
-using Ardalis.Result;
 
 namespace AktBob.CloudConvert;
 public interface ICloudConvertClient
