@@ -1,7 +1,4 @@
-﻿using MassTransit.Mediator;
-using Microsoft.Extensions.Logging;
-
-namespace AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
+﻿namespace AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
 public class RemoveCaseFromCacheCommandHandler : MediatorRequestHandler<RemoveCaseFromCacheCommand>
 {
     private readonly IData _data;

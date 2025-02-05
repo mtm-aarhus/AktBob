@@ -1,5 +1,4 @@
-﻿
-namespace AktBob.CheckOCRScreeningStatus;
+﻿namespace AktBob.CheckOCRScreeningStatus;
 
 public interface ICheckOCRScreeningStatusService
 {

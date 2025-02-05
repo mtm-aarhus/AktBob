@@ -1,8 +1,5 @@
 ﻿using AktBob.CheckOCRScreeningStatus.Events;
 using AktBob.DatabaseAPI.Contracts.Commands;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.Consumers.UpdateDatabase;
 public class FilesRegisteredConsumer(IData data, IMediator mediator, ILogger<FilesRegisteredConsumer> logger) : IConsumer<FilesRegistered>

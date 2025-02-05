@@ -1,7 +1,4 @@
 ﻿using FilArkivCore.Web.Shared.FileProcess;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.GetFileStatus;

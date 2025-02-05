@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using FilArkivCore.Web.Client;
-using Microsoft.Extensions.Configuration;
-using Ardalis.GuardClauses;
 
 namespace AktBob.CheckOCRScreeningStatus;
 

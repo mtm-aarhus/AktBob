@@ -1,8 +1,5 @@
 ﻿using AktBob.CheckOCRScreeningStatus.Events;
 using AktBob.CheckOCRScreeningStatus.UseCases.GetFileStatus;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.Consumers.CheckFileStatus;
 public class FilesRegisteredConsumer(IData data, IMediator mediator, ILogger<FilesRegistered> logger) : IConsumer<FilesRegistered>

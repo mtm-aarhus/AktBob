@@ -1,13 +1,10 @@
 ﻿using AktBob.CheckOCRScreeningStatus.DTOs;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using AktBob.CheckOCRScreeningStatus.Events;
 using Microsoft.Extensions.Configuration;
 using AktBob.Queue.Contracts;
 using Microsoft.Extensions.DependencyInjection;
-using MassTransit.Mediator;
-using MassTransit;
 
 namespace AktBob.CheckOCRScreeningStatus.BackgroundServices;
 internal class Worker : BackgroundService

@@ -7,7 +7,6 @@ using AktBob.Deskpro;
 using AktBob.PodioHookProcessor;
 using AktBob.DatabaseAPI;
 using AktBob.Podio;
-using AktBob.JournalizeDocuments;
 using AktBob.OpenOrchestrator;
 using AktBob.CloudConvert;
 using MassTransit;

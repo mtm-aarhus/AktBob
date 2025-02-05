@@ -2,10 +2,6 @@
 using AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
 using AktBob.CheckOCRScreeningStatus.UseCases.UpdatePodioItem;
 using AktBob.Podio.Contracts;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.Consumers.UpdatePodioItem;
 public class OCRScreeningCompletedConsumer(IMediator mediator, ILogger<OCRScreeningCompletedConsumer> logger, IData data, IConfiguration configuration) : IConsumer<OCRSceeningCompleted>

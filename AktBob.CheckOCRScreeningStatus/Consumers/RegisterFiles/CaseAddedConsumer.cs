@@ -1,9 +1,6 @@
 ﻿using AktBob.CheckOCRScreeningStatus.Events;
 using AktBob.CheckOCRScreeningStatus.UseCases.RegisterFiles;
 using AktBob.CheckOCRScreeningStatus.UseCases.RemoveCaseFromCache;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.Consumers.RegisterFiles;
 

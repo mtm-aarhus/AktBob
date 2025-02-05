@@ -1,8 +1,4 @@
 ﻿using AktBob.Podio.Contracts;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.UpdatePodioItem;
 public class UpdatePodioItemCommandHandler : MediatorRequestHandler<UpdatePodioItemCommand>

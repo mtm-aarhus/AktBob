@@ -1,7 +1,4 @@
-﻿using Ardalis.Result;
-using FilArkivCore.Web.Shared.Documents;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Logging;
+﻿using FilArkivCore.Web.Shared.Documents;
 
 namespace AktBob.CheckOCRScreeningStatus.UseCases.RegisterFiles;
 public class RegisterFilesCommandHandler : MediatorRequestHandler<RegisterFilesCommand, Result>
