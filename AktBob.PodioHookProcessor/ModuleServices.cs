@@ -24,6 +24,7 @@ public static class ModuleServices
         services.AddTransient<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateGoToFilArkivQueueItemJobHandler>();
         services.AddTransient<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItemJobHandler>();
         services.AddTransient<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCaseJobHandler>();
+        services.AddTransient<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItemJobHandler>();
 
         return services;
     }
