@@ -1,6 +1,6 @@
 ﻿using AktBob.Api.Endpoints.CreateDocumentListQueueItem;
 using AktBob.Shared;
-using AktBob.Shared.Jobs;
+using AktBob.Shared.Contracts;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.CreateGoToFilArkivQueueItem;

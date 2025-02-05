@@ -1,5 +1,5 @@
 ﻿using AktBob.Shared;
-using AktBob.Shared.Jobs;
+using AktBob.Shared.Contracts;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.CreateDocumentListQueueItem;
