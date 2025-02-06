@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AktBob.CheckOCRScreeningStatus.Contracts\AktBob.CheckOCRScreeningStatus.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.CloudConvert.Contracts\AktBob.CloudConvert.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Database.Contracts\AktBob.Database.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
