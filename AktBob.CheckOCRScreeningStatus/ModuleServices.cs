@@ -1,12 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using FilArkivCore.Web.Client;
+using AktBob.CheckOCRScreeningStatus.UseCases;
+using AktBob.Shared;
+using AktBob.Shared.Contracts;
+using AktBob.CheckOCRScreeningStatus.JobHandlers;
 
 namespace AktBob.CheckOCRScreeningStatus;
 
 public static class ModuleServices
 {
-    public static IServiceCollection AddCheckOCRScreeningStatusModule(this IServiceCollection services, IConfiguration configuration, List<Type> mediatorHandlers, List<Type> massTransitConsumers)
+    public static IServiceCollection AddCheckOCRScreeningStatusModule(this IServiceCollection services, IConfiguration configuration, List<Type> mediatorHandlers)
     {
+        // Guard against missing Podio configuration
         var podioAppId = Guard.Against.Null(configuration.GetValue<int>("Podio:AppId"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName"));
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureStorage"));
@@ -18,28 +23,24 @@ public static class ModuleServices
         var podioFieldFilArkivLink = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivLink"));
         Guard.Against.Null(podioFieldFilArkivLink.Value);
 
-        services.AddHostedService<BackgroundServices.Worker>();
-        services.AddSingleton<IData, Data>();
 
+
+        // FilArkiv client
         var filArkivUrl = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:BaseAddress"));
         var filArkivClientId = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientId"));
         var filArkivClientSecret = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientSecret"));
         services.AddFilArkivApiClient(filArkivUrl, filArkivClientId, filArkivClientSecret);
-
         services.AddScoped<IFilArkiv, FilArkiv>();
 
-        mediatorHandlers.AddRange([
-            typeof(UseCases.GetFileStatus.GetFileStatusQueryHandler),
-            typeof(UseCases.RegisterFiles.RegisterFilesCommandHandler),
-            typeof(UseCases.RemoveCaseFromCache.RemoveCaseFromCacheCommandHandler),
-            typeof(UseCases.UpdatePodioItem.UpdatePodioItemCommandHandler)]);
-            
-        massTransitConsumers.AddRange([
-                typeof(Consumers.CheckFileStatus.FilesRegisteredConsumer),
-                typeof(Consumers.RegisterFiles.CaseAddedConsumer),
-                typeof(Consumers.UpdateDatabase.FilesRegisteredConsumer),
-                typeof(Consumers.UpdatePodioItem.OCRScreeningCompletedConsumer)]);
 
+        mediatorHandlers.AddRange([
+            typeof(GetFileStatusQueryHandler),
+            typeof(RegisterFilesCommandHandler),
+            typeof(RemoveCaseFromCacheCommandHandler),
+            typeof(UpdatePodioItemCommandHandler)]);
+
+        services.AddTransient<IJobHandler<CheckOCRScreeningStatusJob>, CheckOCRScreeningStatusJobHandler>();
+        services.AddSingleton<IData, Data>();
 
         return services;
     }

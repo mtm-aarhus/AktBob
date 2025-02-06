@@ -80,6 +80,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.GetOrganized", "AktB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.GetOrganized.Contracts", "AktBob.GetOrganized.Contracts\AktBob.GetOrganized.Contracts.csproj", "{1E2B75E2-EFF5-4202-9461-525C081DC3C9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.CheckOCRScreeningStatus.Contracts", "AktBob.CheckOCRScreeningStatus.Contracts\AktBob.CheckOCRScreeningStatus.Contracts.csproj", "{522AEAC2-6FF2-4FDD-BC86-EA86E4485C2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -188,6 +190,10 @@ Global
 		{1E2B75E2-EFF5-4202-9461-525C081DC3C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E2B75E2-EFF5-4202-9461-525C081DC3C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E2B75E2-EFF5-4202-9461-525C081DC3C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{522AEAC2-6FF2-4FDD-BC86-EA86E4485C2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{522AEAC2-6FF2-4FDD-BC86-EA86E4485C2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{522AEAC2-6FF2-4FDD-BC86-EA86E4485C2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{522AEAC2-6FF2-4FDD-BC86-EA86E4485C2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -214,6 +220,7 @@ Global
 		{0B15645A-3C85-4B16-82A8-C9AF54A7D12F} = {5D2EE99D-5B8F-4AC3-9E73-0405BF1DE4D3}
 		{250D0C49-2284-40D8-BE80-5446161D4600} = {7533BC41-7473-4BFB-B8C3-1529C4F4AF7D}
 		{1E2B75E2-EFF5-4202-9461-525C081DC3C9} = {7533BC41-7473-4BFB-B8C3-1529C4F4AF7D}
+		{522AEAC2-6FF2-4FDD-BC86-EA86E4485C2D} = {A480C33B-82F4-4D2D-8113-A1D67E0FE0EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}

@@ -1,7 +1,10 @@
 ﻿using FilArkivCore.Web.Shared.FileProcess;
 using System.Diagnostics;
 
-namespace AktBob.CheckOCRScreeningStatus.UseCases.GetFileStatus;
+namespace AktBob.CheckOCRScreeningStatus.UseCases;
+
+public record GetFileStatusQuery(Guid FileId);
+
 public class GetFileStatusQueryHandler : MediatorRequestHandler<GetFileStatusQuery>
 {
     private readonly IData _data;
@@ -21,7 +24,7 @@ public class GetFileStatusQueryHandler : MediatorRequestHandler<GetFileStatusQue
     protected override async Task Handle(GetFileStatusQuery query, CancellationToken cancellationToken)
     {
         var random = new Random();
-        var delayTimeOffset = TimeSpan.FromMilliseconds(_configuration.GetValue<int?>("CheckOCRScreening:DelayBetweenChecksSMilliSeconds") ?? 10000);
+        var delay = TimeSpan.FromMilliseconds(_configuration.GetValue<int?>("CheckOCRScreening:DelayBetweenChecksSMilliSeconds") ?? 10000);
 
         var file = _data.GetFile(query.FileId);
 
@@ -31,21 +34,14 @@ public class GetFileStatusQueryHandler : MediatorRequestHandler<GetFileStatusQue
             return;
         }
 
-        var counter = 0;
         var stopWatch = new Stopwatch();
         stopWatch.Start();
 
         while (!file.HasBeenScreened)
         {
             // Wait before each check to reduce throttling
-            var randomDelayTime = TimeSpan.FromMilliseconds(random.Next(0, _configuration.GetValue<int?>("CheckOCRScreening:MaxRandomDelayTimeMilliseconds") ?? 3000));
-            var delay = delayTimeOffset + randomDelayTime;
-            
             _logger.LogInformation($"File {query.FileId} Waiting {delay.TotalMilliseconds} ms before next check");
-
             await Task.Delay(delay, cancellationToken);
-
-            counter++;
 
             // Get file status from FilArkiv
             var parameters = new FileProcessStatusFileParameters
@@ -59,13 +55,13 @@ public class GetFileStatusQueryHandler : MediatorRequestHandler<GetFileStatusQue
 
             if (!response.IsBeingProcessed && !response.FileProcessStatusResponses.Any(x => x.FinishedAt == null))
             {
-                _data.FileHasBeenScreened(file);         
+                _data.FileHasBeenScreened(file);
             }
         }
 
         stopWatch.Stop();
 
-        _logger.LogInformation("File {fileId} has been screened. Elapsed time: {milliseconds} milliseconds. Checked {counter} time(s)", query.FileId, stopWatch.ElapsedMilliseconds, counter);
+        _logger.LogInformation("File {fileId} has been screened. Elapsed time: {milliseconds} milliseconds", query.FileId, stopWatch.ElapsedMilliseconds);
         return;
     }
 }

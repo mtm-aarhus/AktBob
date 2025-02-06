@@ -1,6 +1,8 @@
 ﻿using FilArkivCore.Web.Shared.Documents;
 
-namespace AktBob.CheckOCRScreeningStatus.UseCases.RegisterFiles;
+namespace AktBob.CheckOCRScreeningStatus.UseCases;
+public record RegisterFilesCommand(Guid CaseId) : Request<Result>;
+
 public class RegisterFilesCommandHandler : MediatorRequestHandler<RegisterFilesCommand, Result>
 {
     private readonly IData _data;

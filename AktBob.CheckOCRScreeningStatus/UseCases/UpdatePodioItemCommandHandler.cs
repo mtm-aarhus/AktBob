@@ -1,6 +1,8 @@
 ﻿using AktBob.Podio.Contracts;
 
-namespace AktBob.CheckOCRScreeningStatus.UseCases.UpdatePodioItem;
+namespace AktBob.CheckOCRScreeningStatus.UseCases;
+public record UpdatePodioItemCommand(Guid FilArkivCaseId);
+
 public class UpdatePodioItemCommandHandler : MediatorRequestHandler<UpdatePodioItemCommand>
 {
     private readonly IData _data;

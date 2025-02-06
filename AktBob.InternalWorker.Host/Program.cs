@@ -25,8 +25,7 @@ var builder = Host.CreateDefaultBuilder(args)
 
         // Modules
         var mediatorHandlers = new List<Type>();
-        var massTransitConsumers = new List<Type>();
-        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatorHandlers, massTransitConsumers);
+        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatorHandlers);
         services.AddEmailModuleServices(hostContext.Configuration, mediatorHandlers);
         services.AddQueueModule(hostContext.Configuration, mediatorHandlers);
         services.AddUiPathModule(hostContext.Configuration, mediatorHandlers);
@@ -42,20 +41,6 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddMediator(cfg =>
         {
             cfg.AddConsumers(mediatorHandlers.ToArray());
-        });
-
-        // MassTransit (only used by the CheckOCRScreeningStatus modul)
-        services.AddMassTransit(cfg =>
-        {
-            cfg.SetKebabCaseEndpointNameFormatter();
-
-            // Use in-memory transport, that's good enough for this application
-            cfg.UsingInMemory((context, config) =>
-            {
-                config.ConfigureEndpoints(context);
-            });
-
-            cfg.AddConsumers(massTransitConsumers.ToArray());
         });
 
         // Hangfire
