@@ -1,4 +1,5 @@
 ﻿using AAK.Podio;
+using AAK.Podio.Models;
 using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Podio.Contracts;
@@ -36,7 +37,7 @@ internal class BackgroundWorker : BackgroundService
         var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"GoToFilArkivTrigger:UiPathQueueName:{tenancyName}"));
         var delay = _configuration.GetValue<int?>("GoToFilArkivTrigger:WorkerIntervalSeconds") ?? 10;
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
-        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => long.Parse(x.Key), x => x.Get<PodioField>())));
+        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioField>())));
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "CaseNumber"));
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
@@ -86,7 +87,7 @@ internal class BackgroundWorker : BackgroundService
                             continue;
                         }
 
-                        var caseNumber = getPodioItemQueryResult.Value.Fields.FirstOrDefault(x => x.Id == podioFieldCaseNumber.Key)?.Value?.FirstOrDefault();
+                        var caseNumber = getPodioItemQueryResult.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
                         if (string.IsNullOrEmpty(caseNumber))
                         {
                             _logger.LogError("Could not get case number field value from Podio Item {itemId}", podioItemId);

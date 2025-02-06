@@ -77,13 +77,7 @@ internal class CheckOCRScreeningStatusJobHandler : IJobHandler<CheckOCRScreening
             var commentText = "OCR screening af dokumenterne på FilArkiv er færdig.";
 
             var postCommentCommand = new PostItemCommentCommand(podioAppId, job.PodioItemId, commentText);
-            var postCommentCommandResult = await mediator.SendRequest(postCommentCommand, cancellationToken);
-
-            if (!postCommentCommandResult.IsSuccess)
-            {
-                _logger.LogWarning("Error posting comment on Podio item {id}", job.PodioItemId);
-            }
-
+            await mediator.Send(postCommentCommand, cancellationToken);
 
             // 7. Remove data from cache
             var removeCaseFromCacheCommand = new RemoveCaseFromCacheCommand(job.FilArkivCaseId);

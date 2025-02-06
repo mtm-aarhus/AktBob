@@ -16,7 +16,7 @@ public static class ModuleServices
             BaseAddress: Guard.Against.NullOrEmpty(configuration.GetValue<string>("Podio:BaseAddress")),
             ClientId: Guard.Against.NullOrEmpty(configuration.GetValue<string>("Podio:ClientId")),
             ClientSecret: Guard.Against.NullOrEmpty(configuration.GetValue<string>("Podio:ClientSecret")),
-            AppTokens: podioAppTokens.Select(p => new KeyValuePair<int, string>(int.Parse(p.Key), p.Value)).ToDictionary().AsReadOnly())
+            AppTokens: podioAppTokens.Select(p => new KeyValuePair<string, string>(p.Key, p.Value ?? string.Empty)).ToDictionary().AsReadOnly())
         );
 
         mediatorHandlers.AddRange([

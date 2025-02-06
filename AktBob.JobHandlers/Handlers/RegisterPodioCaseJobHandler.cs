@@ -1,4 +1,5 @@
-﻿using AktBob.Database.Contracts;
+﻿using AAK.Podio.Models;
+using AktBob.Database.Contracts;
 using AktBob.Database.UseCases.Cases.AddCase;
 using AktBob.JobHandlers.Utils;
 using AktBob.Podio.Contracts;
@@ -21,7 +22,7 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
     public async Task Handle(RegisterPodioCaseJob job, CancellationToken cancellationToken = default)
     {
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
-        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => long.Parse(x.Key), x => x.Get<PodioField>())));
+        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioField>())));
         var podioFieldDeskproId = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "DeskproId"));
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "CaseNumber"));
         Guard.Against.Null(podioFieldDeskproId.Value);
@@ -40,7 +41,7 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
                 return;
             }
 
-            var caseNumber = getPodioItemQueryResult.Value.Fields.FirstOrDefault(x => x.Id == podioFieldCaseNumber.Key)?.Value?.FirstOrDefault();
+            var caseNumber = getPodioItemQueryResult.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
 
             if (string.IsNullOrEmpty(caseNumber))
             {
@@ -49,7 +50,7 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
             }
 
             // Get metadata from Deskpro
-            var deskproIdString = getPodioItemQueryResult.Value.Fields.FirstOrDefault(x => x.Id == podioFieldDeskproId.Key)?.Value?.FirstOrDefault();
+            var deskproIdString = getPodioItemQueryResult.Value.GetField(podioFieldDeskproId.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
             if (string.IsNullOrEmpty(deskproIdString))
             {
                 _logger.LogError("Could not get Deskpro Id field value from Podio Item {itemId}", job.PodioItemId);

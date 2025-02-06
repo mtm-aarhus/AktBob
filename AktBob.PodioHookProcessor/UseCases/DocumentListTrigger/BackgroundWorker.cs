@@ -1,4 +1,5 @@
-﻿using AktBob.Database.Contracts;
+﻿using AAK.Podio.Models;
+using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.OpenOrchestrator.Contracts;
@@ -45,7 +46,7 @@ internal class BackgroundWorker : BackgroundService
 
         // Podio variables
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
-        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => long.Parse(x.Key), x => x.Get<PodioField>())));
+        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioField>())));
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "CaseNumber"));
 
         Guard.Against.Null(podioFieldCaseNumber.Value);
@@ -175,7 +176,7 @@ internal class BackgroundWorker : BackgroundService
         return getQueueMessagesResult.Value;
     }
 
-    private bool GetCaseNumberFromPodioItem(IMediator mediator, int podioAppId, long podioItemId, long podioFieldId, CancellationToken cancellationToken, out string caseNumber)
+    private bool GetCaseNumberFromPodioItem(IMediator mediator, int podioAppId, long podioItemId, int podioFieldId, CancellationToken cancellationToken, out string caseNumber)
     {
         caseNumber = string.Empty;
 
@@ -188,7 +189,7 @@ internal class BackgroundWorker : BackgroundService
             return false;
         }
 
-        caseNumber = getPodioItemQueryResult.Value.Fields.FirstOrDefault(x => x.Id == podioFieldId)?.Value?.FirstOrDefault() ?? string.Empty;
+        caseNumber = getPodioItemQueryResult.Value.GetField(podioFieldId)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
 
         if (string.IsNullOrEmpty(caseNumber))
         {

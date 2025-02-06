@@ -1,17 +1,16 @@
 ﻿using AAK.Podio;
 using AktBob.Podio.Contracts;
 using Ardalis.GuardClauses;
-using Ardalis.Result;
 using MassTransit.Mediator;
 
 namespace AktBob.Podio.UseCases;
-public class PostItemCommentCommandHandler(IPodio podio) : MediatorRequestHandler<PostItemCommentCommand, Result>
+public class PostItemCommentCommandHandler(IPodio podio) : MediatorRequestHandler<PostItemCommentCommand>
 {
     private readonly IPodio _podio = podio;
 
-    protected override async Task<Result> Handle(PostItemCommentCommand request, CancellationToken cancellationToken)
+    protected override async Task Handle(PostItemCommentCommand request, CancellationToken cancellationToken)
     {
         Guard.Against.NullOrEmpty(request.Comment);
-        return await _podio.PostItemComment(request.AppId, request.ItemId, request.Comment, cancellationToken);
+        await _podio.PostItemComment(request.AppId, request.ItemId, request.Comment, cancellationToken);
     }
 }
