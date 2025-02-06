@@ -5,7 +5,7 @@ using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.GetOrganized;
+namespace AktBob.GetOrganized.UseCases;
 public class UploadDocumentCommandHandler(ILogger<UploadDocumentCommandHandler> logger, IConfiguration configuration, IGetOrganizedClient getOrganizedClient) : MediatorRequestHandler<UploadDocumentCommand, Result<int>>
 {
     private readonly ILogger<UploadDocumentCommandHandler> _logger = logger;

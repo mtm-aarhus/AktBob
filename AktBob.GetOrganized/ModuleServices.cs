@@ -1,4 +1,5 @@
 ﻿using AAK.GetOrganized;
+using AktBob.GetOrganized.UseCases;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,9 +21,10 @@ public static class ModuleServices
         services.AddGetOrganizedModule(getOrganizedOptions);
 
         mediatorHandlers.AddRange([
-            typeof(UploadDocumentCommandHandler),
+            typeof(CreateCaseCommandHandler),
+            typeof(FinalizeDocumentCommandHandler),
             typeof(RelateDocumentCommandHandler),
-            typeof(FinalizeDocumentCommandHandler)]);
+            typeof(UploadDocumentCommandHandler)]);
 
         return services;
     }

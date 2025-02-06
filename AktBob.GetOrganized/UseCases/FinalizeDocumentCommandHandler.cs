@@ -2,7 +2,7 @@
 using AktBob.GetOrganized.Contracts;
 using MassTransit.Mediator;
 
-namespace AktBob.GetOrganized;
+namespace AktBob.GetOrganized.UseCases;
 public class FinalizeDocumentCommandHandler(IGetOrganizedClient getOrganizedClient) : MediatorRequestHandler<FinalizeDocumentCommand>
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;

@@ -6,7 +6,7 @@ using MassTransit.Mediator;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.Deskpro;
+namespace AktBob.Deskpro.UseCases;
 public class GetDeskproCustomFieldSpecificationsQueryHandler(
     IDeskproClient deskproClient,
     IMemoryCache cache,

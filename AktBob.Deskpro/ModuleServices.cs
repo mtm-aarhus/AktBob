@@ -1,4 +1,5 @@
 ﻿using AAK.Deskpro;
+using AktBob.Deskpro.UseCases;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,8 @@ public static class ModuleServices
             typeof(GetDeskproMessagesQueryHandler),
             typeof(GetDeskproPersonQueryHandler),
             typeof(GetDeskproTicketByIdQueryHandler),
-            typeof(GetDeskproTicketsByFieldSearchQueryHandler)]);
+            typeof(GetDeskproTicketsByFieldSearchQueryHandler),
+            typeof(InvokeWebhookCommandHandler)]);
 
         return services;
     }

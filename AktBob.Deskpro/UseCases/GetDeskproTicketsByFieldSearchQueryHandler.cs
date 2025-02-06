@@ -7,7 +7,7 @@ using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.Deskpro;
+namespace AktBob.Deskpro.UseCases;
 public class GetDeskproTicketsByFieldSearchQueryHandler : MediatorRequestHandler<GetDeskproTicketsByFieldSearchQuery, Result<IEnumerable<TicketDto>>>
 {
     private readonly ILogger<GetDeskproTicketsByFieldSearchQueryHandler> _logger;

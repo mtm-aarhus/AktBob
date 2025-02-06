@@ -4,7 +4,7 @@ using AktBob.Deskpro.Contracts.DTOs;
 using Ardalis.Result;
 using MassTransit.Mediator;
 
-namespace AktBob.Deskpro;
+namespace AktBob.Deskpro.UseCases;
 public class GetDeskproTicketByIdQueryHandler(IDeskproClient deskproClient) : MediatorRequestHandler<GetDeskproTicketByIdQuery, Result<TicketDto>>
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
@@ -38,5 +38,5 @@ public class GetDeskproTicketByIdQueryHandler(IDeskproClient deskproClient) : Me
         return dto;
     }
 
-    
+
 }

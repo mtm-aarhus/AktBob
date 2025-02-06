@@ -5,7 +5,7 @@ using Ardalis.Result;
 using MassTransit;
 using MassTransit.Mediator;
 
-namespace AktBob.Deskpro;
+namespace AktBob.Deskpro.UseCases;
 public class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator mediator) : MediatorRequestHandler<GetDeskproMessagesQuery, Result<IEnumerable<MessageDto>>>
 {
     private readonly IDeskproClient _deskpro = deskpro;
@@ -37,7 +37,7 @@ public class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator me
                     },
                     TicketId = x.TicketId
                 }));
-                
+
                 totalPages = deskproMessages.Pagination.TotalPages;
             }
 

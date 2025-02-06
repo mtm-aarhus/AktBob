@@ -1,4 +1,4 @@
-﻿namespace AktBob.CloudConvert;
+﻿namespace AktBob.CloudConvert.UseCases;
 public class GetFileQueryHandler(ICloudConvertClient cloudConvertClient) : MediatorRequestHandler<GetFileQuery, Result<FileDto>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;

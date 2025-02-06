@@ -37,6 +37,7 @@ public static class ModuleServices
             typeof(GetFileStatusQueryHandler),
             typeof(RegisterFilesCommandHandler),
             typeof(RemoveCaseFromCacheCommandHandler),
+            typeof(UpdateDatabaseCommandHandler),
             typeof(UpdatePodioItemCommandHandler)]);
 
         services.AddTransient<IJobHandler<CheckOCRScreeningStatusJob>, CheckOCRScreeningStatusJobHandler>();

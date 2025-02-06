@@ -4,7 +4,7 @@ using AktBob.Deskpro.Contracts.DTOs;
 using Ardalis.Result;
 using MassTransit.Mediator;
 
-namespace AktBob.Deskpro;
+namespace AktBob.Deskpro.UseCases;
 public class GetDeskproMessageByIdQueryHandler(IDeskproClient deskproClient) : MediatorRequestHandler<GetDeskproMessageByIdQuery, Result<MessageDto>>
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
@@ -40,7 +40,7 @@ public class GetDeskproMessageByIdQueryHandler(IDeskproClient deskproClient) : M
                     PhoneNumbers = message.Person.PhoneNumbers
                 }
             };
-            
+
             return Result.Success(dto);
         }
         catch (Exception)

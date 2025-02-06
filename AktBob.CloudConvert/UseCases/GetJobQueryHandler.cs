@@ -1,4 +1,4 @@
-﻿namespace AktBob.CloudConvert;
+﻿namespace AktBob.CloudConvert.UseCases;
 public class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogger<GetJobQueryHandler> logger, IMediator mediator) : MediatorRequestHandler<GetJobQuery, Result<byte[]>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;

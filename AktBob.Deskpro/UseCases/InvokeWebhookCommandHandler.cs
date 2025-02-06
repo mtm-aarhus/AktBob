@@ -2,7 +2,7 @@
 using AktBob.Deskpro.Contracts;
 using MassTransit.Mediator;
 
-namespace AktBob.Deskpro;
+namespace AktBob.Deskpro.UseCases;
 public class InvokeWebhookCommandHandler(IDeskproClient deskproClient) : MediatorRequestHandler<InvokeWebhookCommand>
 {
     private readonly IDeskproClient _deskproClient = deskproClient;

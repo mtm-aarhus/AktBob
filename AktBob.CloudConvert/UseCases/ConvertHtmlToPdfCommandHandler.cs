@@ -1,6 +1,6 @@
 ﻿using AktBob.CloudConvert.Models;
 
-namespace AktBob.CloudConvert;
+namespace AktBob.CloudConvert.UseCases;
 public class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClient) : MediatorRequestHandler<ConvertHtmlToPdfCommand, Result<ConvertHtmlToPdfResponseDto>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
@@ -72,7 +72,7 @@ public class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClie
         {
             Tasks = tasks
         };
-        
+
         var result = await _cloudConvertClient.CreateJob(payload, cancellationToken);
 
         if (result.IsSuccess)

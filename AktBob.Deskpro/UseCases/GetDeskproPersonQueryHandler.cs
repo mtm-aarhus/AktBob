@@ -5,7 +5,7 @@ using AktBob.Deskpro.Contracts.DTOs;
 using Microsoft.Extensions.Caching.Memory;
 using MassTransit.Mediator;
 
-namespace AktBob.Deskpro;
+namespace AktBob.Deskpro.UseCases;
 public class GetDeskproPersonQueryHandler(IDeskproClient deskpro, IMemoryCache cache) : MediatorRequestHandler<GetDeskproPersonQuery, Result<PersonDto>>
 {
     private readonly IDeskproClient _deskpro = deskpro;

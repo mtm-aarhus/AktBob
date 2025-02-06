@@ -3,7 +3,7 @@ using AktBob.GetOrganized.Contracts;
 using Ardalis.Result;
 using MassTransit.Mediator;
 
-namespace AktBob.GetOrganized;
+namespace AktBob.GetOrganized.UseCases;
 public class CreateCaseCommandHandler(IGetOrganizedClient getOrganizedClient) : MediatorRequestHandler<CreateCaseCommand, Result<CreateCaseResponse>>
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;

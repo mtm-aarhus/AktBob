@@ -24,18 +24,18 @@ public static class ModuleServices
         services.AddHostedService<PostMessageBackgroundJob>();
 
         mediatorTypes.AddRange([
-            typeof(AddCaseCommandHandler),
             typeof(UseCases.Cases.GetCaseById.GetCaseByIdQueryHandler),
-            typeof(GetCasesQueryHandler),
             typeof(UseCases.Cases.GetCasesByTicketId.GetCasesByTicketIdQueryHandler),
+            typeof(AddCaseCommandHandler),
+            typeof(GetCasesQueryHandler),
             typeof(UpdateCaseCommandHandler),
             typeof(UseCases.Messages.ClearQueuedForJournalization.ClearQueuedForJournalizationCommandHandler),
+            typeof(UseCases.Messages.GetMessageById.GetMessageByIdQueryHandler),
+            typeof(PostMessageCommandHandler),
             typeof(DeleteMessageCommandHandler),
             typeof(GetMessageByDeskproMessageIdQueryHandler),
-            typeof(UseCases.Messages.GetMessageById.GetMessageByIdQueryHandler),
             typeof(GetMessagesQueryHandler),
             typeof(UpdateMessageCommandHandler),
-            typeof(PostMessageCommandHandler),
             typeof(UseCases.Tickets.AddTicket.AddTicketCommandHandler),
             typeof(UseCases.Tickets.GetTicketById.GetTicketByIdQueryHandler),
             typeof(GetTicketsQueryHandler),
