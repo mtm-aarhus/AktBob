@@ -15,9 +15,9 @@ internal class CreateDocumentListQueueItemEndpoint : Endpoint<CreateDocumentList
 
     public override void Configure()
     {
-        Post("/Queue/DocumentList");
+        Post("/Jobs/CreateDocumentListQueueItem");
         AllowFormData(urlEncoded: true);
-        Options(x => x.WithTags("Queue"));
+        Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
             s.Summary = "Creates document list queue item";

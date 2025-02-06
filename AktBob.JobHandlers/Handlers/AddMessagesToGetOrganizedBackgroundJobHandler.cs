@@ -16,17 +16,17 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
 
 namespace AktBob.JournalizeDocuments.BackgroundServices;
-internal class AddSingleMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
+internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
 {
     private readonly IMediator _mediator;
     private readonly IConfiguration _configuration;
-    private readonly ILogger<AddSingleMessagesToGetOrganizedBackgroundJobHandler> _logger;
+    private readonly ILogger<AddMessagesToGetOrganizedBackgroundJobHandler> _logger;
     private readonly DeskproHelper _deskproHelpers;
 
-    public AddSingleMessagesToGetOrganizedBackgroundJobHandler(
+    public AddMessagesToGetOrganizedBackgroundJobHandler(
         IMediator mediator,
         IConfiguration configuration,
-        ILogger<AddSingleMessagesToGetOrganizedBackgroundJobHandler> logger,
+        ILogger<AddMessagesToGetOrganizedBackgroundJobHandler> logger,
         DeskproHelper deskproHelpers)
     {
         _mediator = mediator;

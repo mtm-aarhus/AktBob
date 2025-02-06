@@ -1,5 +1,5 @@
 ﻿namespace AktBob.Shared.Contracts;
-public record AddOrUpdateFullDeskproTicketToGetOrganizedJob
+public record AddOrUpdateDeskproTicketToGetOrganizedJob
 {
     public int TicketId { get; set; }
     public string GOCaseNumber { get; set; } = string.Empty;

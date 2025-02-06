@@ -14,16 +14,16 @@ using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace AktBob.JobHandlers.Handlers;
-internal class AddOrUpdateFullDeskproTicketToGetOrganizedJobHandler(
+internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
     IMediator mediator,
-    ILogger<AddOrUpdateFullDeskproTicketToGetOrganizedJobHandler> logger,
-    DeskproHelper deskproHelper) : IJobHandler<AddOrUpdateFullDeskproTicketToGetOrganizedJob>
+    ILogger<AddOrUpdateDeskproTicketToGetOrganizedJobHandler> logger,
+    DeskproHelper deskproHelper) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
 {
     private readonly IMediator _mediator = mediator;
-    private readonly ILogger<AddOrUpdateFullDeskproTicketToGetOrganizedJobHandler> _logger = logger;
+    private readonly ILogger<AddOrUpdateDeskproTicketToGetOrganizedJobHandler> _logger = logger;
     private readonly DeskproHelper _deskproHelper = deskproHelper;
 
-    public async Task Handle(AddOrUpdateFullDeskproTicketToGetOrganizedJob job, CancellationToken cancellationToken = default)
+    public async Task Handle(AddOrUpdateDeskproTicketToGetOrganizedJob job, CancellationToken cancellationToken = default)
     {
         try
         {

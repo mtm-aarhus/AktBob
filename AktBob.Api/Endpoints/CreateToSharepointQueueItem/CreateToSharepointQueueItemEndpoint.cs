@@ -12,9 +12,9 @@ internal class CreateToSharepointQueueItemEndpoint(IJobDispatcher jobDispatcher)
     public override void Configure()
     {
 
-        Post("/Queue/ToSharepoint");
+        Post("/Jobs/CreateToSharepointQueueItem");
         AllowFormData(urlEncoded: true);
-        Options(x => x.WithTags("Queue"));
+        Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
             s.Summary = "Creates a FilArkiv to Sharepoint queue item";
