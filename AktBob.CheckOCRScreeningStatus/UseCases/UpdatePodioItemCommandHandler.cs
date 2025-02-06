@@ -41,7 +41,7 @@ public class UpdatePodioItemCommandHandler : MediatorRequestHandler<UpdatePodioI
         var podioFieldFilArkivCaseId = podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivCaseId");
         var podioFieldFilArkivLink = podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivLink");
 
-        var updateFilArkivCaseIdFieldCommand = new UpdateItemFieldCommand(podioAppId, @case.PodioItemId, podioFieldFilArkivCaseId.Key, @case.CaseId.ToString());
+        var updateFilArkivCaseIdFieldCommand = new UpdateFieldCommand(podioAppId, @case.PodioItemId, podioFieldFilArkivCaseId.Key, @case.CaseId.ToString());
         var updateFilArkivCaseIdFieldCommandResult = await _mediator.SendRequest(updateFilArkivCaseIdFieldCommand, cancellationToken);
 
         if (!updateFilArkivCaseIdFieldCommandResult.IsSuccess)
@@ -49,7 +49,7 @@ public class UpdatePodioItemCommandHandler : MediatorRequestHandler<UpdatePodioI
             return;
         }
 
-        var updateFilArkivLinkFieldCommand = new UpdateItemFieldCommand(podioAppId, @case.PodioItemId, podioFieldFilArkivLink.Key, $"https://aarhus.filarkiv.dk/archives/case/{@case.CaseId.ToString()}");
+        var updateFilArkivLinkFieldCommand = new UpdateFieldCommand(podioAppId, @case.PodioItemId, podioFieldFilArkivLink.Key, $"https://aarhus.filarkiv.dk/archives/case/{@case.CaseId.ToString()}");
         var updateFilArkivLinkFieldCommandResult = await _mediator.SendRequest(updateFilArkivLinkFieldCommand, cancellationToken);
 
         return;

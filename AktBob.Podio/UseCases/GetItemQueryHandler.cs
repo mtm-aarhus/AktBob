@@ -4,7 +4,7 @@ using AktBob.Podio.Contracts;
 using Ardalis.Result;
 using MassTransit.Mediator;
 
-namespace AktBob.Podio;
+namespace AktBob.Podio.UseCases;
 public class GetItemQueryHandler(IPodio podio) : MediatorRequestHandler<GetItemQuery, Result<Item>>
 {
     private readonly IPodio _podio = podio;

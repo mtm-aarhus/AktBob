@@ -4,14 +4,9 @@ using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.CreateDocumentListQueueItem;
 
-internal class CreateDocumentListQueueItemEndpoint : Endpoint<CreateDocumentListQueueItemRequest>
+internal class CreateDocumentListQueueItemEndpoint(IJobDispatcher jobDispatcher) : Endpoint<CreateDocumentListQueueItemRequest>
 {
-    private readonly IJobDispatcher _jobDispatcher;
-
-    public CreateDocumentListQueueItemEndpoint(IJobDispatcher jobDispatcher)
-    {
-        _jobDispatcher = jobDispatcher;
-    }
+    private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public override void Configure()
     {

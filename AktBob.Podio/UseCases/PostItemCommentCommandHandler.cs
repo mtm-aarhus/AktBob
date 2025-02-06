@@ -4,7 +4,7 @@ using Ardalis.GuardClauses;
 using Ardalis.Result;
 using MassTransit.Mediator;
 
-namespace AktBob.Podio;
+namespace AktBob.Podio.UseCases;
 public class PostItemCommentCommandHandler(IPodio podio) : MediatorRequestHandler<PostItemCommentCommand, Result>
 {
     private readonly IPodio _podio = podio;

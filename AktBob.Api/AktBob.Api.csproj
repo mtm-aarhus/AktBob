@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AktBob.Database\AktBob.Database.csproj" />
+    <ProjectReference Include="..\AktBob.Podio\AktBob.Podio.csproj" />
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
   </ItemGroup>
 

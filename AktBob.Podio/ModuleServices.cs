@@ -1,4 +1,5 @@
 ﻿using AAK.Podio;
+using AktBob.Podio.UseCases;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +21,7 @@ public static class ModuleServices
 
         mediatorHandlers.AddRange([
             typeof(PostItemCommentCommandHandler),
-            typeof(UpdateItemFieldCommandHandler),
+            typeof(UpdateFieldCommandHandler),
             typeof(GetItemQueryHandler)]);
 
         return services;
