@@ -9,6 +9,7 @@ using MassTransit;
 using Hangfire;
 using AktBob.JobHandlers;
 using AktBob.GetOrganized;
+using AktBob.Database;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -30,6 +31,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddCloudConvertModule(hostContext.Configuration, mediatorHandlers);
         services.AddGetOrganizedModule(hostContext.Configuration, mediatorHandlers);
         services.AddJobHandlers(hostContext.Configuration);
+        services.AddDatabaseModule(hostContext.Configuration, mediatorHandlers);
 
         // MassTransit Mediator
         services.AddMediator(cfg =>

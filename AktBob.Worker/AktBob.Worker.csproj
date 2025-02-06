@@ -12,6 +12,7 @@
 	</PropertyGroup>
 	
   <ItemGroup>
+    <PackageReference Include="aak.deskpro" Version="1.11.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.1" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
@@ -23,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AktBob.CheckOCRScreeningStatus\AktBob.CheckOCRScreeningStatus.csproj" />
     <ProjectReference Include="..\AktBob.CloudConvert\AktBob.CloudConvert.csproj" />
+    <ProjectReference Include="..\AktBob.Database\AktBob.Database.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
     <ProjectReference Include="..\AktBob.Email\AktBob.Email.csproj" />
     <ProjectReference Include="..\AktBob.GetOrganized\AktBob.GetOrganized.csproj" />
