@@ -10,7 +10,7 @@ using System.Collections.Concurrent;
 namespace AktBob.Database;
 public static class ModuleServices
 {
-    public static IServiceCollection AddDatabaseModule(this IServiceCollection services, IConfiguration configuration, List<Type> mediatorTypes)
+    public static IServiceCollection AddDatabaseModule(this IServiceCollection services, IConfiguration configuration, List<Type> mediatorHandlers)
     {
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("Database"));
 
@@ -23,7 +23,7 @@ public static class ModuleServices
 
         services.AddHostedService<PostMessageBackgroundJob>();
 
-        mediatorTypes.AddRange([
+        mediatorHandlers.AddRange([
             typeof(GetCaseByIdQueryHandler),
             typeof(GetCasesByTicketIdQueryHandler),
             typeof(AddCaseCommandHandler),
