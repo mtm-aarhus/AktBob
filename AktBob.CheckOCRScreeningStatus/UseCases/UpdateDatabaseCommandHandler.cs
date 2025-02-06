@@ -20,7 +20,7 @@ public class UpdateDatabaseCommandHandler(IServiceScopeFactory serviceScopeFacto
             var getDatabaseCaseQuery = new GetCasesQuery(null, request.PodioItemId, null);
             var getDatabaseCaseResult = await mediator.SendRequest(getDatabaseCaseQuery, cancellationToken);
 
-            if (!getDatabaseCaseResult.IsSuccess)
+            if (!getDatabaseCaseResult.IsSuccess || !getDatabaseCaseResult.Value.Any())
             {
                 _logger.LogWarning("Database did not return any case for Podio item id {id}", request.PodioItemId);
                 return;

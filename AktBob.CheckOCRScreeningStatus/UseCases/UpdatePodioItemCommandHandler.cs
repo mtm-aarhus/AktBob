@@ -24,33 +24,22 @@ public class UpdatePodioItemCommandHandler : MediatorRequestHandler<UpdatePodioI
 
         if (@case == null)
         {
-            _logger.LogError("Case {id} not found", command.FilArkivCaseId);
+            _logger.LogError("Case {id} not found in cache", command.FilArkivCaseId);
             return;
         }
 
-        if (@case.PodioItemUpdated)
-        {
-            _logger.LogInformation("Case {id}: PodioItem already updated", command.FilArkivCaseId);
-            return;
-        }
-
-        _logger.LogInformation("OCRScreeningCompleted: updating Podio item {id}, setting FilArkivCaseId {filarkivCaseId}", @case.PodioItemId, command.FilArkivCaseId);
+        _logger.LogInformation("Updating Podio item {id}, setting FilArkivCaseId {filarkivCaseId}", @case.PodioItemId, command.FilArkivCaseId);
 
         var podioAppId = Convert.ToInt32(_configuration.GetValue<int?>("Podio:AppId"));
         var podioFields = _configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioField>());
         var podioFieldFilArkivCaseId = podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivCaseId");
         var podioFieldFilArkivLink = podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivLink");
 
-        var updateFilArkivCaseIdFieldCommand = new UpdateFieldCommand(podioAppId, @case.PodioItemId, podioFieldFilArkivCaseId.Key, @case.CaseId.ToString());
-        var updateFilArkivCaseIdFieldCommandResult = await _mediator.SendRequest(updateFilArkivCaseIdFieldCommand, cancellationToken);
+        var updateFilArkivCaseIdFieldCommand = new UpdateFieldCommand(podioAppId, @case.PodioItemId, podioFieldFilArkivCaseId.Key, command.FilArkivCaseId.ToString());
+        await _mediator.Send(updateFilArkivCaseIdFieldCommand, cancellationToken);
 
-        if (!updateFilArkivCaseIdFieldCommandResult.IsSuccess)
-        {
-            return;
-        }
-
-        var updateFilArkivLinkFieldCommand = new UpdateFieldCommand(podioAppId, @case.PodioItemId, podioFieldFilArkivLink.Key, $"https://aarhus.filarkiv.dk/archives/case/{@case.CaseId.ToString()}");
-        var updateFilArkivLinkFieldCommandResult = await _mediator.SendRequest(updateFilArkivLinkFieldCommand, cancellationToken);
+        var updateFilArkivLinkFieldCommand = new UpdateFieldCommand(podioAppId, @case.PodioItemId, podioFieldFilArkivLink.Key, $"https://aarhus.filarkiv.dk/archives/case/{command.FilArkivCaseId}");
+        await _mediator.Send(updateFilArkivLinkFieldCommand, cancellationToken);
 
         return;
     }
