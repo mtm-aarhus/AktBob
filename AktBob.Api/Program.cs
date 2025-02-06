@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authentication;
 using NSwag;
 using AktBob.Database;
 using MassTransit;
+using Microsoft.AspNetCore.Mvc.Filters;
+using AktBob.Podio;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +51,7 @@ builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Config
 // Modules
 var mediatorHandlers = new List<Type>();
 builder.Services.AddDatabaseModule(builder.Configuration, mediatorHandlers);
+builder.Services.AddPodioModule(builder.Configuration, mediatorHandlers);
 
 // MassTransit Mediator
 builder.Services.AddMediator(cfg =>
@@ -59,11 +62,14 @@ builder.Services.AddMediator(cfg =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-app.UseHangfireDashboard();
-
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
+});
+
 
 app.UseFastEndpoints(c =>
 {
