@@ -14,24 +14,25 @@ using AktBob.JobHandlers.Utils;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AktBob.JournalizeDocuments.BackgroundServices;
 internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
 {
-    private readonly IMediator _mediator;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AddMessagesToGetOrganizedBackgroundJobHandler> _logger;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly DeskproHelper _deskproHelpers;
 
     public AddMessagesToGetOrganizedBackgroundJobHandler(
-        IMediator mediator,
         IConfiguration configuration,
         ILogger<AddMessagesToGetOrganizedBackgroundJobHandler> logger,
+        IServiceScopeFactory serviceScopeFactory,
         DeskproHelper deskproHelpers)
     {
-        _mediator = mediator;
         _configuration = configuration;
         _logger = logger;
+        _serviceScopeFactory = serviceScopeFactory;
         _deskproHelpers = deskproHelpers;
     }
 
@@ -40,136 +41,135 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
         var delaySeconds = _configuration.GetValue<int?>("JournalizeDeskproMessages:WorkerIntervalSeconds") ?? 10;
         var journalizeAfterUpload = _configuration.GetValue<bool?>("JournalizeDeskproMessages:JournalizeAfterUpload") ?? true;
 
+        using var scope = _serviceScopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
         while (!stoppingToken.IsCancellationRequested)
         {
             await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
 
-            try
-            {
-                // Get new messages from the database
-                var getMessagesQueryResult = await _mediator.SendRequest(new GetMessagesQuery(IncludeJournalized: false));
+            // Get new messages from the database
+            var getMessagesQueryResult = await mediator.SendRequest(new GetMessagesQuery(IncludeJournalized: false));
 
-                if (getMessagesQueryResult.Status == ResultStatus.NotFound)
+            if (getMessagesQueryResult.Status == ResultStatus.NotFound)
+            {
+                continue;
+            }
+
+            if (!getMessagesQueryResult.IsSuccess)
+            {
+                _logger.LogError("Error requesting database API for messages not journalized");
+                continue;
+            }
+
+
+            // Loop through each messsage
+            foreach (var message in getMessagesQueryResult.Value.OrderBy(m => m.DeskproMessageId))
+            {
+                if (string.IsNullOrEmpty(message.GOCaseNumber))
                 {
+                    // The Deskpro ticket that holds the message is not yet related to a GO-case -> do nothing
                     continue;
                 }
 
-                if (!getMessagesQueryResult.IsSuccess)
+                if (message.GODocumentId is not null)
                 {
-                    _logger.LogError("Error requesting database API for messages not journalized");
+                    // The message is already journalized -> do nothing
                     continue;
                 }
 
 
-                // Loop through each messsage
-                foreach (var message in getMessagesQueryResult.Value.OrderBy(m => m.DeskproMessageId))
+                // From this point: the message is ready to be journalized
+
+
+                _logger.LogInformation("Deskpro message ready for upload to GetOrganized. DeskproTicketId {deskproTicketId}, DeskproMessageId {deskproMessageId}", message.DeskproTicketId, message.DeskproMessageId);
+
+
+                // Get Deskpro ticket
+                var deskproTicketResult = await _deskproHelpers.GetDeskproTicket(mediator, message.DeskproTicketId);
+                if (!deskproTicketResult.IsSuccess)
                 {
-                    if (string.IsNullOrEmpty(message.GOCaseNumber))
-                    {
-                        // The Deskpro ticket that holds the message is not yet related to a GO-case -> do nothing
-                        continue;
-                    }
-
-                    if (message.GODocumentId is not null)
-                    {
-                        // The message is already journalized -> do nothing
-                        continue;
-                    }
-
-
-                    // From this point: the message is ready to be journalized
-
-
-                    _logger.LogInformation("Deskpro message ready for upload to GetOrganized. DeskproTicketId {deskproTicketId}, DeskproMessageId {deskproMessageId}", message.DeskproTicketId, message.DeskproMessageId);
-
-
-                    // Get Deskpro ticket
-                    var deskproTicketResult = await _deskproHelpers.GetDeskproTicket(message.DeskproTicketId);
-                    if (!deskproTicketResult.IsSuccess)
-                    {
-                        _logger.LogError("Error getting Deskpro ticket {id}", message.DeskproTicketId);
-                        continue;
-                    }
-
-
-                    // Get Deskpro message
-                    var deskproMessageResult = await _deskproHelpers.GetDeskproMessage(message.TicketId, message.DeskproMessageId);
-                    if (!deskproMessageResult.IsSuccess)
-                    {
-                        _logger.LogError("Error requesting Deskpro message #{id}. Message will be marked as 'deleted' in database.", message.Id);
-
-                        var deleteMessageCommand = new DeleteMessageCommand(message.Id);
-                        await _mediator.Send(deleteMessageCommand);
-                        continue;
-                    }
-
-
-                    // Get Deskpro person
-                    var personResult = await _deskproHelpers.GetDeskproPerson(deskproMessageResult!.Value.Person.Id);
-
-
-                    // Get attachments
-                    var attachments = Enumerable.Empty<AttachmentDto>();
-                    if (deskproMessageResult.Value.AttachmentIds.Any())
-                    {
-                        attachments = await _deskproHelpers.GetDeskproMessageAttachments(deskproTicketResult.Value!.Id, deskproMessageResult.Value.Id);
-                    }
-
-
-                    // Generate PDF document
-                    var generateDocumentResult = await GenerateDocument(message, deskproTicketResult.Value!, deskproMessageResult!, personResult.Value, attachments);
-                    if (!generateDocumentResult.IsSuccess)
-                    {
-                        _logger.LogError("Error generating the message document for Deskpro message {id}", message.DeskproMessageId);
-                        continue;
-                    }
-
-
-                    DateTime createdAtDanishTime = deskproMessageResult!.Value.CreatedAt.UtcToDanish();
-
-                    var metadata = new UploadDocumentMetadata
-                    {
-                        DocumentDate = createdAtDanishTime,
-                        DocumentCategory = deskproMessageResult.Value.IsAgentNote ? DocumentCategory.Intern : MapDocumentCategoryFromPerson(personResult.Value)
-                    };
-
-                    var fileName = GenerateFileName(message, personResult, createdAtDanishTime);
-
-
-                    // Upload parent document
-                    var uploadDocumentCommand = new UploadDocumentCommand(generateDocumentResult.Value, message.GOCaseNumber, fileName, metadata, false);
-                    var uploadDocumentResult = await _mediator.SendRequest(uploadDocumentCommand, stoppingToken);
-
-                    if (!uploadDocumentResult.IsSuccess)
-                    {
-                        _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", message.DeskproMessageId, message.GOCaseNumber);
-                        continue;
-                    }
-
-
-                    // Update database
-                    var updateMessageCommand = new UpdateMessageCommand(message.Id, uploadDocumentResult.Value);
-                    await _mediator.Send(updateMessageCommand);
-
-
-                    // Handle message attachments
-                    await ProcessAttachments(attachments, message.GOCaseNumber, metadata, uploadDocumentResult, stoppingToken);
-
-
-                    // Finalize the parent document
-                    // IMPORTANT: the parent document must not be finalized before the attachments has been set as children
-                    var finalizeParentDocumentCommand = new FinalizeDocumentCommand(uploadDocumentResult.Value, false);
-                    await _mediator.Send(finalizeParentDocumentCommand, stoppingToken);
+                    _logger.LogError("Error getting Deskpro ticket {id}", message.DeskproTicketId);
+                    continue;
                 }
+
+
+                // Get Deskpro message
+                var getDeskproMessageQuery = new GetDeskproMessageByIdQuery(message.TicketId, message.DeskproMessageId);
+                var getDeskproMessageResult = await mediator.SendRequest(getDeskproMessageQuery, stoppingToken);
+
+                if (!getDeskproMessageResult.IsSuccess)
+                {
+                    _logger.LogError("Error requesting Deskpro message #{id}. Message will be marked as 'deleted' in database.", message.Id);
+
+                    var deleteMessageCommand = new DeleteMessageCommand(message.Id);
+                    await mediator.Send(deleteMessageCommand);
+                    continue;
+                }
+
+
+                // Get Deskpro person
+                var personResult = await _deskproHelpers.GetDeskproPerson(mediator, getDeskproMessageResult!.Value.Person.Id);
+
+
+                // Get attachments
+                var attachments = Enumerable.Empty<AttachmentDto>();
+                if (getDeskproMessageResult.Value.AttachmentIds.Any())
+                {
+                    attachments = await _deskproHelpers.GetDeskproMessageAttachments(mediator, deskproTicketResult.Value!.Id, getDeskproMessageResult.Value.Id);
+                }
+
+
+                // Generate PDF document
+                var generateDocumentResult = await GenerateDocument(mediator, message, deskproTicketResult.Value!, getDeskproMessageResult!, personResult.Value, attachments);
+                if (!generateDocumentResult.IsSuccess)
+                {
+                    _logger.LogError("Error generating the message document for Deskpro message {id}", message.DeskproMessageId);
+                    continue;
+                }
+
+
+                DateTime createdAtDanishTime = getDeskproMessageResult!.Value.CreatedAt.UtcToDanish();
+
+                var metadata = new UploadDocumentMetadata
+                {
+                    DocumentDate = createdAtDanishTime,
+                    DocumentCategory = getDeskproMessageResult.Value.IsAgentNote ? DocumentCategory.Intern : MapDocumentCategoryFromPerson(personResult.Value)
+                };
+
+                var fileName = GenerateFileName(message, personResult, createdAtDanishTime);
+
+
+                // Upload parent document
+                var uploadDocumentCommand = new UploadDocumentCommand(generateDocumentResult.Value, message.GOCaseNumber, fileName, metadata, false);
+                var uploadDocumentResult = await mediator.SendRequest(uploadDocumentCommand, stoppingToken);
+
+                if (!uploadDocumentResult.IsSuccess)
+                {
+                    _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", message.DeskproMessageId, message.GOCaseNumber);
+                    continue;
+                }
+
+
+                // Update database
+                var updateMessageCommand = new UpdateMessageCommand(message.Id, uploadDocumentResult.Value);
+                await mediator.Send(updateMessageCommand);
+
+
+                // Handle message attachments
+                await ProcessAttachments(mediator, attachments, message.GOCaseNumber, metadata, uploadDocumentResult, stoppingToken);
+
+
+                // Finalize the parent document
+                // IMPORTANT: the parent document must not be finalized before the attachments has been set as children
+                var finalizeParentDocumentCommand = new FinalizeDocumentCommand(uploadDocumentResult.Value, false);
+                await mediator.Send(finalizeParentDocumentCommand, stoppingToken);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-            }
+
         }
     }
 
-    private async Task ProcessAttachments(IEnumerable<AttachmentDto> attachments, string caseNumber, UploadDocumentMetadata metadata, int? parentDocumentId, CancellationToken cancellationToken = default)
+    private async Task ProcessAttachments(IMediator mediator, IEnumerable<AttachmentDto> attachments, string caseNumber, UploadDocumentMetadata metadata, int? parentDocumentId, CancellationToken cancellationToken = default)
     {
         if (!attachments.Any())
         {
@@ -184,7 +184,7 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
             using (var stream = new MemoryStream())
             {
                 var getAttachmentStreamQuery = new GetDeskproMessageAttachmentQuery(attachment.DownloadUrl);
-                var getAttachmentStreamResult = await _mediator.SendRequest(getAttachmentStreamQuery, cancellationToken);
+                var getAttachmentStreamResult = await mediator.SendRequest(getAttachmentStreamQuery, cancellationToken);
 
                 if (!getAttachmentStreamResult.IsSuccess)
                 {
@@ -197,7 +197,7 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
 
                 // Upload the attachment to GO
                 var uploadDocumentCommand = new UploadDocumentCommand(attachmentBytes, caseNumber, attachment.FileName, metadata, false);
-                var uploadDocumentResult = await _mediator.SendRequest(uploadDocumentCommand, cancellationToken); // TODO: make unique filenames independent from possible file already uploaded with same file name
+                var uploadDocumentResult = await mediator.SendRequest(uploadDocumentCommand, cancellationToken); // TODO: make unique filenames independent from possible file already uploaded with same file name
                 if (!uploadDocumentResult.IsSuccess)
                 {
                     continue;
@@ -205,7 +205,7 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
 
                 // Finalize the attachment
                 var finalizeDocumentCommand = new FinalizeDocumentCommand(uploadDocumentResult.Value, false);
-                await _mediator.Send(finalizeDocumentCommand, cancellationToken);
+                await mediator.Send(finalizeDocumentCommand, cancellationToken);
                 childrenDocumentIds.Add(uploadDocumentResult.Value);
             }
         }
@@ -214,7 +214,7 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
         if (childrenDocumentIds.Count > 0)
         {
             var relateDocumentCommand = new RelateDocumentCommand((int)parentDocumentId!, childrenDocumentIds.ToArray());
-            await _mediator.Send(relateDocumentCommand, cancellationToken);
+            await mediator.Send(relateDocumentCommand, cancellationToken);
         }
     }
 
@@ -256,7 +256,7 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
     }
 
 
-    private async Task<Result<byte[]>> GenerateDocument(Database.Contracts.Dtos.MessageDto databaseMessageDto, TicketDto deskproTicket, MessageDto deskproMessageDto, PersonDto? person, IEnumerable<AttachmentDto> attachmentDtos, CancellationToken cancellationToken = default)
+    private async Task<Result<byte[]>> GenerateDocument(IMediator mediator, Database.Contracts.Dtos.MessageDto databaseMessageDto, TicketDto deskproTicket, MessageDto deskproMessageDto, PersonDto? person, IEnumerable<AttachmentDto> attachmentDtos, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Generating PDF document from Deskpro message #{id}", deskproMessageDto.Id);
 
@@ -264,7 +264,7 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
         var bytes = Encoding.UTF8.GetBytes(html);
 
         var convertCommand = new ConvertHtmlToPdfCommand([bytes]);
-        var convertResult = await _mediator.SendRequest(convertCommand, cancellationToken);
+        var convertResult = await mediator.SendRequest(convertCommand, cancellationToken);
 
         if (!convertResult.IsSuccess)
         {
@@ -273,8 +273,8 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
         }
 
         var jobQuery = new GetJobQuery(convertResult.Value.JobId);
-        var jobResult = await _mediator.SendRequest(jobQuery, cancellationToken);
-        
+        var jobResult = await mediator.SendRequest(jobQuery, cancellationToken);
+
         if (!jobResult.IsSuccess)
         {
             return Result.Error();

@@ -6,7 +6,6 @@ using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
-using AktBob.Database.UseCases.Tickets.UpdateTicket;
 
 namespace AktBob.Database;
 public static class ModuleServices

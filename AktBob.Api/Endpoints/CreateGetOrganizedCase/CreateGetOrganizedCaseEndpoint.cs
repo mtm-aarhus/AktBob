@@ -3,17 +3,17 @@ using AktBob.Shared.Contracts;
 using FastEndpoints;
 
 namespace AktBob.ExternalQueue.Endpoints;
-internal class CreateAktindsigtssagAddQueueMessage(IJobDispatcher jobDispatcher) : Endpoint<CreateAktindsigtssagAddQueueMessageRequest>
+internal class CreateGetOrganizedCaseEndpoint(IJobDispatcher jobDispatcher) : Endpoint<CreateGetOrganizedCaseRequest>
 {
     private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public override void Configure()
     {
-        Post("GetOrganized/Aktindsigtssag");
-        Options(x => x.WithTags("GetOrganized"));
+        Post("/Jobs/CreateGetOrganizedCase");
+        Options(x => x.WithTags("Jobs"));
     }
 
-    public override async Task HandleAsync(CreateAktindsigtssagAddQueueMessageRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CreateGetOrganizedCaseRequest req, CancellationToken ct)
     {
         var command = new CreateGetOrganizedCaseJob(req.DeskproTicketId, req.CaseTitle);
         _jobDispatcher.Dispatch(command);

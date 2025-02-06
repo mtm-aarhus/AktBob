@@ -17,6 +17,9 @@ public static class RegisterJobHandlers
         services.AddTransient<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItemJobHandler>();
         services.AddTransient<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCaseJobHandler>();
         services.AddTransient<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItemJobHandler>();
+        services.AddTransient<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCaseJobHandler>();
+        services.AddTransient<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganizedJobHandler>();
+        services.AddTransient<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCaseJobHandler>();
 
         services.AddHostedService<AddMessagesToGetOrganizedBackgroundJobHandler>();
 

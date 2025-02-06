@@ -7,18 +7,17 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.JobHandlers.Utils;
-internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, IMemoryCache cache)
+internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
 {
-    private readonly IMediator _mediator = mediator;
     private readonly ILogger<DeskproHelper> _logger = logger;
     private readonly IMemoryCache _cache = cache;
 
-    public async Task<Result<TicketDto>> GetDeskproTicket(int ticketId)
+    public async Task<Result<TicketDto>> GetDeskproTicket(IMediator mediator, int ticketId)
     {
         _logger.LogInformation("Getting Deskpro ticket #{id}", ticketId);
 
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticketId);
-        var getDeskproTicketQueryResult = await _mediator.SendRequest(getDeskproTicketQuery);
+        var getDeskproTicketQueryResult = await mediator.SendRequest(getDeskproTicketQuery);
 
         if (!getDeskproTicketQueryResult.IsSuccess)
         {
@@ -30,7 +29,7 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
     }
 
 
-    public async Task<Result<PersonDto>> GetDeskproPerson(int? personId)
+    public async Task<Result<PersonDto>> GetDeskproPerson(IMediator mediator, int? personId)
     {
         if (personId == null)
         {
@@ -50,7 +49,7 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
         _logger.LogInformation("Getting Deskpro person #{id}", personId);
 
         var query = new GetDeskproPersonQuery((int)personId);
-        var result = await _mediator.SendRequest(query);
+        var result = await mediator.SendRequest(query);
 
         if (!result.IsSuccess)
         {
@@ -68,12 +67,12 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
     }
 
 
-    public async Task<IEnumerable<AttachmentDto>> GetDeskproMessageAttachments(int deskproTicketId, int deskproMessageId)
+    public async Task<IEnumerable<AttachmentDto>> GetDeskproMessageAttachments(IMediator mediator, int deskproTicketId, int deskproMessageId)
     {
         _logger.LogInformation("Getting Deskpro message #{id} attachments", deskproMessageId);
 
         var query = new GetDeskproMessageAttachmentsQuery(deskproTicketId, deskproMessageId);
-        var result = await _mediator.SendRequest(query);
+        var result = await mediator.SendRequest(query);
 
         if (!result.IsSuccess)
         {
@@ -82,21 +81,5 @@ internal class DeskproHelper(IMediator mediator, ILogger<DeskproHelper> logger, 
         }
 
         return result.Value;
-    }
-
-
-    public async Task<Result<MessageDto>> GetDeskproMessage(int ticketId, int messageId)
-    {
-        _logger.LogInformation("Getting Deskpro message #{id}", messageId);
-
-        var query = new GetDeskproMessageByIdQuery(ticketId, messageId);
-        var result = await _mediator.SendRequest(query);
-
-        if (!result.IsSuccess)
-        {
-            return Result.Error();
-        }
-
-        return result;
     }
 }

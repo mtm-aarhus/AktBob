@@ -36,6 +36,6 @@ internal class PatchTicket(IMediator mediator) : Endpoint<PatchTicketRequest, Ti
             JournalizedAt: req.JournalizedAt);
 
         var result = await _mediator.SendRequest(command, ct);
-        await this.SendResponse(result, r => r.Value.ToDto());
+        await this.SendResponse(result, r => r.Value);
     }
 }
