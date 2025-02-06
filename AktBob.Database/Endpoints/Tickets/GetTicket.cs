@@ -1,12 +1,15 @@
 ﻿using AktBob.Database.Contracts.Dtos;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Tickets.GetTicketById;
+using AktBob.Database.UseCases.Tickets;
 using FastEndpoints;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
-namespace AktBob.Database.Endpoints.Tickets.Get;
+namespace AktBob.Database.Endpoints.Tickets;
+
+internal record GetTicketRequest(int Id);
+
 internal class GetTicket(IMediator mediator) : Endpoint<GetTicketRequest, TicketDto>
 {
     private readonly IMediator _mediator = mediator;
@@ -38,7 +41,7 @@ internal class GetTicket(IMediator mediator) : Endpoint<GetTicketRequest, Ticket
             return;
         }
 
-        var dto = result.Value.ToDto();
+        var dto = result.Value;
         await SendOkAsync(dto);
     }
 }

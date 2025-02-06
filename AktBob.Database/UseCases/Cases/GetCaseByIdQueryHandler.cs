@@ -6,8 +6,10 @@ using Dapper;
 using MassTransit.Mediator;
 using System.Data;
 
-namespace AktBob.Database.UseCases.Cases.GetCaseById;
-internal class GetCaseByIdQueryHandler(ISqlDataAccess sqlDataAccess) : MediatorRequestHandler<GetCaseByIdQuery, Result<CaseDto>>
+namespace AktBob.Database.UseCases.Cases;
+
+public record GetCaseByIdQuery(int Id) : Request<Result<CaseDto>>;
+public class GetCaseByIdQueryHandler(ISqlDataAccess sqlDataAccess) : MediatorRequestHandler<GetCaseByIdQuery, Result<CaseDto>>
 {
     private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
 

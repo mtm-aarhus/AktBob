@@ -21,12 +21,10 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
     private readonly ILogger<CreateDocumentListQueueItemJobHandler> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-    private readonly string _configurationObjectName = "DocumentListTrigger";
+    private readonly string _configurationObjectName = "CreateDocumentListQueueItemJobHandler";
 
     public async Task Handle(CreateDocumentListQueueItemJob job, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("CreateDocumentListQueueItemJobHandler {id}", job.PodioItemId);
-
         // UiPath variables
         var tenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
         var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:UiPathQueueName:{tenancyName}"));

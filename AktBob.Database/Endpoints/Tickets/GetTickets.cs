@@ -6,7 +6,10 @@ using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
-namespace AktBob.Database.Endpoints.Tickets.Get;
+namespace AktBob.Database.Endpoints.Tickets;
+
+internal record GetTicketsRequest(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId, bool IncludeClosedTickets = true);
+
 internal class GetTickets(IMediator mediator) : Endpoint<GetTicketsRequest, IEnumerable<TicketDto>>
 {
     private readonly IMediator _mediator = mediator;

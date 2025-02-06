@@ -38,15 +38,12 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var delaySeconds = _configuration.GetValue<int?>("JournalizeDeskproMessages:WorkerIntervalSeconds") ?? 10;
-        var journalizeAfterUpload = _configuration.GetValue<bool?>("JournalizeDeskproMessages:JournalizeAfterUpload") ?? true;
-
         using var scope = _serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            await Task.Delay(TimeSpan.FromSeconds(delaySeconds), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
 
             // Get new messages from the database
             var getMessagesQueryResult = await mediator.SendRequest(new GetMessagesQuery(IncludeJournalized: false));

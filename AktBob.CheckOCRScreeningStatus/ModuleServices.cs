@@ -13,9 +13,6 @@ public static class ModuleServices
     {
         // Guard against missing Podio configuration
         var podioAppId = Guard.Against.Null(configuration.GetValue<int>("Podio:AppId"));
-        Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOCRScreeningStatus:QueueName"));
-        Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureStorage"));
-
         var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => long.Parse(x.Key), x => x.Get<PodioField>())));
         var podioFieldFilArkivCaseId = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivCaseId"));
         Guard.Against.Null(podioFieldFilArkivCaseId.Value);

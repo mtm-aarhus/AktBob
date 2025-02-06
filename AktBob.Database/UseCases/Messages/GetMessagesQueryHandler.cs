@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 
 namespace AktBob.Database.UseCases.Messages;
-internal class GetMessagesQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetMessagesQuery, Result<IEnumerable<MessageDto>>>
+public class GetMessagesQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetMessagesQuery, Result<IEnumerable<MessageDto>>>
 {
     private readonly IConfiguration _configuration = configuration;
 

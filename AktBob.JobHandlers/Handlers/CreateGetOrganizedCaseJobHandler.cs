@@ -33,14 +33,14 @@ internal class CreateGetOrganizedCaseJobHandler : IJobHandler<CreateGetOrganized
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-            _logger.LogInformation("Creating GetOrganized Case (requeust from Deskpro ID: {deskproId}", job.DeskproId);
+            _logger.LogInformation("Creating GetOrganized case (Deskpro ID {deskproId}", job.DeskproId);
 
             var caseOwner = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:DefaultCaseOwner"));
             var facet = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:Facet"));
             var caseTypePrefix = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:CaseTypePrefix"));
             var caseStatus = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:CaseStatus"));
             var caseAccess = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:CaseAccess"));
-            var deskproWebhookId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("Deskpro:Webhooks:OpdaterTicketMedGoAktindsigtssag"));
+            var deskproWebhookId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("Deskpro:Webhooks:UpdateTicketSetGoCaseId"));
 
 
             // 1. Create GetOrganized case

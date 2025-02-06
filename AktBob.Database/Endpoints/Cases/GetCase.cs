@@ -1,12 +1,15 @@
 ﻿using AktBob.Database.Contracts.Dtos;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Cases.GetCaseById;
+using AktBob.Database.UseCases.Cases;
 using FastEndpoints;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
-namespace AktBob.Database.Endpoints.Cases.Get;
+namespace AktBob.Database.Endpoints.Cases;
+
+internal record GetCaseRequest(int Id);
+
 internal class GetCase(IMediator mediator) : Endpoint<GetCaseRequest, CaseDto>
 {
     private readonly IMediator _mediator = mediator;

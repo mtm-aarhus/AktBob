@@ -1,4 +1,6 @@
-﻿using AktBob.Database.Entities;
+﻿using AktBob.Database.Contracts.Dtos;
+using AktBob.Database.Entities;
+using AktBob.Database.Extensions;
 using Ardalis.GuardClauses;
 using Ardalis.Result;
 using Dapper;
@@ -6,12 +8,14 @@ using MassTransit.Mediator;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
-namespace AktBob.Database.UseCases.Messages.GetMessageById;
-internal class GetMessageByIdQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetMessageByIdQuery, Result<Message>>
+namespace AktBob.Database.UseCases.Messages;
+
+public record GetMessageByIdQuery(int Id) : Request<Result<MessageDto>>;
+public class GetMessageByIdQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetMessageByIdQuery, Result<MessageDto>>
 {
     private readonly IConfiguration _configuration = configuration;
 
-    protected override async Task<Result<Message>> Handle(GetMessageByIdQuery request, CancellationToken cancellationToken)
+    protected override async Task<Result<MessageDto>> Handle(GetMessageByIdQuery request, CancellationToken cancellationToken)
     {
         var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("Database"));
 
@@ -32,7 +36,7 @@ internal class GetMessageByIdQueryHandler(IConfiguration configuration) : Mediat
                 return Result.Error();
             }
 
-            return Result.Success(messages.First());
+            return Result.Success(messages.First().ToDto());
         }
     }
 }

@@ -6,7 +6,18 @@ using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
-namespace AktBob.Database.Endpoints.Cases.Patch;
+namespace AktBob.Database.Endpoints.Cases;
+
+internal record PatchCaseRequest
+{
+    public int Id { get; set; }
+    public long? PodioItemId { get; set; }
+    public string? CaseNumber { get; set; }
+    public Guid? FilArkivCaseId { get; set; }
+    public string? SharepointFolderName { get; set; }
+
+}
+
 internal class PatchCase(IMediator mediator) : Endpoint<PatchCaseRequest, CaseDto>
 {
     private readonly IMediator _mediator = mediator;

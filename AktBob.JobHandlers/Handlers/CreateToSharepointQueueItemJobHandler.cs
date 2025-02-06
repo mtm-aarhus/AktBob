@@ -23,7 +23,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
     public async Task Handle(CreateToSharepointQueueItemJob job, CancellationToken cancellationToken = default)
     {
         var tenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
-        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"ToSharepointTrigger:UiPathQueueName:{tenancyName}"));
+        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"CreateToSharepointQueueItemJobHandler:UiPathQueueName:{tenancyName}"));
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
         var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioField>())));
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "CaseNumber"));

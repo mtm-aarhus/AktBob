@@ -5,7 +5,10 @@ using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
-namespace AktBob.Database.Endpoints.Messages.Patch;
+namespace AktBob.Database.Endpoints.Messages;
+
+internal record PatchMessageRequest(int Id, int? GoDocumentId);
+
 internal class PatchMessage(IMediator mediator) : Endpoint<PatchMessageRequest, MessageDto>
 {
     private readonly IMediator _mediator = mediator;

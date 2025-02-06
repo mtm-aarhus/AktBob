@@ -1,13 +1,33 @@
 ﻿using AktBob.Database.Contracts.Dtos;
-using AktBob.Database.Endpoints.Cases.Get;
 using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Cases.AddCase;
 using FastEndpoints;
+using FluentValidation;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
-namespace AktBob.Database.Endpoints.Cases.Post;
+namespace AktBob.Database.Endpoints.Cases;
+
+internal record PostCaseRequest
+{
+    public int TicketId { get; set; }
+    public long PodioItemId { get; set; }
+    public string CaseNumber { get; set; } = string.Empty;
+    public Guid? FilArkivCaseId { get; set; }
+}
+
+internal class PostCaseRequestValidator : Validator<PostCaseRequest>
+{
+    public PostCaseRequestValidator()
+    {
+        RuleFor(x => x.TicketId).NotEmpty();
+        RuleFor(x => x.PodioItemId).NotEmpty();
+        RuleFor(x => x.CaseNumber).NotEmpty();
+    }
+}
+
+
 internal class PostCase(IMediator mediator) : Endpoint<PostCaseRequest, CaseDto>
 {
     private readonly IMediator _mediator = mediator;

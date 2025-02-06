@@ -1,6 +1,5 @@
 ﻿using AktBob.Database.Contracts.Dtos;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Tickets.GetTicketById;
 using AktBob.Database.UseCases.Tickets.UpdateTicket;
 using Ardalis.Result;
 using Dapper;
@@ -63,6 +62,6 @@ internal class UpdateTicketCommandHandler(ISqlDataAccess sqlDataAccess, IMediato
             return Result.CriticalError();
         }
 
-        return Result.Success(ticket.ToDto());
+        return Result.Success(ticket);
     }
 }

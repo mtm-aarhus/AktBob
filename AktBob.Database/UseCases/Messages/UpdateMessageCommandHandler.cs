@@ -1,8 +1,5 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Contracts.Dtos;
-using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Messages.ClearQueuedForJournalization;
-using AktBob.Database.UseCases.Messages.GetMessageById;
 using Ardalis.GuardClauses;
 using Ardalis.Result;
 using Dapper;
@@ -12,7 +9,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Database.UseCases.Messages;
-internal class UpdateMessageCommandHandler(IConfiguration configuration, IMediator mediator) : MediatorRequestHandler<UpdateMessageCommand, Result<MessageDto>>
+public class UpdateMessageCommandHandler(IConfiguration configuration, IMediator mediator) : MediatorRequestHandler<UpdateMessageCommand, Result<MessageDto>>
 {
     private readonly IConfiguration _configuration = configuration;
     private readonly IMediator _mediator = mediator;
@@ -64,6 +61,6 @@ internal class UpdateMessageCommandHandler(IConfiguration configuration, IMediat
             return Result.NotFound();
         }
 
-        return Result.Success(getMessageQueryResult.Value.ToDto());
+        return Result.Success(getMessageQueryResult.Value);
     }
 }

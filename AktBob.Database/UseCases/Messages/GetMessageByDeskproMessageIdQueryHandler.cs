@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 
 namespace AktBob.Database.UseCases.Messages;
-internal class GetMessageByDeskproMessageIdQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
+public class GetMessageByDeskproMessageIdQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
 {
     private readonly IConfiguration _configuration = configuration;
 

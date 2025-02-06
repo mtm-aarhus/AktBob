@@ -6,6 +6,9 @@ using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Messages;
+
+internal record GetMessagesRequest(bool? IncludeJournalized, int? DeskproMessageId);
+
 internal class GetMessages(IMediator mediator) : Endpoint<GetMessagesRequest, IEnumerable<MessageDto>>
 {
     private readonly IMediator _mediator = mediator;

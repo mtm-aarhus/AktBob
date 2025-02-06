@@ -1,14 +1,24 @@
 ﻿using AktBob.Database.Contracts.Dtos;
-using AktBob.Database.Endpoints.Tickets;
-using AktBob.Database.Endpoints.Tickets.Get;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Tickets.AddTicket;
+using AktBob.Database.UseCases.Tickets;
 using FastEndpoints;
+using FluentValidation;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
-namespace AktBob.Database.Entities.Tickets;
+namespace AktBob.Database.Endpoints.Tickets;
+
+internal record PostTicketRequest(int DeskproId);
+
+internal class PostTicketRequestValidator : Validator<PostTicketRequest>
+{
+    public PostTicketRequestValidator()
+    {
+        RuleFor(x => x.DeskproId).NotNull();
+    }
+}
+
 internal class PostTicket(IMediator mediator) : Endpoint<PostTicketRequest, TicketDto>
 {
     private readonly IMediator _mediator = mediator;
@@ -35,10 +45,10 @@ internal class PostTicket(IMediator mediator) : Endpoint<PostTicketRequest, Tick
 
         if (result.IsSuccess)
         {
-            await SendCreatedAtAsync<GetTicket>(routeValues: null, responseBody: result.Value.ToDto(), cancellation: ct);
+            await SendCreatedAtAsync<GetTicket>(routeValues: null, responseBody: result.Value, cancellation: ct);
             return;
         }
 
-        await this.SendResponse(result, r => r.Value.ToDto());
+        await this.SendResponse(result, r => r.Value);
     }
 }

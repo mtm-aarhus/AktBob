@@ -1,10 +1,7 @@
 using AktBob.CheckOCRScreeningStatus;
 using Serilog;
-using AktBob.Email;
-using AktBob.Queue;
 using AktBob.UiPath;
 using AktBob.Deskpro;
-using AktBob.PodioHookProcessor;
 using AktBob.Podio;
 using AktBob.OpenOrchestrator;
 using AktBob.CloudConvert;
@@ -26,10 +23,7 @@ var builder = Host.CreateDefaultBuilder(args)
         // Modules
         var mediatorHandlers = new List<Type>();
         services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatorHandlers);
-        //services.AddEmailModuleServices(hostContext.Configuration, mediatorHandlers);
-        services.AddQueueModule(hostContext.Configuration, mediatorHandlers);
         services.AddUiPathModule(hostContext.Configuration, mediatorHandlers);
-        services.AddPodioHookProcessorModule(hostContext.Configuration);
         services.AddDeskproModule(hostContext.Configuration, mediatorHandlers);
         services.AddPodioModule(hostContext.Configuration, mediatorHandlers);
         services.AddOpenOrchestratorModule(hostContext.Configuration, mediatorHandlers);

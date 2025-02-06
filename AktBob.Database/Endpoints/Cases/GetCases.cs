@@ -6,7 +6,10 @@ using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
-namespace AktBob.Database.Endpoints.Cases.Get;
+namespace AktBob.Database.Endpoints.Cases;
+
+internal record GetCasesRequest(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId);
+
 internal class GetCases(IMediator mediator) : Endpoint<GetCasesRequest, IEnumerable<CaseDto>>
 {
     private readonly IMediator _mediator = mediator;

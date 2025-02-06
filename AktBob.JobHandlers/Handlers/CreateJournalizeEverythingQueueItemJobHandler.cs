@@ -17,7 +17,7 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<CreateJournalizeEverythingQueueItemJobHandler> _logger = logger;
-    private readonly string _configurationObjectName = "JournalizeEverythingTrigger";
+    private readonly string _configurationObjectName = "CreateJournalizeEverythingQueueItemJobHandler";
 
     public async Task Handle(CreateJournalizeEverythingQueueItemJob job, CancellationToken cancellationToken = default)
     {

@@ -1,5 +1,4 @@
-﻿using AktBob.Database.UseCases.Messages.GetMessageById;
-using Ardalis.GuardClauses;
+﻿using Ardalis.GuardClauses;
 using Ardalis.Result;
 using Dapper;
 using MassTransit;
@@ -8,8 +7,10 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.Database.UseCases.Messages.ClearQueuedForJournalization;
-internal class ClearQueuedForJournalizationCommandHandler : MediatorRequestHandler<ClearQueuedForJournalizationCommand, Result>
+namespace AktBob.Database.UseCases.Messages;
+
+public record ClearQueuedForJournalizationCommand(int Id) : Request<Result>;
+public class ClearQueuedForJournalizationCommandHandler : MediatorRequestHandler<ClearQueuedForJournalizationCommand, Result>
 {
     private readonly IConfiguration _configuration;
     private readonly IMediator _mediator;

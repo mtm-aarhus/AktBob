@@ -2,7 +2,9 @@
 using System.Collections.Concurrent;
 
 namespace AktBob.Database.UseCases.Messages.PostMessage;
-internal class PostMessageCommandHandler(ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> dictionary) : MediatorRequestHandler<PostMessageCommand>
+
+public record PostMessageCommand(int DeskproTicketId);
+public class PostMessageCommandHandler(ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> dictionary) : MediatorRequestHandler<PostMessageCommand>
 {
     private readonly ConcurrentDictionary<Guid, DeskproTicketWithNewMessage> _dictionary = dictionary;
 

@@ -1,7 +1,6 @@
 ﻿using AktBob.Database.Contracts.Dtos;
 using AktBob.Database.UseCases.Cases.AddCase;
-using AktBob.Database.UseCases.Cases.GetCaseById;
-using AktBob.Database.UseCases.Tickets.GetTicketById;
+using AktBob.Database.UseCases.Tickets;
 using Ardalis.Result;
 using Dapper;
 using MassTransit;

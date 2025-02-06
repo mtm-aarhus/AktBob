@@ -3,7 +3,12 @@ using FastEndpoints;
 using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
-namespace AktBob.Database.Endpoints.Messages.Post;
+namespace AktBob.Database.Endpoints.Messages;
+
+internal record PostMessageRequest(int DeskproTicketId);
+
+internal record PostMessageResponse(int Id);
+
 internal class PostMessage(IMediator mediator) : Endpoint<PostMessageRequest>
 {
     private readonly IMediator _mediator = mediator;
