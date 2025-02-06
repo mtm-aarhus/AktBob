@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.InternalWorker.Host", "AktBob.InternalWorker.Host\AktBob.InternalWorker.Host.csproj", "{7F27F275-F6CF-45E8-B339-BD5E67752CFD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.CheckOCRScreeningStatus", "AktBob.CheckOCRScreeningStatus\AktBob.CheckOCRScreeningStatus.csproj", "{5A76B308-131B-496C-AECA-8A83C5C6C660}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Check OCR Screening Status Module", "Check OCR Screening Status Module", "{A480C33B-82F4-4D2D-8113-A1D67E0FE0EF}"
@@ -81,16 +79,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.GetOrganized", "AktB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.GetOrganized.Contracts", "AktBob.GetOrganized.Contracts\AktBob.GetOrganized.Contracts.csproj", "{1E2B75E2-EFF5-4202-9461-525C081DC3C9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Worker", "AktBob.Worker\AktBob.Worker.csproj", "{AB717426-EE39-4C39-A2EC-4FF4C49FE647}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7F27F275-F6CF-45E8-B339-BD5E67752CFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F27F275-F6CF-45E8-B339-BD5E67752CFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F27F275-F6CF-45E8-B339-BD5E67752CFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F27F275-F6CF-45E8-B339-BD5E67752CFD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5A76B308-131B-496C-AECA-8A83C5C6C660}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5A76B308-131B-496C-AECA-8A83C5C6C660}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A76B308-131B-496C-AECA-8A83C5C6C660}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -189,6 +185,10 @@ Global
 		{1E2B75E2-EFF5-4202-9461-525C081DC3C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E2B75E2-EFF5-4202-9461-525C081DC3C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E2B75E2-EFF5-4202-9461-525C081DC3C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB717426-EE39-4C39-A2EC-4FF4C49FE647}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB717426-EE39-4C39-A2EC-4FF4C49FE647}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB717426-EE39-4C39-A2EC-4FF4C49FE647}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB717426-EE39-4C39-A2EC-4FF4C49FE647}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
