@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using AktBob.JobHandlers.Handlers;
 using AktBob.JobHandlers.Utils;
 using AktBob.JournalizeDocuments.BackgroundServices;
+using AktBob.JobHandlers.Handlers.AddOrUpdateDeskproTicketToGetOrganized;
 
 namespace AktBob.JobHandlers;
 public static class RegisterJobHandlers
@@ -23,6 +24,7 @@ public static class RegisterJobHandlers
         services.AddHostedService<AddMessagesToGetOrganizedBackgroundJobHandler>();
 
         services.AddTransient<DeskproHelper>();
+        services.AddSingleton<PendingsTickets>();
 
         return services;
     }

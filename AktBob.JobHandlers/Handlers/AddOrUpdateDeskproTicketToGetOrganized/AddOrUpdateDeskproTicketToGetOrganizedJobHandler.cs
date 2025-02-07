@@ -14,21 +14,31 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
-namespace AktBob.JobHandlers.Handlers;
+namespace AktBob.JobHandlers.Handlers.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
     ILogger<AddOrUpdateDeskproTicketToGetOrganizedJobHandler> logger,
     DeskproHelper deskproHelper,
-    IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
+    IServiceScopeFactory serviceScopeFactory,
+    PendingsTickets pendingsTickets) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
 {
     private readonly ILogger<AddOrUpdateDeskproTicketToGetOrganizedJobHandler> _logger = logger;
     private readonly DeskproHelper _deskproHelper = deskproHelper;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+    private readonly PendingsTickets _pendingsTickets = pendingsTickets;
 
     public async Task Handle(AddOrUpdateDeskproTicketToGetOrganizedJob job, CancellationToken cancellationToken = default)
     {
         var scope = _serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+ 
+        var currentPendingTicket = new PendingTicket(job.TicketId, job.SubmittedAt);
+        _pendingsTickets.AddPendingTicket(currentPendingTicket);
 
+        // Check if this submission is the most recent for the specified ticket
+        if (!IsMostRecentSubmission(currentPendingTicket))
+        {
+            return;
+        }
 
         List<byte[]> content = new();
 
@@ -151,6 +161,11 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         }
 
 
+        // Check if this submission is the most recent for the specified ticket
+        if (!IsMostRecentSubmission(currentPendingTicket))
+        {
+            return;
+        }
 
 
         // Upload to GO
@@ -168,8 +183,21 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         if (!uploadDocumentResult.IsSuccess)
         {
             _logger.LogError("Error uploading full ticket document to GetOrganized: Deskpro ticket {ticketId}, GO case '{goCaseNumber}'", job.TicketId, job.GOCaseNumber);
-            return;
         }
+        
+        _pendingsTickets.RemovePendingTicket(currentPendingTicket);
+    }
+
+    private bool IsMostRecentSubmission(PendingTicket pendingTicket)
+    {
+        if (!_pendingsTickets.IsMostRecent(pendingTicket))
+        {
+            _logger.LogInformation("Not the most current submission for updating the Deskpro PDF document. (Deskpro ticket {id}, submittedAt {submittedAt}", pendingTicket.TicketId, pendingTicket.SubmittedAt);
+            _pendingsTickets.RemovePendingTicket(pendingTicket);
+            return false;
+        }
+
+        return true;
     }
 
     private IEnumerable<string> GenerateCustomFieldValues(int[] customFieldIds, IEnumerable<CustomFieldSpecificationDto> customFieldSpecificationDtos, TicketDto ticketDto)
