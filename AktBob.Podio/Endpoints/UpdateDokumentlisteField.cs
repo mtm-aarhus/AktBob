@@ -12,7 +12,7 @@ internal class UpdateDokumentlisteField(IConfiguration configuration, IMediator 
 
     public override void Configure()
     {
-        Put("Podio/{ItemId}/DokumentlisteField");
+        Put("/Podio/{ItemId}/Fields/Dokumentliste", "/Podio/{ItemId}/DokumentlisteField");
         Options(x => x.WithTags("Podio"));
     }
 

@@ -12,7 +12,7 @@ internal class UpdateSharepointmappeField(IMediator mediator, IConfiguration con
 
     public override void Configure()
     {
-        Put("Podio/{ItemId}/SharepointmappeField");
+        Put("/Podio/{ItemId}/Fields/Sharepointmappe", "/Podio/{ItemId}/SharepointmappeField");
         Options(x => x.WithTags("Podio"));
     }
 
