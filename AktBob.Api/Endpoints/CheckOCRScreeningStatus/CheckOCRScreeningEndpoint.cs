@@ -10,7 +10,7 @@ internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher) : Endpoin
 
     public override void Configure()
     {
-        Post("/Jobs/CheckOCRScreeningStatus");
+        Post("/Jobs/CheckOCRScreeningStatus", "/CheckOCRScreeningStatus/Case");
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {

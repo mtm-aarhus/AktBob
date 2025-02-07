@@ -10,7 +10,7 @@ internal class CreateDocumentListQueueItemEndpoint(IJobDispatcher jobDispatcher)
 
     public override void Configure()
     {
-        Post("/Jobs/CreateDocumentListQueueItem");
+        Post("/Jobs/CreateDocumentListQueueItem", "/Queue/f1dd04ad");
         AllowFormData(urlEncoded: true);
         Options(x => x.WithTags("Jobs"));
         Summary(s =>

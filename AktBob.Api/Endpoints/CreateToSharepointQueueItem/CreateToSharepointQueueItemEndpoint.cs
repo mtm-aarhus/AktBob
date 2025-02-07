@@ -12,7 +12,7 @@ internal class CreateToSharepointQueueItemEndpoint(IJobDispatcher jobDispatcher)
     public override void Configure()
     {
 
-        Post("/Jobs/CreateToSharepointQueueItem");
+        Post("/Jobs/CreateToSharepointQueueItem", "/Queue/013bb1ee");
         AllowFormData(urlEncoded: true);
         Options(x => x.WithTags("Jobs"));
         Summary(s =>

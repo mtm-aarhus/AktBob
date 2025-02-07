@@ -10,7 +10,7 @@ internal class CreateJournalizeEverythingQueueItemEndpoint(IJobDispatcher jobDis
 
     public override void Configure()
     {
-        Post("/Jobs/CreateJournalizeEverythingQueueItem");
+        Post("/Jobs/CreateJournalizeEverythingQueueItem", "/Queue/babf56f3");
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
