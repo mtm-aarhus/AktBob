@@ -10,7 +10,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedEndpoint(IJobDispatcher job
 
     public override void Configure()
     {
-        Post("/Jobs/AddOrUpdateDeskproTicketToGetOrganized", "/Queue/6inqa7a8");
+        Post("/Jobs/AddOrUpdateDeskproTicketToGetOrganized");
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
