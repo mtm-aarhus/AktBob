@@ -9,7 +9,7 @@ internal class CreateGetOrganizedCaseEndpoint(IJobDispatcher jobDispatcher) : En
 
     public override void Configure()
     {
-        Post("/Jobs/CreateGetOrganizedCase", "/GetOrganized/Aktindsigtssag");
+        Post("/Jobs/CreateGetOrganizedCase");
         Options(x => x.WithTags("Jobs"));
     }
 
