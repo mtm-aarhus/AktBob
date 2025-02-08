@@ -2,13 +2,11 @@
 using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.JobHandlers.Utils;
-using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared;
 using AktBob.Shared.Contracts;
-using AktBob.UiPath.Contracts;
 using Ardalis.GuardClauses;
+using Hangfire;
 using MassTransit;
 using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +21,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly string _configurationObjectName = "CreateDocumentListQueueItemJobHandler";
 
-    public async Task Handle(CreateDocumentListQueueItemJob job, CancellationToken cancellationToken = default)
+    public Task Handle(CreateDocumentListQueueItemJob job, CancellationToken cancellationToken = default)
     {
         // UiPath variables
         var tenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
@@ -35,78 +33,66 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
 
         // Podio variables
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
-        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioField>())));
+        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<(int AppId, string Label)>())));
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "CaseNumber"));
 
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
-        using (var scope = _serviceScopeFactory.CreateScope())
+        using var scope = _serviceScopeFactory.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+        // Get metadata from Podio
+        if (!GetCaseNumberFromPodioItem(mediator, podioAppId, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken, out string caseNumber))
         {
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-            // Get metadata from Podio
-            if (!GetCaseNumberFromPodioItem(mediator, podioAppId, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken, out string caseNumber))
-            {
-                return;
-            }
-
-            // Find ticket in database from PodioItemId
-            if (!GetTicketFromApiDatabaseByPodioItemId(mediator, job.PodioItemId, cancellationToken, out Database.Contracts.Dtos.TicketDto? databaseTicketDto))
-            {
-                return;
-            }
-
-            // Get ticket from Deskpro
-            if (!GetDeskproTicket(mediator, databaseTicketDto!.DeskproId, cancellationToken, out TicketDto? deskproTicketDto))
-            {
-                return;
-            }
-
-            // Get Deskpro ticket agent, if any (returns (string.Empty, string.Empty) if there is no agent)
-            GetDeskproTicketAgent(mediator, deskproTicketDto!.Agent, cancellationToken, out (string Name, string Email) agent);
-
-            if (useOpenOrchestrator)
-            {
-                // Create OpenOrchestrator queue item
-                await CreateOpenOrchestratorQueueItem(mediator, openOrchestratorQueueName, caseNumber, agent, job.PodioItemId, deskproTicketDto, cancellationToken);
-            }
-            else
-            {
-                await PostUiPathQueueElement(uiPathQueueName, mediator, job.PodioItemId, caseNumber, deskproTicketDto, agent, cancellationToken);
-            }
+            return Task.CompletedTask;
         }
-    }
 
-    private async Task CreateOpenOrchestratorQueueItem(IMediator mediator, string queueName, string caseNumber, (string Name, string Email) agent, long podioItemId, TicketDto deskproTicketDto, CancellationToken stoppingToken)
-    {
-        var data = new
+        // Find ticket in database from PodioItemId
+        if (!GetTicketFromApiDatabaseByPodioItemId(mediator, job.PodioItemId, cancellationToken, out Database.Contracts.Dtos.TicketDto? databaseTicketDto))
         {
-            SagsNummer = caseNumber,
-            agent.Email,
-            Navn = agent.Name,
-            PodioID = podioItemId,
-            DeskproID = deskproTicketDto.Id,
-            Titel = deskproTicketDto.Subject
-        };
+            return Task.CompletedTask;
+        }
 
-        var command = new CreateQueueItemCommand(queueName, data, podioItemId.ToString());
-        await mediator.Send(command, stoppingToken);
-    }
-
-    private static async Task PostUiPathQueueElement(string uiPathQueueName, IMediator mediator, long podioItemId, string caseNumber, TicketDto deskproTicketDto, (string Name, string Email) agent, CancellationToken stoppingToken)
-    {
-        var uiPathQueueItemContent = new
+        // Get ticket from Deskpro
+        if (!GetDeskproTicket(mediator, databaseTicketDto!.DeskproId, cancellationToken, out TicketDto? deskproTicketDto))
         {
-            SagsNummer = caseNumber,
-            agent.Email,
-            Navn = agent.Name,
-            PodioID = podioItemId,
-            DeskproID = deskproTicketDto.Id,
-            Titel = deskproTicketDto.Subject
-        };
+            return Task.CompletedTask;
+        }
 
-        var addUiPathQueueItemCommand = new AddQueueItemCommand(uiPathQueueName, podioItemId.ToString(), uiPathQueueItemContent);
-        await mediator.Send(addUiPathQueueItemCommand, stoppingToken);
+        // Get Deskpro ticket agent, if any (returns (string.Empty, string.Empty) if there is no agent)
+        GetDeskproTicketAgent(mediator, deskproTicketDto!.Agent, cancellationToken, out (string Name, string Email) agent);
+
+        if (useOpenOrchestrator)
+        {
+            // Create OpenOrchestrator queue item
+            var payload = new
+            {
+                SagsNummer = caseNumber,
+                agent.Email,
+                Navn = agent.Name,
+                PodioID = job.PodioItemId,
+                DeskproID = deskproTicketDto.Id,
+                Titel = deskproTicketDto.Subject
+            };
+
+            BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {caseNumber}", payload, CancellationToken.None));
+        }
+        else
+        {
+            var payload = new
+            {
+                SagsNummer = caseNumber,
+                agent.Email,
+                Navn = agent.Name,
+                PodioID = job.PodioItemId,
+                DeskproID = deskproTicketDto.Id,
+                Titel = deskproTicketDto.Subject
+            };
+
+            BackgroundJob.Enqueue<CreateUiPathQueueItem>(x => x.Run(uiPathQueueName, $"PodioItemID {job.PodioItemId}: {caseNumber}", payload, CancellationToken.None));
+        }
+
+        return Task.CompletedTask;
     }
 
     private bool GetCaseNumberFromPodioItem(IMediator mediator, int podioAppId, long podioItemId, int podioFieldId, CancellationToken cancellationToken, out string caseNumber)

@@ -11,6 +11,6 @@ public class AddQueueItemCommandHandler(IUiPathOrchestratorApi uiPathOrchestrato
         await _uiPathOrchestratorApi.AddQueueItem(
             request.QueueName,
             request.Reference,
-            request.QueueItem);
+            request.Payload);
     }
 }

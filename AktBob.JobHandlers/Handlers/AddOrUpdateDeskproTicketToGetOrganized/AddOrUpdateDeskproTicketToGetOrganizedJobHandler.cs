@@ -111,7 +111,8 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
         if (getMessagesResult.IsSuccess)
         {
-            foreach (var message in getMessagesResult.Value)
+            var messages = getMessagesResult.Value.OrderByDescending(x => x.CreatedAt);
+            foreach (var message in messages)
             {
                 var person = await _deskproHelper.GetDeskproPerson(mediator, message.Person?.Id);
                 message.Person = person.Value;
@@ -129,14 +130,14 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
                 if (!getMessageFromApiDatabaseResult.IsSuccess)
                 {
-                    _logger.LogWarning("No message found in API database for Deskpro message ID {id}", message.Id);
+                    _logger.LogWarning("No message found in database for Deskpro message ID {id}", message.Id);
                 }
                 else
                 {
                     messageNumber = getMessageFromApiDatabaseResult.Value.MessageNumber ?? 0;
                 }
 
-                var messageHtml = HtmlHelper.GenerateMessageHtml(message, attachments, job.GOCaseNumber, ticket.Subject, messageNumber); // TODO: fix message number
+                var messageHtml = HtmlHelper.GenerateMessageHtml(message, attachments, job.GOCaseNumber, ticket.Subject, messageNumber);
                 content.Add(Encoding.UTF8.GetBytes(messageHtml));
             }
         }
@@ -192,7 +193,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
     {
         if (!_pendingsTickets.IsMostRecent(pendingTicket))
         {
-            _logger.LogInformation("Not the most current submission for updating the Deskpro PDF document. (Deskpro ticket {id}, submittedAt {submittedAt}", pendingTicket.TicketId, pendingTicket.SubmittedAt);
+            _logger.LogInformation("Not the most current submission for updating the Deskpro PDF document. (Deskpro ticket {id}, submittedAt {submittedAt})", pendingTicket.TicketId, pendingTicket.SubmittedAt);
             _pendingsTickets.RemovePendingTicket(pendingTicket);
             return false;
         }

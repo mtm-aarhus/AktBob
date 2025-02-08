@@ -5,26 +5,25 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AktBob.JobHandlers.Handlers;
 using AktBob.JobHandlers.Utils;
-using AktBob.JournalizeDocuments.BackgroundServices;
-using AktBob.JobHandlers.Handlers.AddOrUpdateDeskproTicketToGetOrganized;
+using AktBob.JobHandlers.Handlers.AddMessagesToGetOrganized;
 
 namespace AktBob.JobHandlers;
 public static class RegisterJobHandlers
 {
     public static IServiceCollection AddJobHandlers(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganizedJobHandler>();
+        services.AddTransient<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, Handlers.AddOrUpdateDeskproTicketToGetOrganized.AddOrUpdateDeskproTicketToGetOrganizedJobHandler>();
         services.AddTransient<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItemJobHandler>();
-        services.AddTransient<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCaseJobHandler>();
+        services.AddTransient<IJobHandler<CreateGetOrganizedCaseJob>, Handlers.CreateGetOrganizedCase.CreateGetOrganizedCaseJobHandler>();
         services.AddTransient<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateGoToFilArkivQueueItemJobHandler>();
         services.AddTransient<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItemJobHandler>();
         services.AddTransient<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItemJobHandler>();
         services.AddTransient<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCaseJobHandler>();
 
-        services.AddHostedService<AddMessagesToGetOrganizedBackgroundJobHandler>();
+        services.AddHostedService<AddMessagesToGetOrganizedBackgroundJob>();
 
         services.AddTransient<DeskproHelper>();
-        services.AddSingleton<PendingsTickets>();
+        services.AddSingleton<Handlers.AddOrUpdateDeskproTicketToGetOrganized.PendingsTickets>();
 
         return services;
     }

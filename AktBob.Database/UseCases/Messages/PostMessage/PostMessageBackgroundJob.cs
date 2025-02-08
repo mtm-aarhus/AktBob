@@ -30,13 +30,11 @@ internal class PostMessageBackgroundJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var registeredAtIntervalSeconds = _configuration.GetValue<int?>("WaitSecondsBeforeProcessingNewDeskproMessage") ?? 120;
-
         while (!stoppingToken.IsCancellationRequested)
         {
             // Get all registered tickets with new messages that have been waiting for at little while....
             // We need to wait since the newest message is not immediatly avaible from the Deskpro API
-            var deskproTickets = _deskproTicketsWithNewMessage.Where(x => x.Value.RegisteredAt < DateTime.UtcNow.AddSeconds(-registeredAtIntervalSeconds));
+            var deskproTickets = _deskproTicketsWithNewMessage.Where(x => x.Value.RegisteredAt < DateTime.UtcNow.AddSeconds(-120));
             var deskproTicketIds = deskproTickets.Select(x => x.Value.DeskproTicketId).ToList();
             var keys = deskproTickets.Select(x => x.Key).ToArray();
 

@@ -9,6 +9,9 @@ public class RelateDocumentCommandHandler(IGetOrganizedClient getOrganizedClient
 
     protected override async Task Handle(RelateDocumentCommand request, CancellationToken cancellationToken)
     {
-        await _getOrganizedClient.RelateDocuments(request.ParentDocumentId, request.ChildDocumentIds, request.RelationType, cancellationToken);
+        if (request.ChildDocumentIds.Any())
+        {
+            await _getOrganizedClient.RelateDocuments(request.ParentDocumentId, request.ChildDocumentIds, request.RelationType, cancellationToken);
+        }
     }
 }

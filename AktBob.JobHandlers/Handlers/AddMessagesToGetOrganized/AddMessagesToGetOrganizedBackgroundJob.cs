@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using AAK.GetOrganized.UploadDocument;
+﻿using AAK.GetOrganized.UploadDocument;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using AAK.GetOrganized;
@@ -15,26 +14,17 @@ using AktBob.GetOrganized.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
 using Microsoft.Extensions.DependencyInjection;
+using Hangfire;
 
-namespace AktBob.JournalizeDocuments.BackgroundServices;
-internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
+namespace AktBob.JobHandlers.Handlers.AddMessagesToGetOrganized;
+internal class AddMessagesToGetOrganizedBackgroundJob(
+    ILogger<AddMessagesToGetOrganizedBackgroundJob> logger,
+    IServiceScopeFactory serviceScopeFactory,
+    DeskproHelper deskproHelpers) : BackgroundService
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<AddMessagesToGetOrganizedBackgroundJobHandler> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly DeskproHelper _deskproHelpers;
-
-    public AddMessagesToGetOrganizedBackgroundJobHandler(
-        IConfiguration configuration,
-        ILogger<AddMessagesToGetOrganizedBackgroundJobHandler> logger,
-        IServiceScopeFactory serviceScopeFactory,
-        DeskproHelper deskproHelpers)
-    {
-        _configuration = configuration;
-        _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
-        _deskproHelpers = deskproHelpers;
-    }
+    private readonly ILogger<AddMessagesToGetOrganizedBackgroundJob> _logger = logger;
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+    private readonly DeskproHelper _deskproHelpers = deskproHelpers;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -55,7 +45,7 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
 
             if (!getMessagesQueryResult.IsSuccess)
             {
-                _logger.LogError("Error requesting database API for messages not journalized");
+                _logger.LogError("Error requesting database for messages not journalized");
                 continue;
             }
 
@@ -74,10 +64,6 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
                     // The message is already journalized -> do nothing
                     continue;
                 }
-
-
-                // From this point: the message is ready to be journalized
-
 
                 _logger.LogInformation("Deskpro message ready for upload to GetOrganized. DeskproTicketId {deskproTicketId}, DeskproMessageId {deskproMessageId}", message.DeskproTicketId, message.DeskproMessageId);
 
@@ -127,11 +113,12 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
 
 
                 DateTime createdAtDanishTime = getDeskproMessageResult!.Value.CreatedAt.UtcToDanish();
+                var documentCategory = getDeskproMessageResult.Value.IsAgentNote ? DocumentCategory.Intern : MapDocumentCategoryFromPerson(personResult.Value);
 
                 var metadata = new UploadDocumentMetadata
                 {
                     DocumentDate = createdAtDanishTime,
-                    DocumentCategory = getDeskproMessageResult.Value.IsAgentNote ? DocumentCategory.Intern : MapDocumentCategoryFromPerson(personResult.Value)
+                    DocumentCategory = documentCategory
                 };
 
                 var fileName = GenerateFileName(message, personResult, createdAtDanishTime);
@@ -149,69 +136,24 @@ internal class AddMessagesToGetOrganizedBackgroundJobHandler : BackgroundService
 
 
                 // Update database
+                // TODO: improve this: We need call this directly here and not in a background job since adding the documentId to the message in the database prevents uploading the message again next time
                 var updateMessageCommand = new UpdateMessageCommand(message.Id, uploadDocumentResult.Value);
-                await mediator.Send(updateMessageCommand);
+                await mediator.Send(updateMessageCommand, stoppingToken);
+                _logger.LogInformation("Database updated: GetOrganized documentId {documentId} set for message {id}", uploadDocumentResult.Value, message.Id);
 
-
-                // Handle message attachments
-                await ProcessAttachments(mediator, attachments, message.GOCaseNumber, metadata, uploadDocumentResult, stoppingToken);
-
-
-                // Finalize the parent document
-                // IMPORTANT: the parent document must not be finalized before the attachments has been set as children
-                var finalizeParentDocumentCommand = new FinalizeDocumentCommand(uploadDocumentResult.Value, false);
-                await mediator.Send(finalizeParentDocumentCommand, stoppingToken);
-            }
-
-        }
-    }
-
-    private async Task ProcessAttachments(IMediator mediator, IEnumerable<AttachmentDto> attachments, string caseNumber, UploadDocumentMetadata metadata, int? parentDocumentId, CancellationToken cancellationToken = default)
-    {
-        if (!attachments.Any())
-        {
-            return;
-        }
-
-        var childrenDocumentIds = new List<int>();
-
-        foreach (var attachment in attachments)
-        {
-            // Get the individual attachments as a stream
-            using (var stream = new MemoryStream())
-            {
-                var getAttachmentStreamQuery = new GetDeskproMessageAttachmentQuery(attachment.DownloadUrl);
-                var getAttachmentStreamResult = await mediator.SendRequest(getAttachmentStreamQuery, cancellationToken);
-
-                if (!getAttachmentStreamResult.IsSuccess)
+                if (attachments.Any())
                 {
-                    _logger.LogError("Error downloading attachment '{filename}' from Deskpro message #{messageId}, ticketId {ticketId}", attachment.FileName, attachment.MessageId, attachment.TicketId);
-                    continue;
+                    // Handle message attachments
+                    // Note: the attachments handler also finalizing the parent document
+                    BackgroundJob.Enqueue<ProcessMessageAttachments>(x => x.UploadToGetOrganized(uploadDocumentResult.Value, message.GOCaseNumber, getDeskproMessageResult!.Value.CreatedAt, documentCategory, attachments, CancellationToken.None));
                 }
-
-                getAttachmentStreamResult.Value.CopyTo(stream);
-                var attachmentBytes = stream.ToArray();
-
-                // Upload the attachment to GO
-                var uploadDocumentCommand = new UploadDocumentCommand(attachmentBytes, caseNumber, attachment.FileName, metadata, false);
-                var uploadDocumentResult = await mediator.SendRequest(uploadDocumentCommand, cancellationToken); // TODO: make unique filenames independent from possible file already uploaded with same file name
-                if (!uploadDocumentResult.IsSuccess)
+                else
                 {
-                    continue;
+                    // Finalize the parent document
+                    BackgroundJob.Enqueue<FinalizeDocument>(x => x.Run(uploadDocumentResult.Value, CancellationToken.None));
+
                 }
-
-                // Finalize the attachment
-                var finalizeDocumentCommand = new FinalizeDocumentCommand(uploadDocumentResult.Value, false);
-                await mediator.Send(finalizeDocumentCommand, cancellationToken);
-                childrenDocumentIds.Add(uploadDocumentResult.Value);
             }
-        }
-
-        // Set attachments as children
-        if (childrenDocumentIds.Count > 0)
-        {
-            var relateDocumentCommand = new RelateDocumentCommand((int)parentDocumentId!, childrenDocumentIds.ToArray());
-            await mediator.Send(relateDocumentCommand, cancellationToken);
         }
     }
 

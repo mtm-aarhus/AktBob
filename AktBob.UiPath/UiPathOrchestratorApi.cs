@@ -1,7 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -12,15 +11,13 @@ internal class UiPathOrchestratorApi : IUiPathOrchestratorApi
 {
     private readonly IConfiguration _configuration;
     private readonly HttpClient _httpClient;
-    private readonly ILogger<UiPathOrchestratorApi> _logger;
     private readonly IMemoryCache _cache;
     private const string UIPATH_TOKEN = "UIPATH_TOKEN";
 
-    public UiPathOrchestratorApi(IConfiguration configuration, HttpClient httpClient, ILogger<UiPathOrchestratorApi> logger, IMemoryCache cache)
+    public UiPathOrchestratorApi(IConfiguration configuration, HttpClient httpClient, IMemoryCache cache)
     {
         _configuration = configuration;
         _httpClient = httpClient;
-        _logger = logger;
         _cache = cache;
     }
 
@@ -46,8 +43,6 @@ internal class UiPathOrchestratorApi : IUiPathOrchestratorApi
             };
 
             var json = JsonSerializer.Serialize(body);
-            _logger.LogInformation($"Adding queue item to UiPath Ochestrator: {json}");
-
             var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
 
             requestMessage.Method = HttpMethod.Post;

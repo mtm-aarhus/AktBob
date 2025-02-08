@@ -1,7 +1,6 @@
 ﻿using AAK.Podio.Models;
 using AktBob.Database.Contracts;
 using AktBob.Database.UseCases.Cases.AddCase;
-using AktBob.JobHandlers.Utils;
 using AktBob.Podio.Contracts;
 using AktBob.Shared;
 using AktBob.Shared.Contracts;
@@ -22,7 +21,7 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
     public async Task Handle(RegisterPodioCaseJob job, CancellationToken cancellationToken = default)
     {
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
-        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioField>())));
+        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<(int AppId, string Label)>())));
         var podioFieldDeskproId = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "DeskproId"));
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "CaseNumber"));
         Guard.Against.Null(podioFieldDeskproId.Value);
