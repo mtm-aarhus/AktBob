@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Authentication;
 using NSwag;
 using AktBob.Database;
 using MassTransit;
-using Microsoft.AspNetCore.Mvc.Filters;
 using AktBob.Podio;
+using Hangfire.Dashboard.BasicAuthorization;
+using Ardalis.GuardClauses;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,16 +61,37 @@ builder.Services.AddMediator(cfg =>
 });
 
 
+
+
 var app = builder.Build();
+
+var options = new DashboardOptions
+{
+    Authorization =
+    [
+        new BasicAuthAuthorizationFilter(
+            new BasicAuthAuthorizationFilterOptions
+            {
+                RequireSsl = false,
+                SslRedirect = false,
+                LoginCaseSensitive = true,
+                Users =
+                [
+                    new BasicAuthAuthorizationUser
+                    {
+                        Login = Guard.Against.NullOrEmpty(app.Configuration.GetValue<string>("HangfireDashboard:Username")),
+                        PasswordClear = Guard.Against.NullOrEmpty(app.Configuration.GetValue<string>("HangfireDashboard:Password"))
+                    }
+                ]
+            }
+        )
+    ]
+};
+
+app.UseHangfireDashboard("/hangfire", options);
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseHangfireDashboard("/hangfire", new DashboardOptions
-{
-    Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
-});
-
 
 app.UseFastEndpoints(c =>
 {
@@ -79,6 +101,6 @@ app.UseFastEndpoints(c =>
         ep.Description(b => b.ClearDefaultProduces());
     };
 });
-app.UseSwaggerGen();
 
+app.UseSwaggerGen();
 app.Run();
