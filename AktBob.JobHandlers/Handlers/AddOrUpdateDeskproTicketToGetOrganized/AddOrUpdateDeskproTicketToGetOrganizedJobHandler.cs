@@ -34,6 +34,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         var currentPendingTicket = new PendingTicket(job.TicketId, job.SubmittedAt);
         _pendingsTickets.AddPendingTicket(currentPendingTicket);
 
+
         // Check if this submission is the most recent for the specified ticket
         if (!IsMostRecentSubmission(currentPendingTicket))
         {
@@ -42,21 +43,18 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
         List<byte[]> content = new();
 
+
         // Get Deskpro Ticket
         var ticketResult = await _deskproHelper.GetDeskproTicket(mediator, job.TicketId);
 
-        if (!ticketResult.IsSuccess)
+        if (!ticketResult.IsSuccess || ticketResult.Value is null)
         {
-            // TODO;
+            _logger.LogError("Error getting ticket {id} from Deskpro", job.TicketId);
             return;
         }
 
         var ticket = ticketResult.Value;
-        if (ticket is null)
-        {
-            // TODO
-            return;
-        }
+        
 
         // Get custom fields specification
         var ticketCustomFieldsQuery = new GetDeskproCustomFieldSpecificationsQuery();
@@ -64,24 +62,50 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
         if (!ticketCustomFieldsResult.IsSuccess)
         {
-            // TODO
+            _logger.LogError("Error getting custom fields specifications from Deskpro");
             return;
         }
 
 
         // Get ticket agent
-        var agentResult = await _deskproHelper.GetDeskproPerson(mediator, ticket.Agent?.Id);
-        if (!agentResult.IsSuccess)
+        var agent = new PersonDto();
+        if (ticket.Agent?.Id is not null)
         {
-            // TODO
+            var agentResult = await _deskproHelper.GetDeskproPerson(mediator, ticket.Agent.Id);
+            if (!agentResult.IsSuccess)
+            {
+                _logger.LogWarning("Error getting person {id} from Deskpro", ticket.Agent.Id);
+            }
+            else
+            {
+                agent = agentResult.Value;
+            }
+        }
+        else
+        {
+            _logger.LogWarning("Deskpro ticket {id} has no assigned agents", job.TicketId);
         }
 
+
         // Get ticket user
-        var userResult = await _deskproHelper.GetDeskproPerson(mediator, ticket.Person?.Id);
-        if (!userResult.IsSuccess)
+        var user = new PersonDto();
+        if (ticket.Person?.Id is not null)
         {
-            // TODO
+            var userResult = await _deskproHelper.GetDeskproPerson(mediator, ticket.Person.Id);
+            if (!userResult.IsSuccess)
+            {
+                _logger.LogWarning("Error getting person {id} from Deskpro", ticket.Person.Id);
+            }
+            else
+            {
+                user = userResult.Value;
+            }
         }
+        else
+        {
+            _logger.LogWarning("Deskpro ticket {id} has no assigned agents", job.TicketId);
+        }
+        
 
 
         // Map ticket fields
@@ -89,17 +113,17 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         var caseNumbers = HtmlHelper.GenerateListOfFieldValues(job.CaseNumberFieldIds, ticket, "ticket-case-numbers.html");
 
         var ticketDictionary = new Dictionary<string, string>
-            {
-                { "ticketId", ticket.Id.ToString() },
-                { "caseTitle", ticket.Subject },
-                { "userName", userResult.Value.FullName },
-                { "userEmail", userResult.Value.Email },
-                { "userPhone", string.Join(", ", userResult.Value.PhoneNumbers) },
-                { "agentName", agentResult.Value.FullName },
-                { "agentEmail", agentResult.Value.Email },
-                { "custom-fields", string.Join("", customFields) },
-                { "caseNumbers", string.Join("", caseNumbers) }
-            };
+        {
+            { "ticketId", ticket.Id.ToString() },
+            { "caseTitle", ticket.Subject },
+            { "userName", user.FullName },
+            { "userEmail", user.Email },
+            { "userPhone", string.Join(", ", user.PhoneNumbers) },
+            { "agentName", agent.FullName },
+            { "agentEmail", agent.Email },
+            { "custom-fields", string.Join("", customFields) },
+            { "caseNumbers", string.Join("", caseNumbers) }
+        };
 
         var ticketHtml = HtmlHelper.GenerateHtml("ticket.html", ticketDictionary);
         content.Add(Encoding.UTF8.GetBytes(ticketHtml));
@@ -150,7 +174,8 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
         if (!convertResult.IsSuccess)
         {
-            // TODO
+            _logger.LogError("Error creating CloudConvert job generating PDF for Deskpro ticket {id}", job.TicketId);
+            return;
         }
 
         var getJobQuery = new GetJobQuery(convertResult.Value.JobId);
@@ -158,11 +183,12 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
         if (!getJobResult.IsSuccess)
         {
-            // TODO
+            _logger.LogError("Error querying job '{id}' from PDF from CloudConvert", convertResult.Value.JobId);
+            return;
         }
 
 
-        // Check if this submission is the most recent for the specified ticket
+        // Check if this submission is the most recent for the specified ticket. Check this as late as possible.
         if (!IsMostRecentSubmission(currentPendingTicket))
         {
             return;
