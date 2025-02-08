@@ -23,7 +23,7 @@ var builder = Host.CreateDefaultBuilder(args)
 
         // Modules
         var mediatorHandlers = new List<Type>();
-        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration, mediatorHandlers);
+        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration);
         services.AddUiPathModule(hostContext.Configuration, mediatorHandlers);
         services.AddDeskproModule(hostContext.Configuration, mediatorHandlers);
         services.AddPodioModule(hostContext.Configuration, mediatorHandlers);

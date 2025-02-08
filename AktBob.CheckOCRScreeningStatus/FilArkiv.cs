@@ -1,7 +1,7 @@
 ﻿using FilArkivCore.Web.Client;
 
 namespace AktBob.CheckOCRScreeningStatus;
-internal class FilArkiv : IFilArkiv
+internal class FilArkiv
 {
     public FilArkiv(FilArkivCoreClient filArkivCoreClient)
     {
