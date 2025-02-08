@@ -1,15 +1,16 @@
 ﻿using AktBob.CheckOCRScreeningStatus.JobHandlers;
 using AktBob.Shared;
 using AktBob.Shared.Contracts;
+using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.Documents;
 using Hangfire;
 
 namespace AktBob.CheckOCRScreeningStatus.Jobs;
 
-internal class RegisterFilesJobHandler(CachedData cachedData, FilArkiv filArkiv, ILogger<RegisterFilesJobHandler> logger) : IJobHandler<CheckOCRScreeningStatusJob>
+internal class RegisterFilesJobHandler(CachedData cachedData, FilArkivCoreClient filArkivCoreClient, ILogger<RegisterFilesJobHandler> logger) : IJobHandler<CheckOCRScreeningStatusJob>
 {
     private readonly CachedData _cachedData = cachedData;
-    private readonly FilArkiv _filArkiv = filArkiv;
+    private readonly FilArkivCoreClient _filArkivCoreClient = filArkivCoreClient;
     private readonly ILogger<RegisterFilesJobHandler> _logger = logger;
 
     public async Task Handle(CheckOCRScreeningStatusJob job, CancellationToken cancellationToken = default)
@@ -37,7 +38,7 @@ internal class RegisterFilesJobHandler(CachedData cachedData, FilArkiv filArkiv,
                 PageSize = 100
             };
 
-            var documentOverview = await _filArkiv.FilArkivCoreClient.GetCaseDocumentOverviewListAsync(documentOverviewParameters);
+            var documentOverview = await _filArkivCoreClient.GetCaseDocumentOverviewListAsync(documentOverviewParameters);
 
             if (documentOverview == null)
             {

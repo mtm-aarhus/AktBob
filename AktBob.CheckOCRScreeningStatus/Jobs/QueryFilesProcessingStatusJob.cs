@@ -1,12 +1,13 @@
 ﻿using AktBob.CheckOCRScreeningStatus.Jobs;
+using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.FileProcess;
 using Hangfire;
 
 namespace AktBob.CheckOCRScreeningStatus.JobHandlers;
-internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJob> logger, FilArkiv filArkiv, CachedData cachedData)
+internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJob> logger, FilArkivCoreClient filArkivCoreClient, CachedData cachedData)
 {
     private readonly ILogger<QueryFilesProcessingStatusJob> _logger = logger;
-    private readonly FilArkiv _filArkiv = filArkiv;
+    private readonly FilArkivCoreClient _filArkivCoreClient = filArkivCoreClient;
     private readonly CachedData _cachedData = cachedData;
 
     public async Task Run(Guid cacheId, CancellationToken cancellationToken = default)
@@ -34,7 +35,7 @@ internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJ
                     {
                         await Task.Delay(10000);
 
-                        var response = await _filArkiv.FilArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
+                        var response = await _filArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
                         _logger.LogInformation("File {fileId} IsBeingProcessed: {isBeingProcessed} ('{fileName}')", fileId, response.IsBeingProcessed, response.FileName);
 
                         if (!response.IsBeingProcessed && !response.FileProcessStatusResponses.Any(x => x.FinishedAt == null))
