@@ -19,7 +19,7 @@
 1. Build the web project container image. We use a timestamp to identity the revision.
 		
         $timestamp = Get-Date -Format "yyyyMMddHHmmss"
-        docker build --build-arg ENVIRONMENT=production -t aktbobacr.azurecr.io/aktbob.api:$timestamp .
+        docker build --build-arg ENVIRONMENT=production -t aktbobacr.azurecr.io/aktbob.api:$timestamp --file "AktBob.Api/Dockerfile" .
 
 2. Azure login
 
