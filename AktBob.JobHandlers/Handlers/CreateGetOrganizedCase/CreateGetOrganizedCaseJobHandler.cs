@@ -58,7 +58,7 @@ internal class CreateGetOrganizedCaseJobHandler : IJobHandler<CreateGetOrganized
 
         _logger.LogInformation("GO case {getOrganizedCaseId} created (Deskpro ID: {deskproId}, GO Case Url: {getOrganizedCaseUrl})", caseId, job.DeskproId, caseUrl);
 
-        //BackgroundJob.Enqueue<UpdateDeskproField>(x => x.SetGetOrganizedCaseId(job.DeskproId, caseId, caseUrl, CancellationToken.None));
+        BackgroundJob.Enqueue<UpdateDeskproField>(x => x.SetGetOrganizedCaseId(job.DeskproId, caseId, caseUrl, CancellationToken.None));
         BackgroundJob.Enqueue<UpdateDatabase>(x => x.SetGetOrganizedCaseId(job.DeskproId, caseId, caseUrl, CancellationToken.None));
     }
 }
