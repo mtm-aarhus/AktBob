@@ -20,6 +20,6 @@ public class GetCasesByTicketIdQueryHandler(ISqlDataAccess sqlDataAccess) : Medi
         parameters.Add(Constants.T_CASES_TICKET_ID, request.TicketId, DbType.Int32, ParameterDirection.Input);
 
         var result = await _sqlDataAccess.ExecuteProcedure<Case>(Constants.SP_CASE_GET_BY_TICKET_ID, parameters);
-        return Result.Success(result.Value.Select(x => x.ToDto()));
+        return Result.Success(result?.Value?.Select(x => x.ToDto()) ?? Enumerable.Empty<CaseDto>());
     }
 }
