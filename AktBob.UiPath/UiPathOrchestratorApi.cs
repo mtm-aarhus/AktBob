@@ -21,7 +21,7 @@ internal class UiPathOrchestratorApi : IUiPathOrchestratorApi
         _cache = cache;
     }
 
-    public async Task AddQueueItem(string queueName, string reference, object queueItem)
+    public async Task AddQueueItem(string queueName, string reference, string queueItem)
     {
         using (var requestMessage = new HttpRequestMessage())
         {
@@ -30,6 +30,7 @@ internal class UiPathOrchestratorApi : IUiPathOrchestratorApi
                 token = await GetToken();
             }
 
+            var queueContent = JsonSerializer.Deserialize<object>(queueItem, new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
             var tenancyName = _configuration.GetValue<string>("UiPath:TenancyName");
             var body = new
             {
@@ -38,11 +39,11 @@ internal class UiPathOrchestratorApi : IUiPathOrchestratorApi
                     Name = queueName,
                     Priority = "Low",
                     Reference = reference,
-                    SpecificContent = queueItem
+                    SpecificContent = queueContent
                 }
             };
 
-            var json = JsonSerializer.Serialize(body);
+            var json = JsonSerializer.Serialize(body, new JsonSerializerOptions { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
             var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
 
             requestMessage.Method = HttpMethod.Post;

@@ -33,7 +33,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
 
         // Podio variables
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
-        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<(int AppId, string Label)>())));
+        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioFieldConfigurationSection>())));
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "CaseNumber"));
 
         Guard.Against.Null(podioFieldCaseNumber.Value);
@@ -75,7 +75,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
                 Titel = deskproTicketDto.Subject
             };
 
-            BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {caseNumber}", payload, CancellationToken.None));
+            BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {caseNumber}", payload.ToJson(), CancellationToken.None));
         }
         else
         {
@@ -89,7 +89,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
                 Titel = deskproTicketDto.Subject
             };
 
-            BackgroundJob.Enqueue<CreateUiPathQueueItem>(x => x.Run(uiPathQueueName, $"PodioItemID {job.PodioItemId}: {caseNumber}", payload, CancellationToken.None));
+            BackgroundJob.Enqueue<CreateUiPathQueueItem>(x => x.Run(uiPathQueueName, $"PodioItemID {job.PodioItemId}: {caseNumber}", payload.ToJson(), CancellationToken.None));
         }
 
         return Task.CompletedTask;

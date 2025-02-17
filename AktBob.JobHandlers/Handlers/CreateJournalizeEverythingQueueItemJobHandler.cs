@@ -105,7 +105,7 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
                 Overmappenavn = ticket.SharepointFolderName
             };
 
-            BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload, CancellationToken.None));
+            BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload.ToJson(), CancellationToken.None));
         }
         else
         {
@@ -119,7 +119,7 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
                 Overmappenavn = ticket.SharepointFolderName
             };
 
-            BackgroundJob.Enqueue<CreateUiPathQueueItem>(x => x.Run(uiPathQueueName, $"Deskpro ID {job.DeskproId.ToString()}", payload, CancellationToken.None));
+            BackgroundJob.Enqueue<CreateUiPathQueueItem>(x => x.Run(uiPathQueueName, $"Deskpro ID {job.DeskproId.ToString()}", payload.ToJson(), CancellationToken.None));
         }
     }
 }

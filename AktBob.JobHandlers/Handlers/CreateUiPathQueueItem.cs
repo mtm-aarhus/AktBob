@@ -9,7 +9,7 @@ internal class CreateUiPathQueueItem(IServiceScopeFactory serviceScopeFactory, I
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly ILogger<CreateDocumentListQueueItemJobHandler> _logger = logger;
 
-    public async Task Run(string queueName, string reference, object payload, CancellationToken cancellationToken = default)
+    public async Task Run(string queueName, string reference, string payload, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();

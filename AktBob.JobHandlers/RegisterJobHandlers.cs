@@ -13,6 +13,7 @@ public static class RegisterJobHandlers
     public static IServiceCollection AddJobHandlers(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, Handlers.AddOrUpdateDeskproTicketToGetOrganized.AddOrUpdateDeskproTicketToGetOrganizedJobHandler>();
+        services.AddTransient<IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>, CreateAfgørelsesskrivelseQueueItemJobHandler>();
         services.AddTransient<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItemJobHandler>();
         services.AddTransient<IJobHandler<CreateGetOrganizedCaseJob>, Handlers.CreateGetOrganizedCase.CreateGetOrganizedCaseJobHandler>();
         services.AddTransient<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateGoToFilArkivQueueItemJobHandler>();
