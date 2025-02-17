@@ -21,7 +21,7 @@ internal class UpdatePodioItemJob
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int>("Podio:AppId"));
-        var podioFields = Guard.Against.Null(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<(int AppId, string Label)>()));
+        var podioFields = Guard.Against.Null(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<FieldSection>()));
 
         // FilArkivCaseId
         var filArkivCaseIdFieldId = podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivCaseId").Key;
@@ -36,7 +36,7 @@ internal class UpdatePodioItemJob
     {
         var updateFilArkivCaseIdFieldCommand = new UpdateFieldCommand(podioAppId, podioItemId, fieldId, value);
         await mediator.Send(updateFilArkivCaseIdFieldCommand, cancellationToken);
-
-        _logger.LogInformation("Podio item {id} updated: Field {fieldId} = '{value}'", podioItemId, fieldId, value);
     }
+
+    record FieldSection(int AppId, string Label);
 }
