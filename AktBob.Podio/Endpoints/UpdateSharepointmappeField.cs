@@ -18,8 +18,6 @@ internal class UpdateSharepointmappeField(IMediator mediator, IConfiguration con
 
     public override async Task HandleAsync(UpdatePodioFieldRequest req, CancellationToken ct)
     {
-        await SendOkAsync();
-
         var appId = _configuration.GetValue<int>("Podio:AktindsigtApp:Id");
         var fieldId = _configuration.GetValue<int>("Podio:AktindsigtApp:Fields:Sharepointmappe");
 
