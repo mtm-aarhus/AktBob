@@ -18,20 +18,19 @@ internal class UpdateDeskproField(ILogger<UpdateDeskproField> logger, IConfigura
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         var deskproWebhookId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("Deskpro:Webhooks:UpdateTicketSetGoCaseId"));
-        var caseUrlClean = caseUrl.Replace("ad.", "");
 
-        _logger.LogInformation($"Updating Deskpro ticket. Invoking webhook ID {deskproWebhookId}. Payload: getOrganizedCaseId = {caseId}, getOrganizedCaseUrl = {caseUrlClean}, deskproTicketId = {deskproId}");
+        _logger.LogInformation("Updating Deskpro ticket. Invoking webhook ID {deskproWebhookId}. Payload: getOrganizedCaseId = {caseId}, getOrganizedCaseUrl = {caseUrl}, deskproTicketId = {deskproId}", deskproWebhookId, caseId, caseUrl, deskproId);
 
         var payload = new
         {
             GetOrganizedCaseId = caseId,
-            GetOrganizedCaseUrlClean = caseUrlClean,
+            GetOrganizedCaseUrlClean = caseUrl,
             DeskproTicketId = deskproId
         };
 
         var invokeWebhookCommand = new InvokeWebhookCommand(deskproWebhookId, payload);
         await mediator.Send(invokeWebhookCommand, cancellationToken);
 
-        _logger.LogInformation($"webhook ID {deskproWebhookId} invoked.Payload: getOrganizedCaseId = {caseId}, getOrganizedCaseUrl = {caseUrlClean}, deskproTicketId = {deskproId}");
+        _logger.LogInformation("webhook ID {deskproWebhookId} invoked.Payload: getOrganizedCaseId = {caseId}, getOrganizedCaseUrl = {caseUrl}, deskproTicketId = {deskproId}", deskproWebhookId, caseId, caseUrl, deskproId);
     }
 }

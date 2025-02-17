@@ -1,5 +1,4 @@
 ﻿using AktBob.Database.Contracts.Dtos;
-using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Tickets.UpdateTicket;
 using Ardalis.Result;
 using Dapper;
@@ -47,6 +46,11 @@ internal class UpdateTicketCommandHandler(ISqlDataAccess sqlDataAccess, IMediato
             ticket.TicketClosedAt = request.TicketClosedAt;
         }
 
+        if (request.CaseUrl != null)
+        {
+            ticket.CaseUrl = request.CaseUrl;
+        }
+
         // Execture database procedure
         var parameters = new DynamicParameters();
         parameters.Add(Constants.T_TICKETS_ID, ticket.Id);
@@ -54,6 +58,7 @@ internal class UpdateTicketCommandHandler(ISqlDataAccess sqlDataAccess, IMediato
         parameters.Add(Constants.T_CASES_SHAREPOINT_FOLDERNAME, ticket.SharepointFolderName);
         parameters.Add(Constants.T_TICKETS_JOURNALIZED_AT, ticket.JournalizedAt);
         parameters.Add(Constants.T_TICKETS_CLOSED_AT, ticket.TicketClosedAt);
+        parameters.Add(Constants.T_TICKETS_CASEURL, ticket.CaseUrl);
 
         var result = await _sqlDataAccess.ExecuteProcedure(Constants.SP_TICKET_UPDATE_BY_ID, parameters);
 

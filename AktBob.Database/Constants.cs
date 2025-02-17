@@ -35,6 +35,8 @@ internal static class Constants
     public const string T_TICKETS_SHAREPOINT_FOLDERNAME = "SharepointFolderName";
     public const string T_TICKETS_JOURNALIZED_AT = "JournalizedAt";
     public const string T_TICKETS_CLOSED_AT = "TicketClosedAt";
+    public const string T_TICKETS_CASEURL = "CaseUrl";
+
 
 
     // "Cases" table column names

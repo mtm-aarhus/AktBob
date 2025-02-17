@@ -12,10 +12,12 @@ internal record PatchTicketRequest
 {
     public int Id { get; set; }
     public string? CaseNumber { get; set; }
+    public string? CaseUrl { get; set; }
     public string? SharepointFolderName { get; set; }
     public DateTime? TicketClosedAt { get; set; }
     public DateTime? JournalizedAt { get; set; }
 }
+
 internal class PatchTicket(IMediator mediator) : Endpoint<PatchTicketRequest, TicketDto>
 {
     private readonly IMediator _mediator = mediator;
@@ -40,6 +42,7 @@ internal class PatchTicket(IMediator mediator) : Endpoint<PatchTicketRequest, Ti
         var command = new UpdateTicketCommand(
             Id: req.Id,
             CaseNumber: req.CaseNumber,
+            CaseUrl: req.CaseUrl,
             SharepointFolderName: req.SharepointFolderName,
             TicketClosedAt: req.TicketClosedAt,
             JournalizedAt: req.JournalizedAt);

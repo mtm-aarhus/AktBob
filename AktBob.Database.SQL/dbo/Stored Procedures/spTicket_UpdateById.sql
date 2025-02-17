@@ -3,7 +3,8 @@
 	@CaseNumber NVARCHAR(50),
 	@SharepointFolderName NVARCHAR(2048) NULL,
 	@JournalizedAt DATETIME2 NULL,
-	@TicketClosedAt DATETIME2 NULL
+	@TicketClosedAt DATETIME2 NULL,
+	@CaseUrl NVARCHAR(1024) NULL
 AS
 BEGIN
 	BEGIN TRY
@@ -13,7 +14,8 @@ BEGIN
 				CaseNumber = @CaseNumber,
 				SharepointFolderName = @SharepointFolderName,
 				JournalizedAt = @JournalizedAt,
-				TicketClosedAt = @TicketClosedAt
+				TicketClosedAt = @TicketClosedAt,
+				CaseUrl = @CaseUrl
 			WHERE Id = @Id
 		COMMIT
 	END TRY

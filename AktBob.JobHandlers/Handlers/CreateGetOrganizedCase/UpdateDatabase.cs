@@ -11,7 +11,7 @@ internal class UpdateDatabase(ILogger<UpdateDatabase> logger, IServiceScopeFacto
     private readonly ILogger<UpdateDatabase> _logger = logger;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
-    public async Task SetGetOrganizedCaseId(int deskproId, string caseId, CancellationToken cancellationToken = default)
+    public async Task SetGetOrganizedCaseId(int deskproId, string caseId, string caseUrl, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
@@ -29,7 +29,7 @@ internal class UpdateDatabase(ILogger<UpdateDatabase> logger, IServiceScopeFacto
 
         var databaseTicket = getDatabaseTicketResult.Value.First();
 
-        var updateDatabaseTicketCommand = new UpdateTicketCommand(databaseTicket.Id, caseId, null, null, null);
+        var updateDatabaseTicketCommand = new UpdateTicketCommand(databaseTicket.Id, caseId, caseUrl, null, null, null);
         var updateDatabaseTicketResult = await mediator.SendRequest(updateDatabaseTicketCommand, cancellationToken);
 
         if (!updateDatabaseTicketResult.IsSuccess)

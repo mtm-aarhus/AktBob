@@ -54,11 +54,11 @@ internal class CreateGetOrganizedCaseJobHandler : IJobHandler<CreateGetOrganized
         }
 
         var caseId = createCaseResult.Value.CaseId;
-        var caseUrl = createCaseResult.Value.CaseUrl;
+        var caseUrl = createCaseResult.Value.CaseUrl.Replace("ad.", "");
 
         _logger.LogInformation("GO case {getOrganizedCaseId} created (Deskpro ID: {deskproId}, GO Case Url: {getOrganizedCaseUrl})", caseId, job.DeskproId, caseUrl);
 
-        BackgroundJob.Enqueue<UpdateDeskproField>(x => x.SetGetOrganizedCaseId(job.DeskproId, caseId, caseUrl, CancellationToken.None));
-        BackgroundJob.Enqueue<UpdateDatabase>(x => x.SetGetOrganizedCaseId(job.DeskproId, caseId, CancellationToken.None));
+        //BackgroundJob.Enqueue<UpdateDeskproField>(x => x.SetGetOrganizedCaseId(job.DeskproId, caseId, caseUrl, CancellationToken.None));
+        BackgroundJob.Enqueue<UpdateDatabase>(x => x.SetGetOrganizedCaseId(job.DeskproId, caseId, caseUrl, CancellationToken.None));
     }
 }
