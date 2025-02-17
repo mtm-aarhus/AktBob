@@ -9,7 +9,7 @@ internal class CreateOpenOrchestratorQueueItem(IServiceScopeFactory serviceScope
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly ILogger<CreateOpenOrchestratorQueueItem> _logger = logger;
 
-    public async Task Run(string queueName, string reference, object payload, CancellationToken cancellationToken = default)
+    public async Task Run(string queueName, string reference, string payload, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Createing OpenOrchestrator queue item ...");
         _logger.LogInformation("Queue name: '{name}'", queueName);
