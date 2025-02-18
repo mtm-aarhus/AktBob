@@ -14,9 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.PodioHookProcessor.UseCases;
-internal class CreateGoToFilArkivQueueItemJobHandler(ILogger<CreateGoToFilArkivQueueItemJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateGoToFilArkivQueueItemJob>
+internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueueItemJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateGoToFilArkivQueueItemJob>
 {
-    private readonly ILogger<CreateGoToFilArkivQueueItemJobHandler> _logger = logger;
+    private readonly ILogger<CreateToFilArkivQueueItemJobHandler> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
