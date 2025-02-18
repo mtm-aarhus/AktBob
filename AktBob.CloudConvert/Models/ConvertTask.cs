@@ -40,7 +40,7 @@ internal class ConvertTask
     public string PageFormat { get; } = "a4";
 
     [JsonPropertyName("margin_top")]
-    public int MarginTop { get; } = 15;
+    public int MarginTop { get; } = 10;
 
     [JsonPropertyName("margin_bottom")]
     public int MarginBottom { get; } = 15;
