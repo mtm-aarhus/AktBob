@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace AktBob.Api.Endpoints.CreateGoToFilArkivQueueItem;
 
-internal class CreateGoToFilArkivQueueItemRequestValidator : Validator<CreateGoToFilArkivQueueItemRequest>
+internal class CreateToFilArkivQueueItemRequestValidator : Validator<CreateToFilArkivQueueItemRequest>
 {
-    public CreateGoToFilArkivQueueItemRequestValidator()
+    public CreateToFilArkivQueueItemRequestValidator()
     {
         RuleFor(x => x.PodioItemId).NotNull();
     }

@@ -5,23 +5,23 @@ using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.CreateGoToFilArkivQueueItem;
 
-internal class CreateGoToFilArkivQueueItemEndpoint : Endpoint<CreateDocumentListQueueItemRequest>
+internal class CreateToFilArkivQueueItemEndpoint : Endpoint<CreateDocumentListQueueItemRequest>
 {
     private readonly IJobDispatcher _jobDispatcher;
 
-    public CreateGoToFilArkivQueueItemEndpoint(IJobDispatcher jobDispatcher)
+    public CreateToFilArkivQueueItemEndpoint(IJobDispatcher jobDispatcher)
     {
         _jobDispatcher = jobDispatcher;
     }
 
     public override void Configure()
     {
-        Post("/Jobs/CreateGoToFilArkivQueueItem", "/Queue/edbae766");
+        Post("/Jobs/CreateToFilArkivQueueItem", "/Queue/edbae766");
         AllowFormData(urlEncoded: true);
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
-            s.Summary = "Creates GO-to-FilArkiv queue item";
+            s.Summary = "Creates To-FilArkiv queue item";
         });
     }
 

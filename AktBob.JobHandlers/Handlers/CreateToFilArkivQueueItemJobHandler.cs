@@ -12,6 +12,7 @@ using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 
 namespace AktBob.PodioHookProcessor.UseCases;
 internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueueItemJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateGoToFilArkivQueueItemJob>
@@ -22,8 +23,7 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
 
     public async Task Handle(CreateGoToFilArkivQueueItemJob job, CancellationToken cancellationToken = default)
     {
-        var tenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
-        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"CreateGoToFilArkivQueueItemJobHandler:UiPathQueueName:{tenancyName}"));
+        var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateToFilArkivQueueItemJobHandler:OpenOrchestratorQueueName"));
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
         var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioFieldConfigurationSection>())));
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "CaseNumber"));
@@ -49,49 +49,49 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
             return;
         }
 
-        // Find Deskpro ticket by PodioItemId
-        var getTicketByPodioItemIdQuery = new GetTicketsQuery(null, job.PodioItemId, null);
-        var getTicketByPodioItemIdQueryResult = await mediator.SendRequest(getTicketByPodioItemIdQuery, cancellationToken);
+        // Find database ticket by PodioItemId
+        var getDatabaseTicketByPodioItemIdQuery = new GetTicketsQuery(null, job.PodioItemId, null);
+        var getDatabaseTicketByPodioItemIdQueryResult = await mediator.SendRequest(getDatabaseTicketByPodioItemIdQuery, cancellationToken);
 
-        if (!getTicketByPodioItemIdQueryResult.IsSuccess)
+        if (!getDatabaseTicketByPodioItemIdQueryResult.IsSuccess)
         {
             _logger.LogError($"Could not get data from database for ticket by PodioItemId {job.PodioItemId}");
             return;
         }
 
-        if (getTicketByPodioItemIdQueryResult.Value.Count() < 1)
+        if (getDatabaseTicketByPodioItemIdQueryResult.Value.Count() < 1)
         {
             _logger.LogError("No Deskpro tickets found for PodioItemId {podioItemId}.", job.PodioItemId);
             return;
         }
 
-        if (getTicketByPodioItemIdQueryResult.Value.Count() > 1)
+        if (getDatabaseTicketByPodioItemIdQueryResult.Value.Count() > 1)
         {
-            _logger.LogWarning("{count} Deskpro tickets found for PodioItemId {podioItemId}. Only processing the first.", getTicketByPodioItemIdQueryResult.Value.Count(), job.PodioItemId);
+            _logger.LogWarning("{count} Deskpro tickets found for PodioItemId {podioItemId}. Only processing the first.", getDatabaseTicketByPodioItemIdQueryResult.Value.Count(), job.PodioItemId);
         }
 
-        var ticket = getTicketByPodioItemIdQueryResult.Value.FirstOrDefault();
+        var databaseTicket = getDatabaseTicketByPodioItemIdQueryResult.Value.FirstOrDefault();
 
-        if (ticket is null)
+        if (databaseTicket is null)
         {
             _logger.LogError("Ticket related to PodioItemId {id} not found in database", job.PodioItemId);
             return;
         }
 
         // Get the case sharepoint folder name ("undermappenavn")
-        var caseSharepointFolderName = ticket.Cases?.FirstOrDefault(x => x.PodioItemId == job.PodioItemId)?.SharepointFolderName;
+        var caseSharepointFolderName = databaseTicket.Cases?.FirstOrDefault(x => x.PodioItemId == job.PodioItemId)?.SharepointFolderName;
         if (caseSharepointFolderName == null)
         {
             _logger.LogError("Case related to PodioItemId {id}: SharepointFolderName is null or empty", job.PodioItemId);
         }
 
         // Get data from Deskpro
-        var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticket.DeskproId);
+        var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(databaseTicket.DeskproId);
         var getDeskproTicketQueryResult = await mediator.SendRequest(getDeskproTicketQuery, cancellationToken);
 
         if (!getDeskproTicketQueryResult.IsSuccess)
         {
-            _logger.LogError($"Could not get data from Deskpro for ticket ID {ticket.DeskproId}");
+            _logger.LogError($"Could not get data from Deskpro for ticket ID {databaseTicket.DeskproId}");
             return;
         }
 
@@ -104,23 +104,25 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
         }
         else
         {
-            _logger.LogWarning($"Deskpro ticket {ticket.DeskproId} has no agents assigned");
+            _logger.LogWarning($"Deskpro ticket {databaseTicket.DeskproId} has no agents assigned");
         }
 
-        // Post UiPath queue item
+        // Create queue item
         var payload = new
         {
-            SagsNummer = caseNumber,
-            Email = agent.Email,
-            Navn = agent.Name,
+            Sagsnummer = caseNumber,
+            MailModtager = agent.Email,
+            DeskProID = databaseTicket.DeskproId,
+            DeskProTitel = getDeskproTicketQueryResult.Value.Subject,
             PodioID = job.PodioItemId,
-            DeskproID = ticket.DeskproId,
-            Titel = getDeskproTicketQueryResult.Value.Subject,
-            Overmappenavn = ticket.SharepointFolderName,
-            Undermappenavn = caseSharepointFolderName
+            Overmappe = databaseTicket.SharepointFolderName,
+            Undermappe = caseSharepointFolderName,
+            GeoSag = !IsNovaCase(caseNumber),
+            NovaSag = IsNovaCase(caseNumber),
+            AktSagsURL = databaseTicket.CaseUrl
         };
 
-        BackgroundJob.Enqueue<CreateUiPathQueueItem>(x => x.Run(uiPathQueueName, job.PodioItemId.ToString(), payload.ToJson(), CancellationToken.None));
+        BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}", payload.ToJson(), CancellationToken.None));
     }
 
     private async Task<(string Name, string Email)> GetDeskproAgent(IMediator mediator, int agentId, CancellationToken cancellationToken = default)
@@ -138,5 +140,12 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
         }
 
         return (string.Empty, string.Empty);
+    }
+
+    private bool IsNovaCase(string caseNumber)
+    {
+        string pattern = @"^S\d{4}-\d{1,5}$";
+        Regex regex = new Regex(pattern);
+        return regex.IsMatch(caseNumber);
     }
 }

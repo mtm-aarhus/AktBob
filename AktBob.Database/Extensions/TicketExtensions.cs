@@ -11,6 +11,7 @@ internal static class TicketExtensions
             Id = ticket.Id,
             DeskproId = ticket.DeskproId,
             CaseNumber = ticket.CaseNumber,
+            CaseUrl = ticket.CaseUrl,
             SharepointFolderName = ticket.SharepointFolderName,
             TicketClosedAt = ticket.TicketClosedAt,
             JournalizedAt = ticket.JournalizedAt,

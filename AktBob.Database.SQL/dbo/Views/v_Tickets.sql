@@ -5,6 +5,7 @@ SELECT
 	Id
 	,DeskproId
 	,CaseNumber
+	,CaseUrl
 	,SharepointFolderName
 	,JournalizedAt
 	,TicketClosedAt
