@@ -67,6 +67,24 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     }
 
 
+    public async Task<(string Name, string Email)> GetAgent(IMediator mediator, int agentId, CancellationToken cancellationToken = default)
+    {
+        var query = new GetDeskproPersonQuery(agentId);
+        var result = await mediator.SendRequest(query, cancellationToken);
+
+        if (result.IsSuccess && result.Value.IsAgent)
+        {
+            return (result.Value.FullName, result.Value.Email);
+        }
+        else
+        {
+            _logger.LogWarning($"Unable to get agent from Deskpro, agent id {agentId}");
+        }
+
+        return (string.Empty, string.Empty);
+    }
+
+
     public async Task<IEnumerable<AttachmentDto>> GetDeskproMessageAttachments(IMediator mediator, int deskproTicketId, int deskproMessageId)
     {
         _logger.LogInformation("Getting Deskpro message #{id} attachments", deskproMessageId);

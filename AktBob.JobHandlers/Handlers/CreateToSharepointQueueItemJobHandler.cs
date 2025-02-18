@@ -2,6 +2,7 @@
 using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.JobHandlers.Handlers;
+using AktBob.JobHandlers.Utils;
 using AktBob.Podio.Contracts;
 using AktBob.Shared;
 using AktBob.Shared.Contracts;
@@ -15,11 +16,12 @@ using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
 namespace AktBob.PodioHookProcessor.UseCases;
-internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQueueItemJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateToSharepointQueueItemJob>
+internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQueueItemJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory, DeskproHelper deskproHelper) : IJobHandler<CreateToSharepointQueueItemJob>
 {
     private readonly ILogger<CreateToSharepointQueueItemJobHandler> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+    private readonly DeskproHelper _deskproHelper = deskproHelper;
 
     public async Task Handle(CreateToSharepointQueueItemJob job, CancellationToken cancellationToken = default)
     {
@@ -104,7 +106,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
 
         if (deskproTicket.Agent is not null && deskproTicket.Agent.Id > 0)
         {
-            agent = await GetDeskproAgent(mediator, deskproTicket.Agent.Id, cancellationToken);
+            agent = await _deskproHelper.GetAgent(mediator, deskproTicket.Agent.Id, cancellationToken);
         }
         else
         {
@@ -128,23 +130,6 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
         };
 
         BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}", payload.ToJson(), CancellationToken.None));
-    }
-
-    private async Task<(string Name, string Email)> GetDeskproAgent(IMediator mediator, int agentId, CancellationToken cancellationToken = default)
-    {
-        var getAgentQuery = new GetDeskproPersonQuery(agentId);
-        var getAgentResult = await mediator.SendRequest(getAgentQuery, cancellationToken);
-
-        if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
-        {
-            return (getAgentResult.Value.FullName, getAgentResult.Value.Email);
-        }
-        else
-        {
-            _logger.LogWarning($"Unable to get agent from Deskpro, agent id {agentId}");
-        }
-
-        return (string.Empty, string.Empty);
     }
 
     private bool IsNovaCase(string caseNumber)
