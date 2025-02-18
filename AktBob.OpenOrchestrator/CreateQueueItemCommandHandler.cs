@@ -40,7 +40,7 @@ public class CreateQueueItemCommandHandler(IConfiguration configuration, ILogger
                     },
                     commandType: System.Data.CommandType.Text);
 
-                _logger.LogInformation("OpenOrchestrator queue item '{id}' created. Data: {data}", id, command.Payload);
+                _logger.LogInformation("OpenOrchestrator queue item {id} created. Data: {data}", id, command.Payload);
 
                 return Result.Success(id);
             }
