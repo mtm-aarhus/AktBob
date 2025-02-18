@@ -72,7 +72,7 @@ internal class AddMessagesToGetOrganizedBackgroundJob(
 
 
                     // Get Deskpro ticket
-                    var deskproTicketResult = await _deskproHelpers.GetDeskproTicket(mediator, message.DeskproTicketId);
+                    var deskproTicketResult = await _deskproHelpers.GetTicket(mediator, message.DeskproTicketId);
                     if (!deskproTicketResult.IsSuccess)
                     {
                         _logger.LogError("Error getting Deskpro ticket {id}", message.DeskproTicketId);
@@ -95,14 +95,14 @@ internal class AddMessagesToGetOrganizedBackgroundJob(
 
 
                     // Get Deskpro person
-                    var personResult = await _deskproHelpers.GetDeskproPerson(mediator, getDeskproMessageResult!.Value.Person.Id);
+                    var personResult = await _deskproHelpers.GetPerson(mediator, getDeskproMessageResult!.Value.Person.Id);
 
 
                     // Get attachments
                     var attachments = Enumerable.Empty<AttachmentDto>();
                     if (getDeskproMessageResult.Value.AttachmentIds.Any())
                     {
-                        attachments = await _deskproHelpers.GetDeskproMessageAttachments(mediator, deskproTicketResult.Value!.Id, getDeskproMessageResult.Value.Id);
+                        attachments = await _deskproHelpers.GetMessageAttachments(mediator, deskproTicketResult.Value!.Id, getDeskproMessageResult.Value.Id);
                     }
 
 

@@ -45,7 +45,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
 
         // Get Deskpro Ticket
-        var ticketResult = await _deskproHelper.GetDeskproTicket(mediator, job.TicketId);
+        var ticketResult = await _deskproHelper.GetTicket(mediator, job.TicketId);
 
         if (!ticketResult.IsSuccess || ticketResult.Value is null)
         {
@@ -71,7 +71,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         var agent = new PersonDto();
         if (ticket.Agent?.Id is not null)
         {
-            var agentResult = await _deskproHelper.GetDeskproPerson(mediator, ticket.Agent.Id);
+            var agentResult = await _deskproHelper.GetPerson(mediator, ticket.Agent.Id);
             if (!agentResult.IsSuccess)
             {
                 _logger.LogWarning("Error getting person {id} from Deskpro", ticket.Agent.Id);
@@ -91,7 +91,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         var user = new PersonDto();
         if (ticket.Person?.Id is not null)
         {
-            var userResult = await _deskproHelper.GetDeskproPerson(mediator, ticket.Person.Id);
+            var userResult = await _deskproHelper.GetPerson(mediator, ticket.Person.Id);
             if (!userResult.IsSuccess)
             {
                 _logger.LogWarning("Error getting person {id} from Deskpro", ticket.Person.Id);
@@ -138,13 +138,13 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
             var messages = getMessagesResult.Value.OrderByDescending(x => x.CreatedAt);
             foreach (var message in messages)
             {
-                var person = await _deskproHelper.GetDeskproPerson(mediator, message.Person?.Id);
+                var person = await _deskproHelper.GetPerson(mediator, message.Person?.Id);
                 message.Person = person.Value;
 
                 var attachments = Enumerable.Empty<AttachmentDto>();
                 if (message.AttachmentIds.Any())
                 {
-                    attachments = await _deskproHelper.GetDeskproMessageAttachments(mediator, ticket.Id, message.Id);
+                    attachments = await _deskproHelper.GetMessageAttachments(mediator, ticket.Id, message.Id);
                 }
 
                 // Get message number from API database

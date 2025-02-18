@@ -12,7 +12,7 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     private readonly ILogger<DeskproHelper> _logger = logger;
     private readonly IMemoryCache _cache = cache;
 
-    public async Task<Result<TicketDto>> GetDeskproTicket(IMediator mediator, int ticketId)
+    public async Task<Result<TicketDto>> GetTicket(IMediator mediator, int ticketId)
     {
         _logger.LogInformation("Getting Deskpro ticket #{id}", ticketId);
 
@@ -29,7 +29,7 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     }
 
 
-    public async Task<Result<PersonDto>> GetDeskproPerson(IMediator mediator, int? personId)
+    public async Task<Result<PersonDto>> GetPerson(IMediator mediator, int? personId)
     {
         if (personId == null)
         {
@@ -85,7 +85,7 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     }
 
 
-    public async Task<IEnumerable<AttachmentDto>> GetDeskproMessageAttachments(IMediator mediator, int deskproTicketId, int deskproMessageId)
+    public async Task<IEnumerable<AttachmentDto>> GetMessageAttachments(IMediator mediator, int deskproTicketId, int deskproMessageId)
     {
         _logger.LogInformation("Getting Deskpro message #{id} attachments", deskproMessageId);
 
