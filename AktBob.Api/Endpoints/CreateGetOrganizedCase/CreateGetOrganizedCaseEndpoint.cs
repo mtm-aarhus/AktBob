@@ -15,8 +15,8 @@ internal class CreateGetOrganizedCaseEndpoint(IJobDispatcher jobDispatcher) : En
 
     public override async Task HandleAsync(CreateGetOrganizedCaseRequest req, CancellationToken ct)
     {
-        var command = new CreateGetOrganizedCaseJob(req.DeskproTicketId, req.CaseTitle);
-        _jobDispatcher.Dispatch(command);
+        var createCaseCommand = new CreateGetOrganizedCaseJob(req.DeskproTicketId, req.CaseTitle);
+        _jobDispatcher.Dispatch(createCaseCommand);
         await SendNoContentAsync(ct);
     }
 }

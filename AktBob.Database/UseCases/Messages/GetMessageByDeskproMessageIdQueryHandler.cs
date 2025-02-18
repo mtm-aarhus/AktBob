@@ -1,5 +1,5 @@
-﻿using AktBob.Database.Contracts;
-using AktBob.Database.Contracts.Dtos;
+﻿using AktBob.Database.Contracts.Dtos;
+using AktBob.Database.Contracts.Messages;
 using AktBob.Database.Entities;
 using AktBob.Database.Extensions;
 using Ardalis.GuardClauses;
@@ -11,11 +11,11 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 
 namespace AktBob.Database.UseCases.Messages;
-public class GetMessageByDeskproMessageIdQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
+public class GetMessageByDeskproMessageIdQueryHandler(IConfiguration configuration) : MediatorRequestHandler<Contracts.Messages.GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
 {
     private readonly IConfiguration _configuration = configuration;
 
-    protected override async Task<Result<MessageDto>> Handle(GetMessageByDeskproMessageIdQuery request, CancellationToken cancellationToken)
+    protected override async Task<Result<MessageDto>> Handle(Contracts.Messages.GetMessageByDeskproMessageIdQuery request, CancellationToken cancellationToken)
     {
         var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("Database"));
 

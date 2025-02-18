@@ -10,17 +10,17 @@ using Microsoft.Extensions.Logging;
 using AktBob.Shared;
 using Hangfire;
 
-namespace AktBob.JobHandlers.Handlers.AddMessagesToGetOrganized;
+namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactory, ILogger<ProcessMessageAttachments> logger)
 {
     private readonly IServiceScopeFactory serviceScopeFactory = serviceScopeFactory;
     private readonly ILogger<ProcessMessageAttachments> _logger = logger;
 
-    public async Task UploadToGetOrganized(int parentDocumentId, string caseNumber, DateTime timestamp, DocumentCategory documentCategory, IEnumerable<AttachmentDto> attachments,  CancellationToken cancellationToken = default)
+    public async Task UploadToGetOrganized(int parentDocumentId, string caseNumber, DateTime timestamp, DocumentCategory documentCategory, IEnumerable<AttachmentDto> attachments, CancellationToken cancellationToken = default)
     {
         using var scope = serviceScopeFactory.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        
+
         DateTime createdAtDanishTime = timestamp.UtcToDanish();
         var childrenDocumentIds = new List<int>();
 
@@ -30,10 +30,12 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
             DocumentCategory = documentCategory
         };
 
-        foreach (var attachment in attachments)
+        try
         {
-            using (var stream = new MemoryStream())
+            foreach (var attachment in attachments)
             {
+                using var stream = new MemoryStream();
+                
                 // Get the individual attachments from Deskpro
                 var getAttachmentStreamQuery = new GetDeskproMessageAttachmentQuery(attachment.DownloadUrl);
                 var getAttachmentStreamResult = await mediator.SendRequest(getAttachmentStreamQuery, cancellationToken);
@@ -48,12 +50,15 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 var attachmentBytes = stream.ToArray();
 
                 // Upload the attachment to GO
-                var uploadDocumentCommand = new UploadDocumentCommand(attachmentBytes, caseNumber, attachment.FileName, metadata, false);
-                var uploadDocumentResult = await mediator.SendRequest(uploadDocumentCommand, cancellationToken); // TODO: make unique filenames independent from possible file already uploaded with same file name
-                
+                var filenameNoExtension = Path.GetFileNameWithoutExtension(attachment.FileName);
+                var fileExtension = Path.GetExtension(attachment.FileName);
+                var filename = $"{filenameNoExtension} ({timestamp.ToString("dd-MM-yyyy HH-mm-ss")}) TEST{fileExtension}";
+                var uploadDocumentCommand = new UploadDocumentCommand(attachmentBytes, caseNumber, filename, metadata, true);
+                var uploadDocumentResult = await mediator.SendRequest(uploadDocumentCommand, cancellationToken);
+
                 if (!uploadDocumentResult.IsSuccess)
                 {
-                    _logger.LogError("Error upload Deskpro message attachement to GetOrganized (Filename: '{filename}' Download URL: {url})", attachment.FileName, attachment.DownloadUrl);
+                    _logger.LogError("Error upload Deskpro message attachment to GetOrganized (Filename: '{filename}' Download URL: {url})", attachment.FileName, attachment.DownloadUrl);
                     continue;
                 }
 
@@ -63,11 +68,17 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 BackgroundJob.Enqueue<FinalizeDocument>(x => x.Run(uploadDocumentResult.Value, CancellationToken.None));
             }
         }
+        catch (Exception ex)
+        {
+            _logger.LogError("Something went wrong uploding message attachments to GetOrganized. Message: {message}", ex.Message);
+            return;
+
+        }
 
         // Set attachments as children
         var relateDocumentCommand = new RelateDocumentCommand(parentDocumentId, childrenDocumentIds.ToArray());
         await mediator.Send(relateDocumentCommand, cancellationToken);
-        
+
 
         // Finalize the parent document
         // The parent document must not be finalized before the attachments has been set as children

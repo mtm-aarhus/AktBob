@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MassTransit.Mediator;
 using MassTransit;
 using Hangfire;
+using AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 
 namespace AktBob.JobHandlers.Handlers.CreateGetOrganizedCase;
 internal class CreateGetOrganizedCaseJobHandler : IJobHandler<CreateGetOrganizedCaseJob>
@@ -60,5 +61,6 @@ internal class CreateGetOrganizedCaseJobHandler : IJobHandler<CreateGetOrganized
 
         BackgroundJob.Enqueue<UpdateDeskproField>(x => x.SetGetOrganizedCaseId(job.DeskproId, caseId, caseUrl, CancellationToken.None));
         BackgroundJob.Enqueue<UpdateDatabase>(x => x.SetGetOrganizedCaseId(job.DeskproId, caseId, caseUrl, CancellationToken.None));
+        BackgroundJob.Schedule<RegisterMessagesJobHandler>(x => x.Handle(new RegisterMessagesJob(job.DeskproId), CancellationToken.None), TimeSpan.FromMinutes(2));
     }
 }

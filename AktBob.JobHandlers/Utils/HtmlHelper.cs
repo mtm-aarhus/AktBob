@@ -35,7 +35,7 @@ internal static class HtmlHelper
         return items;
     }
 
-    public static string GenerateMessageHtml(MessageDto deskproMessageDto, IEnumerable<AttachmentDto> attachments, string goCaseNumber, string caseTitle, int messageNumber)
+    public static string GenerateMessageHtml(DateTime createdAt, string personName, string personEmail, string content, string caseNumber, string caseTitle, int messageNumber, IEnumerable<AttachmentDto> attachments)
     {
         string appRoot = AppDomain.CurrentDomain.BaseDirectory;
         string messageTemplatePath = Path.Combine(appRoot, "HtmlTemplates", "message.html");
@@ -48,14 +48,14 @@ internal static class HtmlHelper
 
         var dictionary = new Dictionary<string, string>
         {
-            { "caseNumber",  goCaseNumber },
+            { "caseNumber",  caseNumber },
             { "title", caseTitle },
             { "messageNumber", messageNumber.ToString() ?? string.Empty },
-            { "timestamp", deskproMessageDto.CreatedAt.ToString("dd-MM-yyyy HH:mm:ss") },
-            { "fromName", deskproMessageDto.Person.FullName },
-            { "fromEmail", deskproMessageDto.Person.Email },
+            { "timestamp", createdAt.ToString("dd-MM-yyyy HH:mm:ss") },
+            { "fromName", personName },
+            { "fromEmail", personEmail },
             { "attachments", string.Join("", attachmentFileNames) },
-            { "messageContent", deskproMessageDto.Content }
+            { "messageContent", content }
         };
 
         var html = messageTemplate.ReplacePlaceholders(dictionary);

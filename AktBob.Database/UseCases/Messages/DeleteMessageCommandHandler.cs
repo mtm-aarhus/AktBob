@@ -1,4 +1,4 @@
-﻿using AktBob.Database.Contracts;
+﻿using AktBob.Database.Contracts.Messages;
 using Ardalis.GuardClauses;
 using Dapper;
 using MassTransit.Mediator;

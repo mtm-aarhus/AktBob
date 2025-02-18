@@ -2,7 +2,7 @@
 using MassTransit.Mediator;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AktBob.JobHandlers.Handlers.AddMessagesToGetOrganized;
+namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 internal class FinalizeDocument(IServiceScopeFactory serviceScopeFactory)
 {
     private readonly IServiceScopeFactory serviceScopeFactory = serviceScopeFactory;

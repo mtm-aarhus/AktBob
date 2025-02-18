@@ -5,13 +5,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AktBob.JobHandlers.Handlers;
 using AktBob.JobHandlers.Utils;
-using AktBob.JobHandlers.Handlers.AddMessagesToGetOrganized;
+using AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 
 namespace AktBob.JobHandlers;
 public static class RegisterJobHandlers
 {
     public static IServiceCollection AddJobHandlers(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddTransient<IJobHandler<RegisterMessagesJob>, RegisterMessagesJobHandler>();
         services.AddTransient<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, Handlers.AddOrUpdateDeskproTicketToGetOrganized.AddOrUpdateDeskproTicketToGetOrganizedJobHandler>();
         services.AddTransient<IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>, CreateAfgørelsesskrivelseQueueItemJobHandler>();
         services.AddTransient<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItemJobHandler>();
@@ -20,8 +21,6 @@ public static class RegisterJobHandlers
         services.AddTransient<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItemJobHandler>();
         services.AddTransient<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItemJobHandler>();
         services.AddTransient<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCaseJobHandler>();
-
-        services.AddHostedService<AddMessagesToGetOrganizedBackgroundJob>();
 
         services.AddTransient<DeskproHelper>();
         services.AddSingleton<Handlers.AddOrUpdateDeskproTicketToGetOrganized.PendingsTickets>();

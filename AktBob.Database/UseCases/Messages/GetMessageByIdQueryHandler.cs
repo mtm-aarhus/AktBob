@@ -10,12 +10,12 @@ using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Database.UseCases.Messages;
 
-public record GetMessageByIdQuery(int Id) : Request<Result<MessageDto>>;
-public class GetMessageByIdQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetMessageByIdQuery, Result<MessageDto>>
+public record GetMessageByDeskproMessageIdQuery(int Id) : Request<Result<MessageDto>>;
+public class GetMessageByIdQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
 {
     private readonly IConfiguration _configuration = configuration;
 
-    protected override async Task<Result<MessageDto>> Handle(GetMessageByIdQuery request, CancellationToken cancellationToken)
+    protected override async Task<Result<MessageDto>> Handle(GetMessageByDeskproMessageIdQuery request, CancellationToken cancellationToken)
     {
         var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("Database"));
 

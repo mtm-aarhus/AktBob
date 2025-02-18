@@ -4,8 +4,6 @@
     [DeskproId]    INT NOT NULL,
     [GODocumentId] INT NULL,
     [Deleted] BIT NOT NULL DEFAULT 0, 
-    [QueuedForJournalizationAt] DATETIME2 NULL, 
-    [Hash] NCHAR(64) NULL, 
     [MessageNumber] INT NULL, 
     PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_Messages_Ticket] FOREIGN KEY ([TicketId]) REFERENCES [dbo].[Tickets] ([Id])

@@ -2,6 +2,7 @@
 using AAK.GetOrganized.UploadDocument;
 using AktBob.CloudConvert.Contracts;
 using AktBob.Database.Contracts;
+using AktBob.Database.Contracts.Messages;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
@@ -149,19 +150,19 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
                 // Get message number from API database
                 var messageNumber = 0;
-                var getMessageFromApiDatabaseQuery = new GetMessageByDeskproMessageIdQuery(message.Id);
-                var getMessageFromApiDatabaseResult = await mediator.SendRequest(getMessageFromApiDatabaseQuery, cancellationToken);
+                var getDatabaseMessageQuery = new GetMessageByDeskproMessageIdQuery(message.Id);
+                var getDatabaseMessageResult = await mediator.SendRequest(getDatabaseMessageQuery, cancellationToken);
 
-                if (!getMessageFromApiDatabaseResult.IsSuccess)
+                if (!getDatabaseMessageResult.IsSuccess)
                 {
                     _logger.LogWarning("No message found in database for Deskpro message ID {id}", message.Id);
                 }
                 else
                 {
-                    messageNumber = getMessageFromApiDatabaseResult.Value.MessageNumber ?? 0;
+                    messageNumber = getDatabaseMessageResult.Value.MessageNumber ?? 0;
                 }
 
-                var messageHtml = HtmlHelper.GenerateMessageHtml(message, attachments, job.GOCaseNumber, ticket.Subject, messageNumber);
+                var messageHtml = HtmlHelper.GenerateMessageHtml(message.CreatedAt, message.Person.FullName, message.Person.Email, message.Content, job.GOCaseNumber, ticket.Subject, messageNumber, attachments);
                 content.Add(Encoding.UTF8.GetBytes(messageHtml));
             }
         }

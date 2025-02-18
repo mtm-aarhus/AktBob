@@ -1,11 +1,9 @@
 ﻿using AktBob.Database.UseCases.Cases;
 using AktBob.Database.UseCases.Messages;
 using AktBob.Database.UseCases.Tickets;
-using AktBob.Database.UseCases.Messages.PostMessage;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Concurrent;
 
 namespace AktBob.Database;
 public static class ModuleServices
@@ -16,30 +14,21 @@ public static class ModuleServices
 
         services.AddTransient<ISqlDataAccess, SqlDataAccess>();
 
-        services.AddSingleton(serviceProvider =>
-        {
-            return new ConcurrentDictionary<Guid, DeskproTicketWithNewMessage>();
-        });
-
-        services.AddHostedService<PostMessageBackgroundJob>();
-
         mediatorHandlers.AddRange([
             typeof(GetCaseByIdQueryHandler),
             typeof(GetCasesByTicketIdQueryHandler),
             typeof(AddCaseCommandHandler),
             typeof(GetCasesQueryHandler),
             typeof(UpdateCaseCommandHandler),
-            typeof(ClearQueuedForJournalizationCommandHandler),
             typeof(GetMessageByIdQueryHandler),
-            typeof(PostMessageCommandHandler),
             typeof(DeleteMessageCommandHandler),
             typeof(GetMessageByDeskproMessageIdQueryHandler),
-            typeof(GetMessagesQueryHandler),
-            typeof(UpdateMessageCommandHandler),
+            typeof(UpdateMessageSetGoDocumentIdCommandHandler),
             typeof(AddTicketCommandHandler),
             typeof(GetTicketByIdQueryHandler),
             typeof(GetTicketsQueryHandler),
-            typeof(UpdateTicketCommandHandler)]);
+            typeof(UpdateTicketCommandHandler),
+            typeof(AddMessagesCommandHandler)]);
 
         return services;
     }

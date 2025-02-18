@@ -3,8 +3,6 @@ AS
 	
 SELECT
 	[Messages].Id 'Id'
-	,[Messages].QueuedForJournalizationAt 'QueuedForJournalizationAt'
-	,[Messages].[Hash] 'Hash'
 	,Tickets.Id 'TicketId'
 	,Tickets.DeskproId 'DeskproTicketId'
 	,Tickets.CaseNumber 'GOCaseNumber'

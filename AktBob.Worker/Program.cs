@@ -10,6 +10,9 @@ using Hangfire;
 using AktBob.JobHandlers;
 using AktBob.GetOrganized;
 using AktBob.Database;
+using AktBob.Database.Contracts.Messages;
+using System.Threading;
+using MassTransit.Mediator;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -46,4 +49,9 @@ var builder = Host.CreateDefaultBuilder(args)
 
 
 var host = builder.Build();
+
+var mediator = host.Services.GetRequiredService<IMediator>();
+
+var updateMessageCommand = new UpdateMessageSetGoDocumentIdCommand(2055, 45);
+await mediator.Send(updateMessageCommand);
 host.Run();
