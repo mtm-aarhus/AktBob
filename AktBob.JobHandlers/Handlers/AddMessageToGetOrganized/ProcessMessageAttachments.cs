@@ -52,7 +52,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 // Upload the attachment to GO
                 var filenameNoExtension = Path.GetFileNameWithoutExtension(attachment.FileName);
                 var fileExtension = Path.GetExtension(attachment.FileName);
-                var filename = $"{filenameNoExtension} ({timestamp.ToString("dd-MM-yyyy HH-mm-ss")}) TEST{fileExtension}";
+                var filename = $"{filenameNoExtension} ({timestamp.ToString("dd-MM-yyyy HH-mm-ss")}){fileExtension}";
                 var uploadDocumentCommand = new UploadDocumentCommand(attachmentBytes, caseNumber, filename, metadata, true);
                 var uploadDocumentResult = await mediator.SendRequest(uploadDocumentCommand, cancellationToken);
 

@@ -156,7 +156,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var titleElements = new List<string>
         {
             "Besked",
-            $"({messageNumber.ToString("D3")}) TEST"
+            $"({messageNumber.ToString("D3")})"
         };
         
 
