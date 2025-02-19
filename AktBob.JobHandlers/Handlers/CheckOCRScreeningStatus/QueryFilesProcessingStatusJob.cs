@@ -40,9 +40,15 @@ internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJ
                         var response = await _filArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
                         _logger.LogInformation("File {fileId} IsBeingProcessed: {isBeingProcessed} ('{fileName}')", fileId, response.IsBeingProcessed, response.FileName);
 
-                        if (!response.IsBeingProcessed && !response.FileProcessStatusResponses.Any(x => x.FinishedAt == null))
+                        if (!response.IsInQueue)
                         {
-                            break;
+                            if (!response.FileProcessStatusResponses.Any(x =>
+                                x.Ignore == false
+                                && x.FinishedAt == null
+                                && x.RetryInProgress == false))
+                            {
+                                break;
+                            }
                         }
 
                         // TODO: Maybe break out of while loop after a maximum time period?
