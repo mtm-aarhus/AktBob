@@ -1,5 +1,6 @@
 ﻿using AAK.Podio.Models;
 using AktBob.Database.Contracts;
+using AktBob.Database.UseCases.Cases.GetCases;
 using AktBob.Deskpro.Contracts;
 using AktBob.JobHandlers.Handlers;
 using AktBob.JobHandlers.Utils;
@@ -42,6 +43,24 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
             _logger.LogError("Could not get case number field value from Podio Item {itemId}", job.PodioItemId);
             return;
         }
+
+        // Find database case from PodioItemID
+        var getDatabaseCasesQuery = new GetCasesQuery(null, job.PodioItemId, null);
+        var getDataCaseCasesResult = await mediator.SendRequest(getDatabaseCasesQuery, cancellationToken);
+
+        if (!getDataCaseCasesResult.IsSuccess)
+        {
+            _logger.LogError("Error getting cases from databse by PodioItemId {podioItemId}", job.PodioItemId);
+            return;
+        }
+
+        if (getDataCaseCasesResult.Value is null || getDataCaseCasesResult.Value.Count() == 0 || getDataCaseCasesResult.Value.FirstOrDefault() == null)
+        {
+            _logger.LogError("No database cases found by PodioItemId {podioItemId}", job.PodioItemId);
+            return;
+        }
+
+        var databaseCase = getDataCaseCasesResult.Value.First();
 
         // Find database ticket from PodioItemId
         var getDatabaseTicketQuery = new GetTicketsQuery(null, job.PodioItemId, null);
@@ -118,7 +137,8 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
             Undermappe = caseSharepointFolderName,
             GeoSag = !IsNovaCase(caseNumber),
             NovaSag = IsNovaCase(caseNumber),
-            AktSagsURL = databaseTicket.CaseUrl
+            AktSagsURL = databaseTicket.CaseUrl,
+            FilarkivCaseID = databaseCase.FilArkivCaseId
         };
 
         BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}", payload.ToJson(), CancellationToken.None));
