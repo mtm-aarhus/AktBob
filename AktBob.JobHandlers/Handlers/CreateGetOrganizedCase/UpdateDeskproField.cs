@@ -1,9 +1,4 @@
 ﻿using AktBob.Deskpro.Contracts;
-using Ardalis.GuardClauses;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.JobHandlers.Handlers.CreateGetOrganizedCase;
 internal class UpdateDeskproField(ILogger<UpdateDeskproField> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory)

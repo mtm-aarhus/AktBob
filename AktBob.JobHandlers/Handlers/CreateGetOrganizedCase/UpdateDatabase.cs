@@ -1,9 +1,5 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.UseCases.Tickets.UpdateTicket;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.JobHandlers.Handlers.CreateGetOrganizedCase;
 internal class UpdateDatabase(ILogger<UpdateDatabase> logger, IServiceScopeFactory serviceScopeFactory)

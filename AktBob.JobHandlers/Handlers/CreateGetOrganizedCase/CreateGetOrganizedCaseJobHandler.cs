@@ -1,12 +1,4 @@
-﻿using AktBob.Shared;
-using AktBob.Shared.Contracts;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Ardalis.GuardClauses;
-using Microsoft.Extensions.DependencyInjection;
-using MassTransit.Mediator;
-using MassTransit;
-using Hangfire;
+﻿using AktBob.Shared.Contracts;
 using AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 
 namespace AktBob.JobHandlers.Handlers.CreateGetOrganizedCase;

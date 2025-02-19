@@ -3,12 +3,6 @@ using AAK.GetOrganized;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using AktBob.Shared;
-using Hangfire;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactory, ILogger<ProcessMessageAttachments> logger)

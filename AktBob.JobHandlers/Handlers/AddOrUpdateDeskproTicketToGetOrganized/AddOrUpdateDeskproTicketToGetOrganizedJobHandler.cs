@@ -1,18 +1,12 @@
 ﻿using AAK.GetOrganized;
 using AAK.GetOrganized.UploadDocument;
 using AktBob.CloudConvert.Contracts;
-using AktBob.Database.Contracts;
 using AktBob.Database.Contracts.Messages;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
 using AktBob.JobHandlers.Utils;
-using AktBob.Shared;
 using AktBob.Shared.Contracts;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace AktBob.JobHandlers.Handlers.AddOrUpdateDeskproTicketToGetOrganized;

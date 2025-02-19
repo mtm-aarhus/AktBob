@@ -1,5 +1,4 @@
 ﻿using AktBob.Podio.Contracts;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
 internal class UpdatePodioItemJob

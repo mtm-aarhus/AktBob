@@ -1,14 +1,7 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Contracts.Messages;
 using AktBob.Deskpro.Contracts;
-using AktBob.Shared;
 using AktBob.Shared.Contracts;
-using Hangfire;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 internal class RegisterMessagesJobHandler(ILogger<RegisterMessagesJobHandler> logger, IServiceScopeFactory serviceScopeFactory, IConfiguration configuration) : IJobHandler<RegisterMessagesJob>

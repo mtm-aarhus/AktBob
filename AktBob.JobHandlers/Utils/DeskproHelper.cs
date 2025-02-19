@@ -1,10 +1,6 @@
 ﻿using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
-using Ardalis.Result;
-using MassTransit;
-using MassTransit.Mediator;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.JobHandlers.Utils;
 internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)

@@ -1,8 +1,6 @@
-﻿using AktBob.Shared;
-using AktBob.Shared.Contracts;
+﻿using AktBob.Shared.Contracts;
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.Documents;
-using Hangfire;
 
 namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
 

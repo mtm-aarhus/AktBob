@@ -1,7 +1,4 @@
 ﻿using AktBob.OpenOrchestrator.Contracts;
-using MassTransit.Mediator;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.JobHandlers.Handlers;
 internal class CreateOpenOrchestratorQueueItem(IServiceScopeFactory serviceScopeFactory, ILogger<CreateOpenOrchestratorQueueItem> logger)

@@ -1,15 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
-using AktBob.Shared;
 using AktBob.Shared.Contracts;
-using Ardalis.GuardClauses;
-using Hangfire;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System.Text.Json;
 
 namespace AktBob.JobHandlers.Handlers;
 internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactory serviceScopeFactory, ILogger<CreateAfgørelsesskrivelseQueueItemJobHandler> logger, IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>

@@ -1,15 +1,7 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.JobHandlers.Handlers;
-using AktBob.Shared;
 using AktBob.Shared.Contracts;
-using Ardalis.GuardClauses;
-using Hangfire;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.PodioHookProcessor.UseCases;
 internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration, ILogger<CreateJournalizeEverythingQueueItemJobHandler> logger) : IJobHandler<CreateJournalizeEverythingQueueItemJob>

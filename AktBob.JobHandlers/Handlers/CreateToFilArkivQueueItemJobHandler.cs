@@ -4,15 +4,7 @@ using AktBob.Deskpro.Contracts;
 using AktBob.JobHandlers.Handlers;
 using AktBob.JobHandlers.Utils;
 using AktBob.Podio.Contracts;
-using AktBob.Shared;
 using AktBob.Shared.Contracts;
-using Ardalis.GuardClauses;
-using Hangfire;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
 namespace AktBob.PodioHookProcessor.UseCases;

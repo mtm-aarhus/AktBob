@@ -2,14 +2,7 @@
 using AktBob.Database.Contracts;
 using AktBob.Database.UseCases.Cases.AddCase;
 using AktBob.Podio.Contracts;
-using AktBob.Shared;
 using AktBob.Shared.Contracts;
-using Ardalis.GuardClauses;
-using MassTransit;
-using MassTransit.Mediator;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.PodioHookProcessor.UseCases;
 internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<RegisterPodioCaseJob>

@@ -1,6 +1,5 @@
 ﻿using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.FileProcess;
-using Hangfire;
 
 namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
 internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJob> logger,

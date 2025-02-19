@@ -1,7 +1,4 @@
 ﻿using AktBob.UiPath.Contracts;
-using MassTransit.Mediator;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.JobHandlers.Handlers;
 internal class CreateUiPathQueueItem(IServiceScopeFactory serviceScopeFactory, ILogger<CreateDocumentListQueueItemJobHandler> logger)

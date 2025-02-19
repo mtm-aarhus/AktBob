@@ -1,7 +1,4 @@
-﻿using AktBob.Database.Contracts;
-using AktBob.Database.Contracts.Messages;
-using MassTransit.Mediator;
-using Microsoft.Extensions.DependencyInjection;
+﻿using AktBob.Database.Contracts.Messages;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 internal class DeleteMessage(IServiceScopeFactory serviceScopeFactory)

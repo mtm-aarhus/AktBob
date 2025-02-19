@@ -1,7 +1,5 @@
 ﻿using AktBob.PodioHookProcessor.UseCases;
 using AktBob.Shared.Contracts;
-using AktBob.Shared;
-using Microsoft.Extensions.DependencyInjection;
 using AktBob.JobHandlers.Handlers;
 using AktBob.JobHandlers.Utils;
 using AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
