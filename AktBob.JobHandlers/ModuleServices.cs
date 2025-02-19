@@ -6,9 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using AktBob.JobHandlers.Handlers;
 using AktBob.JobHandlers.Utils;
 using AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
+using Ardalis.GuardClauses;
+using FilArkivCore.Web.Client;
+using AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
 
 namespace AktBob.JobHandlers;
-public static class RegisterJobHandlers
+public static class ModuleServices
 {
     public static IServiceCollection AddJobHandlers(this IServiceCollection services, IConfiguration configuration)
     {
@@ -21,9 +24,23 @@ public static class RegisterJobHandlers
         services.AddTransient<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItemJobHandler>();
         services.AddTransient<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItemJobHandler>();
         services.AddTransient<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCaseJobHandler>();
+        services.AddTransient<IJobHandler<CheckOCRScreeningStatusJob>, RegisterFilesJobHandler>();
 
         services.AddTransient<DeskproHelper>();
         services.AddSingleton<Handlers.AddOrUpdateDeskproTicketToGetOrganized.PendingsTickets>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddJobHandlersModule(this IServiceCollection services, IConfiguration configuration)
+    {
+        // FilArkiv client
+        var filArkivUrl = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:BaseAddress"));
+        var filArkivClientId = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientId"));
+        var filArkivClientSecret = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientSecret"));
+        services.AddFilArkivApiClient(filArkivUrl, filArkivClientId, filArkivClientSecret);
+
+        services.AddSingleton<CachedData>();
 
         return services;
     }

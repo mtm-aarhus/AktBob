@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AktBob.CheckOCRScreeningStatus\AktBob.CheckOCRScreeningStatus.csproj" />
     <ProjectReference Include="..\AktBob.CloudConvert\AktBob.CloudConvert.csproj" />
     <ProjectReference Include="..\AktBob.Database\AktBob.Database.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />

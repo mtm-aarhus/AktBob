@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FilArkivCore.Web.Client" Version="1.0.217" />
+    <PackageReference Include="FilArkivCore.Web.Shared" Version="1.0.251" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AktBob.CloudConvert.Contracts\AktBob.CloudConvert.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Database.Contracts\AktBob.Database.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />

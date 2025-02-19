@@ -1,4 +1,3 @@
-using AktBob.CheckOCRScreeningStatus;
 using Serilog;
 using AktBob.UiPath;
 using AktBob.Deskpro;
@@ -11,7 +10,6 @@ using AktBob.JobHandlers;
 using AktBob.GetOrganized;
 using AktBob.Database;
 using AktBob.Database.Contracts.Messages;
-using System.Threading;
 using MassTransit.Mediator;
 
 var builder = Host.CreateDefaultBuilder(args)
@@ -26,15 +24,15 @@ var builder = Host.CreateDefaultBuilder(args)
 
         // Modules
         var mediatorHandlers = new List<Type>();
-        services.AddCheckOCRScreeningStatusModule(hostContext.Configuration);
         services.AddUiPathModule(hostContext.Configuration, mediatorHandlers);
         services.AddDeskproModule(hostContext.Configuration, mediatorHandlers);
         services.AddPodioModule(hostContext.Configuration, mediatorHandlers);
         services.AddOpenOrchestratorModule(hostContext.Configuration, mediatorHandlers);
         services.AddCloudConvertModule(hostContext.Configuration, mediatorHandlers);
         services.AddGetOrganizedModule(hostContext.Configuration, mediatorHandlers);
-        services.AddJobHandlers(hostContext.Configuration);
         services.AddDatabaseModule(hostContext.Configuration, mediatorHandlers);
+        services.AddJobHandlers(hostContext.Configuration);
+        services.AddJobHandlersModule(hostContext.Configuration);
 
         // MassTransit Mediator
         services.AddMediator(cfg =>

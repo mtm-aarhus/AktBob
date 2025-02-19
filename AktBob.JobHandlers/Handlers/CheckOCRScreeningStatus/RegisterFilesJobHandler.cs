@@ -1,11 +1,10 @@
-﻿using AktBob.CheckOCRScreeningStatus.JobHandlers;
-using AktBob.Shared;
+﻿using AktBob.Shared;
 using AktBob.Shared.Contracts;
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.Documents;
 using Hangfire;
 
-namespace AktBob.CheckOCRScreeningStatus.Jobs;
+namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
 
 internal class RegisterFilesJobHandler(CachedData cachedData, FilArkivCoreClient filArkivCoreClient, ILogger<RegisterFilesJobHandler> logger) : IJobHandler<CheckOCRScreeningStatusJob>
 {

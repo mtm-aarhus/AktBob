@@ -1,7 +1,7 @@
 ﻿using AktBob.Podio.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AktBob.CheckOCRScreeningStatus.Jobs;
+namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
 internal class UpdatePodioItemJob
 {
     private readonly IConfiguration _configuration;

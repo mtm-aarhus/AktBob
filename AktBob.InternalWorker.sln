@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.CheckOCRScreeningStatus", "AktBob.CheckOCRScreeningStatus\AktBob.CheckOCRScreeningStatus.csproj", "{5A76B308-131B-496C-AECA-8A83C5C6C660}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Check OCR Screening Status Module", "Check OCR Screening Status Module", "{A480C33B-82F4-4D2D-8113-A1D67E0FE0EF}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Email Module", "Email Module", "{04E88733-1387-4041-AAF2-EA21EC4A1D24}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Email", "AktBob.Email\AktBob.Email.csproj", "{57215D5C-7983-4A89-B722-307B8A354BC1}"
@@ -83,10 +79,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5A76B308-131B-496C-AECA-8A83C5C6C660}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A76B308-131B-496C-AECA-8A83C5C6C660}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5A76B308-131B-496C-AECA-8A83C5C6C660}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5A76B308-131B-496C-AECA-8A83C5C6C660}.Release|Any CPU.Build.0 = Release|Any CPU
 		{57215D5C-7983-4A89-B722-307B8A354BC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{57215D5C-7983-4A89-B722-307B8A354BC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57215D5C-7983-4A89-B722-307B8A354BC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -186,7 +178,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{5A76B308-131B-496C-AECA-8A83C5C6C660} = {A480C33B-82F4-4D2D-8113-A1D67E0FE0EF}
 		{57215D5C-7983-4A89-B722-307B8A354BC1} = {04E88733-1387-4041-AAF2-EA21EC4A1D24}
 		{D87D21C4-BEC3-4B6F-B225-2AD892851FD3} = {04E88733-1387-4041-AAF2-EA21EC4A1D24}
 		{98F0A731-E540-4F0C-9B36-25F304073804} = {5DA13B9A-D290-426C-93BB-781FE2C772C4}

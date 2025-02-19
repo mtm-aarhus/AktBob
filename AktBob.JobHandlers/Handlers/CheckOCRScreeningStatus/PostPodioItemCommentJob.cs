@@ -1,7 +1,7 @@
 ﻿using AktBob.Podio.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AktBob.CheckOCRScreeningStatus.Jobs;
+namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
 internal class PostPodioItemCommentJob(IConfiguration configuration, IServiceScopeFactory serviceScopeFactory)
 {
     private readonly IConfiguration _configuration = configuration;
