@@ -3,11 +3,15 @@ using FilArkivCore.Web.Shared.FileProcess;
 using Hangfire;
 
 namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
-internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJob> logger, FilArkivCoreClient filArkivCoreClient, CachedData cachedData)
+internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJob> logger,
+                                             FilArkivCoreClient filArkivCoreClient,
+                                             CachedData cachedData,
+                                             CheckOCRScreeningStatusSettings settings)
 {
     private readonly ILogger<QueryFilesProcessingStatusJob> _logger = logger;
     private readonly FilArkivCoreClient _filArkivCoreClient = filArkivCoreClient;
     private readonly CachedData _cachedData = cachedData;
+    private readonly CheckOCRScreeningStatusSettings _settings = settings;
 
     public async Task Run(Guid cacheId, CancellationToken cancellationToken = default)
     {
@@ -51,7 +55,11 @@ internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJ
 
         _cachedData.Cases.TryRemove(cacheId, out Case? removedCase);
 
-        BackgroundJob.Enqueue<UpdatePodioItemJob>(job => job.Run(@case.FilArkivCaseId, @case.PodioItemId, CancellationToken.None));
+        if (!_settings.UpdatePodioItemImmediately)
+        {
+            BackgroundJob.Enqueue<UpdatePodioItemJob>(job => job.Run(@case.FilArkivCaseId, @case.PodioItemId, CancellationToken.None));
+        }
+
         BackgroundJob.Enqueue<PostPodioItemCommentJob>(job => job.Run(@case.PodioItemId, CancellationToken.None));
     }
 }

@@ -6,11 +6,15 @@ using Hangfire;
 
 namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
 
-internal class RegisterFilesJobHandler(CachedData cachedData, FilArkivCoreClient filArkivCoreClient, ILogger<RegisterFilesJobHandler> logger) : IJobHandler<CheckOCRScreeningStatusJob>
+internal class RegisterFilesJobHandler(CachedData cachedData,
+                                       FilArkivCoreClient filArkivCoreClient,
+                                       ILogger<RegisterFilesJobHandler> logger,
+                                       CheckOCRScreeningStatusSettings settings) : IJobHandler<CheckOCRScreeningStatusJob>
 {
     private readonly CachedData _cachedData = cachedData;
     private readonly FilArkivCoreClient _filArkivCoreClient = filArkivCoreClient;
     private readonly ILogger<RegisterFilesJobHandler> _logger = logger;
+    private readonly CheckOCRScreeningStatusSettings _settings = settings;
 
     public async Task Handle(CheckOCRScreeningStatusJob job, CancellationToken cancellationToken = default)
     {
@@ -63,5 +67,10 @@ internal class RegisterFilesJobHandler(CachedData cachedData, FilArkivCoreClient
 
         // Enqueue job: query files processing status
         BackgroundJob.Enqueue<QueryFilesProcessingStatusJob>(x => x.Run(cacheId, CancellationToken.None));
+
+        if (_settings.UpdatePodioItemImmediately)
+        {
+            BackgroundJob.Enqueue<UpdatePodioItemJob>(job => job.Run(@case.FilArkivCaseId, @case.PodioItemId, CancellationToken.None));
+        }
     }
 }

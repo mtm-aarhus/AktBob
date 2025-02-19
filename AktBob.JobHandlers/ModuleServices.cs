@@ -1,12 +1,10 @@
 ﻿using AktBob.PodioHookProcessor.UseCases;
 using AktBob.Shared.Contracts;
 using AktBob.Shared;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AktBob.JobHandlers.Handlers;
 using AktBob.JobHandlers.Utils;
 using AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
-using Ardalis.GuardClauses;
 using FilArkivCore.Web.Client;
 using AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
 
@@ -41,6 +39,7 @@ public static class ModuleServices
         services.AddFilArkivApiClient(filArkivUrl, filArkivClientId, filArkivClientSecret);
 
         services.AddSingleton<CachedData>();
+        services.AddSingleton<CheckOCRScreeningStatusSettings>();
 
         return services;
     }
