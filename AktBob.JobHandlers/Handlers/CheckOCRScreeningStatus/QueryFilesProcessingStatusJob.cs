@@ -22,39 +22,50 @@ internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJ
 
         _logger.LogInformation("Querying processing statusses for files for FilArkiv Case {id}, PodioItemId {podioItemId}", @case.FilArkivCaseId, @case.PodioItemId);
 
-        // Query each file with a 10 seconds delay between queries
+        // Query each file with a delay between queries
         // Wait for all files to return a 'finished' state
-        await Task.WhenAll(
-            @case.Files.Select(
-                async fileId =>
+        var random = new Random();
+        var tasks = @case.Files.Select(
+            async fileId =>
+            {
+                var parameters = new FileProcessStatusFileParameters
                 {
-                    var parameters = new FileProcessStatusFileParameters
+                    FileId = fileId
+                };
+
+                var first = true;
+
+                while (true)
+                {
+                    var delay = 20000 + random.Next(-2000, 2000);
+                    await Task.Delay(delay);
+
+                    var response = await _filArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
+
+                    if (first)
                     {
-                        FileId = fileId
-                    };
-
-                    while (true)
-                    {
-                        await Task.Delay(10000);
-
-                        var response = await _filArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
-                        _logger.LogInformation("File {fileId} IsBeingProcessed: {isBeingProcessed} ('{fileName}')", fileId, response.IsBeingProcessed, response.FileName);
-
-                        if (!response.IsInQueue)
-                        {
-                            if (!response.FileProcessStatusResponses.Any(x =>
-                                x.Ignore == false
-                                && x.FinishedAt == null
-                                && x.RetryInProgress == false))
-                            {
-                                break;
-                            }
-                        }
-
-                        // TODO: Maybe break out of while loop after a maximum time period?
+                        _logger.LogInformation("Case {caseId} File {fileId} IsBeingProcessed: {isBeingProcessed} IsInQueue: {isInQueue} ({queueNumber}) ('{fileName}')", @case.FilArkivCaseId, fileId, response.IsBeingProcessed, response.IsInQueue, response.QueueNumber, response.FileName);
+                        first = false;
                     }
+
+                    if (!response.IsInQueue)
+                    {
+                        if (!response.FileProcessStatusResponses.Any(x =>
+                            x.Ignore == false
+                            && x.FinishedAt == null
+                            && x.RetryInProgress == false))
+                        {
+                            _logger.LogInformation("Case {caseId} File {fileId} Finished ('{fileName}')", @case.FilArkivCaseId, fileId, response.FileName);
+                            break;
+                        }
+                    }
+
+                    // TODO: Maybe break out of while loop after a maximum time period?
                 }
-        ));
+            }
+        ).ToArray();
+
+        Task.WaitAll(tasks, cancellationToken);
 
         _logger.LogInformation("Finished querying processing statusses for files for FilArkiv Case {id}, PodioItemId {podioItemId}", @case.FilArkivCaseId, @case.PodioItemId);
 
