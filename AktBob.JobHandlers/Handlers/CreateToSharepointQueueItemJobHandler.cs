@@ -146,7 +146,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
 
     private bool IsNovaCase(string caseNumber)
     {
-        string pattern = @"^S\d{4}-\d{1,5}$";
+        string pattern = @"^[A-Za-z]\d{4}-\d{1,10}$";
         Regex regex = new Regex(pattern);
         return regex.IsMatch(caseNumber);
     }
