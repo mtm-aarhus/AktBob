@@ -20,6 +20,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddSerilog(config =>
         {
             config.ReadFrom.Configuration(hostContext.Configuration);
+            config.Enrich.FromLogContext();
         });
 
         // Modules
