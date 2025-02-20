@@ -1,2 +1,2 @@
-﻿namespace AktBob.Email.UseCases.SendEmail;
+﻿namespace AktBob.Email.Contracts;
 public record SendEmailCommand(string To, string Subject, string Body, bool IsBodyHtml = true);
