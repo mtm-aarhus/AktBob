@@ -32,46 +32,27 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
         var afdeling = deskproTicket.Fields.FirstOrDefault(x => x.Id == deskproAfdelingFieldId)?.Values.FirstOrDefault();
         if (string.IsNullOrEmpty(afdeling))
         {
-            _logger.LogError("Deskpro ticket {id} field 'Afdeling' is null or empty", job.DeskproId);
-            return;
+            _logger.LogWarning("Deskpro ticket {id} field 'Afdeling' is null or empty", job.DeskproId);
         }
 
 
         // Get person from Deskpro
         if (deskproTicket.Person == null)
         {
-            _logger.LogError("Deskpro ticket {id}: person is null", job.DeskproId);
-            return;
+            _logger.LogWarning("Deskpro ticket {id}: person is null", job.DeskproId);
         }
 
-
-        var getPersonQuery = new GetDeskproPersonQuery(deskproTicket.Person.Id);
-        var getPersonResult = await mediator.SendRequest(getPersonQuery, cancellationToken);
-
-        if (!getPersonResult.IsSuccess)
-        {
-            _logger.LogError("Error getting person {id} from Deskpro", deskproTicket.Person.Id);
-            return;
-        }
-
+        var getPersonResult = await GetDeskproPerson(mediator, deskproTicket.Person?.Id, cancellationToken);
         var person = getPersonResult.Value;
+
 
         // Get agent from Deskpro
         if (deskproTicket.Agent == null)
         {
-            _logger.LogError("Deskpro ticket {id}: agent is null", job.DeskproId);
-            return;
+            _logger.LogWarning("Deskpro ticket {id}: agent is null", job.DeskproId);
         }
 
-        var getAgentQuery = new GetDeskproPersonQuery(deskproTicket.Agent.Id);
-        var getAgentResult = await mediator.SendRequest(getAgentQuery, cancellationToken);
-
-        if (!getAgentResult.IsSuccess)
-        {
-            _logger.LogError("Error getting agent {id} from Deskpro", deskproTicket.Agent.Id);
-            return;
-        }
-
+        var getAgentResult = await GetDeskproPerson(mediator, deskproTicket.Agent?.Id, cancellationToken);
         var agent = getAgentResult.Value;
 
 
@@ -82,28 +63,43 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
         if (!getDatabaseTicketResult.IsSuccess || getDatabaseTicketResult.Value == null || !getDatabaseTicketResult.Value.Any())
         {
             _logger.LogError("Error ticket from database (DeskproId {id})", job.DeskproId);
-            return;
         }
 
 
-        var databaseTicket = getDatabaseTicketResult.Value.First();
-        if (string.IsNullOrEmpty(databaseTicket.SharepointFolderName))
+        var databaseTicket = getDatabaseTicketResult?.Value?.FirstOrDefault();
+        if (string.IsNullOrEmpty(databaseTicket?.SharepointFolderName))
         {
-            _logger.LogError("Sharepoint folder name is null or empty (database ticket id {id}", databaseTicket.Id);
-            return;
+            _logger.LogError("Sharepoint folder name is null or empty (database ticket id {id}", job.DeskproId);
         }
 
 
         // Create OpenOrchestrator queue item
         var payload = new
         {
-            AnsøgerNavn = person.FullName,
-            AnsøgerEmail = person.Email,
+            AnsøgerNavn = person?.FullName,
+            AnsøgerEmail = person?.Email,
             Afdeling = afdeling,
-            Aktindsigtsovermappe = databaseTicket.SharepointFolderName,
-            SagsbehandlerEmail = agent.Email
+            Aktindsigtsovermappe = databaseTicket?.SharepointFolderName,
+            SagsbehandlerEmail = agent?.Email
         };
 
         BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"DeskproID {job.DeskproId}", payload.ToJson(), CancellationToken.None));
+    }
+
+    private async Task<Result<Deskpro.Contracts.DTOs.PersonDto>> GetDeskproPerson(IMediator mediator, int? personId, CancellationToken cancellationToken)
+    {
+        if (personId is null)
+        {
+            return Result.Error();
+        }
+
+        var getPersonQuery = new GetDeskproPersonQuery((int)personId);
+        var getPersonResult = await mediator.SendRequest(getPersonQuery, cancellationToken);
+        if (!getPersonResult.IsSuccess)
+        {
+            _logger.LogWarning("Error getting person {id} from Deskpro", personId);
+        }
+
+        return getPersonResult;
     }
 }
