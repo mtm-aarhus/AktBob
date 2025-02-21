@@ -368,3 +368,5 @@ FodyWeavers.xsd
 /AktBob.Api/nuget.config
 /nuget.config
 /AktBob.Worker/appsettings.development.json
+/src/AktBob.Worker/appsettings.development.json
+/src/AktBob.Api/appsettings.development.json
