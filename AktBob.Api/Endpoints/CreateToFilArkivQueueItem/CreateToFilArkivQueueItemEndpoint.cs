@@ -16,7 +16,7 @@ internal class CreateToFilArkivQueueItemEndpoint : Endpoint<CreateDocumentListQu
 
     public override void Configure()
     {
-        Post("/Jobs/CreateToFilArkivQueueItem", "/Queue/edbae766");
+        Post("/Jobs/CreateToFilArkivQueueItem");
         AllowFormData(urlEncoded: true);
         Options(x => x.WithTags("Jobs"));
         Summary(s =>

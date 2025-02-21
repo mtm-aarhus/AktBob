@@ -11,7 +11,7 @@ internal class RegisterPodioCaseEndpoint(IJobDispatcher jobDispatcher) : Endpoin
     public override void Configure()
     {
 
-        Post("/Jobs/RegisterPodioCase", "/Queue/e437047b");
+        Post("/Jobs/RegisterPodioCase");
         Options(x => x.WithTags("Jobs"));
         AllowFormData(urlEncoded: true);
         Summary(s =>
