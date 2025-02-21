@@ -1,16 +1,17 @@
 ﻿using AktBob.Shared.Contracts;
 using AktBob.Shared;
 using FastEndpoints;
+using AktBob.Api.Endpoints.CreateAfgørelsesskrivelseQueueItem;
 
-namespace AktBob.Api.Endpoints.CreateAfgørelsesskrivelseQueueItem;
+namespace AktBob.Api.Endpoints.AfgørelsesskrivelseQueueItem;
 
-internal class CreateAfgørelsesskrivelseQueueItemEndpoint(IJobDispatcher jobDispatcher) : Endpoint<CreateAfgørelsesskrivelseQueueItemRequest>
+internal class AfgørelsesskrivelseQueueItemEndpoint(IJobDispatcher jobDispatcher) : Endpoint<AfgørelsesskrivelseQueueItemRequest>
 {
     private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public override void Configure()
     {
-        Post("/Jobs/CreateAfgoerelsesskrivelseQueueItem");
+        Post("/Jobs/AfgoerelsesskrivelseQueueItem", "/Jobs/CreateAfgoerelsesskrivelseQueueItem");
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
@@ -18,7 +19,7 @@ internal class CreateAfgørelsesskrivelseQueueItemEndpoint(IJobDispatcher jobDis
         });
     }
 
-    public override async Task HandleAsync(CreateAfgørelsesskrivelseQueueItemRequest req, CancellationToken ct)
+    public override async Task HandleAsync(AfgørelsesskrivelseQueueItemRequest req, CancellationToken ct)
     {
         var job = new CreateAfgørelsesskrivelseQueueItemJob(req.DeskproId);
         _jobDispatcher.Dispatch(job);

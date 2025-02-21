@@ -1,11 +1,11 @@
 ﻿using FastEndpoints;
 using FluentValidation;
 
-namespace AktBob.Api.Endpoints.AddOrUpdateDeskproTicketToGetOrganized;
+namespace AktBob.Api.Endpoints.DeskproTicketToGetOrganized;
 
-internal class AddOrUpdateDeskproTicketToGetOrganizedRequestValidator : Validator<AddOrUpdateDeskproTicketToGetOrganizedRequest>
+internal class DeskproTicketToGetOrganizedRequestValidator : Validator<DeskproTicketToGetOrganizedRequest>
 {
-    public AddOrUpdateDeskproTicketToGetOrganizedRequestValidator()
+    public DeskproTicketToGetOrganizedRequestValidator()
     {
         RuleFor(x => x.TicketId).GreaterThan(0);
         RuleFor(x => x.GOCaseNumber).NotEmpty();

@@ -1,18 +1,18 @@
-﻿using AktBob.Api.Endpoints.CreateDocumentListQueueItem;
+﻿using AktBob.Api.Endpoints.DocumentListQueueItem;
 using AktBob.Shared;
 using AktBob.Shared.Contracts;
 using FastEndpoints;
 
-namespace AktBob.Api.Endpoints.CreateToSharepointQueueItem;
+namespace AktBob.Api.Endpoints.ToSharepointQueueItem;
 
-internal class CreateToSharepointQueueItemEndpoint(IJobDispatcher jobDispatcher) : Endpoint<CreateDocumentListQueueItemRequest>
+internal class ToSharepointQueueItemEndpoint(IJobDispatcher jobDispatcher) : Endpoint<DocumentListQueueItemRequest>
 {
     private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public override void Configure()
     {
 
-        Post("/Jobs/CreateToSharepointQueueItem");
+        Post("/Jobs/ToSharepointQueueItem", "/Jobs/CreateToSharepointQueueItem");
         AllowFormData(urlEncoded: true);
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
@@ -21,7 +21,7 @@ internal class CreateToSharepointQueueItemEndpoint(IJobDispatcher jobDispatcher)
         });
     }
 
-    public override async Task HandleAsync(CreateDocumentListQueueItemRequest req, CancellationToken ct)
+    public override async Task HandleAsync(DocumentListQueueItemRequest req, CancellationToken ct)
     {
         var job = new CreateToSharepointQueueItemJob(req.PodioItemId);
         _jobDispatcher.Dispatch(job);

@@ -2,15 +2,15 @@
 using AktBob.Shared.Contracts;
 using FastEndpoints;
 
-namespace AktBob.Api.Endpoints.CreateDocumentListQueueItem;
+namespace AktBob.Api.Endpoints.DocumentListQueueItem;
 
-internal class CreateDocumentListQueueItemEndpoint(IJobDispatcher jobDispatcher) : Endpoint<CreateDocumentListQueueItemRequest>
+internal class DocumentListQueueItemEndpoint(IJobDispatcher jobDispatcher) : Endpoint<DocumentListQueueItemRequest>
 {
     private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public override void Configure()
     {
-        Post("/Jobs/CreateDocumentListQueueItem");
+        Post("/Jobs/DocumentListQueueItem", "/Jobs/CreateDocumentListQueueItem");
         AllowFormData(urlEncoded: true);
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
@@ -19,7 +19,7 @@ internal class CreateDocumentListQueueItemEndpoint(IJobDispatcher jobDispatcher)
         });
     }
 
-    public override async Task HandleAsync(CreateDocumentListQueueItemRequest req, CancellationToken ct)
+    public override async Task HandleAsync(DocumentListQueueItemRequest req, CancellationToken ct)
     {
         var job = new CreateDocumentListQueueItemJob(req.PodioItemId);
         _jobDispatcher.Dispatch(job);

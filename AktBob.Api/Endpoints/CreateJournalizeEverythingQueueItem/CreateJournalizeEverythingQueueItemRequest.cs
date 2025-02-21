@@ -1,3 +1,0 @@
-﻿namespace AktBob.Api.Endpoints.CreateJournalizeEverythingQueueItem;
-
-internal record CreateJournalizeEverythingQueueItemRequest(int DeskproId);

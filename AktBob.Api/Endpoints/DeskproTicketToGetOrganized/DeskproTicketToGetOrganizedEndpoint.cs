@@ -2,15 +2,15 @@
 using AktBob.Shared.Contracts;
 using FastEndpoints;
 
-namespace AktBob.Api.Endpoints.AddOrUpdateDeskproTicketToGetOrganized;
+namespace AktBob.Api.Endpoints.DeskproTicketToGetOrganized;
 
-internal class AddOrUpdateDeskproTicketToGetOrganizedEndpoint(IJobDispatcher jobDispatcher) : Endpoint<AddOrUpdateDeskproTicketToGetOrganizedRequest>
+internal class DeskproTicketToGetOrganizedEndpoint(IJobDispatcher jobDispatcher) : Endpoint<DeskproTicketToGetOrganizedRequest>
 {
     private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public override void Configure()
     {
-        Post("/Jobs/AddOrUpdateDeskproTicketToGetOrganized");
+        Post("/Jobs/DeskproTicketToGetOrganized", "/Jobs/AddOrUpdateDeskproTicketToGetOrganized");
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
@@ -18,7 +18,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedEndpoint(IJobDispatcher job
         });
     }
 
-    public override async Task HandleAsync(AddOrUpdateDeskproTicketToGetOrganizedRequest req, CancellationToken ct)
+    public override async Task HandleAsync(DeskproTicketToGetOrganizedRequest req, CancellationToken ct)
     {
         var command = new AddOrUpdateDeskproTicketToGetOrganizedJob
         {

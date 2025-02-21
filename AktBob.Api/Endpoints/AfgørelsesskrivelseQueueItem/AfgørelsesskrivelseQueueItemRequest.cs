@@ -1,3 +1,3 @@
 ﻿namespace AktBob.Api.Endpoints.CreateAfgørelsesskrivelseQueueItem;
 
-public record CreateAfgørelsesskrivelseQueueItemRequest(int DeskproId);
+public record AfgørelsesskrivelseQueueItemRequest(int DeskproId);
