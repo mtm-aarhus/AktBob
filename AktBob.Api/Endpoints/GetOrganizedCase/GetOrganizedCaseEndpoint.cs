@@ -9,8 +9,12 @@ internal class GetOrganizedCaseEndpoint(IJobDispatcher jobDispatcher) : Endpoint
 
     public override void Configure()
     {
-        Post("/Jobs/GetOrganizedCase", "/Jobs/CreateGetOrganizedCase");
+        Post("/Jobs/GetOrganizedCase");
         Options(x => x.WithTags("Jobs"));
+        Summary(s =>
+        {
+            s.Summary = "Creates a new GetOrganized case and updates the Deskpro ticket with the GetOrganized case ID/URL";
+        });
     }
 
     public override async Task HandleAsync(GetOrganizedCaseRequest req, CancellationToken ct)

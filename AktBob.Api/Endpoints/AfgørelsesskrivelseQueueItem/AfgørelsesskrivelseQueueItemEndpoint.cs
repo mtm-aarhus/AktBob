@@ -11,11 +11,11 @@ internal class AfgørelsesskrivelseQueueItemEndpoint(IJobDispatcher jobDispatche
 
     public override void Configure()
     {
-        Post("/Jobs/AfgoerelsesskrivelseQueueItem", "/Jobs/CreateAfgoerelsesskrivelseQueueItem");
+        Post("/Jobs/AfgoerelsesskrivelseQueueItem");
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
-            s.Summary = "Creates afgørelsesskrivelse queue item";
+            s.Summary = "Creates a new OpenOrchestrator 'AktbobAfgørelse' queue item";
         });
     }
 

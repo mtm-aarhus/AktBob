@@ -30,11 +30,6 @@ internal class PatchCase(IMediator mediator) : Endpoint<PatchCaseRequest, CaseDt
         Description(x => x
             .Produces<CaseDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound));
-
-        Summary(x =>
-        {
-            x.Description = "Opdaterer de angivne felter for en specific case i databasen. Alle felter er valgfrie og ignoreres hvis de enten ikke angives eller angives til null. Returnerer den opdaterede case.";
-        });
     }
 
     public override async Task HandleAsync(PatchCaseRequest req, CancellationToken ct)

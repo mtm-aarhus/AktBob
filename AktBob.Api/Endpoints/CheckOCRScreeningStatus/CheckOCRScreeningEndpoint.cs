@@ -20,7 +20,7 @@ internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher, IMediator
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
-            s.Summary = "Initiate a new job checking the OCR screening status for a FilArkiv case's documents";
+            s.Summary = "Initiates a new job checking the OCR screening status for a FilArkiv case's documents and updates the Podio item with the FilArkiv case ID/URL";
         });
     }
 

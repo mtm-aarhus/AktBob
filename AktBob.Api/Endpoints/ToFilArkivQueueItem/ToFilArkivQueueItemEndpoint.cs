@@ -11,12 +11,12 @@ internal class ToFilArkivQueueItemEndpoint(IJobDispatcher jobDispatcher) : Endpo
 
     public override void Configure()
     {
-        Post("/Jobs/ToFilArkivQueueItem", "/Jobs/CreateToFilArkivQueueItem");
+        Post("/Jobs/ToFilArkivQueueItem");
         AllowFormData(urlEncoded: true);
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
-            s.Summary = "Creates To-FilArkiv queue item";
+            s.Summary = "Creates a new OpenOrchestrator 'AktbobGenererAktindsigter' queue item";
         });
     }
 

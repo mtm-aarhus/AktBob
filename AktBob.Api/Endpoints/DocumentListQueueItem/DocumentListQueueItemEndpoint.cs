@@ -10,12 +10,12 @@ internal class DocumentListQueueItemEndpoint(IJobDispatcher jobDispatcher) : End
 
     public override void Configure()
     {
-        Post("/Jobs/DocumentListQueueItem", "/Jobs/CreateDocumentListQueueItem");
+        Post("/Jobs/DocumentListQueueItem");
         AllowFormData(urlEncoded: true);
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
-            s.Summary = "Creates document list queue item";
+            s.Summary = "Creates a new OpenOrchestrator 'AktbobDokumentlisteQueue' queue item";
         });
     }
 

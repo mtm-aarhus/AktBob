@@ -40,11 +40,6 @@ internal class PostCase(IMediator mediator) : Endpoint<PostCaseRequest, CaseDto>
         Description(x => x
             .Produces<CaseDto>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status400BadRequest));
-
-        Summary(x =>
-        {
-            x.Description = "Opretter en ny case i databasen";
-        });
     }
 
     public override async Task HandleAsync(PostCaseRequest req, CancellationToken ct)

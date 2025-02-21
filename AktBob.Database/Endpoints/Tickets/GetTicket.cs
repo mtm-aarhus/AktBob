@@ -22,11 +22,6 @@ internal class GetTicket(IMediator mediator) : Endpoint<GetTicketRequest, Ticket
         Description(x => x
            .Produces<TicketDto>(StatusCodes.Status200OK)
            .ProducesProblem(StatusCodes.Status404NotFound));
-
-        Summary(x =>
-        {
-            x.Description = "Henter en specific ticket i databasen ud fra database-ID'et";
-        });
     }
 
 

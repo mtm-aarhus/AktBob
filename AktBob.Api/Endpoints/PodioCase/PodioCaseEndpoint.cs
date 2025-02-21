@@ -2,25 +2,25 @@
 using AktBob.Shared.Contracts;
 using FastEndpoints;
 
-namespace AktBob.Api.Endpoints.RegisterPodioCase;
+namespace AktBob.Api.Endpoints.PodioCase;
 
-internal class RegisterPodioCaseEndpoint(IJobDispatcher jobDispatcher) : Endpoint<RegisterPodioCaseRequet>
+internal class PodioCaseEndpoint(IJobDispatcher jobDispatcher) : Endpoint<PodioCaseRequet>
 {
     private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public override void Configure()
     {
 
-        Post("/Jobs/RegisterPodioCase");
+        Post("/Jobs/PodioCase");
         Options(x => x.WithTags("Jobs"));
         AllowFormData(urlEncoded: true);
         Summary(s =>
         {
-            s.Summary = "Registers Podio case in database";
+            s.Summary = "Initiates a job that eventually registers the Podio case in the database";
         });
     }
 
-    public override async Task HandleAsync(RegisterPodioCaseRequet req, CancellationToken ct)
+    public override async Task HandleAsync(PodioCaseRequet req, CancellationToken ct)
     {
         var job = new RegisterPodioCaseJob(req.PodioItemId);
         _jobDispatcher.Dispatch(job);

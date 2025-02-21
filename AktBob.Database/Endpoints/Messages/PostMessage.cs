@@ -20,11 +20,6 @@ internal class PostMessage(IJobDispatcher jobDispatcher) : Endpoint<PostMessageR
 
         Description(x => x
             .Produces(StatusCodes.Status201Created));
-
-        Summary(x =>
-        {
-            x.Description = "Tilføjer køelement til baggrundsproces, der opretter en message i databasen.";
-        });
     }
 
     public override async Task HandleAsync(PostMessageRequest req, CancellationToken ct)

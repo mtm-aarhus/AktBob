@@ -31,11 +31,6 @@ internal class PostTicket(IMediator mediator) : Endpoint<PostTicketRequest, Tick
         Description(x => x
           .Produces<TicketDto>(StatusCodes.Status201Created)
           .ProducesProblem(StatusCodes.Status400BadRequest));
-
-        Summary(x =>
-        {
-            x.Description = "Opretter en ny ticket i databasen.";
-        });
     }
 
     public override async Task HandleAsync(PostTicketRequest req, CancellationToken ct)

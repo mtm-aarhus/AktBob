@@ -10,11 +10,11 @@ internal class JournalizeEverythingQueueItemEndpoint(IJobDispatcher jobDispatche
 
     public override void Configure()
     {
-        Post("/Jobs/JournalizeEverythingQueueItem", "/Jobs/CreateJournalizeEverythingQueueItem");
+        Post("/Jobs/JournalizeEverythingQueueItem");
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
-            s.Summary = "Creates queue item for journalizing everything";
+            s.Summary = "Creates a new OpenOrchestrator 'AktbobJournaliser' queue item";
         });
     }
 

@@ -22,11 +22,6 @@ internal class GetCase(IMediator mediator) : Endpoint<GetCaseRequest, CaseDto>
         Description(x => x
             .Produces<CaseDto>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound));
-
-        Summary(x =>
-        {
-            x.Description = "Henter en specific case fra databasen ud fra database-ID'et";
-        });
     }
 
     public override async Task HandleAsync(GetCaseRequest req, CancellationToken ct)

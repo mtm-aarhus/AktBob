@@ -12,12 +12,12 @@ internal class ToSharepointQueueItemEndpoint(IJobDispatcher jobDispatcher) : End
     public override void Configure()
     {
 
-        Post("/Jobs/ToSharepointQueueItem", "/Jobs/CreateToSharepointQueueItem");
+        Post("/Jobs/ToSharepointQueueItem");
         AllowFormData(urlEncoded: true);
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
-            s.Summary = "Creates a FilArkiv to Sharepoint queue item";
+            s.Summary = "Creates a new OpenOrchestrator 'AktbobFromFilarkivToSharePoint' queue item";
         });
     }
 

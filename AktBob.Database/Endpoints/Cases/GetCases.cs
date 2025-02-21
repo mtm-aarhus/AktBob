@@ -21,11 +21,6 @@ internal class GetCases(IMediator mediator) : Endpoint<GetCasesRequest, IEnumera
 
         Description(x => x
             .Produces<IEnumerable<CaseDto>>(StatusCodes.Status200OK));
-
-        Summary(x =>
-        {
-            x.Description = "Returnerer et array med cases, der matcher den eller de angivne filteringsfelter. Alle felter er valgfrie. Hvis ingen angives, returneres samtlige cases fra databasen.";
-        });
     }
 
     public override async Task HandleAsync(GetCasesRequest req, CancellationToken ct)

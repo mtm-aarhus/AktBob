@@ -30,11 +30,6 @@ internal class PatchTicket(IMediator mediator) : Endpoint<PatchTicketRequest, Ti
         Description(x => x
            .Produces<TicketDto>(StatusCodes.Status200OK)
            .ProducesProblem(StatusCodes.Status404NotFound));
-
-        Summary(x =>
-        {
-            x.Description = "Opdaterer en specific ticket i databasen med de angivne felter. Alle felter er valgfrie og ignoreres hvis de enten ikke er angivet eller angivet til null. Returnerer den opdaterede ticket.";
-        });
     }
 
     public override async Task HandleAsync(PatchTicketRequest req, CancellationToken ct)

@@ -21,11 +21,6 @@ internal class GetTickets(IMediator mediator) : Endpoint<GetTicketsRequest, IEnu
 
         Description(x => x
            .Produces<IEnumerable<TicketDto>>(StatusCodes.Status200OK));
-
-        Summary(x =>
-        {
-            x.Description = "Henter alle tickets fra databasen der matcher den eller de angivne filtreringsfelter. Hvis ingen filtreringsfelter angives returnerers samtlige tickets fra databasen.";
-        });
     }
 
     public override async Task HandleAsync(GetTicketsRequest req, CancellationToken ct)
