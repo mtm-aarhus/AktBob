@@ -54,11 +54,17 @@ internal class CloudConvertClient : ICloudConvertClient
     }
 
 
-    public async Task<Result<JobResponseRoot?>> GetJob(Guid jobId, CancellationToken cancellationToken = default)
+    public async Task<Result<JobResponseRoot>> GetJob(Guid jobId, CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _httpClient.GetFromJsonAsync<JobResponseRoot>($"jobs/{jobId}", cancellationToken);
+            var result = await _httpClient.GetFromJsonAsync<JobResponseRoot>($"jobs/{jobId}", cancellationToken);
+            if (result?.Data is not null)
+            {
+                return result;
+            }
+
+            return Result.Error();
         }
         catch (Exception ex)
         {

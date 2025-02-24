@@ -1,9 +1,12 @@
-﻿namespace AktBob.CloudConvert.UseCases;
-public class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogger<GetJobQueryHandler> logger, IMediator mediator) : MediatorRequestHandler<GetJobQuery, Result<byte[]>>
+﻿using AktBob.Shared;
+
+namespace AktBob.CloudConvert.UseCases;
+public class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogger<GetJobQueryHandler> logger, IMediator mediator, ITimeProvider timeProvider) : MediatorRequestHandler<GetJobQuery, Result<byte[]>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
     private readonly ILogger<GetJobQueryHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
+    private readonly ITimeProvider _timeProvider = timeProvider;
 
     protected override async Task<Result<byte[]>> Handle(GetJobQuery request, CancellationToken cancellationToken)
     {
@@ -11,7 +14,7 @@ public class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogger<
 
         while (!finished)
         {
-            await Task.Delay(5000);
+            await _timeProvider.Delay(2000, cancellationToken);
 
             var getJobResult = await _cloudConvertClient.GetJob(request.JobId, cancellationToken);
             if (!getJobResult.IsSuccess)
