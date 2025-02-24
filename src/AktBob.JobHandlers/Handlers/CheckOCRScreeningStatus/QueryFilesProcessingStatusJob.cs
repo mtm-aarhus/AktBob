@@ -12,7 +12,7 @@ internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJ
     private readonly CachedData _cachedData = cachedData;
     private readonly CheckOCRScreeningStatusSettings _settings = settings;
 
-    public async Task Run(Guid cacheId, CancellationToken cancellationToken = default)
+    public void Run(Guid cacheId, CancellationToken cancellationToken = default)
     {
         if (!_cachedData.Cases.TryGetValue(cacheId, out var @case))
         {

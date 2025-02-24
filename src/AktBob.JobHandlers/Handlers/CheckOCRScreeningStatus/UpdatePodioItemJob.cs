@@ -23,11 +23,11 @@ internal class UpdatePodioItemJob
         var podioFields = Guard.Against.Null(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<FieldSection>()));
 
         // FilArkivCaseId
-        var filArkivCaseIdFieldId = podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivCaseId").Key;
+        var filArkivCaseIdFieldId = podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "FilArkivCaseId").Key;
         await UpdateField(mediator, podioItemId, podioAppId, filArkivCaseIdFieldId, filArkivCaseId.ToString(), cancellationToken);
 
         // FilArkivLink
-        var filArkivLinkFieldId = podioFields.FirstOrDefault(x => x.Value.AppId == podioAppId && x.Value.Label == "FilArkivLink").Key;
+        var filArkivLinkFieldId = podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "FilArkivLink").Key;
         await UpdateField(mediator, podioItemId, podioAppId, filArkivLinkFieldId, $"https://aarhus.filarkiv.dk/archives/case/{filArkivCaseId}", cancellationToken);
     }
 
