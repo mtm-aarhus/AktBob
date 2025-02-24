@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace AktBob.Tests.Unit.Shared;
+﻿namespace AktBob.Tests.Unit.Shared;
 
 public class MockHttpMessageHandler : HttpMessageHandler
 {

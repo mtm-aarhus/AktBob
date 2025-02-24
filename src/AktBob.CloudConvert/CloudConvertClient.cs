@@ -62,7 +62,7 @@ internal class CloudConvertClient : ICloudConvertClient
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error getting job {id}: {error}", jobId, ex);
+            _logger.LogError(ex, "Error getting job {id}", jobId);
             return Result.Error();
         }
     }
@@ -96,7 +96,7 @@ internal class CloudConvertClient : ICloudConvertClient
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
+            _logger.LogError(ex, "Error getting file {url}", url);
             return Result.Error();
         }
 
