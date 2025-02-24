@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="AktBob.CloudConvert.Tests.Unit"/>
+    </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\AktBob.CloudConvert.Contracts\AktBob.CloudConvert.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />

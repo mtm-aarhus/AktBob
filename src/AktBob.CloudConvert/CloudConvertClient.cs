@@ -15,11 +15,11 @@ internal class CloudConvertClient : ICloudConvertClient
         _logger = logger;
     }
 
-    public async Task<Result<Guid>> CreateJob(object payload, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> CreateJob(object payload, CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Creating Cloud Convert job ...");
+            _logger.LogInformation("Creating Cloud Convert job");
 
             var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions {  PropertyNameCaseInsensitive = false });
             var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
@@ -39,7 +39,7 @@ internal class CloudConvertClient : ICloudConvertClient
 
             if (data?.Data is not null)
             {
-                _logger.LogInformation("Cloud Convert job created: '{id}'", data.Data.Id);
+                _logger.LogInformation("Cloud Convert job created: {id}", data.Data.Id);
                 return data.Data.Id;
             }
 
@@ -48,7 +48,7 @@ internal class CloudConvertClient : ICloudConvertClient
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
+            _logger.LogError(ex, "Error creating Cloud Convert job");
             return Result.Error();
         }
     }
