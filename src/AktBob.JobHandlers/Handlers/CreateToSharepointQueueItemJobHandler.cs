@@ -29,7 +29,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
 
         // Get metadata from Podio
         var getPodioItemQuery = new GetItemQuery(podioAppId, job.PodioItemId);
-        var getPodioItemQueryResult = await mediator.SendRequest(getPodioItemQuery, cancellationToken);
+        var getPodioItemQueryResult = await mediator.Send(getPodioItemQuery, cancellationToken);
 
         if (!getPodioItemQueryResult.IsSuccess)
         {
@@ -46,7 +46,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
 
         // Find database case from PodioItemID
         var getDatabaseCasesQuery = new GetCasesQuery(null, job.PodioItemId, null);
-        var getDataCaseCasesResult = await mediator.SendRequest(getDatabaseCasesQuery, cancellationToken);
+        var getDataCaseCasesResult = await mediator.Send(getDatabaseCasesQuery, cancellationToken);
 
         if (!getDataCaseCasesResult.IsSuccess)
         {
@@ -64,7 +64,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
 
         // Find database ticket from PodioItemId
         var getDatabaseTicketQuery = new GetTicketsQuery(null, job.PodioItemId, null);
-        var getDatabaseTicketResult = await mediator.SendRequest(getDatabaseTicketQuery, cancellationToken);
+        var getDatabaseTicketResult = await mediator.Send(getDatabaseTicketQuery, cancellationToken);
 
         if (!getDatabaseTicketResult.IsSuccess)
         {
@@ -102,7 +102,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
         }
 
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(databaseTicket.DeskproId);
-        var getDeskproTicketResult = await mediator.SendRequest(getDeskproTicketQuery, cancellationToken);
+        var getDeskproTicketResult = await mediator.Send(getDeskproTicketQuery, cancellationToken);
 
         if (!getDeskproTicketResult.IsSuccess)
         {

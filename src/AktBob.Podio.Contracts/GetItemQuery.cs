@@ -1,6 +1,6 @@
 ﻿using AAK.Podio.Models;
 using Ardalis.Result;
-using MassTransit.Mediator;
+using MediatR;
 
 namespace AktBob.Podio.Contracts;
-public record GetItemQuery(int AppId, long ItemId) : Request<Result<Item>>;
+public record GetItemQuery(int AppId, long ItemId) : IRequest<Result<Item>>;

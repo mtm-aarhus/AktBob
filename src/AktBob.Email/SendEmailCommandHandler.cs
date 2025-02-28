@@ -1,14 +1,14 @@
 ﻿using AktBob.Email.Contracts;
-using MassTransit.Mediator;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using System.Net.Mail;
 
 namespace AktBob.Email;
-public class SendEmailCommandHandler(IConfiguration configuration) : MediatorRequestHandler<SendEmailCommand>
+internal class SendEmailCommandHandler(IConfiguration configuration) : IRequestHandler<SendEmailCommand>
 {
     private readonly IConfiguration _configuration = configuration;
 
-    protected override async Task Handle(SendEmailCommand request, CancellationToken cancellationToken)
+    public async Task Handle(SendEmailCommand request, CancellationToken cancellationToken)
     {
         var from = _configuration.GetValue<string>("EmailModule:From");
         var smtp = _configuration.GetValue<string>("EmailModule:Smtp");

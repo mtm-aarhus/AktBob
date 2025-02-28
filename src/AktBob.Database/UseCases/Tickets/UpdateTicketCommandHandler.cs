@@ -1,20 +1,16 @@
 ﻿using AktBob.Database.Contracts.Dtos;
 using AktBob.Database.UseCases.Tickets.UpdateTicket;
-using Ardalis.Result;
-using Dapper;
-using MassTransit;
-using MassTransit.Mediator;
 
 namespace AktBob.Database.UseCases.Tickets;
-internal class UpdateTicketCommandHandler(ISqlDataAccess sqlDataAccess, IMediator mediator) : MediatorRequestHandler<UpdateTicketCommand, Result<TicketDto>>
+internal class UpdateTicketCommandHandler(ISqlDataAccess sqlDataAccess, IMediator mediator) : IRequestHandler<UpdateTicketCommand, Result<TicketDto>>
 {
     private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
     private readonly IMediator _mediator = mediator;
 
-    protected override async Task<Result<TicketDto>> Handle(UpdateTicketCommand request, CancellationToken cancellationToken)
+    public async Task<Result<TicketDto>> Handle(UpdateTicketCommand request, CancellationToken cancellationToken)
     {
         var getTicketQuery = new GetTicketByIdQuery(request.Id);
-        var getTicketResult = await _mediator.SendRequest(getTicketQuery, cancellationToken);
+        var getTicketResult = await _mediator.Send(getTicketQuery, cancellationToken);
 
         if (!getTicketResult.IsSuccess)
         {

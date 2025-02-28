@@ -1,14 +1,14 @@
 ﻿using AAK.GetOrganized;
 using AktBob.GetOrganized.Contracts;
 using Ardalis.Result;
-using MassTransit.Mediator;
+using MediatR;
 
 namespace AktBob.GetOrganized.UseCases;
-public class CreateCaseCommandHandler(IGetOrganizedClient getOrganizedClient) : MediatorRequestHandler<CreateCaseCommand, Result<CreateCaseResponse>>
+internal class CreateCaseCommandHandler(IGetOrganizedClient getOrganizedClient) : IRequestHandler<CreateCaseCommand, Result<CreateCaseResponse>>
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 
-    protected override async Task<Result<CreateCaseResponse>> Handle(CreateCaseCommand request, CancellationToken cancellationToken)
+    public async Task<Result<CreateCaseResponse>> Handle(CreateCaseCommand request, CancellationToken cancellationToken)
     {
         var createCaseCommand = new AAK.GetOrganized.CreateCase.CreateCaseCommand(request.CaseTypePrefix, request.CaseTitle, request.Description, request.Status, request.Access);
         var createCaseResponse = await _getOrganizedClient.CreateCase(createCaseCommand);

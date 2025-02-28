@@ -1,11 +1,11 @@
 ﻿using AktBob.CloudConvert.Models;
 
 namespace AktBob.CloudConvert.UseCases;
-public class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClient) : MediatorRequestHandler<ConvertHtmlToPdfCommand, Result<ConvertHtmlToPdfResponseDto>>
+internal class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClient) : IRequestHandler<ConvertHtmlToPdfCommand, Result<ConvertHtmlToPdfResponseDto>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
 
-    protected override async Task<Result<ConvertHtmlToPdfResponseDto>> Handle(ConvertHtmlToPdfCommand command, CancellationToken cancellationToken)
+    public async Task<Result<ConvertHtmlToPdfResponseDto>> Handle(ConvertHtmlToPdfCommand command, CancellationToken cancellationToken)
     {
         var importTasks = new Dictionary<Guid, ImportTask>();
         var convertTasks = new Dictionary<Guid, ConvertTask>();
@@ -81,6 +81,5 @@ public class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClie
         }
 
         return Result.Error();
-
     }
 }

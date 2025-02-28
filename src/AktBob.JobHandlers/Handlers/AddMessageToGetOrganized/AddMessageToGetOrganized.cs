@@ -29,7 +29,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         try
         {
             var getDatabaseMessageQuery = new GetMessageByDeskproMessageIdQuery(deskproMessageId);
-            var getDatabaseMessageResult = await mediator.SendRequest(getDatabaseMessageQuery, cancellationToken);
+            var getDatabaseMessageResult = await mediator.Send(getDatabaseMessageQuery, cancellationToken);
 
             if (!getDatabaseMessageResult.IsSuccess || getDatabaseMessageResult.Value is null)
             {
@@ -59,7 +59,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
 
             // Get Deskpro message
             var getDeskproMessageQuery = new GetDeskproMessageByIdQuery(deskproTicketId, deskproMessageId);
-            var getDeskproMessageResult = await mediator.SendRequest(getDeskproMessageQuery, cancellationToken);
+            var getDeskproMessageResult = await mediator.Send(getDeskproMessageQuery, cancellationToken);
 
             if (!getDeskproMessageResult.IsSuccess)
             {
@@ -107,7 +107,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
 
             // Upload parent document
             var uploadDocumentCommand = new UploadDocumentCommand(generateDocumentResult.Value, caseNumber, fileName, metadata, false);
-            var uploadDocumentResult = await mediator.SendRequest(uploadDocumentCommand, cancellationToken);
+            var uploadDocumentResult = await mediator.Send(uploadDocumentCommand, cancellationToken);
 
             if (!uploadDocumentResult.IsSuccess)
             {
@@ -193,7 +193,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var bytes = Encoding.UTF8.GetBytes(html);
 
         var convertCommand = new ConvertHtmlToPdfCommand([bytes]);
-        var convertResult = await mediator.SendRequest(convertCommand, cancellationToken);
+        var convertResult = await mediator.Send(convertCommand, cancellationToken);
 
         if (!convertResult.IsSuccess)
         {
@@ -202,7 +202,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         }
 
         var jobQuery = new GetJobQuery(convertResult.Value.JobId);
-        var jobResult = await mediator.SendRequest(jobQuery, cancellationToken);
+        var jobResult = await mediator.Send(jobQuery, cancellationToken);
 
         if (!jobResult.IsSuccess)
         {

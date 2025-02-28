@@ -1,13 +1,13 @@
 ﻿using AAK.GetOrganized;
-using AktBob.GetOrganized.UseCases;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace AktBob.GetOrganized;
 public static class ModuleServices
 {
-    public static IServiceCollection AddGetOrganizedModule(this IServiceCollection services, IConfiguration configuration, List<Type> mediatorHandlers)
+    public static IServiceCollection AddGetOrganizedModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatorAssemblies)
     {
         // Add GetOrganized service
         var getOrganizedOptions = new GetOrganizedOptions
@@ -20,11 +20,7 @@ public static class ModuleServices
 
         services.AddGetOrganizedModule(getOrganizedOptions);
 
-        mediatorHandlers.AddRange([
-            typeof(CreateCaseCommandHandler),
-            typeof(FinalizeDocumentCommandHandler),
-            typeof(RelateDocumentCommandHandler),
-            typeof(UploadDocumentCommandHandler)]);
+        mediatorAssemblies.Add(typeof(ModuleServices).Assembly);
 
         return services;
     }

@@ -19,7 +19,7 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
 
         // Get data from Deskpro
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(job.DeskproId);
-        var getDeskproTicketResult = await mediator.SendRequest(getDeskproTicketQuery, cancellationToken);
+        var getDeskproTicketResult = await mediator.Send(getDeskproTicketQuery, cancellationToken);
 
         if (!getDeskproTicketResult.IsSuccess)
         {
@@ -58,7 +58,7 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
 
         // Get data from database
         var getDatabaseTicketQuery = new GetTicketsQuery(job.DeskproId, null, null);
-        var getDatabaseTicketResult = await mediator.SendRequest(getDatabaseTicketQuery, cancellationToken);
+        var getDatabaseTicketResult = await mediator.Send(getDatabaseTicketQuery, cancellationToken);
 
         if (!getDatabaseTicketResult.IsSuccess || getDatabaseTicketResult.Value == null || !getDatabaseTicketResult.Value.Any())
         {
@@ -94,7 +94,7 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
         }
 
         var getPersonQuery = new GetDeskproPersonQuery((int)personId);
-        var getPersonResult = await mediator.SendRequest(getPersonQuery, cancellationToken);
+        var getPersonResult = await mediator.Send(getPersonQuery, cancellationToken);
         if (!getPersonResult.IsSuccess)
         {
             _logger.LogWarning("Error getting person {id} from Deskpro", personId);

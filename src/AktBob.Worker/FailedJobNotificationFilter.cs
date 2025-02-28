@@ -1,7 +1,7 @@
 ﻿using AktBob.Email.Contracts;
 using Hangfire.States;
 using Hangfire.Storage;
-using MassTransit.Mediator;
+using MediatR;
 
 namespace AktBob.Worker;
 internal class FailedJobNotificationFilter(IMediator mediator, ILogger<FailedJobNotificationFilter> logger, IConfiguration configuration) : IApplyStateFilter

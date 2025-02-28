@@ -92,7 +92,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         caseNumber = string.Empty;
 
         var getPodioItemQuery = new GetItemQuery(podioAppId, podioItemId);
-        var getPodioItemQueryResult = mediator.SendRequest(getPodioItemQuery, cancellationToken).GetAwaiter().GetResult();
+        var getPodioItemQueryResult = mediator.Send(getPodioItemQuery, cancellationToken).GetAwaiter().GetResult();
 
         if (!getPodioItemQueryResult.IsSuccess)
         {
@@ -126,7 +126,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         // after 10 retries something else is wrong.
         while (counter <= retriesCount || !cancellationToken.IsCancellationRequested)
         {
-            var getTicketByPodioItemIdQueryResult = mediator.SendRequest(getTicketByPodioItemIdQuery, cancellationToken).GetAwaiter().GetResult();
+            var getTicketByPodioItemIdQueryResult = mediator.Send(getTicketByPodioItemIdQuery, cancellationToken).GetAwaiter().GetResult();
 
             // We have data: Exit the while loop
             if (getTicketByPodioItemIdQueryResult.IsSuccess)
@@ -165,7 +165,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         ticketDto = null;
 
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(deskproId);
-        var getDeskproTicketQueryResult = mediator.SendRequest(getDeskproTicketQuery, cancellationToken).GetAwaiter().GetResult();
+        var getDeskproTicketQueryResult = mediator.Send(getDeskproTicketQuery, cancellationToken).GetAwaiter().GetResult();
 
         if (!getDeskproTicketQueryResult.IsSuccess)
         {
@@ -194,7 +194,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         }
 
         var getAgentQuery = new GetDeskproPersonQuery(person.Id);
-        var getAgentResult = mediator.SendRequest(getAgentQuery, cancellationToken).GetAwaiter().GetResult();
+        var getAgentResult = mediator.Send(getAgentQuery, cancellationToken).GetAwaiter().GetResult();
 
         if (getAgentResult.IsSuccess
             && getAgentResult.Value is not null

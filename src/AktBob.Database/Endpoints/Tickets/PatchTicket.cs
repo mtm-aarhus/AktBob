@@ -2,8 +2,6 @@
 using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Tickets.UpdateTicket;
 using FastEndpoints;
-using MassTransit;
-using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Tickets;
@@ -42,7 +40,7 @@ internal class PatchTicket(IMediator mediator) : Endpoint<PatchTicketRequest, Ti
             TicketClosedAt: req.TicketClosedAt,
             JournalizedAt: req.JournalizedAt);
 
-        var result = await _mediator.SendRequest(command, ct);
+        var result = await _mediator.Send(command, ct);
         await this.SendResponse(result, r => r.Value);
     }
 }

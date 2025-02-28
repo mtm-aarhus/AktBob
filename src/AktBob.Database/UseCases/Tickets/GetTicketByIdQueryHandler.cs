@@ -2,22 +2,18 @@
 using AktBob.Database.Entities;
 using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Cases;
-using Ardalis.Result;
-using Dapper;
-using MassTransit;
-using MassTransit.Mediator;
 using System.Data;
 
 namespace AktBob.Database.UseCases.Tickets;
 
-public record GetTicketByIdQuery(int Id) : Request<Result<TicketDto>>;
+internal record GetTicketByIdQuery(int Id) : IRequest<Result<TicketDto>>;
 
-public class GetTicketByIdQueryHandler(ISqlDataAccess sqlDataAccess, IMediator mediator) : MediatorRequestHandler<GetTicketByIdQuery, Result<TicketDto>>
+internal class GetTicketByIdQueryHandler(ISqlDataAccess sqlDataAccess, IMediator mediator) : IRequestHandler<GetTicketByIdQuery, Result<TicketDto>>
 {
     private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
     private readonly IMediator _mediator = mediator;
 
-    protected override async Task<Result<TicketDto>> Handle(GetTicketByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<TicketDto>> Handle(GetTicketByIdQuery request, CancellationToken cancellationToken)
     {
         var parameters = new DynamicParameters();
         parameters.Add(Constants.T_TICKETS_ID, request.Id, DbType.Int32, ParameterDirection.Input);
@@ -38,7 +34,7 @@ public class GetTicketByIdQueryHandler(ISqlDataAccess sqlDataAccess, IMediator m
 
         // Get cases for the ticket
         var getCasesQuery = new GetCasesByTicketIdQuery(ticket.Id);
-        var getCasesQueryResult = await _mediator.SendRequest(getCasesQuery, cancellationToken);
+        var getCasesQueryResult = await _mediator.Send(getCasesQuery, cancellationToken);
 
         var dto = ticket.ToDto();
 

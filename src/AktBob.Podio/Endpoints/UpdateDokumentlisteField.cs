@@ -1,6 +1,5 @@
 ﻿using AktBob.Podio.Contracts;
 using FastEndpoints;
-using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 

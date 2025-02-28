@@ -1,18 +1,18 @@
 ﻿using AAK.GetOrganized;
 using AktBob.GetOrganized.Contracts;
 using Ardalis.Result;
-using MassTransit.Mediator;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.GetOrganized.UseCases;
-public class UploadDocumentCommandHandler(ILogger<UploadDocumentCommandHandler> logger, IConfiguration configuration, IGetOrganizedClient getOrganizedClient) : MediatorRequestHandler<UploadDocumentCommand, Result<int>>
+internal class UploadDocumentCommandHandler(ILogger<UploadDocumentCommandHandler> logger, IConfiguration configuration, IGetOrganizedClient getOrganizedClient) : IRequestHandler<UploadDocumentCommand, Result<int>>
 {
     private readonly ILogger<UploadDocumentCommandHandler> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 
-    protected override async Task<Result<int>> Handle(UploadDocumentCommand request, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(UploadDocumentCommand request, CancellationToken cancellationToken)
     {
         try
         {

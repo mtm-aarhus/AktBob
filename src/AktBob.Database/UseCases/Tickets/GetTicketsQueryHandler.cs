@@ -3,19 +3,16 @@ using AktBob.Database.Contracts.Dtos;
 using AktBob.Database.Entities;
 using AktBob.Database.Extensions;
 using Ardalis.GuardClauses;
-using Ardalis.Result;
-using Dapper;
-using MassTransit.Mediator;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 
 namespace AktBob.Database.UseCases.Tickets;
-internal class GetTicketsQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetTicketsQuery, Result<IEnumerable<TicketDto>>>
+internal class GetTicketsQueryHandler(IConfiguration configuration) : IRequestHandler<GetTicketsQuery, Result<IEnumerable<TicketDto>>>
 {
     private readonly IConfiguration _configuration = configuration;
 
-    protected override async Task<Result<IEnumerable<TicketDto>>> Handle(GetTicketsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<TicketDto>>> Handle(GetTicketsQuery request, CancellationToken cancellationToken)
     {
         var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("Database"));
 

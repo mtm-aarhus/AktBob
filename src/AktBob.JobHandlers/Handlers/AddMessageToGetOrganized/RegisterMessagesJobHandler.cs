@@ -16,7 +16,7 @@ internal class RegisterMessagesJobHandler(ILogger<RegisterMessagesJobHandler> lo
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         var getDeskproMessagesQuery = new GetDeskproMessagesQuery(job.DeskproTicketId);
-        var getDeskproMessagesResult = await mediator.SendRequest(getDeskproMessagesQuery, cancellationToken);
+        var getDeskproMessagesResult = await mediator.Send(getDeskproMessagesQuery, cancellationToken);
 
         if (!getDeskproMessagesResult.IsSuccess)
         {
@@ -30,7 +30,7 @@ internal class RegisterMessagesJobHandler(ILogger<RegisterMessagesJobHandler> lo
         foreach (var deskproMessage in deskproMessages)
         {
             var getDatabaseTicketsQuery = new GetTicketsQuery(job.DeskproTicketId, null, null, true);
-            var getDatabaseTicketsResult = await mediator.SendRequest(getDatabaseTicketsQuery, cancellationToken);
+            var getDatabaseTicketsResult = await mediator.Send(getDatabaseTicketsQuery, cancellationToken);
 
             if (!getDatabaseTicketsResult.IsSuccess || !getDatabaseTicketsResult.Value.Any())
             {
@@ -47,7 +47,7 @@ internal class RegisterMessagesJobHandler(ILogger<RegisterMessagesJobHandler> lo
             var databaseTicket = getDatabaseTicketsResult.Value.First();
 
             var addMessageCommand = new AddMessageCommand(databaseTicket.Id, deskproMessage.Id); // The handler's stored procedure prevents from persisting duplicates, so we don't need to worry about it here
-            var addMessageResult = await mediator.SendRequest(addMessageCommand, cancellationToken);
+            var addMessageResult = await mediator.Send(addMessageCommand, cancellationToken);
 
             if (!addMessageResult.IsSuccess)
             {

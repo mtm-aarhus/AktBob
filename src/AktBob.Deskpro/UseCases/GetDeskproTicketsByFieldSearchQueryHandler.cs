@@ -2,13 +2,11 @@
 using AAK.Deskpro.Models;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
-using Ardalis.Result;
-using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Deskpro.UseCases;
-public class GetDeskproTicketsByFieldSearchQueryHandler : MediatorRequestHandler<GetDeskproTicketsByFieldSearchQuery, Result<IEnumerable<TicketDto>>>
+internal class GetDeskproTicketsByFieldSearchQueryHandler : IRequestHandler<GetDeskproTicketsByFieldSearchQuery, Result<IEnumerable<TicketDto>>>
 {
     private readonly ILogger<GetDeskproTicketsByFieldSearchQueryHandler> _logger;
     private readonly IConfiguration _configuration;
@@ -21,7 +19,7 @@ public class GetDeskproTicketsByFieldSearchQueryHandler : MediatorRequestHandler
         _deskpro = deskpro;
     }
 
-    protected override async Task<Result<IEnumerable<TicketDto>>> Handle(GetDeskproTicketsByFieldSearchQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<TicketDto>>> Handle(GetDeskproTicketsByFieldSearchQuery request, CancellationToken cancellationToken)
     {
         var ticketsList = new List<Ticket>();
 

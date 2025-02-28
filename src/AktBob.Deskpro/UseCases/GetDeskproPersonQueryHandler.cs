@@ -1,18 +1,16 @@
 ﻿using AAK.Deskpro;
-using Ardalis.Result;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using Microsoft.Extensions.Caching.Memory;
-using MassTransit.Mediator;
 
 namespace AktBob.Deskpro.UseCases;
-public class GetDeskproPersonQueryHandler(IDeskproClient deskpro, IMemoryCache cache) : MediatorRequestHandler<GetDeskproPersonQuery, Result<PersonDto>>
+internal class GetDeskproPersonQueryHandler(IDeskproClient deskpro, IMemoryCache cache) : IRequestHandler<GetDeskproPersonQuery, Result<PersonDto>>
 {
     private readonly IDeskproClient _deskpro = deskpro;
     private readonly IMemoryCache _cache = cache;
     private const string CACHE_KEY = "DeskproPerson";
 
-    protected override async Task<Result<PersonDto>> Handle(GetDeskproPersonQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PersonDto>> Handle(GetDeskproPersonQuery request, CancellationToken cancellationToken)
     {
         if (_cache.TryGetValue(CACHE_KEY + request.PersonId.ToString(), out PersonDto? dto))
         {

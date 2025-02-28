@@ -1,2 +1,4 @@
-﻿namespace AktBob.Email.Contracts;
-public record SendEmailCommand(string To, string Subject, string Body, bool IsBodyHtml = true);
+﻿using MediatR;
+
+namespace AktBob.Email.Contracts;
+public record SendEmailCommand(string To, string Subject, string Body, bool IsBodyHtml = true) : IRequest;

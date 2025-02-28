@@ -2,20 +2,17 @@
 using AktBob.Database.Entities;
 using AktBob.Database.Extensions;
 using Ardalis.GuardClauses;
-using Ardalis.Result;
-using Dapper;
-using MassTransit.Mediator;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Database.UseCases.Messages;
 
-public record GetMessageByDeskproMessageIdQuery(int Id) : Request<Result<MessageDto>>;
-public class GetMessageByIdQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
+internal record GetMessageByDeskproMessageIdQuery(int Id) : IRequest<Result<MessageDto>>;
+internal class GetMessageByIdQueryHandler(IConfiguration configuration) : IRequestHandler<GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
 {
     private readonly IConfiguration _configuration = configuration;
 
-    protected override async Task<Result<MessageDto>> Handle(GetMessageByDeskproMessageIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<MessageDto>> Handle(GetMessageByDeskproMessageIdQuery request, CancellationToken cancellationToken)
     {
         var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("Database"));
 

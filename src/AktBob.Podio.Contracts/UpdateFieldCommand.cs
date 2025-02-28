@@ -1,5 +1,4 @@
-﻿using Ardalis.Result;
-using MassTransit.Mediator;
+﻿using MediatR;
 
 namespace AktBob.Podio.Contracts;
-public record UpdateFieldCommand(int AppId, long ItemId, int FieldId, string Value) : Request<Result>;
+public record UpdateFieldCommand(int AppId, long ItemId, int FieldId, string Value) : IRequest;

@@ -2,8 +2,6 @@
 using AktBob.Database.Contracts.Dtos;
 using AktBob.Database.Extensions;
 using FastEndpoints;
-using MassTransit;
-using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Tickets;
@@ -31,7 +29,7 @@ internal class GetTickets(IMediator mediator) : Endpoint<GetTicketsRequest, IEnu
             FilArkivCaseId: req.FilArkivCaseId,
             IncludeClosedTickets: req.IncludeClosedTickets);
 
-        var result = await _mediator.SendRequest(query, ct);
+        var result = await _mediator.Send(query, ct);
 
         await this.SendResponse(result, r => r.Value);
     }

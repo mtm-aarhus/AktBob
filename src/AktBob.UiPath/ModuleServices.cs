@@ -1,11 +1,12 @@
 ﻿using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace AktBob.UiPath;
 public static class ModuleServices
 {
-    public static IServiceCollection AddUiPathModule(this IServiceCollection services, IConfiguration configuration, List<Type> mediatorHandlers)
+    public static IServiceCollection AddUiPathModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatorAssemblies)
     {
         var tenancyName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("UiPath:TenancyName"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>($"UiPath:{tenancyName}:Username"));
@@ -21,7 +22,7 @@ public static class ModuleServices
             client.BaseAddress = new Uri(url);
         });
 
-        mediatorHandlers.Add(typeof(AddQueueItemCommandHandler));
+        mediatorAssemblies.Add(typeof(ModuleServices).Assembly);
 
         return services;
     }

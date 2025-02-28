@@ -25,7 +25,7 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
 
             // Get metadata from Podio
             var getPodioItemQuery = new GetItemQuery(podioAppId, job.PodioItemId);
-            var getPodioItemQueryResult = await mediator.SendRequest(getPodioItemQuery, cancellationToken);
+            var getPodioItemQueryResult = await mediator.Send(getPodioItemQuery, cancellationToken);
 
             if (!getPodioItemQueryResult.IsSuccess)
             {
@@ -56,7 +56,7 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
             }
 
             var ticketQuery = new GetTicketsQuery(deskproId, null, null);
-            var ticketResult = await mediator.SendRequest(ticketQuery, cancellationToken);
+            var ticketResult = await mediator.Send(ticketQuery, cancellationToken);
 
             if (!ticketResult.IsSuccess || ticketResult.Value.Count() == 0)
             {
@@ -72,7 +72,7 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
 
             // Post case to database
             var postCaseCommand = new AddCaseCommand(ticketResult.Value.First().Id, job.PodioItemId, caseNumber, null);
-            var postCaseCommandResult = await mediator.SendRequest(postCaseCommand, cancellationToken);
+            var postCaseCommandResult = await mediator.Send(postCaseCommand, cancellationToken);
 
             if (!postCaseCommandResult.IsSuccess)
             {

@@ -28,7 +28,7 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
 
         // Get metadata from Podio
         var getPodioItemQuery = new GetItemQuery(podioAppId, job.PodioItemId);
-        var getPodioItemQueryResult = await mediator.SendRequest(getPodioItemQuery, cancellationToken);
+        var getPodioItemQueryResult = await mediator.Send(getPodioItemQuery, cancellationToken);
 
         if (!getPodioItemQueryResult.IsSuccess)
         {
@@ -45,7 +45,7 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
 
         // Find database ticket by PodioItemId
         var getDatabaseTicketByPodioItemIdQuery = new GetTicketsQuery(null, job.PodioItemId, null);
-        var getDatabaseTicketByPodioItemIdQueryResult = await mediator.SendRequest(getDatabaseTicketByPodioItemIdQuery, cancellationToken);
+        var getDatabaseTicketByPodioItemIdQueryResult = await mediator.Send(getDatabaseTicketByPodioItemIdQuery, cancellationToken);
 
         if (!getDatabaseTicketByPodioItemIdQueryResult.IsSuccess)
         {
@@ -81,7 +81,7 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
 
         // Get data from Deskpro
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(databaseTicket.DeskproId);
-        var getDeskproTicketQueryResult = await mediator.SendRequest(getDeskproTicketQuery, cancellationToken);
+        var getDeskproTicketQueryResult = await mediator.Send(getDeskproTicketQuery, cancellationToken);
 
         if (!getDeskproTicketQueryResult.IsSuccess)
         {

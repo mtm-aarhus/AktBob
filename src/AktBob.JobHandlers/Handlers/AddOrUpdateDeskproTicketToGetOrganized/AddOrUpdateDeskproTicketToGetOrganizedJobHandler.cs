@@ -53,7 +53,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
         // Get custom fields specification
         var ticketCustomFieldsQuery = new GetDeskproCustomFieldSpecificationsQuery();
-        var ticketCustomFieldsResult = await mediator.SendRequest(ticketCustomFieldsQuery, cancellationToken); // TODO: Cache
+        var ticketCustomFieldsResult = await mediator.Send(ticketCustomFieldsQuery, cancellationToken); // TODO: Cache
 
         if (!ticketCustomFieldsResult.IsSuccess)
         {
@@ -126,7 +126,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
         // Messages
         var getMessagesQuery = new GetDeskproMessagesQuery(ticket.Id);
-        var getMessagesResult = await mediator.SendRequest(getMessagesQuery, cancellationToken);
+        var getMessagesResult = await mediator.Send(getMessagesQuery, cancellationToken);
 
         if (getMessagesResult.IsSuccess)
         {
@@ -145,7 +145,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
                 // Get message number from API database
                 var messageNumber = 0;
                 var getDatabaseMessageQuery = new GetMessageByDeskproMessageIdQuery(message.Id);
-                var getDatabaseMessageResult = await mediator.SendRequest(getDatabaseMessageQuery, cancellationToken);
+                var getDatabaseMessageResult = await mediator.Send(getDatabaseMessageQuery, cancellationToken);
 
                 if (!getDatabaseMessageResult.IsSuccess)
                 {
@@ -165,7 +165,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
         // Generate PDF
         var convertCommand = new ConvertHtmlToPdfCommand(content);
-        var convertResult = await mediator.SendRequest(convertCommand, cancellationToken);
+        var convertResult = await mediator.Send(convertCommand, cancellationToken);
 
         if (!convertResult.IsSuccess)
         {
@@ -174,7 +174,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         }
 
         var getJobQuery = new GetJobQuery(convertResult.Value.JobId);
-        var getJobResult = await mediator.SendRequest(getJobQuery, cancellationToken);
+        var getJobResult = await mediator.Send(getJobQuery, cancellationToken);
 
         if (!getJobResult.IsSuccess)
         {
@@ -200,7 +200,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         var fileName = "Samlet korrespondance.pdf";
 
         var uploadDocumentCommand = new UploadDocumentCommand(getJobResult.Value, job.GOCaseNumber, fileName, metadata, true);
-        var uploadDocumentResult = await mediator.SendRequest(uploadDocumentCommand, cancellationToken);
+        var uploadDocumentResult = await mediator.Send(uploadDocumentCommand, cancellationToken);
 
         if (!uploadDocumentResult.IsSuccess)
         {

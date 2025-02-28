@@ -4,13 +4,11 @@ namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
 internal class UpdatePodioItemJob
 {
     private readonly IConfiguration _configuration;
-    private readonly ILogger<UpdatePodioItemJob> _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public UpdatePodioItemJob(IConfiguration configuration, ILogger<UpdatePodioItemJob> logger, IServiceScopeFactory serviceScopeFactory)
+    public UpdatePodioItemJob(IConfiguration configuration, IServiceScopeFactory serviceScopeFactory)
     {
         _configuration = configuration;
-        _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
     }
 

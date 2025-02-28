@@ -32,7 +32,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 
                 // Get the individual attachments from Deskpro
                 var getAttachmentStreamQuery = new GetDeskproMessageAttachmentQuery(attachment.DownloadUrl);
-                var getAttachmentStreamResult = await mediator.SendRequest(getAttachmentStreamQuery, cancellationToken);
+                var getAttachmentStreamResult = await mediator.Send(getAttachmentStreamQuery, cancellationToken);
 
                 if (!getAttachmentStreamResult.IsSuccess)
                 {
@@ -48,7 +48,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 var fileExtension = Path.GetExtension(attachment.FileName);
                 var filename = $"{filenameNoExtension} ({timestamp.ToString("dd-MM-yyyy HH-mm-ss")}){fileExtension}";
                 var uploadDocumentCommand = new UploadDocumentCommand(attachmentBytes, caseNumber, filename, metadata, true);
-                var uploadDocumentResult = await mediator.SendRequest(uploadDocumentCommand, cancellationToken);
+                var uploadDocumentResult = await mediator.Send(uploadDocumentCommand, cancellationToken);
 
                 if (!uploadDocumentResult.IsSuccess)
                 {

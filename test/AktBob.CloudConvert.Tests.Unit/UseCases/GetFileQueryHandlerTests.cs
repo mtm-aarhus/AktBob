@@ -7,25 +7,13 @@ using NSubstitute;
 
 namespace AktBob.CloudConvert.Tests.Unit.UseCases;
 
-public class TestableGetFileQueryHandler : GetFileQueryHandler
-{
-    public TestableGetFileQueryHandler(ICloudConvertClient cloudConvertClient) : base(cloudConvertClient)
-    {
-    }
-
-    public new Task<Result<FileDto>> Handle(GetFileQuery query, CancellationToken cancellationToken)
-    {
-        return base.Handle(query, cancellationToken);
-    }
-}
-
 public class GetFileQueryHandlerTests
 {
     private readonly ICloudConvertClient _cloudConvertClient = Substitute.For<ICloudConvertClient>();
-    private readonly TestableGetFileQueryHandler _sut;
+    private readonly GetFileQueryHandler _sut;
     public GetFileQueryHandlerTests()
     {
-        _sut = new TestableGetFileQueryHandler(_cloudConvertClient);
+        _sut = new GetFileQueryHandler(_cloudConvertClient);
     }
 
     [Fact]

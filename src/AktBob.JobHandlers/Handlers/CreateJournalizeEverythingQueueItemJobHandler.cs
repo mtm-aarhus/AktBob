@@ -26,7 +26,7 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
 
         // GET DATA FROM API DATABASE
         var getTicketQuery = new GetTicketsQuery(job.DeskproId, null, null);
-        var getTicketResult = await mediator.SendRequest(getTicketQuery, cancellationToken);
+        var getTicketResult = await mediator.Send(getTicketQuery, cancellationToken);
 
         if (!getTicketResult.IsSuccess)
         {
@@ -56,7 +56,7 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
 
         // GET DATA FROM DESKPRO
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticket.DeskproId);
-        var getDeskproTicketQueryResult = await mediator.SendRequest(getDeskproTicketQuery, cancellationToken);
+        var getDeskproTicketQueryResult = await mediator.Send(getDeskproTicketQuery, cancellationToken);
 
         if (!getDeskproTicketQueryResult.IsSuccess)
         {
@@ -72,7 +72,7 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
         {
             // Get agent email address from Deskpro
             var getAgentQuery = new GetDeskproPersonQuery(getDeskproTicketQueryResult.Value.Agent.Id!);
-            var getAgentResult = await mediator.SendRequest(getAgentQuery, cancellationToken);
+            var getAgentResult = await mediator.Send(getAgentQuery, cancellationToken);
 
             if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
             {

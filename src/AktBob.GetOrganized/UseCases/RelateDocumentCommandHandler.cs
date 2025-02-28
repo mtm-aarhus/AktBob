@@ -1,13 +1,13 @@
 ﻿using AAK.GetOrganized;
 using AktBob.GetOrganized.Contracts;
-using MassTransit.Mediator;
+using MediatR;
 
 namespace AktBob.GetOrganized.UseCases;
-public class RelateDocumentCommandHandler(IGetOrganizedClient getOrganizedClient) : MediatorRequestHandler<RelateDocumentCommand>
+internal class RelateDocumentCommandHandler(IGetOrganizedClient getOrganizedClient) : IRequestHandler<RelateDocumentCommand>
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 
-    protected override async Task Handle(RelateDocumentCommand request, CancellationToken cancellationToken)
+    public async Task Handle(RelateDocumentCommand request, CancellationToken cancellationToken)
     {
         if (request.ChildDocumentIds.Any())
         {

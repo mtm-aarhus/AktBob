@@ -3,17 +3,14 @@ using AktBob.Database.Entities;
 using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Cases.GetCases;
 using Ardalis.GuardClauses;
-using Ardalis.Result;
-using Dapper;
-using MassTransit.Mediator;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Database.UseCases.Cases;
-internal class GetCasesQueryHandler(IConfiguration configuration) : MediatorRequestHandler<GetCasesQuery, Result<IEnumerable<CaseDto>>>
+internal class GetCasesQueryHandler(IConfiguration configuration) : IRequestHandler<GetCasesQuery, Result<IEnumerable<CaseDto>>>
 {
     private readonly IConfiguration _configuration = configuration;
-    protected override async Task<Result<IEnumerable<CaseDto>>> Handle(GetCasesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<CaseDto>>> Handle(GetCasesQuery request, CancellationToken cancellationToken)
     {
         var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("Database"));
 

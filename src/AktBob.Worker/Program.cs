@@ -4,13 +4,13 @@ using AktBob.Deskpro;
 using AktBob.Podio;
 using AktBob.OpenOrchestrator;
 using AktBob.CloudConvert;
-using MassTransit;
 using Hangfire;
 using AktBob.JobHandlers;
 using AktBob.GetOrganized;
 using AktBob.Database;
 using AktBob.Worker;
 using AktBob.Email;
+using System.Reflection;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -24,7 +24,7 @@ var builder = Host.CreateDefaultBuilder(args)
         });
 
         // Modules
-        var mediatorHandlers = new List<Type>();
+        var mediatorHandlers = new List<Assembly>();
         services.AddUiPathModule(hostContext.Configuration, mediatorHandlers);
         services.AddDeskproModule(hostContext.Configuration, mediatorHandlers);
         services.AddPodioModule(hostContext.Configuration, mediatorHandlers);
@@ -36,10 +36,10 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddJobHandlersModule(hostContext.Configuration);
         services.AddEmailModuleServices(hostContext.Configuration, mediatorHandlers);
 
-        // MassTransit Mediator
-        services.AddMediator(cfg =>
+        // MediatR
+        services.AddMediatR(cfg =>
         {
-            cfg.AddConsumers(mediatorHandlers.ToArray());
+            cfg.RegisterServicesFromAssemblies(mediatorHandlers.ToArray());
         });
 
         // Hangfire

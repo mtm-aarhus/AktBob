@@ -2,19 +2,19 @@
 using Ardalis.GuardClauses;
 using Ardalis.Result;
 using Dapper;
-using MassTransit.Mediator;
+using MediatR;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.OpenOrchestrator;
 
-public class CreateQueueItemCommandHandler(IConfiguration configuration, ILogger<CreateQueueItemCommandHandler> logger) : MediatorRequestHandler<CreateQueueItemCommand, Result<Guid>>
+internal class CreateQueueItemCommandHandler(IConfiguration configuration, ILogger<CreateQueueItemCommandHandler> logger) : IRequestHandler<CreateQueueItemCommand, Result<Guid>>
 {
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<CreateQueueItemCommandHandler> _logger = logger;
 
-    protected override async Task<Result<Guid>> Handle(CreateQueueItemCommand command, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateQueueItemCommand command, CancellationToken cancellationToken)
     {
         var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("OpenOrchestratorDb"));
         Guard.Against.NullOrEmpty(command.QueueName);

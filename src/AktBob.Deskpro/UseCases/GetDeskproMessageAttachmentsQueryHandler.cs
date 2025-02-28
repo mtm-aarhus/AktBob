@@ -1,15 +1,13 @@
 ﻿using AAK.Deskpro;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
-using Ardalis.Result;
-using MassTransit.Mediator;
 
 namespace AktBob.Deskpro.UseCases;
-public class GetDeskproMessageAttachmentsQueryHandler(IDeskproClient deskpro) : MediatorRequestHandler<GetDeskproMessageAttachmentsQuery, Result<IEnumerable<AttachmentDto>>>
+public class GetDeskproMessageAttachmentsQueryHandler(IDeskproClient deskpro) : IRequestHandler<GetDeskproMessageAttachmentsQuery, Result<IEnumerable<AttachmentDto>>>
 {
     private readonly IDeskproClient _deskpro = deskpro;
 
-    protected override async Task<Result<IEnumerable<AttachmentDto>>> Handle(GetDeskproMessageAttachmentsQuery query, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<AttachmentDto>>> Handle(GetDeskproMessageAttachmentsQuery query, CancellationToken cancellationToken)
     {
         var attachments = new List<AttachmentDto>();
         var pageNumber = 1;

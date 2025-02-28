@@ -3,8 +3,6 @@ using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Cases.AddCase;
 using FastEndpoints;
 using FluentValidation;
-using MassTransit;
-using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Cases;
@@ -50,7 +48,7 @@ internal class PostCase(IMediator mediator) : Endpoint<PostCaseRequest, CaseDto>
             FilArkivCaseId: req.FilArkivCaseId,
             CaseNumber: req.CaseNumber);
 
-        var result = await _mediator.SendRequest(addCaseCommand, ct);
+        var result = await _mediator.Send(addCaseCommand, ct);
 
         if (result.IsSuccess)
         {

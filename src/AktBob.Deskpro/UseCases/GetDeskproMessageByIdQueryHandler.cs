@@ -1,15 +1,13 @@
 ﻿using AAK.Deskpro;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
-using Ardalis.Result;
-using MassTransit.Mediator;
 
 namespace AktBob.Deskpro.UseCases;
-public class GetDeskproMessageByIdQueryHandler(IDeskproClient deskproClient) : MediatorRequestHandler<GetDeskproMessageByIdQuery, Result<MessageDto>>
+internal class GetDeskproMessageByIdQueryHandler(IDeskproClient deskproClient) : IRequestHandler<GetDeskproMessageByIdQuery, Result<MessageDto>>
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
 
-    protected override async Task<Result<MessageDto>> Handle(GetDeskproMessageByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<MessageDto>> Handle(GetDeskproMessageByIdQuery request, CancellationToken cancellationToken)
     {
         try
         {

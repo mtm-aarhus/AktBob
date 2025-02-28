@@ -1,2 +1,3 @@
 ﻿global using Ardalis.Result;
-global using MassTransit.Mediator;
+global using MediatR;
+global using AktBob.CloudConvert.Contracts.DTOs;

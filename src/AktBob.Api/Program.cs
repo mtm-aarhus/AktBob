@@ -6,10 +6,10 @@ using Hangfire;
 using Microsoft.AspNetCore.Authentication;
 using NSwag;
 using AktBob.Database;
-using MassTransit;
 using AktBob.Podio;
 using Hangfire.Dashboard.BasicAuthorization;
 using Ardalis.GuardClauses;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,14 +50,14 @@ builder.Services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
 builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Configuration.GetConnectionString("Hangfire")));
 
 // Modules
-var mediatorHandlers = new List<Type>();
-builder.Services.AddDatabaseModule(builder.Configuration, mediatorHandlers);
-builder.Services.AddPodioModule(builder.Configuration, mediatorHandlers);
+var mediatorAssemblies = new List<Assembly>();
+builder.Services.AddDatabaseModule(builder.Configuration, mediatorAssemblies);
+builder.Services.AddPodioModule(builder.Configuration, mediatorAssemblies);
 
-// MassTransit Mediator
-builder.Services.AddMediator(cfg =>
+// MediatR
+builder.Services.AddMediatR(cfg =>
 {
-    cfg.AddConsumers(mediatorHandlers.ToArray());
+    cfg.RegisterServicesFromAssemblies(mediatorAssemblies.ToArray());
 });
 
 

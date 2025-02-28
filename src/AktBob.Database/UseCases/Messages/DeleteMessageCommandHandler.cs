@@ -1,16 +1,14 @@
 ﻿using AktBob.Database.Contracts.Messages;
 using Ardalis.GuardClauses;
-using Dapper;
-using MassTransit.Mediator;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Database.UseCases.Messages;
-public class DeleteMessageCommandHandler(IConfiguration configuration) : MediatorRequestHandler<DeleteMessageCommand>
+internal class DeleteMessageCommandHandler(IConfiguration configuration) : IRequestHandler<DeleteMessageCommand>
 {
     private readonly IConfiguration _configuration = configuration;
 
-    protected override async Task Handle(DeleteMessageCommand request, CancellationToken cancellationToken)
+    public async Task Handle(DeleteMessageCommand request, CancellationToken cancellationToken)
     {
         var connectionString = Guard.Against.NullOrEmpty(_configuration.GetConnectionString("Database"));
 

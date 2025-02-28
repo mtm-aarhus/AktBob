@@ -1,9 +1,6 @@
 ﻿using AktBob.Database.Contracts.Dtos;
-using AktBob.Database.Extensions;
 using AktBob.Database.UseCases.Tickets;
 using FastEndpoints;
-using MassTransit;
-using MassTransit.Mediator;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Tickets;
@@ -28,7 +25,7 @@ internal class GetTicket(IMediator mediator) : Endpoint<GetTicketRequest, Ticket
     public override async Task HandleAsync(GetTicketRequest req, CancellationToken ct)
     {
         var query = new GetTicketByIdQuery(req.Id);
-        var result = await _mediator.SendRequest(query, ct);
+        var result = await _mediator.Send(query, ct);
 
         if (!result.IsSuccess)
         {

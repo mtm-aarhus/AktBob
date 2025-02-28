@@ -1,14 +1,17 @@
 ﻿using AktBob.Shared;
 
 namespace AktBob.CloudConvert.UseCases;
-public class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogger<GetJobQueryHandler> logger, IMediator mediator, ITimeProvider timeProvider) : MediatorRequestHandler<GetJobQuery, Result<byte[]>>
+internal class GetJobQueryHandler(ICloudConvertClient cloudConvertClient,
+                                ILogger<GetJobQueryHandler> logger,
+                                IMediator mediator,
+                                ITimeProvider timeProvider) : IRequestHandler<GetJobQuery, Result<byte[]>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
     private readonly ILogger<GetJobQueryHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly ITimeProvider _timeProvider = timeProvider;
 
-    protected override async Task<Result<byte[]>> Handle(GetJobQuery request, CancellationToken cancellationToken)
+    public async Task<Result<byte[]>> Handle(GetJobQuery request, CancellationToken cancellationToken)
     {
         var finished = false;
 
@@ -34,7 +37,7 @@ public class GetJobQueryHandler(ICloudConvertClient cloudConvertClient, ILogger<
             if (getJobResult.Value!.Data.Status == "finished" && !string.IsNullOrEmpty(file?.Url))
             {
                 var getFileQuery = new GetFileQuery(file.Url);
-                var getFileResult = await _mediator.SendRequest(getFileQuery, cancellationToken);
+                var getFileResult = await _mediator.Send(getFileQuery, cancellationToken);
 
                 if (!getFileResult.IsSuccess)
                 {

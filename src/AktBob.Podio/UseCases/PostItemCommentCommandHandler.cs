@@ -1,17 +1,16 @@
 ﻿using AAK.Podio;
 using AktBob.Podio.Contracts;
-using MassTransit.Mediator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Podio.UseCases;
-public class PostItemCommentCommandHandler(IPodioFactory podioFactory, IConfiguration configuration, ILogger<PostItemCommentCommandHandler> logger) : MediatorRequestHandler<PostItemCommentCommand>
+public class PostItemCommentCommandHandler(IPodioFactory podioFactory, IConfiguration configuration, ILogger<PostItemCommentCommandHandler> logger) : IRequestHandler<PostItemCommentCommand>
 {
     private readonly IPodioFactory _podioFactory = podioFactory;
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<PostItemCommentCommandHandler> _logger = logger;
 
-    protected override async Task Handle(PostItemCommentCommand command, CancellationToken cancellationToken)
+    public async Task Handle(PostItemCommentCommand command, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Posting comment on Podio item. ItemId {itemId} Value: '{value}'", command.ItemId, command.Comment);
 

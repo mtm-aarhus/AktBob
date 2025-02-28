@@ -1,9 +1,8 @@
 ﻿global using Ardalis.GuardClauses;
 global using Ardalis.Result;
-global using MassTransit;
-global using MassTransit.Mediator;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Hangfire;
 global using AktBob.Shared;
+global using MediatR;

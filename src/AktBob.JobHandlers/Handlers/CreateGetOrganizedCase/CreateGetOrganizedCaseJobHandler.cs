@@ -38,7 +38,7 @@ internal class CreateGetOrganizedCaseJobHandler : IJobHandler<CreateGetOrganized
             Status: caseStatus,
             Access: caseAccess);
 
-        var createCaseResult = await mediator.SendRequest(createCaseCommand, cancellationToken);
+        var createCaseResult = await mediator.Send(createCaseCommand, cancellationToken);
 
         if (!createCaseResult.IsSuccess)
         {
