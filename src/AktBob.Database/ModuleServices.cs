@@ -6,13 +6,13 @@ using System.Reflection;
 namespace AktBob.Database;
 public static class ModuleServices
 {
-    public static IServiceCollection AddDatabaseModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatorAssemblies)
+    public static IServiceCollection AddDatabaseModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> cqrsHandlersAssemblies)
     {
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("Database"));
 
         services.AddTransient<ISqlDataAccess, SqlDataAccess>();
 
-        mediatorAssemblies.Add(typeof(ModuleServices).Assembly);
+        cqrsHandlersAssemblies.Add(typeof(ModuleServices).Assembly);
 
         return services;
     }

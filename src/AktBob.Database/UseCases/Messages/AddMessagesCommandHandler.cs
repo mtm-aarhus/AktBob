@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 
 namespace AktBob.Database.UseCases.Messages;
-internal class AddMessagesCommandHandler(IConfiguration configuration) : IRequestHandler<AddMessageCommand, Result<int>>
+internal class AddMessagesCommandHandler(IConfiguration configuration) : ICommandHandler<AddMessageCommand, Result<int>>
 {
     private readonly IConfiguration _configuration = configuration;
 

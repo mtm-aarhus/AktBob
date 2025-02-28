@@ -3,7 +3,7 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Deskpro.UseCases;
-internal class GetDeskproTicketByIdQueryHandler(IDeskproClient deskproClient) : IRequestHandler<GetDeskproTicketByIdQuery, Result<TicketDto>>
+internal class GetDeskproTicketByIdQueryHandler(IDeskproClient deskproClient) : IQueryHandler<GetDeskproTicketByIdQuery, Result<TicketDto>>
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
 

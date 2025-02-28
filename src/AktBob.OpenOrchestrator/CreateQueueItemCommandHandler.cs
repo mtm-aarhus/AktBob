@@ -1,15 +1,15 @@
 ﻿using AktBob.OpenOrchestrator.Contracts;
+using AktBob.Shared.CQRS;
 using Ardalis.GuardClauses;
 using Ardalis.Result;
 using Dapper;
-using MediatR;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.OpenOrchestrator;
 
-internal class CreateQueueItemCommandHandler(IConfiguration configuration, ILogger<CreateQueueItemCommandHandler> logger) : IRequestHandler<CreateQueueItemCommand, Result<Guid>>
+internal class CreateQueueItemCommandHandler(IConfiguration configuration, ILogger<CreateQueueItemCommandHandler> logger) : ICommandHandler<CreateQueueItemCommand, Result<Guid>>
 {
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<CreateQueueItemCommandHandler> _logger = logger;

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 
 namespace AktBob.Database.UseCases.Messages;
-internal class GetMessageByDeskproMessageIdQueryHandler(IConfiguration configuration) : IRequestHandler<Contracts.Messages.GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
+internal class GetMessageByDeskproMessageIdQueryHandler(IConfiguration configuration) : IQueryHandler<Contracts.Messages.GetMessageByDeskproMessageIdQuery, Result<MessageDto>>
 {
     private readonly IConfiguration _configuration = configuration;
 

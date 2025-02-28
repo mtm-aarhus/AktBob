@@ -1,13 +1,14 @@
 ﻿using AktBob.Podio.Contracts;
+using AktBob.Shared.CQRS;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Podio.Endpoints;
-internal class UpdateDokumentlisteField(IConfiguration configuration, IMediator mediator) : Endpoint<UpdatePodioFieldRequest>
+internal class UpdateDokumentlisteField(IConfiguration configuration, ICommandDispatcher commandDispatcher) : Endpoint<UpdatePodioFieldRequest>
 {
     private readonly IConfiguration _configuration = configuration;
-    private readonly IMediator _mediator = mediator;
+    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
 
     public override void Configure()
     {
@@ -21,7 +22,7 @@ internal class UpdateDokumentlisteField(IConfiguration configuration, IMediator 
         var fieldId = _configuration.GetValue<int>("Podio:AktindsigtApp:Fields:Dokumentliste");
 
         var command = new UpdateFieldCommand(appId, req.ItemId, fieldId, req.Value);
-        await _mediator.Send(command, ct);
+        await _commandDispatcher.Dispatch(command, ct);
 
         await SendNoContentAsync(ct);
     }

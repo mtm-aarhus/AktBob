@@ -3,7 +3,7 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Deskpro.UseCases;
-public class GetDeskproMessageAttachmentsQueryHandler(IDeskproClient deskpro) : IRequestHandler<GetDeskproMessageAttachmentsQuery, Result<IEnumerable<AttachmentDto>>>
+public class GetDeskproMessageAttachmentsQueryHandler(IDeskproClient deskpro) : IQueryHandler<GetDeskproMessageAttachmentsQuery, Result<IEnumerable<AttachmentDto>>>
 {
     private readonly IDeskproClient _deskpro = deskpro;
 

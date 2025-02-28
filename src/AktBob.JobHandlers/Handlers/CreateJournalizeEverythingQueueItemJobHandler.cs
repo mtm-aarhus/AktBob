@@ -1,9 +1,8 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
-using AktBob.JobHandlers.Handlers;
 using AktBob.Shared.Contracts;
 
-namespace AktBob.PodioHookProcessor.UseCases;
+namespace AktBob.JobHandlers.Handlers;
 internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration, ILogger<CreateJournalizeEverythingQueueItemJobHandler> logger) : IJobHandler<CreateJournalizeEverythingQueueItemJob>
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
@@ -13,6 +12,9 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
 
     public async Task Handle(CreateJournalizeEverythingQueueItemJob job, CancellationToken cancellationToken = default)
     {
+        var scope = _serviceScopeFactory.CreateScope();
+        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+
         // UiPath variables
         var uiPathTenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
         var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:UiPathQueueName:{uiPathTenancyName}"));
@@ -21,12 +23,10 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:OpenOrchestratorQueueName"));
         var useOpenOrchestrator = _configuration.GetValue<bool>($"{_configurationObjectName}:UseOpenOrchestrator");
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         // GET DATA FROM API DATABASE
         var getTicketQuery = new GetTicketsQuery(job.DeskproId, null, null);
-        var getTicketResult = await mediator.Send(getTicketQuery, cancellationToken);
+        var getTicketResult = await queryDispatcher.Dispatch(getTicketQuery, cancellationToken);
 
         if (!getTicketResult.IsSuccess)
         {
@@ -56,7 +56,7 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
 
         // GET DATA FROM DESKPRO
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticket.DeskproId);
-        var getDeskproTicketQueryResult = await mediator.Send(getDeskproTicketQuery, cancellationToken);
+        var getDeskproTicketQueryResult = await queryDispatcher.Dispatch(getDeskproTicketQuery, cancellationToken);
 
         if (!getDeskproTicketQueryResult.IsSuccess)
         {
@@ -72,7 +72,7 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
         {
             // Get agent email address from Deskpro
             var getAgentQuery = new GetDeskproPersonQuery(getDeskproTicketQueryResult.Value.Agent.Id!);
-            var getAgentResult = await mediator.Send(getAgentQuery, cancellationToken);
+            var getAgentResult = await queryDispatcher.Dispatch(getAgentQuery, cancellationToken);
 
             if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
             {

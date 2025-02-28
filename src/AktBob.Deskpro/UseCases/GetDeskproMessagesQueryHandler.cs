@@ -3,10 +3,10 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Deskpro.UseCases;
-internal class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator mediator) : IRequestHandler<GetDeskproMessagesQuery, Result<IEnumerable<MessageDto>>>
+internal class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IQueryDispatcher queryDispatcher) : IQueryHandler<GetDeskproMessagesQuery, Result<IEnumerable<MessageDto>>>
 {
     private readonly IDeskproClient _deskpro = deskpro;
-    private readonly IMediator _mediator = mediator;
+    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
 
     public async Task<Result<IEnumerable<MessageDto>>> Handle(GetDeskproMessagesQuery query, CancellationToken cancellationToken)
     {
@@ -47,7 +47,7 @@ internal class GetDeskproMessagesQueryHandler(IDeskproClient deskpro, IMediator 
         foreach (var message in messages)
         {
             var getPersonQuery = new GetDeskproPersonQuery(message.Person.Id);
-            var getPersonResult = await _mediator.Send(getPersonQuery, cancellationToken);
+            var getPersonResult = await _queryDispatcher.Dispatch(getPersonQuery, cancellationToken);
 
             var person = getPersonResult.Value;
             if (person != null)

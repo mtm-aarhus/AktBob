@@ -1,6 +1,6 @@
 ﻿using AAK.Podio.Models;
+using AktBob.Shared.CQRS;
 using Ardalis.Result;
-using MediatR;
 
 namespace AktBob.Podio.Contracts;
-public record GetItemQuery(int AppId, long ItemId) : IRequest<Result<Item>>;
+public record GetItemQuery(int AppId, long ItemId) : IQuery<Result<Item>>;

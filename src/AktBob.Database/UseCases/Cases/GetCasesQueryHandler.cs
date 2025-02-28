@@ -7,7 +7,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Database.UseCases.Cases;
-internal class GetCasesQueryHandler(IConfiguration configuration) : IRequestHandler<GetCasesQuery, Result<IEnumerable<CaseDto>>>
+internal class GetCasesQueryHandler(IConfiguration configuration) : IQueryHandler<GetCasesQuery, Result<IEnumerable<CaseDto>>>
 {
     private readonly IConfiguration _configuration = configuration;
     public async Task<Result<IEnumerable<CaseDto>>> Handle(GetCasesQuery request, CancellationToken cancellationToken)

@@ -6,12 +6,12 @@ using System.Data;
 
 namespace AktBob.Database.UseCases.Tickets;
 
-internal record GetTicketByIdQuery(int Id) : IRequest<Result<TicketDto>>;
+internal record GetTicketByIdQuery(int Id) : IQuery<Result<TicketDto>>;
 
-internal class GetTicketByIdQueryHandler(ISqlDataAccess sqlDataAccess, IMediator mediator) : IRequestHandler<GetTicketByIdQuery, Result<TicketDto>>
+internal class GetTicketByIdQueryHandler(ISqlDataAccess sqlDataAccess, IQueryDispatcher queryDispatcher) : IQueryHandler<GetTicketByIdQuery, Result<TicketDto>>
 {
     private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
-    private readonly IMediator _mediator = mediator;
+    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
 
     public async Task<Result<TicketDto>> Handle(GetTicketByIdQuery request, CancellationToken cancellationToken)
     {
@@ -34,7 +34,7 @@ internal class GetTicketByIdQueryHandler(ISqlDataAccess sqlDataAccess, IMediator
 
         // Get cases for the ticket
         var getCasesQuery = new GetCasesByTicketIdQuery(ticket.Id);
-        var getCasesQueryResult = await _mediator.Send(getCasesQuery, cancellationToken);
+        var getCasesQueryResult = await _queryDispatcher.Dispatch(getCasesQuery, cancellationToken);
 
         var dto = ticket.ToDto();
 

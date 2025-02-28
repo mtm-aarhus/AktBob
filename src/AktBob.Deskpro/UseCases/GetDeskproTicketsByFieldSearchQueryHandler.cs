@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Deskpro.UseCases;
-internal class GetDeskproTicketsByFieldSearchQueryHandler : IRequestHandler<GetDeskproTicketsByFieldSearchQuery, Result<IEnumerable<TicketDto>>>
+internal class GetDeskproTicketsByFieldSearchQueryHandler : IQueryHandler<GetDeskproTicketsByFieldSearchQuery, Result<IEnumerable<TicketDto>>>
 {
     private readonly ILogger<GetDeskproTicketsByFieldSearchQueryHandler> _logger;
     private readonly IConfiguration _configuration;

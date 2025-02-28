@@ -1,12 +1,12 @@
 ﻿using AktBob.Email.Contracts;
+using AktBob.Shared.CQRS;
 using Hangfire.States;
 using Hangfire.Storage;
-using MediatR;
 
 namespace AktBob.Worker;
-internal class FailedJobNotificationFilter(IMediator mediator, ILogger<FailedJobNotificationFilter> logger, IConfiguration configuration) : IApplyStateFilter
+internal class FailedJobNotificationFilter(ICommandDispatcher commandDispatcher, ILogger<FailedJobNotificationFilter> logger, IConfiguration configuration) : IApplyStateFilter
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
     private readonly ILogger<FailedJobNotificationFilter> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
 
@@ -28,7 +28,7 @@ internal class FailedJobNotificationFilter(IMediator mediator, ILogger<FailedJob
 
             var subject = $"AktBob.Worker job {jobId} failed";
             var command = new SendEmailCommand(to, subject, exceptionMessage ?? string.Empty, false);
-            await _mediator.Send(command);
+            await _commandDispatcher.Dispatch(command);
         }
     }
 

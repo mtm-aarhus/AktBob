@@ -2,15 +2,15 @@
 using AktBob.Database.Contracts.Dtos;
 
 namespace AktBob.Database.UseCases.Cases;
-internal class UpdateCaseCommandHandler(IMediator mediator, ISqlDataAccess sqlDataAccess) : IRequestHandler<UpdateCaseCommand, Result<CaseDto>>
+internal class UpdateCaseCommandHandler(IQueryDispatcher queryDispatcher, ISqlDataAccess sqlDataAccess) : ICommandHandler<UpdateCaseCommand, Result<CaseDto>>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
     private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
 
     public async Task<Result<CaseDto>> Handle(UpdateCaseCommand request, CancellationToken cancellationToken)
     {
         var getCaseQuery = new GetCaseByIdQuery(request.Id);
-        var getCaseResult = await _mediator.Send(getCaseQuery, cancellationToken);
+        var getCaseResult = await _queryDispatcher.Dispatch(getCaseQuery, cancellationToken);
 
         if (!getCaseResult.IsSuccess)
         {

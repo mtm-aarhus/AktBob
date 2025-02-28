@@ -1,2 +1,2 @@
 ﻿namespace AktBob.Database.Contracts.Messages;
-public record DeleteMessageCommand(int Id) : IRequest;
+public record DeleteMessageCommand(int Id) : ICommand;

@@ -9,7 +9,7 @@ internal class CreateUiPathQueueItem(IServiceScopeFactory serviceScopeFactory, I
     public async Task Run(string queueName, string reference, string payload, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
 
         _logger.LogInformation("Creating UiPath queue item ...");
         _logger.LogInformation("Queue name: '{name}'", queueName);
@@ -17,6 +17,6 @@ internal class CreateUiPathQueueItem(IServiceScopeFactory serviceScopeFactory, I
         _logger.LogInformation("Payload: {payload}", payload.ToString());
 
         var command = new AddQueueItemCommand(queueName, reference, payload);
-        await mediator.Send(command);
+        await commandDispatcher.Dispatch(command);
     }
 }

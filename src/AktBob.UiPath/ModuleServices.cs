@@ -6,7 +6,7 @@ using System.Reflection;
 namespace AktBob.UiPath;
 public static class ModuleServices
 {
-    public static IServiceCollection AddUiPathModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatorAssemblies)
+    public static IServiceCollection AddUiPathModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> cqrsHandlersAssemblies)
     {
         var tenancyName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("UiPath:TenancyName"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>($"UiPath:{tenancyName}:Username"));
@@ -22,7 +22,7 @@ public static class ModuleServices
             client.BaseAddress = new Uri(url);
         });
 
-        mediatorAssemblies.Add(typeof(ModuleServices).Assembly);
+        cqrsHandlersAssemblies.Add(typeof(ModuleServices).Assembly);
 
         return services;
     }

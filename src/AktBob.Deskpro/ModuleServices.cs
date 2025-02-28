@@ -8,7 +8,7 @@ namespace AktBob.Deskpro;
 
 public static class ModuleServices
 {
-    public static IServiceCollection AddDeskproModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatorAssemblies)
+    public static IServiceCollection AddDeskproModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> cqrsHandlersAssemblies)
     {
         var deskproOptions = new DeskproOptions
         {
@@ -18,7 +18,7 @@ public static class ModuleServices
 
         services.AddDeskpro(deskproOptions);
 
-        mediatorAssemblies.Add(typeof(ModuleServices).Assembly);
+        cqrsHandlersAssemblies.Add(typeof(ModuleServices).Assembly);
 
         return services;
     }

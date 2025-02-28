@@ -1,9 +1,9 @@
 ﻿using AAK.GetOrganized;
 using AktBob.GetOrganized.Contracts;
-using MediatR;
+using AktBob.Shared.CQRS;
 
 namespace AktBob.GetOrganized.UseCases;
-internal class FinalizeDocumentCommandHandler(IGetOrganizedClient getOrganizedClient) : IRequestHandler<FinalizeDocumentCommand>
+internal class FinalizeDocumentCommandHandler(IGetOrganizedClient getOrganizedClient) : ICommandHandler<FinalizeDocumentCommand>
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 

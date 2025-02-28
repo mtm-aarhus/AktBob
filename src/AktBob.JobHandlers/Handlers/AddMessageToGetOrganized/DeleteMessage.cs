@@ -8,9 +8,9 @@ internal class DeleteMessage(IServiceScopeFactory serviceScopeFactory)
     public async Task Run(int id, CancellationToken cancellationToken = default)
     {
         var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
 
         var deleteMessageCommand = new DeleteMessageCommand(id);
-        await mediator.Send(deleteMessageCommand, cancellationToken);
+        await commandDispatcher.Dispatch(deleteMessageCommand, cancellationToken);
     }
 }

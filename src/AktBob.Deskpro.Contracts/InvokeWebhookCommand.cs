@@ -1,2 +1,2 @@
 ﻿namespace AktBob.Deskpro.Contracts;
-public record InvokeWebhookCommand(string WebhookId, object Payload) : IRequest;
+public record InvokeWebhookCommand(string WebhookId, object Payload) : ICommand;

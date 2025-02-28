@@ -8,7 +8,7 @@ namespace AktBob.Deskpro.UseCases;
 internal class GetDeskproCustomFieldSpecificationsQueryHandler(
     IDeskproClient deskproClient,
     IMemoryCache cache,
-    ILogger<GetDeskproCustomFieldSpecificationsQueryHandler> logger) : IRequestHandler<GetDeskproCustomFieldSpecificationsQuery, Result<IEnumerable<CustomFieldSpecificationDto>>>
+    ILogger<GetDeskproCustomFieldSpecificationsQueryHandler> logger) : IQueryHandler<GetDeskproCustomFieldSpecificationsQuery, Result<IEnumerable<CustomFieldSpecificationDto>>>
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
     private readonly IMemoryCache _cache = cache;

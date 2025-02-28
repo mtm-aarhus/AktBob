@@ -16,9 +16,9 @@ internal record PatchCaseRequest
 
 }
 
-internal class PatchCase(IMediator mediator) : Endpoint<PatchCaseRequest, CaseDto>
+internal class PatchCase(ICommandDispatcher commandDispatcher) : Endpoint<PatchCaseRequest, CaseDto>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
 
     public override void Configure()
     {
@@ -39,7 +39,7 @@ internal class PatchCase(IMediator mediator) : Endpoint<PatchCaseRequest, CaseDt
             CaseNumber: req.CaseNumber,
             SharepointFolderName: req.SharepointFolderName);
 
-        var result = await _mediator.Send(command, ct);
+        var result = await _commandDispatcher.Dispatch(command, ct);
         await this.SendResponse(result, r => r.Value);
     }
 }

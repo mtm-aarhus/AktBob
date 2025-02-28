@@ -11,6 +11,9 @@ using AktBob.Database;
 using AktBob.Worker;
 using AktBob.Email;
 using System.Reflection;
+using AktBob.Shared.CQRS;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using AktBob.Shared;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -24,23 +27,22 @@ var builder = Host.CreateDefaultBuilder(args)
         });
 
         // Modules
-        var mediatorHandlers = new List<Assembly>();
-        services.AddUiPathModule(hostContext.Configuration, mediatorHandlers);
-        services.AddDeskproModule(hostContext.Configuration, mediatorHandlers);
-        services.AddPodioModule(hostContext.Configuration, mediatorHandlers);
-        services.AddOpenOrchestratorModule(hostContext.Configuration, mediatorHandlers);
-        services.AddCloudConvertModule(hostContext.Configuration, mediatorHandlers);
-        services.AddGetOrganizedModule(hostContext.Configuration, mediatorHandlers);
-        services.AddDatabaseModule(hostContext.Configuration, mediatorHandlers);
+        var cqrsHandlersAssemblies = new List<Assembly>();
+        services.AddUiPathModule(hostContext.Configuration, cqrsHandlersAssemblies);
+        services.AddDeskproModule(hostContext.Configuration, cqrsHandlersAssemblies);
+        services.AddPodioModule(hostContext.Configuration, cqrsHandlersAssemblies);
+        services.AddOpenOrchestratorModule(hostContext.Configuration, cqrsHandlersAssemblies);
+        services.AddCloudConvertModule(hostContext.Configuration, cqrsHandlersAssemblies);
+        services.AddGetOrganizedModule(hostContext.Configuration, cqrsHandlersAssemblies);
+        services.AddDatabaseModule(hostContext.Configuration, cqrsHandlersAssemblies);
         services.AddJobHandlers(hostContext.Configuration);
         services.AddJobHandlersModule(hostContext.Configuration);
-        services.AddEmailModuleServices(hostContext.Configuration, mediatorHandlers);
+        services.AddEmailModuleServices(hostContext.Configuration, cqrsHandlersAssemblies);
 
-        // MediatR
-        services.AddMediatR(cfg =>
-        {
-            cfg.RegisterServicesFromAssemblies(mediatorHandlers.ToArray());
-        });
+        // CQRS
+        services.AddSingleton<ICommandDispatcher, CommandDispatcher>();
+        services.AddSingleton<IQueryDispatcher, QueryDispatcher>();
+        services.AddCQRSHandlers(cqrsHandlersAssemblies.ToArray());
 
         // Hangfire
         services.AddTransient<FailedJobNotificationFilter>();

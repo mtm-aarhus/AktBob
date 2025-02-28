@@ -8,9 +8,9 @@ namespace AktBob.Database.Endpoints.Tickets;
 
 internal record GetTicketsRequest(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId, bool IncludeClosedTickets = true);
 
-internal class GetTickets(IMediator mediator) : Endpoint<GetTicketsRequest, IEnumerable<TicketDto>>
+internal class GetTickets(IQueryDispatcher queryDispatcher) : Endpoint<GetTicketsRequest, IEnumerable<TicketDto>>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
 
     public override void Configure()
     {
@@ -29,7 +29,7 @@ internal class GetTickets(IMediator mediator) : Endpoint<GetTicketsRequest, IEnu
             FilArkivCaseId: req.FilArkivCaseId,
             IncludeClosedTickets: req.IncludeClosedTickets);
 
-        var result = await _mediator.Send(query, ct);
+        var result = await _queryDispatcher.Dispatch(query, ct);
 
         await this.SendResponse(result, r => r.Value);
     }

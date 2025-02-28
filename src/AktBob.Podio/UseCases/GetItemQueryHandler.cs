@@ -1,10 +1,11 @@
 ﻿using AAK.Podio;
 using AAK.Podio.Models;
 using AktBob.Podio.Contracts;
+using AktBob.Shared.CQRS;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Podio.UseCases;
-internal class GetItemQueryHandler(IPodioFactory podioFactory, IConfiguration configuration) : IRequestHandler<GetItemQuery, Result<Item>>
+internal class GetItemQueryHandler(IPodioFactory podioFactory, IConfiguration configuration) : IQueryHandler<GetItemQuery, Result<Item>>
 {
     private readonly IPodioFactory _podioFactory = podioFactory;
     private readonly IConfiguration _configuration = configuration;

@@ -1,2 +1,2 @@
 ﻿namespace AktBob.GetOrganized.Contracts;
-public record CreateCaseResponse(string CaseId, string CaseUrl) : IRequest;
+public record CreateCaseResponse(string CaseId, string CaseUrl) : ICommand;

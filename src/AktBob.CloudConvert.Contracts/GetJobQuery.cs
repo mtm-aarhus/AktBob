@@ -1,2 +1,4 @@
-﻿namespace AktBob.CloudConvert.Contracts;
-public record GetJobQuery(Guid JobId) : IRequest<Result<byte[]>>;
+﻿using AktBob.Shared.CQRS;
+
+namespace AktBob.CloudConvert.Contracts;
+public record GetJobQuery(Guid JobId) : IQuery<Result<byte[]>>;

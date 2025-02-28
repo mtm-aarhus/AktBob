@@ -6,12 +6,12 @@ using System.Reflection;
 namespace AktBob.OpenOrchestrator;
 public static class ModuleServices
 {
-    public static IServiceCollection AddOpenOrchestratorModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatorAssemblies)
+    public static IServiceCollection AddOpenOrchestratorModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> cqrsHandlersAssemblies)
     {
         // Make sure we have a connection string til the Open Orchestrator database
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("OpenOrchestratorDb"));
 
-        mediatorAssemblies.Add(typeof(ModuleServices).Assembly);
+        cqrsHandlersAssemblies.Add(typeof(ModuleServices).Assembly);
         return services;
     }
 }

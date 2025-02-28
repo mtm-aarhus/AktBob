@@ -1,2 +1,4 @@
-﻿namespace AktBob.CloudConvert.Contracts;
-public record GetFileQuery(string Url) : IRequest<Result<FileDto>>;
+﻿using AktBob.Shared.CQRS;
+
+namespace AktBob.CloudConvert.Contracts;
+public record GetFileQuery(string Url) : IQuery<Result<FileDto>>;

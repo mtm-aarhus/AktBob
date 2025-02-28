@@ -2,19 +2,19 @@
 using FilArkivCore.Web.Shared.FileProcess;
 
 namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
-internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJob> logger,
-                                             FilArkivCoreClient filArkivCoreClient,
-                                             CachedData cachedData,
-                                             CheckOCRScreeningStatusSettings settings)
+internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJob> logger, IServiceScopeFactory serviceProviderFactory)
 {
     private readonly ILogger<QueryFilesProcessingStatusJob> _logger = logger;
-    private readonly FilArkivCoreClient _filArkivCoreClient = filArkivCoreClient;
-    private readonly CachedData _cachedData = cachedData;
-    private readonly CheckOCRScreeningStatusSettings _settings = settings;
+    private readonly IServiceScopeFactory _serviceProviderFactory = serviceProviderFactory;
 
     public void Run(Guid cacheId, CancellationToken cancellationToken = default)
     {
-        if (!_cachedData.Cases.TryGetValue(cacheId, out var @case))
+        var scope = _serviceProviderFactory.CreateScope();
+        var filArkivCoreClient = scope.ServiceProvider.GetRequiredService<FilArkivCoreClient>();
+        var cachedData = scope.ServiceProvider.GetRequiredService<CachedData>();
+        var settings = scope.ServiceProvider.GetRequiredService<CheckOCRScreeningStatusSettings>();
+
+        if (!cachedData.Cases.TryGetValue(cacheId, out var @case))
         {
             _logger.LogWarning("Cached case not found");
             return;
@@ -40,7 +40,7 @@ internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJ
                     var delay = 20000 + random.Next(-2000, 2000);
                     await Task.Delay(delay);
 
-                    var response = await _filArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
+                    var response = await filArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
 
                     if (first)
                     {
@@ -69,9 +69,9 @@ internal class QueryFilesProcessingStatusJob(ILogger<QueryFilesProcessingStatusJ
 
         _logger.LogInformation("Finished querying processing statusses for files for FilArkiv Case {id}, PodioItemId {podioItemId}", @case.FilArkivCaseId, @case.PodioItemId);
 
-        _cachedData.Cases.TryRemove(cacheId, out Case? removedCase);
+        cachedData.Cases.TryRemove(cacheId, out Case? removedCase);
 
-        if (!_settings.UpdatePodioItemImmediately)
+        if (!settings.UpdatePodioItemImmediately)
         {
             BackgroundJob.Enqueue<UpdatePodioItemJob>(job => job.Run(@case.FilArkivCaseId, @case.PodioItemId, CancellationToken.None));
         }

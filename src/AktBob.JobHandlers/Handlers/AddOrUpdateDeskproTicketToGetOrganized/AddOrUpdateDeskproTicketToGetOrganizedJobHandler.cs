@@ -10,28 +10,24 @@ using AktBob.Shared.Contracts;
 using System.Text;
 
 namespace AktBob.JobHandlers.Handlers.AddOrUpdateDeskproTicketToGetOrganized;
-internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
-    ILogger<AddOrUpdateDeskproTicketToGetOrganizedJobHandler> logger,
-    DeskproHelper deskproHelper,
-    IServiceScopeFactory serviceScopeFactory,
-    PendingsTickets pendingsTickets) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
+internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpdateDeskproTicketToGetOrganizedJobHandler> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
 {
     private readonly ILogger<AddOrUpdateDeskproTicketToGetOrganizedJobHandler> _logger = logger;
-    private readonly DeskproHelper _deskproHelper = deskproHelper;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-    private readonly PendingsTickets _pendingsTickets = pendingsTickets;
 
     public async Task Handle(AddOrUpdateDeskproTicketToGetOrganizedJob job, CancellationToken cancellationToken = default)
     {
         var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
- 
-        var currentPendingTicket = new PendingTicket(job.TicketId, job.SubmittedAt);
-        _pendingsTickets.AddPendingTicket(currentPendingTicket);
+        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        var pendingsTickets = scope.ServiceProvider.GetRequiredService<PendingsTickets>();
+        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
 
+        var currentPendingTicket = new PendingTicket(job.TicketId, job.SubmittedAt);
+        pendingsTickets.AddPendingTicket(currentPendingTicket);
 
         // Check if this submission is the most recent for the specified ticket
-        if (!IsMostRecentSubmission(currentPendingTicket))
+        if (!IsMostRecentSubmission(currentPendingTicket, pendingsTickets))
         {
             return;
         }
@@ -40,7 +36,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
 
         // Get Deskpro Ticket
-        var ticketResult = await _deskproHelper.GetTicket(mediator, job.TicketId);
+        var ticketResult = await deskproHelper.GetTicket(queryDispatcher, job.TicketId);
 
         if (!ticketResult.IsSuccess || ticketResult.Value is null)
         {
@@ -53,7 +49,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
         // Get custom fields specification
         var ticketCustomFieldsQuery = new GetDeskproCustomFieldSpecificationsQuery();
-        var ticketCustomFieldsResult = await mediator.Send(ticketCustomFieldsQuery, cancellationToken); // TODO: Cache
+        var ticketCustomFieldsResult = await queryDispatcher.Dispatch(ticketCustomFieldsQuery, cancellationToken); // TODO: Cache
 
         if (!ticketCustomFieldsResult.IsSuccess)
         {
@@ -66,7 +62,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         var agent = new PersonDto();
         if (ticket.Agent?.Id is not null)
         {
-            var agentResult = await _deskproHelper.GetPerson(mediator, ticket.Agent.Id);
+            var agentResult = await deskproHelper.GetPerson(queryDispatcher, ticket.Agent.Id);
             if (!agentResult.IsSuccess)
             {
                 _logger.LogWarning("Error getting person {id} from Deskpro", ticket.Agent.Id);
@@ -86,7 +82,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         var user = new PersonDto();
         if (ticket.Person?.Id is not null)
         {
-            var userResult = await _deskproHelper.GetPerson(mediator, ticket.Person.Id);
+            var userResult = await deskproHelper.GetPerson(queryDispatcher, ticket.Person.Id);
             if (!userResult.IsSuccess)
             {
                 _logger.LogWarning("Error getting person {id} from Deskpro", ticket.Person.Id);
@@ -126,26 +122,26 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
         // Messages
         var getMessagesQuery = new GetDeskproMessagesQuery(ticket.Id);
-        var getMessagesResult = await mediator.Send(getMessagesQuery, cancellationToken);
+        var getMessagesResult = await queryDispatcher.Dispatch(getMessagesQuery, cancellationToken);
 
         if (getMessagesResult.IsSuccess)
         {
             var messages = getMessagesResult.Value.OrderByDescending(x => x.CreatedAt);
             foreach (var message in messages)
             {
-                var person = await _deskproHelper.GetPerson(mediator, message.Person?.Id);
+                var person = await deskproHelper.GetPerson(queryDispatcher, message.Person?.Id);
                 message.Person = person.Value;
 
                 var attachments = Enumerable.Empty<AttachmentDto>();
                 if (message.AttachmentIds.Any())
                 {
-                    attachments = await _deskproHelper.GetMessageAttachments(mediator, ticket.Id, message.Id);
+                    attachments = await deskproHelper.GetMessageAttachments(queryDispatcher, ticket.Id, message.Id);
                 }
 
                 // Get message number from API database
                 var messageNumber = 0;
                 var getDatabaseMessageQuery = new GetMessageByDeskproMessageIdQuery(message.Id);
-                var getDatabaseMessageResult = await mediator.Send(getDatabaseMessageQuery, cancellationToken);
+                var getDatabaseMessageResult = await queryDispatcher.Dispatch(getDatabaseMessageQuery, cancellationToken);
 
                 if (!getDatabaseMessageResult.IsSuccess)
                 {
@@ -165,7 +161,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
         // Generate PDF
         var convertCommand = new ConvertHtmlToPdfCommand(content);
-        var convertResult = await mediator.Send(convertCommand, cancellationToken);
+        var convertResult = await commandDispatcher.Dispatch(convertCommand, cancellationToken);
 
         if (!convertResult.IsSuccess)
         {
@@ -174,7 +170,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         }
 
         var getJobQuery = new GetJobQuery(convertResult.Value.JobId);
-        var getJobResult = await mediator.Send(getJobQuery, cancellationToken);
+        var getJobResult = await queryDispatcher.Dispatch(getJobQuery, cancellationToken);
 
         if (!getJobResult.IsSuccess)
         {
@@ -184,7 +180,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
 
 
         // Check if this submission is the most recent for the specified ticket. Check this as late as possible.
-        if (!IsMostRecentSubmission(currentPendingTicket))
+        if (!IsMostRecentSubmission(currentPendingTicket, pendingsTickets))
         {
             return;
         }
@@ -200,22 +196,22 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(
         var fileName = "Samlet korrespondance.pdf";
 
         var uploadDocumentCommand = new UploadDocumentCommand(getJobResult.Value, job.GOCaseNumber, fileName, metadata, true);
-        var uploadDocumentResult = await mediator.Send(uploadDocumentCommand, cancellationToken);
+        var uploadDocumentResult = await commandDispatcher.Dispatch(uploadDocumentCommand, cancellationToken);
 
         if (!uploadDocumentResult.IsSuccess)
         {
             _logger.LogError("Error uploading full ticket document to GetOrganized: Deskpro ticket {ticketId}, GO case '{goCaseNumber}'", job.TicketId, job.GOCaseNumber);
         }
         
-        _pendingsTickets.RemovePendingTicket(currentPendingTicket);
+        pendingsTickets.RemovePendingTicket(currentPendingTicket);
     }
 
-    private bool IsMostRecentSubmission(PendingTicket pendingTicket)
+    private bool IsMostRecentSubmission(PendingTicket pendingTicket, PendingsTickets pendingsTickets)
     {
-        if (!_pendingsTickets.IsMostRecent(pendingTicket))
+        if (!pendingsTickets.IsMostRecent(pendingTicket))
         {
             _logger.LogInformation("Not the most current submission for updating the Deskpro PDF document. (Deskpro ticket {id}, submittedAt {submittedAt})", pendingTicket.TicketId, pendingTicket.SubmittedAt);
-            _pendingsTickets.RemovePendingTicket(pendingTicket);
+            pendingsTickets.RemovePendingTicket(pendingTicket);
             return false;
         }
 

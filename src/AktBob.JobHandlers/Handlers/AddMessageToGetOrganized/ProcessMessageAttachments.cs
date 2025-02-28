@@ -13,7 +13,8 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
     public async Task UploadToGetOrganized(int parentDocumentId, string caseNumber, DateTime timestamp, DocumentCategory documentCategory, IEnumerable<AttachmentDto> attachments, CancellationToken cancellationToken = default)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
 
         DateTime createdAtDanishTime = timestamp.UtcToDanish();
         var childrenDocumentIds = new List<int>();
@@ -32,7 +33,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 
                 // Get the individual attachments from Deskpro
                 var getAttachmentStreamQuery = new GetDeskproMessageAttachmentQuery(attachment.DownloadUrl);
-                var getAttachmentStreamResult = await mediator.Send(getAttachmentStreamQuery, cancellationToken);
+                var getAttachmentStreamResult = await queryDispatcher.Dispatch(getAttachmentStreamQuery, cancellationToken);
 
                 if (!getAttachmentStreamResult.IsSuccess)
                 {
@@ -48,7 +49,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 var fileExtension = Path.GetExtension(attachment.FileName);
                 var filename = $"{filenameNoExtension} ({timestamp.ToString("dd-MM-yyyy HH-mm-ss")}){fileExtension}";
                 var uploadDocumentCommand = new UploadDocumentCommand(attachmentBytes, caseNumber, filename, metadata, true);
-                var uploadDocumentResult = await mediator.Send(uploadDocumentCommand, cancellationToken);
+                var uploadDocumentResult = await commandDispatcher.Dispatch(uploadDocumentCommand, cancellationToken);
 
                 if (!uploadDocumentResult.IsSuccess)
                 {
@@ -71,7 +72,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
 
         // Set attachments as children
         var relateDocumentCommand = new RelateDocumentCommand(parentDocumentId, childrenDocumentIds.ToArray());
-        await mediator.Send(relateDocumentCommand, cancellationToken);
+        await commandDispatcher.Dispatch(relateDocumentCommand, cancellationToken);
 
 
         // Finalize the parent document

@@ -2,7 +2,7 @@
 using AktBob.Database.UseCases.Tickets.UpdateTicket;
 
 namespace AktBob.JobHandlers.Handlers.CreateGetOrganizedCase;
-internal class UpdateDatabase(ILogger<UpdateDatabase> logger, IServiceScopeFactory serviceScopeFactory)
+internal class UpdateDatabase(ILogger<UpdateDatabase> logger,IServiceScopeFactory serviceScopeFactory)
 {
     private readonly ILogger<UpdateDatabase> _logger = logger;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
@@ -10,12 +10,13 @@ internal class UpdateDatabase(ILogger<UpdateDatabase> logger, IServiceScopeFacto
     public async Task SetGetOrganizedCaseId(int deskproId, string caseId, string caseUrl, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
 
         _logger.LogInformation("Updating database, setting GetOrganized case '{caseId}' for case with DeskproId {deskproId}", caseId, deskproId);
 
         var getDatabaseTicketQuery = new GetTicketsQuery(deskproId, null, null);
-        var getDatabaseTicketResult = await mediator.Send(getDatabaseTicketQuery, cancellationToken);
+        var getDatabaseTicketResult = await queryDispatcher.Dispatch(getDatabaseTicketQuery, cancellationToken);
 
         if (!getDatabaseTicketResult.IsSuccess || getDatabaseTicketResult.Value is null)
         {
@@ -26,7 +27,7 @@ internal class UpdateDatabase(ILogger<UpdateDatabase> logger, IServiceScopeFacto
         var databaseTicket = getDatabaseTicketResult.Value.First();
 
         var updateDatabaseTicketCommand = new UpdateTicketCommand(databaseTicket.Id, caseId, caseUrl, null, null, null);
-        var updateDatabaseTicketResult = await mediator.Send(updateDatabaseTicketCommand, cancellationToken);
+        var updateDatabaseTicketResult = await commandDispatcher.Dispatch(updateDatabaseTicketCommand, cancellationToken);
 
         if (!updateDatabaseTicketResult.IsSuccess)
         {

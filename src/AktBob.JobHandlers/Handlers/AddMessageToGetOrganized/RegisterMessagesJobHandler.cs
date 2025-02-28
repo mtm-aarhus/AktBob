@@ -4,19 +4,19 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Shared.Contracts;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
-internal class RegisterMessagesJobHandler(ILogger<RegisterMessagesJobHandler> logger, IServiceScopeFactory serviceScopeFactory, IConfiguration configuration) : IJobHandler<RegisterMessagesJob>
+internal class RegisterMessagesJobHandler(ILogger<RegisterMessagesJobHandler> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<RegisterMessagesJob>
 {
     private readonly ILogger<RegisterMessagesJobHandler> _logger = logger;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-    private readonly IConfiguration _configuration = configuration;
 
     public async Task Handle(RegisterMessagesJob job, CancellationToken cancellationToken = default)
     {
         var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
 
         var getDeskproMessagesQuery = new GetDeskproMessagesQuery(job.DeskproTicketId);
-        var getDeskproMessagesResult = await mediator.Send(getDeskproMessagesQuery, cancellationToken);
+        var getDeskproMessagesResult = await queryDispatcher.Dispatch(getDeskproMessagesQuery, cancellationToken);
 
         if (!getDeskproMessagesResult.IsSuccess)
         {
@@ -30,7 +30,7 @@ internal class RegisterMessagesJobHandler(ILogger<RegisterMessagesJobHandler> lo
         foreach (var deskproMessage in deskproMessages)
         {
             var getDatabaseTicketsQuery = new GetTicketsQuery(job.DeskproTicketId, null, null, true);
-            var getDatabaseTicketsResult = await mediator.Send(getDatabaseTicketsQuery, cancellationToken);
+            var getDatabaseTicketsResult = await queryDispatcher.Dispatch(getDatabaseTicketsQuery, cancellationToken);
 
             if (!getDatabaseTicketsResult.IsSuccess || !getDatabaseTicketsResult.Value.Any())
             {
@@ -47,7 +47,7 @@ internal class RegisterMessagesJobHandler(ILogger<RegisterMessagesJobHandler> lo
             var databaseTicket = getDatabaseTicketsResult.Value.First();
 
             var addMessageCommand = new AddMessageCommand(databaseTicket.Id, deskproMessage.Id); // The handler's stored procedure prevents from persisting duplicates, so we don't need to worry about it here
-            var addMessageResult = await mediator.Send(addMessageCommand, cancellationToken);
+            var addMessageResult = await commandDispatcher.Dispatch(addMessageCommand, cancellationToken);
 
             if (!addMessageResult.IsSuccess)
             {

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using System.Data;
 
 namespace AktBob.Database.UseCases.Tickets;
-internal class GetTicketsQueryHandler(IConfiguration configuration) : IRequestHandler<GetTicketsQuery, Result<IEnumerable<TicketDto>>>
+internal class GetTicketsQueryHandler(IConfiguration configuration) : IQueryHandler<GetTicketsQuery, Result<IEnumerable<TicketDto>>>
 {
     private readonly IConfiguration _configuration = configuration;
 

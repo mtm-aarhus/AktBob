@@ -9,12 +9,12 @@ internal class PostPodioItemCommentJob(IConfiguration configuration, IServiceSco
     public async Task Run(long podioItemId, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
 
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int>("Podio:AppId"));
         var commentText = "OCR screening af dokumenterne i FilArkiv er færdig.";
 
         var postCommentCommand = new PostItemCommentCommand(podioAppId, podioItemId, commentText);
-        await mediator.Send(postCommentCommand, cancellationToken);
+        await commandDispatcher.Dispatch(postCommentCommand, cancellationToken);
     }
 }

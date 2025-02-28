@@ -5,8 +5,8 @@ using System.Data;
 
 namespace AktBob.Database.UseCases.Cases;
 
-internal record GetCaseByIdQuery(int Id) : IRequest<Result<CaseDto>>;
-internal class GetCaseByIdQueryHandler(ISqlDataAccess sqlDataAccess) : IRequestHandler<GetCaseByIdQuery, Result<CaseDto>>
+internal record GetCaseByIdQuery(int Id) : IQuery<Result<CaseDto>>;
+internal class GetCaseByIdQueryHandler(ISqlDataAccess sqlDataAccess) : IQueryHandler<GetCaseByIdQuery, Result<CaseDto>>
 {
     private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
 

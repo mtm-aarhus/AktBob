@@ -3,11 +3,11 @@ using System.Data;
 
 namespace AktBob.Database.UseCases.Tickets;
 
-internal record AddTicketCommand(int DeskproTicketId) : IRequest<Result<TicketDto>>;
+internal record AddTicketCommand(int DeskproTicketId) : ICommand<Result<TicketDto>>;
 
-internal class AddTicketCommandHandler(IMediator mediator, ISqlDataAccess sqlDataAccess) : IRequestHandler<AddTicketCommand, Result<TicketDto>>
+internal class AddTicketCommandHandler(IQueryDispatcher queryDispatcher, ISqlDataAccess sqlDataAccess) : ICommandHandler<AddTicketCommand, Result<TicketDto>>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
     private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
 
     public async Task<Result<TicketDto>> Handle(AddTicketCommand request, CancellationToken cancellationToken)
@@ -26,7 +26,7 @@ internal class AddTicketCommandHandler(IMediator mediator, ISqlDataAccess sqlDat
         var ticketId = ticketParameters.Get<int>(Constants.T_TICKETS_ID);
 
         var getTicketQuery = new GetTicketByIdQuery(ticketId);
-        var getTicketQueryResult = await _mediator.Send(getTicketQuery, cancellationToken);
+        var getTicketQueryResult = await _queryDispatcher.Dispatch(getTicketQuery, cancellationToken);
         return getTicketQueryResult.Value;
     }
 }

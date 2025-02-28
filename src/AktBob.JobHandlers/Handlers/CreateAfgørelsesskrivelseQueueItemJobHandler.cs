@@ -3,7 +3,9 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Shared.Contracts;
 
 namespace AktBob.JobHandlers.Handlers;
-internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactory serviceScopeFactory, ILogger<CreateAfgørelsesskrivelseQueueItemJobHandler> logger, IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>
+internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactory serviceScopeFactory,
+                                                            ILogger<CreateAfgørelsesskrivelseQueueItemJobHandler> logger,
+                                                            IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly ILogger<CreateAfgørelsesskrivelseQueueItemJobHandler> _logger = logger;
@@ -15,11 +17,11 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
         var deskproAfdelingFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:AfdelingFieldId"));
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
 
         // Get data from Deskpro
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(job.DeskproId);
-        var getDeskproTicketResult = await mediator.Send(getDeskproTicketQuery, cancellationToken);
+        var getDeskproTicketResult = await queryDispatcher.Dispatch(getDeskproTicketQuery, cancellationToken);
 
         if (!getDeskproTicketResult.IsSuccess)
         {
@@ -42,7 +44,7 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
             _logger.LogWarning("Deskpro ticket {id}: person is null", job.DeskproId);
         }
 
-        var getPersonResult = await GetDeskproPerson(mediator, deskproTicket.Person?.Id, cancellationToken);
+        var getPersonResult = await GetDeskproPerson(queryDispatcher, deskproTicket.Person?.Id, cancellationToken);
         var person = getPersonResult.Value;
 
 
@@ -52,13 +54,13 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
             _logger.LogWarning("Deskpro ticket {id}: agent is null", job.DeskproId);
         }
 
-        var getAgentResult = await GetDeskproPerson(mediator, deskproTicket.Agent?.Id, cancellationToken);
+        var getAgentResult = await GetDeskproPerson(queryDispatcher, deskproTicket.Agent?.Id, cancellationToken);
         var agent = getAgentResult.Value;
 
 
         // Get data from database
         var getDatabaseTicketQuery = new GetTicketsQuery(job.DeskproId, null, null);
-        var getDatabaseTicketResult = await mediator.Send(getDatabaseTicketQuery, cancellationToken);
+        var getDatabaseTicketResult = await queryDispatcher.Dispatch(getDatabaseTicketQuery, cancellationToken);
 
         if (!getDatabaseTicketResult.IsSuccess || getDatabaseTicketResult.Value == null || !getDatabaseTicketResult.Value.Any())
         {
@@ -86,7 +88,7 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
         BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"DeskproID {job.DeskproId}", payload.ToJson(), CancellationToken.None));
     }
 
-    private async Task<Result<Deskpro.Contracts.DTOs.PersonDto>> GetDeskproPerson(IMediator mediator, int? personId, CancellationToken cancellationToken)
+    private async Task<Result<Deskpro.Contracts.DTOs.PersonDto>> GetDeskproPerson(IQueryDispatcher queryDispatcher, int? personId, CancellationToken cancellationToken)
     {
         if (personId is null)
         {
@@ -94,7 +96,7 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
         }
 
         var getPersonQuery = new GetDeskproPersonQuery((int)personId);
-        var getPersonResult = await mediator.Send(getPersonQuery, cancellationToken);
+        var getPersonResult = await queryDispatcher.Dispatch(getPersonQuery, cancellationToken);
         if (!getPersonResult.IsSuccess)
         {
             _logger.LogWarning("Error getting person {id} from Deskpro", personId);

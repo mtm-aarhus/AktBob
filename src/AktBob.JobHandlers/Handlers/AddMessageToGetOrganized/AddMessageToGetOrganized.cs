@@ -9,11 +9,11 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts.Messages;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
-internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory, DeskproHelper deskproHelpers)
+internal class AddMessageToGetOrganized(
+    ILogger<AddMessageToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory)
 {
     private readonly ILogger<AddMessageToGetOrganized> _logger = logger;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-    private readonly DeskproHelper _deskproHelpers = deskproHelpers;
 
     public async Task Run(int deskproMessageId, string caseNumber, CancellationToken cancellationToken = default)
     {
@@ -24,12 +24,13 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         }
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
+        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         try
         {
             var getDatabaseMessageQuery = new GetMessageByDeskproMessageIdQuery(deskproMessageId);
-            var getDatabaseMessageResult = await mediator.Send(getDatabaseMessageQuery, cancellationToken);
+            var getDatabaseMessageResult = await queryDispatcher.Dispatch(getDatabaseMessageQuery, cancellationToken);
 
             if (!getDatabaseMessageResult.IsSuccess || getDatabaseMessageResult.Value is null)
             {
@@ -48,7 +49,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             }
             
             // Get Deskpro ticket (we need the deskpro ticket id to query the message ifself)
-            var deskproTicketResult = await _deskproHelpers.GetTicket(mediator, deskproTicketId);
+            var deskproTicketResult = await deskproHelper.GetTicket(queryDispatcher, deskproTicketId);
             if (!deskproTicketResult.IsSuccess)
             {
                 _logger.LogError("Error getting Deskpro ticket {id}", deskproTicketId);
@@ -59,7 +60,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
 
             // Get Deskpro message
             var getDeskproMessageQuery = new GetDeskproMessageByIdQuery(deskproTicketId, deskproMessageId);
-            var getDeskproMessageResult = await mediator.Send(getDeskproMessageQuery, cancellationToken);
+            var getDeskproMessageResult = await queryDispatcher.Dispatch(getDeskproMessageQuery, cancellationToken);
 
             if (!getDeskproMessageResult.IsSuccess)
             {
@@ -71,21 +72,21 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             var deskproMessage = getDeskproMessageResult.Value;
 
             // Get Deskpro person
-            var personResult = await _deskproHelpers.GetPerson(mediator, deskproMessage.Person.Id);
+            var personResult = await deskproHelper.GetPerson(queryDispatcher, deskproMessage.Person.Id);
             var person = personResult.Value;
 
             // Get attachments
             var attachments = Enumerable.Empty<AttachmentDto>();
             if (getDeskproMessageResult.Value.AttachmentIds.Any())
             {
-                attachments = await _deskproHelpers.GetMessageAttachments(mediator, deskproTicket.Id, deskproMessage.Id);
+                attachments = await deskproHelper.GetMessageAttachments(queryDispatcher, deskproTicket.Id, deskproMessage.Id);
             }
 
 
             // Generate PDF document
             _logger.LogInformation("Generating PDF document from Deskpro message {id}", deskproMessageId);
 
-            var generateDocumentResult = await GenerateDocument(mediator, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, caseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
+            var generateDocumentResult = await GenerateDocument(commandDispatcher, queryDispatcher, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, caseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
             if (!generateDocumentResult.IsSuccess)
             {
                 _logger.LogError("Error generating the message document for Deskpro message {id}", deskproMessageId);
@@ -107,7 +108,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
 
             // Upload parent document
             var uploadDocumentCommand = new UploadDocumentCommand(generateDocumentResult.Value, caseNumber, fileName, metadata, false);
-            var uploadDocumentResult = await mediator.Send(uploadDocumentCommand, cancellationToken);
+            var uploadDocumentResult = await commandDispatcher.Dispatch(uploadDocumentCommand, cancellationToken);
 
             if (!uploadDocumentResult.IsSuccess)
             {
@@ -119,7 +120,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             // Update database
             // TODO: improve this: We need call this directly here and not in a background job since adding the documentId to the message in the database prevents uploading the message again next time
             var updateMessageCommand = new UpdateMessageSetGoDocumentIdCommand(deskproMessage.Id, uploadDocumentResult.Value);
-            await mediator.Send(updateMessageCommand, cancellationToken);
+            await commandDispatcher.Dispatch(updateMessageCommand, cancellationToken);
             _logger.LogInformation("Database updated: GetOrganized documentId {documentId} set for message {id}", uploadDocumentResult.Value, deskproMessage.Id);
 
             if (attachments.Any())
@@ -175,7 +176,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
     }
 
 
-    private async Task<Result<byte[]>> GenerateDocument(IMediator mediator, DateTime createdAt, string personName, string personEmail,
+    private async Task<Result<byte[]>> GenerateDocument(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher, DateTime createdAt, string personName, string personEmail,
         string content, string caseNumber, string caseTitle, int messageNumber,
         IEnumerable<AttachmentDto> attachments, CancellationToken cancellationToken = default)
     {
@@ -193,7 +194,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var bytes = Encoding.UTF8.GetBytes(html);
 
         var convertCommand = new ConvertHtmlToPdfCommand([bytes]);
-        var convertResult = await mediator.Send(convertCommand, cancellationToken);
+        var convertResult = await commandDispatcher.Dispatch(convertCommand, cancellationToken);
 
         if (!convertResult.IsSuccess)
         {
@@ -202,7 +203,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         }
 
         var jobQuery = new GetJobQuery(convertResult.Value.JobId);
-        var jobResult = await mediator.Send(jobQuery, cancellationToken);
+        var jobResult = await queryDispatcher.Dispatch(jobQuery, cancellationToken);
 
         if (!jobResult.IsSuccess)
         {

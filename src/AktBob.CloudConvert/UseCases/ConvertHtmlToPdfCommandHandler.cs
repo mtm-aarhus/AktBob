@@ -1,7 +1,8 @@
 ﻿using AktBob.CloudConvert.Models;
+using AktBob.Shared.CQRS;
 
 namespace AktBob.CloudConvert.UseCases;
-internal class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClient) : IRequestHandler<ConvertHtmlToPdfCommand, Result<ConvertHtmlToPdfResponseDto>>
+internal class ConvertHtmlToPdfCommandHandler(ICloudConvertClient cloudConvertClient) : ICommandHandler<ConvertHtmlToPdfCommand, Result<ConvertHtmlToPdfResponseDto>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
 

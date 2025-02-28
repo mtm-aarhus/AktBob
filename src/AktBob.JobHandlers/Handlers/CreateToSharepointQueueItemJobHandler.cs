@@ -9,12 +9,11 @@ using AktBob.Shared.Contracts;
 using System.Text.RegularExpressions;
 
 namespace AktBob.PodioHookProcessor.UseCases;
-internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQueueItemJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory, DeskproHelper deskproHelper) : IJobHandler<CreateToSharepointQueueItemJob>
+internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQueueItemJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateToSharepointQueueItemJob>
 {
     private readonly ILogger<CreateToSharepointQueueItemJobHandler> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-    private readonly DeskproHelper _deskproHelper = deskproHelper;
 
     public async Task Handle(CreateToSharepointQueueItemJob job, CancellationToken cancellationToken = default)
     {
@@ -25,11 +24,12 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
 
         // Get metadata from Podio
         var getPodioItemQuery = new GetItemQuery(podioAppId, job.PodioItemId);
-        var getPodioItemQueryResult = await mediator.Send(getPodioItemQuery, cancellationToken);
+        var getPodioItemQueryResult = await queryDispatcher.Dispatch(getPodioItemQuery, cancellationToken);
 
         if (!getPodioItemQueryResult.IsSuccess)
         {
@@ -46,7 +46,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
 
         // Find database case from PodioItemID
         var getDatabaseCasesQuery = new GetCasesQuery(null, job.PodioItemId, null);
-        var getDataCaseCasesResult = await mediator.Send(getDatabaseCasesQuery, cancellationToken);
+        var getDataCaseCasesResult = await queryDispatcher.Dispatch(getDatabaseCasesQuery, cancellationToken);
 
         if (!getDataCaseCasesResult.IsSuccess)
         {
@@ -64,7 +64,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
 
         // Find database ticket from PodioItemId
         var getDatabaseTicketQuery = new GetTicketsQuery(null, job.PodioItemId, null);
-        var getDatabaseTicketResult = await mediator.Send(getDatabaseTicketQuery, cancellationToken);
+        var getDatabaseTicketResult = await queryDispatcher.Dispatch(getDatabaseTicketQuery, cancellationToken);
 
         if (!getDatabaseTicketResult.IsSuccess)
         {
@@ -102,7 +102,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
         }
 
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(databaseTicket.DeskproId);
-        var getDeskproTicketResult = await mediator.Send(getDeskproTicketQuery, cancellationToken);
+        var getDeskproTicketResult = await queryDispatcher.Dispatch(getDeskproTicketQuery, cancellationToken);
 
         if (!getDeskproTicketResult.IsSuccess)
         {
@@ -117,7 +117,7 @@ internal class CreateToSharepointQueueItemJobHandler(ILogger<CreateToSharepointQ
 
         if (deskproTicket.Agent is not null && deskproTicket.Agent.Id > 0)
         {
-            agent = await _deskproHelper.GetAgent(mediator, deskproTicket.Agent.Id, cancellationToken);
+            agent = await deskproHelper.GetAgent(queryDispatcher, deskproTicket.Agent.Id, cancellationToken);
         }
         else
         {

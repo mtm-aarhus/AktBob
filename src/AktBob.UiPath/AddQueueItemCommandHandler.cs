@@ -1,8 +1,8 @@
-﻿using AktBob.UiPath.Contracts;
-using MediatR;
+﻿using AktBob.Shared.CQRS;
+using AktBob.UiPath.Contracts;
 
 namespace AktBob.UiPath;
-internal class AddQueueItemCommandHandler(IUiPathOrchestratorApi uiPathOrchestratorApi) : IRequestHandler<AddQueueItemCommand>
+internal class AddQueueItemCommandHandler(IUiPathOrchestratorApi uiPathOrchestratorApi) : ICommandHandler<AddQueueItemCommand>
 {
     private readonly IUiPathOrchestratorApi _uiPathOrchestratorApi = uiPathOrchestratorApi;
 

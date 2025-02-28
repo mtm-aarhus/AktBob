@@ -4,7 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Database.UseCases.Messages;
-internal class DeleteMessageCommandHandler(IConfiguration configuration) : IRequestHandler<DeleteMessageCommand>
+internal class DeleteMessageCommandHandler(IConfiguration configuration) : ICommandHandler<DeleteMessageCommand>
 {
     private readonly IConfiguration _configuration = configuration;
 

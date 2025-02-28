@@ -1,5 +1,7 @@
-﻿namespace AktBob.CloudConvert.UseCases;
-internal class GetFileQueryHandler(ICloudConvertClient cloudConvertClient) : IRequestHandler<GetFileQuery, Result<FileDto>>
+﻿using AktBob.Shared.CQRS;
+
+namespace AktBob.CloudConvert.UseCases;
+internal class GetFileQueryHandler(ICloudConvertClient cloudConvertClient) : IQueryHandler<GetFileQuery, Result<FileDto>>
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
 

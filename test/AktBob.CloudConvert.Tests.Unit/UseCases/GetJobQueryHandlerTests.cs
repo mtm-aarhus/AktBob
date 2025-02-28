@@ -3,9 +3,9 @@ using AktBob.CloudConvert.Contracts.DTOs;
 using AktBob.CloudConvert.Models.JobResponse;
 using AktBob.CloudConvert.UseCases;
 using AktBob.Shared;
+using AktBob.Shared.CQRS;
 using Ardalis.Result;
 using FluentAssertions;
-using MediatR;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 using System.Text;
@@ -16,13 +16,13 @@ public class GetJobQueryHandlerTests
 {
     private readonly FakeLogger<GetJobQueryHandler> _logger = new FakeLogger<GetJobQueryHandler>();
     private readonly ICloudConvertClient _cloudConvertClient = Substitute.For<ICloudConvertClient>();
-    private readonly IMediator _mediator = Substitute.For<IMediator>();
+    private readonly IQueryDispatcher _queryDispatcher = Substitute.For<IQueryDispatcher>();
     private readonly ITimeProvider _timeProvider = Substitute.For<ITimeProvider>();
     private readonly GetJobQueryHandler _sut;
 
     public GetJobQueryHandlerTests()
     {
-        _sut = new GetJobQueryHandler(_cloudConvertClient, _logger, _mediator, _timeProvider);
+        _sut = new GetJobQueryHandler(_cloudConvertClient, _logger, _timeProvider, _queryDispatcher);
     }
 
     [Fact]
@@ -71,8 +71,8 @@ public class GetJobQueryHandlerTests
         var fileDto = new FileDto(stream, "filename");
         var resultMock = Task.FromResult(Result.Success(fileDto));
 
-        _mediator
-            .Send(Arg.Any<GetFileQuery>(), Arg.Any<CancellationToken>())
+        _queryDispatcher
+            .Dispatch(Arg.Any<GetFileQuery>(), Arg.Any<CancellationToken>())
             .Returns(resultMock);
 
         // Act

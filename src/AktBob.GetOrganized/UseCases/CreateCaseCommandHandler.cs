@@ -1,10 +1,10 @@
 ﻿using AAK.GetOrganized;
 using AktBob.GetOrganized.Contracts;
+using AktBob.Shared.CQRS;
 using Ardalis.Result;
-using MediatR;
 
 namespace AktBob.GetOrganized.UseCases;
-internal class CreateCaseCommandHandler(IGetOrganizedClient getOrganizedClient) : IRequestHandler<CreateCaseCommand, Result<CreateCaseResponse>>
+internal class CreateCaseCommandHandler(IGetOrganizedClient getOrganizedClient) : ICommandHandler<CreateCaseCommand, Result<CreateCaseResponse>>
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 

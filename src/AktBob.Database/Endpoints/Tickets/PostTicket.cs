@@ -17,9 +17,9 @@ internal class PostTicketRequestValidator : Validator<PostTicketRequest>
     }
 }
 
-internal class PostTicket(IMediator mediator) : Endpoint<PostTicketRequest, TicketDto>
+internal class PostTicket(ICommandDispatcher commandDispatcher) : Endpoint<PostTicketRequest, TicketDto>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
 
     public override void Configure()
     {
@@ -34,7 +34,7 @@ internal class PostTicket(IMediator mediator) : Endpoint<PostTicketRequest, Tick
     public override async Task HandleAsync(PostTicketRequest req, CancellationToken ct)
     {
         var command = new AddTicketCommand(req.DeskproId);
-        var result = await _mediator.Send(command);
+        var result = await _commandDispatcher.Dispatch(command);
 
         if (result.IsSuccess)
         {

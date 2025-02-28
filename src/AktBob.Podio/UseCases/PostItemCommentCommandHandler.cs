@@ -1,10 +1,11 @@
 ﻿using AAK.Podio;
 using AktBob.Podio.Contracts;
+using AktBob.Shared.CQRS;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Podio.UseCases;
-public class PostItemCommentCommandHandler(IPodioFactory podioFactory, IConfiguration configuration, ILogger<PostItemCommentCommandHandler> logger) : IRequestHandler<PostItemCommentCommand>
+public class PostItemCommentCommandHandler(IPodioFactory podioFactory, IConfiguration configuration, ILogger<PostItemCommentCommandHandler> logger) : ICommandHandler<PostItemCommentCommand>
 {
     private readonly IPodioFactory _podioFactory = podioFactory;
     private readonly IConfiguration _configuration = configuration;

@@ -8,9 +8,9 @@ namespace AktBob.Database.Endpoints.Cases;
 
 internal record GetCaseRequest(int Id);
 
-internal class GetCase(IMediator mediator) : Endpoint<GetCaseRequest, CaseDto>
+internal class GetCase(IQueryDispatcher queryDispatcher) : Endpoint<GetCaseRequest, CaseDto>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
 
     public override void Configure()
     {
@@ -25,7 +25,7 @@ internal class GetCase(IMediator mediator) : Endpoint<GetCaseRequest, CaseDto>
     public override async Task HandleAsync(GetCaseRequest req, CancellationToken ct)
     {
         var getCaseByIdQuery = new GetCaseByIdQuery(req.Id);
-        var result = await _mediator.Send(getCaseByIdQuery, ct);
+        var result = await _queryDispatcher.Dispatch(getCaseByIdQuery, ct);
 
         await this.SendResponse(result, r => r.Value);
     }

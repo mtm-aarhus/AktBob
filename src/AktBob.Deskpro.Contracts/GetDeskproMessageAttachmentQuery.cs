@@ -1,2 +1,2 @@
 ﻿namespace AktBob.Deskpro.Contracts;
-public record GetDeskproMessageAttachmentQuery(string DownloadUrl) : IRequest<Result<Stream>>;
+public record GetDeskproMessageAttachmentQuery(string DownloadUrl) : IQuery<Result<Stream>>;

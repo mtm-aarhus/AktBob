@@ -8,9 +8,9 @@ namespace AktBob.Database.Endpoints.Cases;
 
 internal record GetCasesRequest(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId);
 
-internal class GetCases(IMediator mediator) : Endpoint<GetCasesRequest, IEnumerable<CaseDto>>
+internal class GetCases(IQueryDispatcher queryDispatcher) : Endpoint<GetCasesRequest, IEnumerable<CaseDto>>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
 
     public override void Configure()
     {
@@ -28,7 +28,7 @@ internal class GetCases(IMediator mediator) : Endpoint<GetCasesRequest, IEnumera
             PodioItemId: req.PodioItemId,
             FilArkivCaseId: req.FilArkivCaseId);
 
-        var result = await _mediator.Send(query, ct);
+        var result = await _queryDispatcher.Dispatch(query, ct);
         await this.SendResponse(result, r => r.Value);
     }
 }

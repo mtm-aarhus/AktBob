@@ -1,12 +1,13 @@
 ﻿using AktBob.Podio.Contracts;
+using AktBob.Shared.CQRS;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Podio.Endpoints;
-internal class UpdateSharepointmappeField(IMediator mediator, IConfiguration configuration) : Endpoint<UpdatePodioFieldRequest>
+internal class UpdateSharepointmappeField(ICommandDispatcher commandDispatcher, IConfiguration configuration) : Endpoint<UpdatePodioFieldRequest>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
     private readonly IConfiguration _configuration = configuration;
 
     public override void Configure()
@@ -21,7 +22,7 @@ internal class UpdateSharepointmappeField(IMediator mediator, IConfiguration con
         var fieldId = _configuration.GetValue<int>("Podio:AktindsigtApp:Fields:Sharepointmappe");
 
         var command = new UpdateFieldCommand(appId, req.ItemId, fieldId, req.Value);
-        await _mediator.Send(command);
+        await _commandDispatcher.Dispatch(command);
 
         await SendNoContentAsync(ct);
     }

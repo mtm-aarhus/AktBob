@@ -1,10 +1,11 @@
 ﻿using AAK.Podio;
 using AktBob.Podio.Contracts;
+using AktBob.Shared.CQRS;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Podio.UseCases;
-internal class UpdateFieldCommandHandler(IPodioFactory podioFactory, ILogger<UpdateFieldCommandHandler> logger, IConfiguration configuration) : IRequestHandler<UpdateFieldCommand>
+internal class UpdateFieldCommandHandler(IPodioFactory podioFactory, ILogger<UpdateFieldCommandHandler> logger, IConfiguration configuration) : ICommandHandler<UpdateFieldCommand>
 {
     private readonly IPodioFactory _podioFactory = podioFactory;
     private readonly ILogger<UpdateFieldCommandHandler> _logger = logger;

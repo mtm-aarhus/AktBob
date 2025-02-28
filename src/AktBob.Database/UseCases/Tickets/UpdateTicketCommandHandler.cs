@@ -2,15 +2,15 @@
 using AktBob.Database.UseCases.Tickets.UpdateTicket;
 
 namespace AktBob.Database.UseCases.Tickets;
-internal class UpdateTicketCommandHandler(ISqlDataAccess sqlDataAccess, IMediator mediator) : IRequestHandler<UpdateTicketCommand, Result<TicketDto>>
+internal class UpdateTicketCommandHandler(ISqlDataAccess sqlDataAccess, IQueryDispatcher queryDispatcher) : ICommandHandler<UpdateTicketCommand, Result<TicketDto>>
 {
     private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
-    private readonly IMediator _mediator = mediator;
+    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
 
     public async Task<Result<TicketDto>> Handle(UpdateTicketCommand request, CancellationToken cancellationToken)
     {
         var getTicketQuery = new GetTicketByIdQuery(request.Id);
-        var getTicketResult = await _mediator.Send(getTicketQuery, cancellationToken);
+        var getTicketResult = await _queryDispatcher.Dispatch(getTicketQuery, cancellationToken);
 
         if (!getTicketResult.IsSuccess)
         {

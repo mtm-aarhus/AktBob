@@ -26,9 +26,9 @@ internal class PostCaseRequestValidator : Validator<PostCaseRequest>
 }
 
 
-internal class PostCase(IMediator mediator) : Endpoint<PostCaseRequest, CaseDto>
+internal class PostCase(ICommandDispatcher commandDispatcher) : Endpoint<PostCaseRequest, CaseDto>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
 
     public override void Configure()
     {
@@ -48,7 +48,7 @@ internal class PostCase(IMediator mediator) : Endpoint<PostCaseRequest, CaseDto>
             FilArkivCaseId: req.FilArkivCaseId,
             CaseNumber: req.CaseNumber);
 
-        var result = await _mediator.Send(addCaseCommand, ct);
+        var result = await _commandDispatcher.Dispatch(addCaseCommand, ct);
 
         if (result.IsSuccess)
         {

@@ -8,12 +8,11 @@ using AktBob.Shared.Contracts;
 using System.Text.RegularExpressions;
 
 namespace AktBob.PodioHookProcessor.UseCases;
-internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueueItemJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory, DeskproHelper deskproHelper) : IJobHandler<CreateGoToFilArkivQueueItemJob>
+internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueueItemJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateGoToFilArkivQueueItemJob>
 {
     private readonly ILogger<CreateToFilArkivQueueItemJobHandler> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-    private readonly DeskproHelper _deskproHelper = deskproHelper;
 
     public async Task Handle(CreateGoToFilArkivQueueItemJob job, CancellationToken cancellationToken = default)
     {
@@ -24,11 +23,12 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
 
         // Get metadata from Podio
         var getPodioItemQuery = new GetItemQuery(podioAppId, job.PodioItemId);
-        var getPodioItemQueryResult = await mediator.Send(getPodioItemQuery, cancellationToken);
+        var getPodioItemQueryResult = await queryDispatcher.Dispatch(getPodioItemQuery, cancellationToken);
 
         if (!getPodioItemQueryResult.IsSuccess)
         {
@@ -45,7 +45,7 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
 
         // Find database ticket by PodioItemId
         var getDatabaseTicketByPodioItemIdQuery = new GetTicketsQuery(null, job.PodioItemId, null);
-        var getDatabaseTicketByPodioItemIdQueryResult = await mediator.Send(getDatabaseTicketByPodioItemIdQuery, cancellationToken);
+        var getDatabaseTicketByPodioItemIdQueryResult = await queryDispatcher.Dispatch(getDatabaseTicketByPodioItemIdQuery, cancellationToken);
 
         if (!getDatabaseTicketByPodioItemIdQueryResult.IsSuccess)
         {
@@ -81,7 +81,7 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
 
         // Get data from Deskpro
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(databaseTicket.DeskproId);
-        var getDeskproTicketQueryResult = await mediator.Send(getDeskproTicketQuery, cancellationToken);
+        var getDeskproTicketQueryResult = await queryDispatcher.Dispatch(getDeskproTicketQuery, cancellationToken);
 
         if (!getDeskproTicketQueryResult.IsSuccess)
         {
@@ -94,7 +94,7 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
         // Get Deskpro agent
         if (getDeskproTicketQueryResult.Value.Agent is not null && getDeskproTicketQueryResult.Value.Agent.Id > 0)
         {
-            agent = await _deskproHelper.GetAgent(mediator, getDeskproTicketQueryResult.Value.Agent.Id, cancellationToken);
+            agent = await deskproHelper.GetAgent(queryDispatcher, getDeskproTicketQueryResult.Value.Agent.Id, cancellationToken);
         }
         else
         {

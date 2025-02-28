@@ -5,9 +5,9 @@ using System.Data;
 
 namespace AktBob.Database.UseCases.Cases;
 
-internal record GetCasesByTicketIdQuery(int TicketId) : IRequest<Result<IEnumerable<CaseDto>>>;
+internal record GetCasesByTicketIdQuery(int TicketId) : IQuery<Result<IEnumerable<CaseDto>>>;
 
-internal class GetCasesByTicketIdQueryHandler(ISqlDataAccess sqlDataAccess) : IRequestHandler<GetCasesByTicketIdQuery, Result<IEnumerable<CaseDto>>>
+internal class GetCasesByTicketIdQueryHandler(ISqlDataAccess sqlDataAccess) : IQueryHandler<GetCasesByTicketIdQuery, Result<IEnumerable<CaseDto>>>
 {
     private readonly ISqlDataAccess _sqlDataAccess = sqlDataAccess;
 

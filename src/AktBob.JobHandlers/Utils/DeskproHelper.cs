@@ -8,12 +8,12 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     private readonly ILogger<DeskproHelper> _logger = logger;
     private readonly IMemoryCache _cache = cache;
 
-    public async Task<Result<TicketDto>> GetTicket(IMediator mediator, int ticketId)
+    public async Task<Result<TicketDto>> GetTicket(IQueryDispatcher queryDispatcher, int ticketId)
     {
         _logger.LogInformation("Getting Deskpro ticket #{id}", ticketId);
 
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticketId);
-        var getDeskproTicketQueryResult = await mediator.Send(getDeskproTicketQuery);
+        var getDeskproTicketQueryResult = await queryDispatcher.Dispatch(getDeskproTicketQuery);
 
         if (!getDeskproTicketQueryResult.IsSuccess)
         {
@@ -25,7 +25,7 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     }
 
 
-    public async Task<Result<PersonDto>> GetPerson(IMediator mediator, int? personId)
+    public async Task<Result<PersonDto>> GetPerson(IQueryDispatcher queryDispatcher, int? personId)
     {
         if (personId == null)
         {
@@ -45,7 +45,7 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
         _logger.LogInformation("Getting Deskpro person #{id}", personId);
 
         var query = new GetDeskproPersonQuery((int)personId);
-        var result = await mediator.Send(query);
+        var result = await queryDispatcher.Dispatch(query);
 
         if (!result.IsSuccess)
         {
@@ -63,10 +63,10 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     }
 
 
-    public async Task<(string Name, string Email)> GetAgent(IMediator mediator, int agentId, CancellationToken cancellationToken = default)
+    public async Task<(string Name, string Email)> GetAgent(IQueryDispatcher queryDispatcher, int agentId, CancellationToken cancellationToken = default)
     {
         var query = new GetDeskproPersonQuery(agentId);
-        var result = await mediator.Send(query, cancellationToken);
+        var result = await queryDispatcher.Dispatch(query, cancellationToken);
 
         if (result.IsSuccess && result.Value.IsAgent)
         {
@@ -81,12 +81,12 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     }
 
 
-    public async Task<IEnumerable<AttachmentDto>> GetMessageAttachments(IMediator mediator, int deskproTicketId, int deskproMessageId)
+    public async Task<IEnumerable<AttachmentDto>> GetMessageAttachments(IQueryDispatcher queryDispatcher, int deskproTicketId, int deskproMessageId)
     {
         _logger.LogInformation("Getting Deskpro message #{id} attachments", deskproMessageId);
 
         var query = new GetDeskproMessageAttachmentsQuery(deskproTicketId, deskproMessageId);
-        var result = await mediator.Send(query);
+        var result = await queryDispatcher.Dispatch(query);
 
         if (!result.IsSuccess)
         {

@@ -2,7 +2,7 @@
 using AktBob.Deskpro.Contracts;
 
 namespace AktBob.Deskpro.UseCases;
-internal class InvokeWebhookCommandHandler(IDeskproClient deskproClient) : IRequestHandler<InvokeWebhookCommand>
+internal class InvokeWebhookCommandHandler(IDeskproClient deskproClient) : ICommandHandler<InvokeWebhookCommand>
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
 

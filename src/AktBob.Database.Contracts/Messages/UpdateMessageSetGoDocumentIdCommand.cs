@@ -1,4 +1,2 @@
-﻿using AktBob.Database.Contracts.Dtos;
-
-namespace AktBob.Database.Contracts.Messages;
-public record UpdateMessageSetGoDocumentIdCommand(int DeskproMessageId, int? GoDocumentId) : IRequest<Result<MessageDto>>;
+﻿namespace AktBob.Database.Contracts.Messages;
+public record UpdateMessageSetGoDocumentIdCommand(int DeskproMessageId, int? GoDocumentId) : ICommand<Result<MessageDto>>;

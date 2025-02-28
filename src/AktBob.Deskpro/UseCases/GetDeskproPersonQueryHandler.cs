@@ -4,7 +4,7 @@ using AktBob.Deskpro.Contracts.DTOs;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace AktBob.Deskpro.UseCases;
-internal class GetDeskproPersonQueryHandler(IDeskproClient deskpro, IMemoryCache cache) : IRequestHandler<GetDeskproPersonQuery, Result<PersonDto>>
+internal class GetDeskproPersonQueryHandler(IDeskproClient deskpro, IMemoryCache cache) : IQueryHandler<GetDeskproPersonQuery, Result<PersonDto>>
 {
     private readonly IDeskproClient _deskpro = deskpro;
     private readonly IMemoryCache _cache = cache;

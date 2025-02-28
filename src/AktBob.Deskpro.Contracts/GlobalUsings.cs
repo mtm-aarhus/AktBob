@@ -1,2 +1,2 @@
 ﻿global using Ardalis.Result;
-global using MediatR;
+global using AktBob.Shared.CQRS;

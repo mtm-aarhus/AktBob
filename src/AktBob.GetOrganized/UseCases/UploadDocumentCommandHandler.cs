@@ -1,12 +1,12 @@
 ﻿using AAK.GetOrganized;
 using AktBob.GetOrganized.Contracts;
+using AktBob.Shared.CQRS;
 using Ardalis.Result;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.GetOrganized.UseCases;
-internal class UploadDocumentCommandHandler(ILogger<UploadDocumentCommandHandler> logger, IConfiguration configuration, IGetOrganizedClient getOrganizedClient) : IRequestHandler<UploadDocumentCommand, Result<int>>
+internal class UploadDocumentCommandHandler(ILogger<UploadDocumentCommandHandler> logger, IConfiguration configuration, IGetOrganizedClient getOrganizedClient) : ICommandHandler<UploadDocumentCommand, Result<int>>
 {
     private readonly ILogger<UploadDocumentCommandHandler> _logger = logger;
     private readonly IConfiguration _configuration = configuration;

@@ -4,22 +4,22 @@ using FilArkivCore.Web.Shared.Documents;
 
 namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
 
-internal class RegisterFilesJobHandler(CachedData cachedData,
-                                       FilArkivCoreClient filArkivCoreClient,
-                                       ILogger<RegisterFilesJobHandler> logger,
-                                       CheckOCRScreeningStatusSettings settings) : IJobHandler<CheckOCRScreeningStatusJob>
+internal class RegisterFilesJobHandler(IServiceScopeFactory serviceScopeFactory, ILogger<RegisterFilesJobHandler> logger) : IJobHandler<CheckOCRScreeningStatusJob>
 {
-    private readonly CachedData _cachedData = cachedData;
-    private readonly FilArkivCoreClient _filArkivCoreClient = filArkivCoreClient;
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly ILogger<RegisterFilesJobHandler> _logger = logger;
-    private readonly CheckOCRScreeningStatusSettings _settings = settings;
 
     public async Task Handle(CheckOCRScreeningStatusJob job, CancellationToken cancellationToken = default)
     {
+        var scope = _serviceScopeFactory.CreateScope();
+        var filArkivCoreClient = scope.ServiceProvider.GetRequiredService<FilArkivCoreClient>();
+        var cachedData = scope.ServiceProvider.GetRequiredService<CachedData>();
+        var settings = scope.ServiceProvider.GetRequiredService<CheckOCRScreeningStatusSettings>();
+
         var @case = new Case(job.FilArkivCaseId, job.PodioItemId);
         var cacheId = Guid.NewGuid();
 
-        if (!_cachedData.Cases.TryAdd(cacheId, @case))
+        if (!cachedData.Cases.TryAdd(cacheId, @case))
         {
             _logger.LogError("Error adding case to cache");
             return;
@@ -39,7 +39,7 @@ internal class RegisterFilesJobHandler(CachedData cachedData,
                 PageSize = 100
             };
 
-            var documentOverview = await _filArkivCoreClient.GetCaseDocumentOverviewListAsync(documentOverviewParameters);
+            var documentOverview = await filArkivCoreClient.GetCaseDocumentOverviewListAsync(documentOverviewParameters);
 
             if (documentOverview == null)
             {
@@ -66,7 +66,7 @@ internal class RegisterFilesJobHandler(CachedData cachedData,
         // Enqueue job: query files processing status
         BackgroundJob.Enqueue<QueryFilesProcessingStatusJob>(x => x.Run(cacheId, CancellationToken.None));
 
-        if (_settings.UpdatePodioItemImmediately)
+        if (settings.UpdatePodioItemImmediately)
         {
             BackgroundJob.Enqueue<UpdatePodioItemJob>(job => job.Run(@case.FilArkivCaseId, @case.PodioItemId, CancellationToken.None));
         }

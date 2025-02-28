@@ -7,9 +7,9 @@ namespace AktBob.Database.Endpoints.Tickets;
 
 internal record GetTicketRequest(int Id);
 
-internal class GetTicket(IMediator mediator) : Endpoint<GetTicketRequest, TicketDto>
+internal class GetTicket(IQueryDispatcher queryDispatcher) : Endpoint<GetTicketRequest, TicketDto>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
 
     public override void Configure()
     {
@@ -25,7 +25,7 @@ internal class GetTicket(IMediator mediator) : Endpoint<GetTicketRequest, Ticket
     public override async Task HandleAsync(GetTicketRequest req, CancellationToken ct)
     {
         var query = new GetTicketByIdQuery(req.Id);
-        var result = await _mediator.Send(query, ct);
+        var result = await _queryDispatcher.Dispatch(query, ct);
 
         if (!result.IsSuccess)
         {

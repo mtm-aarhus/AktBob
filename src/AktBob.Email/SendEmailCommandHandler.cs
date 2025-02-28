@@ -1,10 +1,10 @@
 ﻿using AktBob.Email.Contracts;
-using MediatR;
+using AktBob.Shared.CQRS;
 using Microsoft.Extensions.Configuration;
 using System.Net.Mail;
 
 namespace AktBob.Email;
-internal class SendEmailCommandHandler(IConfiguration configuration) : IRequestHandler<SendEmailCommand>
+internal class SendEmailCommandHandler(IConfiguration configuration) : ICommandHandler<SendEmailCommand>
 {
     private readonly IConfiguration _configuration = configuration;
 

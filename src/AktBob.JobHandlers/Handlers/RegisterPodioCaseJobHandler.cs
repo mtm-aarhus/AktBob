@@ -19,65 +19,64 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "CaseNumber"));
         Guard.Against.Null(podioFieldDeskproId.Value);
 
-        using (var scope = _serviceScopeFactory.CreateScope())
+        using var scope = _serviceScopeFactory.CreateScope();
+        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+
+        // Get metadata from Podio
+        var getPodioItemQuery = new GetItemQuery(podioAppId, job.PodioItemId);
+        var getPodioItemQueryResult = await queryDispatcher.Dispatch(getPodioItemQuery, cancellationToken);
+
+        if (!getPodioItemQueryResult.IsSuccess)
         {
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            _logger.LogError("Could not get item {itemId} from Podio", job.PodioItemId);
+            return;
+        }
 
-            // Get metadata from Podio
-            var getPodioItemQuery = new GetItemQuery(podioAppId, job.PodioItemId);
-            var getPodioItemQueryResult = await mediator.Send(getPodioItemQuery, cancellationToken);
+        var caseNumber = getPodioItemQueryResult.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
 
-            if (!getPodioItemQueryResult.IsSuccess)
-            {
-                _logger.LogError("Could not get item {itemId} from Podio", job.PodioItemId);
-                return;
-            }
+        if (string.IsNullOrEmpty(caseNumber))
+        {
+            _logger.LogError("Could not get case number field value from Podio Item {id}", job.PodioItemId);
+            return;
+        }
 
-            var caseNumber = getPodioItemQueryResult.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
+        // Get metadata from Deskpro
+        var deskproIdString = getPodioItemQueryResult.Value.GetField(podioFieldDeskproId.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
+        if (string.IsNullOrEmpty(deskproIdString))
+        {
+            _logger.LogError("Could not get Deskpro Id field value from Podio Item {itemId}", job.PodioItemId);
+            return;
+        }
 
-            if (string.IsNullOrEmpty(caseNumber))
-            {
-                _logger.LogError("Could not get case number field value from Podio Item {id}", job.PodioItemId);
-                return;
-            }
+        if (!int.TryParse(deskproIdString, out int deskproId))
+        {
+            _logger.LogError("Could not parse Deskpro Id field value as integer from Podio Item {itemId}", job.PodioItemId);
+            return;
+        }
 
-            // Get metadata from Deskpro
-            var deskproIdString = getPodioItemQueryResult.Value.GetField(podioFieldDeskproId.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
-            if (string.IsNullOrEmpty(deskproIdString))
-            {
-                _logger.LogError("Could not get Deskpro Id field value from Podio Item {itemId}", job.PodioItemId);
-                return;
-            }
+        var ticketQuery = new GetTicketsQuery(deskproId, null, null);
+        var ticketResult = await queryDispatcher.Dispatch(ticketQuery, cancellationToken);
 
-            if (!int.TryParse(deskproIdString, out int deskproId))
-            {
-                _logger.LogError("Could not parse Deskpro Id field value as integer from Podio Item {itemId}", job.PodioItemId);
-                return;
-            }
+        if (!ticketResult.IsSuccess || ticketResult.Value.Count() == 0)
+        {
+            _logger.LogWarning("No tickets found in database for DeskproId '{deskproId}'", deskproId);
+            return;
+        }
 
-            var ticketQuery = new GetTicketsQuery(deskproId, null, null);
-            var ticketResult = await mediator.Send(ticketQuery, cancellationToken);
+        if (ticketResult.Value.Count() > 1)
+        {
+            _logger.LogWarning("{count} tickets found in database for DeskproId '{deskproId}'", ticketResult.Value.Count(), deskproId);
+            return;
+        }
 
-            if (!ticketResult.IsSuccess || ticketResult.Value.Count() == 0)
-            {
-                _logger.LogWarning("No tickets found in database for DeskproId '{deskproId}'", deskproId);
-                return;
-            }
+        // Post case to database
+        var postCaseCommand = new AddCaseCommand(ticketResult.Value.First().Id, job.PodioItemId, caseNumber, null);
+        var postCaseCommandResult = await commandDispatcher.Dispatch(postCaseCommand, cancellationToken);
 
-            if (ticketResult.Value.Count() > 1)
-            {
-                _logger.LogWarning("{count} tickets found in database for DeskproId '{deskproId}'", ticketResult.Value.Count(), deskproId);
-                return;
-            }
-
-            // Post case to database
-            var postCaseCommand = new AddCaseCommand(ticketResult.Value.First().Id, job.PodioItemId, caseNumber, null);
-            var postCaseCommandResult = await mediator.Send(postCaseCommand, cancellationToken);
-
-            if (!postCaseCommandResult.IsSuccess)
-            {
-                _logger.LogError("Error adding case to database");
-            }
+        if (!postCaseCommandResult.IsSuccess)
+        {
+            _logger.LogError("Error adding case to database");
         }
     }
 }

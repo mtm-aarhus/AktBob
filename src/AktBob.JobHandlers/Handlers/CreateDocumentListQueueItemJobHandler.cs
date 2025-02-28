@@ -6,7 +6,9 @@ using AktBob.Podio.Contracts;
 using AktBob.Shared.Contracts;
 
 namespace AktBob.JobHandlers.Handlers;
-internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQueueItemJobHandler> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateDocumentListQueueItemJob>
+internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQueueItemJobHandler> logger,
+                                                     IConfiguration configuration,
+                                                     IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateDocumentListQueueItemJob>
 {
     private readonly ILogger<CreateDocumentListQueueItemJobHandler> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
@@ -31,28 +33,28 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
 
         // Get metadata from Podio
-        if (!GetCaseNumberFromPodioItem(mediator, podioAppId, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken, out string caseNumber))
+        if (!GetCaseNumberFromPodioItem(queryDispatcher, podioAppId, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken, out string caseNumber))
         {
             return Task.CompletedTask;
         }
 
         // Find ticket in database from PodioItemId
-        if (!GetTicketFromApiDatabaseByPodioItemId(mediator, job.PodioItemId, cancellationToken, out Database.Contracts.Dtos.TicketDto? databaseTicketDto))
+        if (!GetTicketFromApiDatabaseByPodioItemId(queryDispatcher, job.PodioItemId, cancellationToken, out Database.Contracts.Dtos.TicketDto? databaseTicketDto))
         {
             return Task.CompletedTask;
         }
 
         // Get ticket from Deskpro
-        if (!GetDeskproTicket(mediator, databaseTicketDto!.DeskproId, cancellationToken, out TicketDto? deskproTicketDto))
+        if (!GetDeskproTicket(queryDispatcher, databaseTicketDto!.DeskproId, cancellationToken, out TicketDto? deskproTicketDto))
         {
             return Task.CompletedTask;
         }
 
         // Get Deskpro ticket agent, if any (returns (string.Empty, string.Empty) if there is no agent)
-        GetDeskproTicketAgent(mediator, deskproTicketDto!.Agent, cancellationToken, out (string Name, string Email) agent);
+        GetDeskproTicketAgent(queryDispatcher, deskproTicketDto!.Agent, cancellationToken, out (string Name, string Email) agent);
 
         if (useOpenOrchestrator)
         {
@@ -87,12 +89,12 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         return Task.CompletedTask;
     }
 
-    private bool GetCaseNumberFromPodioItem(IMediator mediator, int podioAppId, long podioItemId, int podioFieldId, CancellationToken cancellationToken, out string caseNumber)
+    private bool GetCaseNumberFromPodioItem(IQueryDispatcher queryDispatcher, int podioAppId, long podioItemId, int podioFieldId, CancellationToken cancellationToken, out string caseNumber)
     {
         caseNumber = string.Empty;
 
         var getPodioItemQuery = new GetItemQuery(podioAppId, podioItemId);
-        var getPodioItemQueryResult = mediator.Send(getPodioItemQuery, cancellationToken).GetAwaiter().GetResult();
+        var getPodioItemQueryResult = queryDispatcher.Dispatch(getPodioItemQuery, cancellationToken).GetAwaiter().GetResult();
 
         if (!getPodioItemQueryResult.IsSuccess)
         {
@@ -111,7 +113,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         return true;
     }
 
-    private bool GetTicketFromApiDatabaseByPodioItemId(IMediator mediator, long podioItemId, CancellationToken cancellationToken, out Database.Contracts.Dtos.TicketDto? ticketDto)
+    private bool GetTicketFromApiDatabaseByPodioItemId(IQueryDispatcher queryDispatcher, long podioItemId, CancellationToken cancellationToken, out Database.Contracts.Dtos.TicketDto? ticketDto)
     {
         var retriesCount = 10;
         var counter = 1;
@@ -126,7 +128,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         // after 10 retries something else is wrong.
         while (counter <= retriesCount || !cancellationToken.IsCancellationRequested)
         {
-            var getTicketByPodioItemIdQueryResult = mediator.Send(getTicketByPodioItemIdQuery, cancellationToken).GetAwaiter().GetResult();
+            var getTicketByPodioItemIdQueryResult = queryDispatcher.Dispatch(getTicketByPodioItemIdQuery, cancellationToken).GetAwaiter().GetResult();
 
             // We have data: Exit the while loop
             if (getTicketByPodioItemIdQueryResult.IsSuccess)
@@ -160,12 +162,12 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         return true;
     }
 
-    private bool GetDeskproTicket(IMediator mediator, int deskproId, CancellationToken cancellationToken, out TicketDto? ticketDto)
+    private bool GetDeskproTicket(IQueryDispatcher queryDispatcher, int deskproId, CancellationToken cancellationToken, out TicketDto? ticketDto)
     {
         ticketDto = null;
 
         var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(deskproId);
-        var getDeskproTicketQueryResult = mediator.Send(getDeskproTicketQuery, cancellationToken).GetAwaiter().GetResult();
+        var getDeskproTicketQueryResult = queryDispatcher.Dispatch(getDeskproTicketQuery, cancellationToken).GetAwaiter().GetResult();
 
         if (!getDeskproTicketQueryResult.IsSuccess)
         {
@@ -177,7 +179,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         return true;
     }
 
-    private void GetDeskproTicketAgent(IMediator mediator, PersonDto? person, CancellationToken cancellationToken, out (string AgentName, string AgentEmail) agent)
+    private void GetDeskproTicketAgent(IQueryDispatcher queryDispatcher, PersonDto? person, CancellationToken cancellationToken, out (string AgentName, string AgentEmail) agent)
     {
         agent = (string.Empty, string.Empty);
 
@@ -194,7 +196,7 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         }
 
         var getAgentQuery = new GetDeskproPersonQuery(person.Id);
-        var getAgentResult = mediator.Send(getAgentQuery, cancellationToken).GetAwaiter().GetResult();
+        var getAgentResult = queryDispatcher.Dispatch(getAgentQuery, cancellationToken).GetAwaiter().GetResult();
 
         if (getAgentResult.IsSuccess
             && getAgentResult.Value is not null

@@ -21,7 +21,7 @@ internal class CreateGetOrganizedCaseJobHandler : IJobHandler<CreateGetOrganized
     public async Task Handle(CreateGetOrganizedCaseJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
 
         _logger.LogInformation("Creating GetOrganized case (Deskpro ID {deskproId}", job.DeskproId);
 
@@ -38,7 +38,7 @@ internal class CreateGetOrganizedCaseJobHandler : IJobHandler<CreateGetOrganized
             Status: caseStatus,
             Access: caseAccess);
 
-        var createCaseResult = await mediator.Send(createCaseCommand, cancellationToken);
+        var createCaseResult = await commandDispatcher.Dispatch(createCaseCommand, cancellationToken);
 
         if (!createCaseResult.IsSuccess)
         {

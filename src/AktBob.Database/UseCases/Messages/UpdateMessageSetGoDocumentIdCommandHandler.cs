@@ -5,10 +5,10 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Database.UseCases.Messages;
-internal class UpdateMessageSetGoDocumentIdCommandHandler(IConfiguration configuration, IMediator mediator) : IRequestHandler<UpdateMessageSetGoDocumentIdCommand, Result<MessageDto>>
+internal class UpdateMessageSetGoDocumentIdCommandHandler(IConfiguration configuration, IQueryDispatcher queryDispatcher) : ICommandHandler<UpdateMessageSetGoDocumentIdCommand, Result<MessageDto>>
 {
     private readonly IConfiguration _configuration = configuration;
-    private readonly IMediator _mediator = mediator;
+    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
 
     public async Task<Result<MessageDto>> Handle(UpdateMessageSetGoDocumentIdCommand request, CancellationToken cancellationToken)
     {
@@ -25,7 +25,7 @@ internal class UpdateMessageSetGoDocumentIdCommandHandler(IConfiguration configu
         }
 
         // Return the updated database object
-        var getMessageQueryResult = await _mediator.Send(new GetMessageByDeskproMessageIdQuery(request.DeskproMessageId), cancellationToken);
+        var getMessageQueryResult = await _queryDispatcher.Dispatch(new GetMessageByDeskproMessageIdQuery(request.DeskproMessageId), cancellationToken);
         if (!getMessageQueryResult.IsSuccess)
         {
             return Result.NotFound();

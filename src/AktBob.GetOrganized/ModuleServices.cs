@@ -7,7 +7,7 @@ using System.Reflection;
 namespace AktBob.GetOrganized;
 public static class ModuleServices
 {
-    public static IServiceCollection AddGetOrganizedModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> mediatorAssemblies)
+    public static IServiceCollection AddGetOrganizedModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> cqrsHandlersAssemblies)
     {
         // Add GetOrganized service
         var getOrganizedOptions = new GetOrganizedOptions
@@ -20,7 +20,7 @@ public static class ModuleServices
 
         services.AddGetOrganizedModule(getOrganizedOptions);
 
-        mediatorAssemblies.Add(typeof(ModuleServices).Assembly);
+        cqrsHandlersAssemblies.Add(typeof(ModuleServices).Assembly);
 
         return services;
     }

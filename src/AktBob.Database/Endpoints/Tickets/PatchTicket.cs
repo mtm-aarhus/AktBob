@@ -16,9 +16,9 @@ internal record PatchTicketRequest
     public DateTime? JournalizedAt { get; set; }
 }
 
-internal class PatchTicket(IMediator mediator) : Endpoint<PatchTicketRequest, TicketDto>
+internal class PatchTicket(ICommandDispatcher commandDispatcher) : Endpoint<PatchTicketRequest, TicketDto>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
 
     public override void Configure()
     {
@@ -40,7 +40,7 @@ internal class PatchTicket(IMediator mediator) : Endpoint<PatchTicketRequest, Ti
             TicketClosedAt: req.TicketClosedAt,
             JournalizedAt: req.JournalizedAt);
 
-        var result = await _mediator.Send(command, ct);
+        var result = await _commandDispatcher.Dispatch(command, ct);
         await this.SendResponse(result, r => r.Value);
     }
 }

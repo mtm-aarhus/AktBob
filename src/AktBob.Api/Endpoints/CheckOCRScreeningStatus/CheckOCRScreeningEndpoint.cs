@@ -2,14 +2,19 @@
 using AktBob.Database.UseCases.Cases.GetCases;
 using AktBob.Shared;
 using AktBob.Shared.Contracts;
+using AktBob.Shared.CQRS;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.CheckOCRScreeningStatus;
 
-internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher, IMediator mediator, ILogger<CheckOCRScreeningEndpoint> logger) : Endpoint<CheckOCRScreeningRequest>
+internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher,
+                                         IQueryDispatcher queryDispatcher,
+                                         ICommandDispatcher commandDispatcher,
+                                         ILogger<CheckOCRScreeningEndpoint> logger) : Endpoint<CheckOCRScreeningRequest>
 {
     private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
-    private readonly IMediator _mediator = mediator;
+    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
+    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
     private readonly ILogger<CheckOCRScreeningEndpoint> _logger = logger;
 
     public override void Configure()
@@ -34,7 +39,7 @@ internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher, IMediator
     private async Task UpdateDatabaseSetFilArkivCaseId(Guid filArkivCaseId, long podioItemId, CancellationToken cancellationToken)
     {
         var getCaseQuery = new GetCasesQuery(null, podioItemId, null);
-        var getCaseResult = await _mediator.Send(getCaseQuery, cancellationToken);
+        var getCaseResult = await _queryDispatcher.Dispatch(getCaseQuery, cancellationToken);
 
         if (!getCaseResult.IsSuccess || !getCaseResult.Value.Any())
         {
@@ -45,7 +50,7 @@ internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher, IMediator
         var rowId = getCaseResult.Value.First().Id;
 
         var updateCommand = new UpdateCaseCommand(rowId, podioItemId, null, filArkivCaseId, null);
-        var updateResult = await _mediator.Send(updateCommand, cancellationToken);
+        var updateResult = await _commandDispatcher.Dispatch(updateCommand, cancellationToken);
 
         if (!updateResult.IsSuccess)
         {
