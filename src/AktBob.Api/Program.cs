@@ -54,11 +54,7 @@ builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Config
 var cqrsHandlersAssemblies = new List<Assembly>();
 builder.Services.AddDatabaseModule(builder.Configuration, cqrsHandlersAssemblies);
 builder.Services.AddPodioModule(builder.Configuration, cqrsHandlersAssemblies);
-
-// CQRS
-builder.Services.AddSingleton<ICommandDispatcher, CommandDispatcher>();
-builder.Services.AddSingleton<IQueryDispatcher, QueryDispatcher>();
-builder.Services.AddCQRSHandlers(cqrsHandlersAssemblies.ToArray());
+builder.Services.AddSharedModule(cqrsHandlersAssemblies);
 
 var app = builder.Build();
 

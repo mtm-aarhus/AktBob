@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
 
         foreach (var handler in handlerTypes)
         {
+            Console.WriteLine($"{handler.iface}, {handler.type}");
             services.AddTransient(handler.iface, handler.type);
         }
 

@@ -1,5 +1,4 @@
 ﻿using AktBob.Shared;
-using AktBob.Shared.CQRS;
 
 namespace AktBob.CloudConvert.UseCases;
 internal class GetJobQueryHandler(ICloudConvertClient cloudConvertClient,

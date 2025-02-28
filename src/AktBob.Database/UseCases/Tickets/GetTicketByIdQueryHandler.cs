@@ -6,7 +6,7 @@ using System.Data;
 
 namespace AktBob.Database.UseCases.Tickets;
 
-internal record GetTicketByIdQuery(int Id) : IQuery<Result<TicketDto>>;
+public record GetTicketByIdQuery(int Id) : IQuery<Result<TicketDto>>;
 
 internal class GetTicketByIdQueryHandler(ISqlDataAccess sqlDataAccess, IQueryDispatcher queryDispatcher) : IQueryHandler<GetTicketByIdQuery, Result<TicketDto>>
 {

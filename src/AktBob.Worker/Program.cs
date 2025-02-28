@@ -38,11 +38,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddJobHandlers(hostContext.Configuration);
         services.AddJobHandlersModule(hostContext.Configuration);
         services.AddEmailModuleServices(hostContext.Configuration, cqrsHandlersAssemblies);
-
-        // CQRS
-        services.AddSingleton<ICommandDispatcher, CommandDispatcher>();
-        services.AddSingleton<IQueryDispatcher, QueryDispatcher>();
-        services.AddCQRSHandlers(cqrsHandlersAssemblies.ToArray());
+        services.AddSharedModule(cqrsHandlersAssemblies);
 
         // Hangfire
         services.AddTransient<FailedJobNotificationFilter>();
