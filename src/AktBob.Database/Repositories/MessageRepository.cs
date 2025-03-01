@@ -40,12 +40,13 @@ internal class MessageRepository : IMessageRepository
 
     public async Task<int> Update(Message message)
     {
-        var sql = @"UPDATE Messages SET
-            TicketId = @TicketId,
-            DeskproId = @DeskproId,
-            GODocumentId = @GODocumentId,
-            Deleted = @Deleted,
-            MessageNumber = @MessageNumber
+        var sql = @"
+            UPDATE Messages SET
+                TicketId = @TicketId,
+                DeskproId = @DeskproId,
+                GODocumentId = @GODocumentId,
+                Deleted = @Deleted,
+                MessageNumber = @MessageNumber
             WHERE Id = @Id";
             
         return await _sqlDataAccess.Execute(sql, message);

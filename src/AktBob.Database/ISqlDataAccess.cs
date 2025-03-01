@@ -1,4 +1,5 @@
-﻿namespace AktBob.Database;
+﻿
+namespace AktBob.Database;
 public interface ISqlDataAccess
 {
     /// <summary>
@@ -36,4 +37,5 @@ public interface ISqlDataAccess
     /// <param name="parameters"></param>
     /// <returns>Enumerable of T</returns>
     Task<IEnumerable<T>> Query<T>(string sql, object? parameters);
+    Task<IEnumerable<T>> Query<T, U>(string sql, object parameters, string splitOn, Func<T, U, T> map);
 }

@@ -36,14 +36,9 @@ internal class CaseRepository : ICaseRepository
 
     public async Task<Case?> Get(int id) => await _sqlDataAccess.QuerySingle<Case>("SELECT * FROM v_Cases WHERE Id = @Id", new { Id = id });
 
-    public async Task<IEnumerable<Case>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
+    public async Task<IEnumerable<Case>> GetAll(long? podioItemId, Guid? filArkivCaseId)
     {
         var filter = new List<string>();
-
-        if (deskproId != null)
-        {
-            filter.Add($"v_Tickets.DeskproId = {deskproId}");
-        }
 
         if (podioItemId != null)
         {
@@ -56,20 +51,17 @@ internal class CaseRepository : ICaseRepository
         }
 
         var filterString = string.Join(" AND ", filter);
-        var getTicketIdsSql = @$"SELECT v_Cases.* FROM v_Cases LEFT JOIN v_Tickets ON v_Cases.TicketId = v_Tickets.Id";
+        var sql = @$"SELECT v_Cases.* FROM v_Cases ";
 
         if (filterString.Length != 0)
         {
-            getTicketIdsSql += $" WHERE {filterString}";
+            sql += $" WHERE {filterString}";
         }
 
-        return await _sqlDataAccess.Query<Case>(getTicketIdsSql, null);
+        return await _sqlDataAccess.Query<Case>(sql, null);
     }
 
-    public Task<Case?> GetByPodioItemId(long podioItemId)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<Case?> GetByPodioItemId(long podioItemId) => await _sqlDataAccess.QuerySingle<Case>("SELECT * FROM v_Cases WHERE PodioItemId = @PodioItemId", new { PodioItemId = podioItemId });
 
     public async Task<Case?> GetByTicketId(int ticketId) => await _sqlDataAccess.QuerySingle<Case>("SELECT * FROM v_Cases WHERE TicketId = @TicketId", new { TicketId = ticketId });
 

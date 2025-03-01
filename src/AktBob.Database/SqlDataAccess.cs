@@ -32,6 +32,20 @@ internal class SqlDataAccess : ISqlDataAccess
         }
     }
 
+    public async Task<IEnumerable<T>> Query<T, U>(string sql, object parameters, string splitOn, Func<T, U, T> map)
+    {
+        using (var connection = new SqlConnection(GetConnectionString()))
+        {
+            return await connection.QueryAsync(
+                sql: sql,
+                map: map,
+                param: parameters,
+                splitOn: splitOn,
+                commandType: CommandType.Text);
+        }
+    }
+
+
     public async Task<int> ExecuteProcedure(string procedureName, DynamicParameters? parameters)
     {
         var connectionString = GetConnectionString();

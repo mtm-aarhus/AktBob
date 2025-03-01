@@ -8,5 +8,5 @@ public interface ITicketRepository
     Task<Ticket?> GetByPodioItemId(long podioItemId);
     Task<Ticket?> Get(int id);
     Task<int> Update(Ticket ticket);
-    Task<IEnumerable<Ticket>> GetAll(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId, bool IncludeClosedTickets = true);
+    //Task<IEnumerable<Ticket>> GetAll(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId);
 }

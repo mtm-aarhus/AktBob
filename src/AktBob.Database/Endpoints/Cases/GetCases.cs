@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Cases;
 
-internal record GetCasesRequest(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId);
+internal record GetCasesRequest(long? PodioItemId, Guid? FilArkivCaseId);
 
 internal class GetCases(ICaseRepository caseRepository) : Endpoint<GetCasesRequest, IEnumerable<CaseDto>>
 {
@@ -23,7 +23,7 @@ internal class GetCases(ICaseRepository caseRepository) : Endpoint<GetCasesReque
 
     public override async Task HandleAsync(GetCasesRequest req, CancellationToken ct)
     {
-        var cases = await _caseRepository.GetAll(req.DeskproId, req.PodioItemId, req.FilArkivCaseId);
+        var cases = await _caseRepository.GetAll(req.PodioItemId, req.FilArkivCaseId);
         await SendOkAsync(cases.ToDto(), ct);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
+using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
 using System.Data;
 
 namespace AktBob.Database.Repositories;
@@ -30,80 +31,118 @@ internal class TicketRepository : ITicketRepository
         return id;
     }
 
-    public async Task<Ticket?> GetByDeskproTicketId(int deskproTicketId) => await _sqlDataAccess.QuerySingle<Ticket>("SELECT * FROM v_Tickets WHERE DeskproId = @DeskproId", new { DeskproId = deskproTicketId });
+    public async Task<Ticket?> Get(int id)
+    {
+        var where = "t.Id = @Id";
+        var tickets = await GetTicketsWithCases(where, new { Id = id });
+        return tickets.FirstOrDefault();
+    }
 
-    public async Task<Ticket?> Get(int id) => await _sqlDataAccess.QuerySingle<Ticket>("SELECT * FROM v_Tickets WHERE Id = @Id", new { Id = id });
+    public async Task<Ticket?> GetByDeskproTicketId(int deskproTicketId)
+    {
+        var where = "t.DeskproId = @DeskproId";
+        var tickets = await GetTicketsWithCases(where, new { DeskproId = deskproTicketId });
+        return tickets.FirstOrDefault();
+    }
+
+    public async Task<Ticket?> GetByPodioItemId(long podioItemId)
+    {
+        var where = "c.PodioItemId = @PodioItemId";
+        var tickets = await GetTicketsWithCases(where, new { PodioItemId = podioItemId });
+        return tickets.FirstOrDefault();
+    }
 
     public async Task<int> Update(Ticket ticket)
     {
-        var sql = @"UPDATE Tickets SET
+        var sql = @"UPDATE Tickets 
+            SET
 				CaseNumber = @CaseNumber,
 				SharepointFolderName = @SharepointFolderName,
-				JournalizedAt = @JournalizedAt,
-				TicketClosedAt = @TicketClosedAt,
 				CaseUrl = @CaseUrl
 			WHERE Id = @Id";
 
         return await _sqlDataAccess.Execute(sql, ticket);
     }
 
-    public async Task<IEnumerable<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId, bool includeClosedTickets = true)
+    //public async Task<IEnumerable<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
+    //{
+    //    // Prepare filter
+    //    var filter = new List<string>();
+
+    //    if (deskproId != null)
+    //    {
+    //        filter.Add("t.DeskproId = @DeskproId");
+    //    }
+
+    //    if (podioItemId != null)
+    //    {
+    //        filter.Add("c.PodioItemId = @PodioItemId");
+    //    } 
+
+    //    if (filArkivCaseId != null)
+    //    {
+    //        filter.Add("c.FilArkivCaseId = @FilArkivCaseId");
+    //    }
+
+    //    var filterString = string.Join(" AND ", filter);
+
+    //    if (!string.IsNullOrEmpty(filterString))
+    //    {
+    //        return await GetTicketsWithCases(filterString, new 
+    //        {
+    //            DeskproId = deskproId,
+    //            PodioItemId = podioItemId,
+    //            FilArkivCaseId = filArkivCaseId
+    //        });
+    //    }
+
+    //    return await GetTicketsWithCases(string.Empty, new {});
+    //}
+
+    private async Task<IEnumerable<Ticket>> GetTicketsWithCases(string where, object parameters)
     {
-        // Prepare filter
-        var filter = new List<string>();
+        var sql = @$"
+                SELECT 
 
-        if (deskproId != null)
+                    t.Id
+	                ,t.DeskproId
+	                ,t.CaseNumber
+	                ,t.CaseUrl
+	                ,t.SharepointFolderName
+
+                    ,c.TicketId
+                    ,c.Id
+                    ,c.PodioItemId
+                    ,c.CaseNumber
+                    ,c.FilArkivCaseId
+                    ,c.SharepointFolderName
+
+                FROM v_Tickets t
+                LEFT JOIN v_Cases c ON t.Id = c.TicketId";
+
+        if (!string.IsNullOrEmpty(where))
         {
-            filter.Add($"Tickets.DeskproId = {deskproId}");
+            sql += $" WHERE {where}";
         }
 
-        if (!includeClosedTickets)
+        var ticketDictionary = new Dictionary<int, Ticket>();
+        var tickets = await _sqlDataAccess.Query<Ticket, Case>(sql, parameters, "TicketId", (ticket, @case) =>
         {
-            filter.Add($"Tickets.TicketClosedAt IS NULL");
-        }
-
-        if (podioItemId != null)
-        {
-            filter.Add($"Cases.PodioItemId = '{podioItemId}'");
-        }
-
-        if (filArkivCaseId != null)
-        {
-            filter.Add($"Cases.FilArkivCaseId = '{filArkivCaseId}'");
-        }
-
-        var filterString = string.Join(" AND ", filter);
-
-        var getTicketIdsSql = $"SELECT Tickets.Id FROM Tickets LEFT JOIN Cases ON Tickets.Id = Cases.TicketId";
-
-        if (!string.IsNullOrEmpty(filterString))
-        {
-            getTicketIdsSql += " WHERE " + filterString;
-        }
-
-        var ticketIds = await _sqlDataAccess.Query<int>(getTicketIdsSql, null);
-
-        if (ticketIds != null && ticketIds.Count() > 0)
-        {
-            var ticketsSql = $"SELECT Tickets.* FROM Tickets WHERE Tickets.Id IN ({string.Join(",", ticketIds)})";
-            var tickets = await _sqlDataAccess.Query<Ticket>(ticketsSql, null);
-
-            foreach (var ticket in tickets)
+            if (!ticketDictionary.TryGetValue(ticket.Id, out var existingTicket))
             {
-                var caseSql = $"SELECT Cases.* FROM Cases WHERE Cases.TicketId = @TicketId";
-                var cases = await _sqlDataAccess.Query<Case>(caseSql, new { TicketId = ticket.Id });
-
-                ticket.Cases = cases.ToList();
+                existingTicket = ticket;
+                existingTicket.Cases = new List<Case>();
+                ticketDictionary.Add(ticket.Id, existingTicket);
             }
-            // Return
-            return tickets;
-        }
 
-        return Enumerable.Empty<Ticket>();
-    }
+            if (@case != null)
+            {
+                existingTicket.Cases.Add(@case);
+            }
 
-    public Task<Ticket?> GetByPodioItemId(long podioItemId)
-    {
-        throw new NotImplementedException();
+            return existingTicket;
+        });
+
+        return ticketDictionary.Values;
     }
 }
