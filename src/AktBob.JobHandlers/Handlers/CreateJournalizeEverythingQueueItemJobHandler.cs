@@ -1,5 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
+using AktBob.JobHandlers.Utils;
 using AktBob.Shared.Contracts;
 
 namespace AktBob.JobHandlers.Handlers;
@@ -13,7 +14,12 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
     public async Task Handle(CreateJournalizeEverythingQueueItemJob job, CancellationToken cancellationToken = default)
     {
         var scope = _serviceScopeFactory.CreateScope();
-        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+
+        // Services
+        var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
+        var getDeskproTicketHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproTicketHandler>();
+        var getDeskproPersonHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproPersonHandler>();
+        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
 
         // UiPath variables
         var uiPathTenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
@@ -24,77 +30,44 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
         var useOpenOrchestrator = _configuration.GetValue<bool>($"{_configurationObjectName}:UseOpenOrchestrator");
 
 
-        // GET DATA FROM API DATABASE
-        var getTicketQuery = new GetTicketsQuery(job.DeskproId, null, null);
-        var getTicketResult = await queryDispatcher.Dispatch(getTicketQuery, cancellationToken);
+        // Get ticket from repository
+        var databaseTicket = await ticketRepository.GetByDeskproTicketId(job.DeskproId);
 
-        if (!getTicketResult.IsSuccess)
-        {
-            _logger.LogError("Error getting ticket data from database for id {id}", job.DeskproId);
-            return;
-        }
-
-        if (getTicketResult.Value.Count() < 1)
+        if (databaseTicket is null)
         {
             _logger.LogError("No Deskpro tickets found for id {id}.", job.DeskproId);
             return;
         }
 
-        if (getTicketResult.Value.Count() > 1)
-        {
-            _logger.LogWarning("{count} Deskpro tickets found for id {id}. Only processing the first.", getTicketResult.Value.Count(), job.DeskproId);
-        }
-
-        var ticket = getTicketResult.Value.First();
-
-        if (string.IsNullOrEmpty(ticket.CaseNumber))
+        if (string.IsNullOrEmpty(databaseTicket.CaseNumber))
         {
             _logger.LogError("GO Aktindsigtssagsnummer not registered for Deskpro Id {id}", job.DeskproId);
             return;
         }
 
 
-        // GET DATA FROM DESKPRO
-        var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(ticket.DeskproId);
-        var getDeskproTicketQueryResult = await queryDispatcher.Dispatch(getDeskproTicketQuery, cancellationToken);
+        // Get ticket from Deskpro
+        var deskproTicketResult = await getDeskproTicketHandler.Handle(job.DeskproId, cancellationToken);
 
-        if (!getDeskproTicketQueryResult.IsSuccess)
+        if (!deskproTicketResult.IsSuccess)
         {
-            _logger.LogError("Error ticket {id} from Deskpro", ticket.DeskproId);
+            _logger.LogError("Error ticket {id} from Deskpro", job.DeskproId);
             return;
         }
 
-        var agentName = string.Empty;
-        var agentEmail = string.Empty;
-
-        // Skip if the Deskpro ticket has no assigned agent
-        if (getDeskproTicketQueryResult.Value.Agent is not null && getDeskproTicketQueryResult.Value.Agent.Id > 0)
-        {
-            // Get agent email address from Deskpro
-            var getAgentQuery = new GetDeskproPersonQuery(getDeskproTicketQueryResult.Value.Agent.Id!);
-            var getAgentResult = await queryDispatcher.Dispatch(getAgentQuery, cancellationToken);
-
-            if (getAgentResult.IsSuccess && getAgentResult.Value.IsAgent)
-            {
-                agentName = getAgentResult.Value.FullName;
-                agentEmail = getAgentResult.Value.Email;
-            }
-        }
-
-
+        var agent = await deskproHelper.GetAgent(getDeskproPersonHandler, deskproTicketResult.Value.Agent?.Id ?? 0, cancellationToken);
 
         // CREATE QUEUE ITEM
-
         if (useOpenOrchestrator)
         {
             // Create OpenOrchestrator queue item
             var payload = new
             {
-                Aktindsigtssag = ticket.CaseNumber,
-                Email = agentEmail,
-                Navn = agentName,
+                Aktindsigtssag = databaseTicket.CaseNumber,
+                Email = agent.Email,
+                Navn = agent.Name,
                 DeskproID = job.DeskproId,
-                Overmappenavn = ticket.SharepointFolderName
+                Overmappenavn = databaseTicket.SharepointFolderName
             };
 
             BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload.ToJson(), CancellationToken.None));
@@ -104,11 +77,11 @@ internal class CreateJournalizeEverythingQueueItemJobHandler(IServiceScopeFactor
             // Create UiPath queue item
             var payload = new
             {
-                Aktindsigtssag = ticket.CaseNumber,
-                Email = agentEmail,
-                Navn = agentName,
+                Aktindsigtssag = databaseTicket.CaseNumber,
+                Email = agent.Email,
+                Navn = agent.Name,
                 DeskproID = job.DeskproId,
-                Overmappenavn = ticket.SharepointFolderName
+                Overmappenavn = databaseTicket.SharepointFolderName
             };
 
             BackgroundJob.Enqueue<CreateUiPathQueueItem>(x => x.Run(uiPathQueueName, $"Deskpro ID {job.DeskproId.ToString()}", payload.ToJson(), CancellationToken.None));

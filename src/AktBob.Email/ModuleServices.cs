@@ -1,18 +1,18 @@
-﻿using Ardalis.GuardClauses;
+﻿using AktBob.Email.Contracts;
+using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace AktBob.Email;
 
 public static class ModuleServices
 {
-    public static IServiceCollection AddEmailModuleServices(this IServiceCollection services, IConfiguration configuration, List<Assembly> cqrsHandlersAssemblies)
+    public static IServiceCollection AddEmailModuleServices(this IServiceCollection services, IConfiguration configuration)
     {
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:From"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:Smtp"));
 
-        cqrsHandlersAssemblies.Add(typeof(ModuleServices).Assembly);
+        services.AddTransient<ISendEmailHandler, SendEmailHandler>();
 
         return services;
     }

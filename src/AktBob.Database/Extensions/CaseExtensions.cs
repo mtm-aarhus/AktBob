@@ -1,5 +1,5 @@
 ﻿using AktBob.Database.Entities;
-using AktBob.Database.Contracts.Dtos;
+using AktBob.Database.Dtos;
 
 namespace AktBob.Database.Extensions;
 internal static class CaseExtensions

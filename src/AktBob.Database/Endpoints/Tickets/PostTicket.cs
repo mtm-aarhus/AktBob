@@ -1,6 +1,7 @@
-﻿using AktBob.Database.Contracts.Dtos;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.Dtos;
+using AktBob.Database.Entities;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Tickets;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -17,9 +18,9 @@ internal class PostTicketRequestValidator : Validator<PostTicketRequest>
     }
 }
 
-internal class PostTicket(ICommandDispatcher commandDispatcher) : Endpoint<PostTicketRequest, TicketDto>
+internal class PostTicket(ITicketRepository ticketRepository) : Endpoint<PostTicketRequest, TicketDto>
 {
-    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
+    private readonly ITicketRepository _ticketRepository = ticketRepository;
 
     public override void Configure()
     {
@@ -33,15 +34,27 @@ internal class PostTicket(ICommandDispatcher commandDispatcher) : Endpoint<PostT
 
     public override async Task HandleAsync(PostTicketRequest req, CancellationToken ct)
     {
-        var command = new AddTicketCommand(req.DeskproId);
-        var result = await _commandDispatcher.Dispatch(command);
-
-        if (result.IsSuccess)
+        var ticket = new Ticket
         {
-            await SendCreatedAtAsync<GetTicket>(routeValues: null, responseBody: result.Value, cancellation: ct);
+            DeskproId = req.DeskproId,
+        };
+
+        var ticketId = await _ticketRepository.Add(ticket);
+
+        if (ticketId == 0)
+        {
+            await SendErrorsAsync(500, ct);
             return;
         }
 
-        await this.SendResponse(result, r => r.Value);
+        var createdTicket = await _ticketRepository.Get(ticketId);
+
+        if (createdTicket == null)
+        {
+            await SendErrorsAsync(500, ct);
+            return;
+        }
+
+        await SendOkAsync(createdTicket.ToDto(), ct);
     }
 }

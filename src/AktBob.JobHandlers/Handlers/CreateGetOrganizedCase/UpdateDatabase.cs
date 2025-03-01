@@ -1,5 +1,4 @@
 ﻿using AktBob.Database.Contracts;
-using AktBob.Database.UseCases.Tickets.UpdateTicket;
 
 namespace AktBob.JobHandlers.Handlers.CreateGetOrganizedCase;
 internal class UpdateDatabase(ILogger<UpdateDatabase> logger,IServiceScopeFactory serviceScopeFactory)
@@ -10,28 +9,26 @@ internal class UpdateDatabase(ILogger<UpdateDatabase> logger,IServiceScopeFactor
     public async Task SetGetOrganizedCaseId(int deskproId, string caseId, string caseUrl, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
-        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+        var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
 
         _logger.LogInformation("Updating database, setting GetOrganized case '{caseId}' for case with DeskproId {deskproId}", caseId, deskproId);
 
-        var getDatabaseTicketQuery = new GetTicketsQuery(deskproId, null, null);
-        var getDatabaseTicketResult = await queryDispatcher.Dispatch(getDatabaseTicketQuery, cancellationToken);
+        var ticket = await ticketRepository.GetByDeskproTicketId(deskproId);
 
-        if (!getDatabaseTicketResult.IsSuccess || getDatabaseTicketResult.Value is null)
+        if (ticket is null)
         {
             _logger.LogError("Error getting database ticket for DeskproId {id}", deskproId);
             return;
         }
 
-        var databaseTicket = getDatabaseTicketResult.Value.First();
+        ticket.CaseNumber = caseId;
+        ticket.CaseUrl = caseUrl;
+        
+        var rows = await ticketRepository.Update(ticket);
 
-        var updateDatabaseTicketCommand = new UpdateTicketCommand(databaseTicket.Id, caseId, caseUrl, null, null, null);
-        var updateDatabaseTicketResult = await commandDispatcher.Dispatch(updateDatabaseTicketCommand, cancellationToken);
-
-        if (!updateDatabaseTicketResult.IsSuccess)
+        if (rows != 1)
         {
-            _logger.LogError("Error updating database ticket ID {id} (DeskproId: {deskproId}) setting GetOrganized CaseId '{caseId}'", databaseTicket.Id, deskproId, caseId);
+            _logger.LogError("Error updating database ticket ID {id} (DeskproId: {deskproId}) setting GetOrganized CaseId '{caseId}'. {rows} ows affected", ticket.Id, deskproId, caseId, rows);
             return;
         }
     }

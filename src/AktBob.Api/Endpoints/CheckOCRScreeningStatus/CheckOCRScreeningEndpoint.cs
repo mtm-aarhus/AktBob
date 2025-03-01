@@ -1,20 +1,16 @@
 ﻿using AktBob.Database.Contracts;
-using AktBob.Database.UseCases.Cases.GetCases;
 using AktBob.Shared;
 using AktBob.Shared.Contracts;
-using AktBob.Shared.CQRS;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.CheckOCRScreeningStatus;
 
 internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher,
-                                         IQueryDispatcher queryDispatcher,
-                                         ICommandDispatcher commandDispatcher,
+                                         ICaseRepository caseRepository,
                                          ILogger<CheckOCRScreeningEndpoint> logger) : Endpoint<CheckOCRScreeningRequest>
 {
     private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
-    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
-    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
+    private readonly ICaseRepository _caseRepository = caseRepository;
     private readonly ILogger<CheckOCRScreeningEndpoint> _logger = logger;
 
     public override void Configure()
@@ -38,27 +34,24 @@ internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher,
 
     private async Task UpdateDatabaseSetFilArkivCaseId(Guid filArkivCaseId, long podioItemId, CancellationToken cancellationToken)
     {
-        var getCaseQuery = new GetCasesQuery(null, podioItemId, null);
-        var getCaseResult = await _queryDispatcher.Dispatch(getCaseQuery, cancellationToken);
+        var @case = await _caseRepository.GetByPodioItemId(podioItemId);
 
-        if (!getCaseResult.IsSuccess || !getCaseResult.Value.Any())
+        if (@case is null )
         {
             _logger.LogWarning("Error updating database with FilArkivCaseId. Database did not return a case for Podio item id {id}", podioItemId);
             return;
         }
 
-        var rowId = getCaseResult.Value.First().Id;
+        @case.FilArkivCaseId = filArkivCaseId;
 
-        var updateCommand = new UpdateCaseCommand(rowId, podioItemId, null, filArkivCaseId, null);
-        var updateResult = await _commandDispatcher.Dispatch(updateCommand, cancellationToken);
+        var updated = await _caseRepository.Update(@case) == 1;
 
-        if (!updateResult.IsSuccess)
+        if (!updated)
         {
-            _logger.LogWarning("Error updating database setting FilArkivCaseId {caseId} for row {id}", filArkivCaseId, rowId);
+            _logger.LogWarning("Error updating database setting FilArkivCaseId {caseId} for row {id}", filArkivCaseId, @case.Id);
             return;
         }
 
         _logger.LogInformation("Database updated: FilArkivCaseId '{filArkivCaseId}' set for case with PodioItemId {podioItemId}", filArkivCaseId, podioItemId);
-
     }
 }

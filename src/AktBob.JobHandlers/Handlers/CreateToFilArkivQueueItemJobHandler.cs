@@ -16,27 +16,33 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
 
     public async Task Handle(CreateGoToFilArkivQueueItemJob job, CancellationToken cancellationToken = default)
     {
+        using var scope = _serviceScopeFactory.CreateScope();
+
+        // Services
+        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
+        var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var getDeskproTicketHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproTicketHandler>();
+        var getDeskproPersonHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproPersonHandler>();
+
+        // Variables
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateToFilArkivQueueItemJobHandler:OpenOrchestratorQueueName"));
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
         var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioFieldConfigurationSection>())));
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "CaseNumber"));
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
-        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
 
         // Get metadata from Podio
-        var getPodioItemQuery = new GetItemQuery(podioAppId, job.PodioItemId);
-        var getPodioItemQueryResult = await queryDispatcher.Dispatch(getPodioItemQuery, cancellationToken);
+        var getPodioItemResult = await getPodioItemHandler.Handle(podioAppId, job.PodioItemId, cancellationToken);
 
-        if (!getPodioItemQueryResult.IsSuccess)
+        if (!getPodioItemResult.IsSuccess)
         {
             _logger.LogError("Could not get item {itemId} from Podio", job.PodioItemId);
             return;
         }
 
-        var caseNumber = getPodioItemQueryResult.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
+        var caseNumber = getPodioItemResult.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(caseNumber))
         {
             _logger.LogError("Could not get case number field value from Podio Item {itemId}", job.PodioItemId);
@@ -44,62 +50,45 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
         }
 
         // Find database ticket by PodioItemId
-        var getDatabaseTicketByPodioItemIdQuery = new GetTicketsQuery(null, job.PodioItemId, null);
-        var getDatabaseTicketByPodioItemIdQueryResult = await queryDispatcher.Dispatch(getDatabaseTicketByPodioItemIdQuery, cancellationToken);
-
-        if (!getDatabaseTicketByPodioItemIdQueryResult.IsSuccess)
-        {
-            _logger.LogError($"Could not get data from database for ticket by PodioItemId {job.PodioItemId}");
-            return;
-        }
-
-        if (getDatabaseTicketByPodioItemIdQueryResult.Value.Count() < 1)
-        {
-            _logger.LogError("No Deskpro tickets found for PodioItemId {podioItemId}.", job.PodioItemId);
-            return;
-        }
-
-        if (getDatabaseTicketByPodioItemIdQueryResult.Value.Count() > 1)
-        {
-            _logger.LogWarning("{count} Deskpro tickets found for PodioItemId {podioItemId}. Only processing the first.", getDatabaseTicketByPodioItemIdQueryResult.Value.Count(), job.PodioItemId);
-        }
-
-        var databaseTicket = getDatabaseTicketByPodioItemIdQueryResult.Value.FirstOrDefault();
-
+        var databaseTicket = await unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId);
         if (databaseTicket is null)
         {
             _logger.LogError("Ticket related to PodioItemId {id} not found in database", job.PodioItemId);
             return;
         }
 
-        // Get the case sharepoint folder name ("undermappenavn")
-        var caseSharepointFolderName = databaseTicket.Cases?.FirstOrDefault(x => x.PodioItemId == job.PodioItemId)?.SharepointFolderName;
-        if (caseSharepointFolderName == null)
+        // Assert that the SharepointFolderName is not empty
+        if (string.IsNullOrEmpty(databaseTicket.SharepointFolderName))
+        {
+            _logger.LogError("Database ticket related to Deskpro ticket {id}: SharepointFolderName is null or empty", databaseTicket.DeskproId);
+            return;
+        }
+
+        // Find database cases
+        var databaseCase = await unitOfWork.Cases.GetByPodioItemId(job.PodioItemId);
+        if (databaseCase is null)
+        {
+            _logger.LogError("Case related to PodioItemId {id} not found in database", job.PodioItemId);
+            return;
+        }
+
+        // Assert that the SharepointFolderName is not empty
+        if (string.IsNullOrEmpty(databaseCase.SharepointFolderName))
         {
             _logger.LogError("Case related to PodioItemId {id}: SharepointFolderName is null or empty", job.PodioItemId);
         }
 
         // Get data from Deskpro
-        var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(databaseTicket.DeskproId);
-        var getDeskproTicketQueryResult = await queryDispatcher.Dispatch(getDeskproTicketQuery, cancellationToken);
+        var deskproTicketResult = await getDeskproTicketHandler.Handle(databaseTicket.DeskproId, cancellationToken);
 
-        if (!getDeskproTicketQueryResult.IsSuccess)
+        if (!deskproTicketResult.IsSuccess)
         {
             _logger.LogError($"Could not get data from Deskpro for ticket ID {databaseTicket.DeskproId}");
             return;
         }
 
-        (string Name, string Email) agent = new(string.Empty, string.Empty);
-
         // Get Deskpro agent
-        if (getDeskproTicketQueryResult.Value.Agent is not null && getDeskproTicketQueryResult.Value.Agent.Id > 0)
-        {
-            agent = await deskproHelper.GetAgent(queryDispatcher, getDeskproTicketQueryResult.Value.Agent.Id, cancellationToken);
-        }
-        else
-        {
-            _logger.LogWarning($"Deskpro ticket {databaseTicket.DeskproId} has no agents assigned");
-        }
+        var  agent = await deskproHelper.GetAgent(getDeskproPersonHandler, deskproTicketResult.Value.Agent?.Id ?? 0, cancellationToken);
 
         // Create queue item
         var payload = new
@@ -107,10 +96,10 @@ internal class CreateToFilArkivQueueItemJobHandler(ILogger<CreateToFilArkivQueue
             Sagsnummer = caseNumber,
             MailModtager = agent.Email,
             DeskProID = databaseTicket.DeskproId,
-            DeskProTitel = getDeskproTicketQueryResult.Value.Subject,
+            DeskProTitel = deskproTicketResult.Value.Subject,
             PodioID = job.PodioItemId,
             Overmappe = databaseTicket.SharepointFolderName,
-            Undermappe = caseSharepointFolderName,
+            Undermappe = databaseCase.SharepointFolderName,
             GeoSag = !IsNovaCase(caseNumber),
             NovaSag = IsNovaCase(caseNumber),
             AktSagsURL = databaseTicket.CaseUrl

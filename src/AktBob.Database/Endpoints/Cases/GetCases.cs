@@ -1,6 +1,6 @@
-﻿using AktBob.Database.Contracts.Dtos;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.Dtos;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Cases.GetCases;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
@@ -8,9 +8,9 @@ namespace AktBob.Database.Endpoints.Cases;
 
 internal record GetCasesRequest(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId);
 
-internal class GetCases(IQueryDispatcher queryDispatcher) : Endpoint<GetCasesRequest, IEnumerable<CaseDto>>
+internal class GetCases(ICaseRepository caseRepository) : Endpoint<GetCasesRequest, IEnumerable<CaseDto>>
 {
-    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
+    private readonly ICaseRepository _caseRepository = caseRepository;
 
     public override void Configure()
     {
@@ -23,12 +23,7 @@ internal class GetCases(IQueryDispatcher queryDispatcher) : Endpoint<GetCasesReq
 
     public override async Task HandleAsync(GetCasesRequest req, CancellationToken ct)
     {
-        var query = new GetCasesQuery(
-            DeskproId: req.DeskproId,
-            PodioItemId: req.PodioItemId,
-            FilArkivCaseId: req.FilArkivCaseId);
-
-        var result = await _queryDispatcher.Dispatch(query, ct);
-        await this.SendResponse(result, r => r.Value);
+        var cases = await _caseRepository.GetAll(req.DeskproId, req.PodioItemId, req.FilArkivCaseId);
+        await SendOkAsync(cases.ToDto(), ct);
     }
 }

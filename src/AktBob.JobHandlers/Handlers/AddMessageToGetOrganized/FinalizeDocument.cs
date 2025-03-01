@@ -8,9 +8,7 @@ internal class FinalizeDocument(IServiceScopeFactory serviceScopeFactory)
     public async Task Run(int documentId, CancellationToken cancellationToken = default)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
-
-        var finalizeParentDocumentCommand = new FinalizeDocumentCommand(documentId, false);
-        await commandDispatcher.Dispatch(finalizeParentDocumentCommand, cancellationToken);
+        var finalizeGetOrganizedDocumentsHandler = scope.ServiceProvider.GetRequiredService<IFinalizeGetOrganizedDocumentHandler>();
+        await finalizeGetOrganizedDocumentsHandler.Handle(documentId, false, cancellationToken);
     }
 }

@@ -15,24 +15,18 @@ internal class UpdatePodioItemJob
     public async Task Run(Guid filArkivCaseId, long podioItemId, CancellationToken cancellationToken)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        var updatePodioFieldHandler = scope.ServiceProvider.GetRequiredService<IUpdatePodioFieldHandler>();
 
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int>("Podio:AppId"));
         var podioFields = Guard.Against.Null(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<FieldSection>()));
 
         // FilArkivCaseId
         var filArkivCaseIdFieldId = podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "FilArkivCaseId").Key;
-        await UpdateField(commandDispatcher, podioItemId, podioAppId, filArkivCaseIdFieldId, filArkivCaseId.ToString(), cancellationToken);
+        await updatePodioFieldHandler.Handle(podioAppId, podioItemId, filArkivCaseIdFieldId, filArkivCaseId.ToString(), cancellationToken);
 
         // FilArkivLink
         var filArkivLinkFieldId = podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "FilArkivLink").Key;
-        await UpdateField(commandDispatcher, podioItemId, podioAppId, filArkivLinkFieldId, $"https://aarhus.filarkiv.dk/archives/case/{filArkivCaseId}", cancellationToken);
-    }
-
-    private async Task UpdateField(ICommandDispatcher commandDispatcher, long podioItemId, int podioAppId, int fieldId, string value, CancellationToken cancellationToken)
-    {
-        var updateFilArkivCaseIdFieldCommand = new UpdateFieldCommand(podioAppId, podioItemId, fieldId, value);
-        await commandDispatcher.Dispatch(updateFilArkivCaseIdFieldCommand, cancellationToken);
+        await updatePodioFieldHandler.Handle(podioAppId, podioItemId, filArkivLinkFieldId, $"https://aarhus.filarkiv.dk/archives/case/{filArkivCaseId}", cancellationToken);
     }
 
     record FieldSection(int AppId, string Label);

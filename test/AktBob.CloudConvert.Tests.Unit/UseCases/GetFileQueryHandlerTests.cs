@@ -1,6 +1,5 @@
-﻿using AktBob.CloudConvert.Contracts;
-using AktBob.CloudConvert.Contracts.DTOs;
-using AktBob.CloudConvert.UseCases;
+﻿using AktBob.CloudConvert.Contracts.DTOs;
+using AktBob.CloudConvert.Handlers;
 using Ardalis.Result;
 using FluentAssertions;
 using NSubstitute;
@@ -10,10 +9,10 @@ namespace AktBob.CloudConvert.Tests.Unit.UseCases;
 public class GetFileQueryHandlerTests
 {
     private readonly ICloudConvertClient _cloudConvertClient = Substitute.For<ICloudConvertClient>();
-    private readonly GetFileQueryHandler _sut;
+    private readonly GetCloudConvertFileHandler _sut;
     public GetFileQueryHandlerTests()
     {
-        _sut = new GetFileQueryHandler(_cloudConvertClient);
+        _sut = new GetCloudConvertFileHandler(_cloudConvertClient);
     }
 
     [Fact]
@@ -27,11 +26,10 @@ public class GetFileQueryHandlerTests
             Filename = filename
         };
         _cloudConvertClient.GetFile(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Result.Success(file));
-        var query = new GetFileQuery(string.Empty);
         var expectedDto = new FileDto(file.Stream, file.Filename);
 
         // Act
-        var result = await _sut.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle("http://localhost", CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -46,10 +44,9 @@ public class GetFileQueryHandlerTests
     {
         // Arrange
         _cloudConvertClient.GetFile(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Result.Error());
-        var query = new GetFileQuery(string.Empty);
 
         // Act
-        var result = await _sut.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle("http://localhost", CancellationToken.None);
         
         // Assert
         result.IsSuccess.Should().BeFalse();

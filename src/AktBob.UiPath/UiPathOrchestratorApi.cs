@@ -95,7 +95,7 @@ internal class UiPathOrchestratorApi : IUiPathOrchestratorApi
 
     private class OrchestratorTokenResponse
     {
-        public string Result { get; set; }
+        public string Result { get; set; } = string.Empty;
     }
 }
 

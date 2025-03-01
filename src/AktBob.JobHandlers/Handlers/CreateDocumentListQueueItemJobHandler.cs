@@ -1,7 +1,8 @@
 ﻿using AAK.Podio.Models;
 using AktBob.Database.Contracts;
+using AktBob.Database.Entities;
 using AktBob.Deskpro.Contracts;
-using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.JobHandlers.Utils;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Contracts;
 
@@ -15,8 +16,18 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly string _configurationObjectName = "CreateDocumentListQueueItemJobHandler";
 
-    public Task Handle(CreateDocumentListQueueItemJob job, CancellationToken cancellationToken = default)
+    public async Task Handle(CreateDocumentListQueueItemJob job, CancellationToken cancellationToken = default)
     {
+        using var scope = _serviceScopeFactory.CreateScope();
+        
+        // Services
+        var getDeskproTicketHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproTicketHandler>();
+        var getDeskproPersonHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproPersonHandler>();
+        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
+        var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
+        var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
+        var timeProvider = scope.ServiceProvider.GetRequiredService<ITimeProvider>();
+
         // UiPath variables
         var tenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
         var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:UiPathQueueName:{tenancyName}"));
@@ -32,95 +43,87 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
 
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
 
         // Get metadata from Podio
-        if (!GetCaseNumberFromPodioItem(queryDispatcher, podioAppId, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken, out string caseNumber))
+        var caseNumberResult = await GetCaseNumberFromPodioItem(getPodioItemHandler, podioAppId, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken);
+        if (!caseNumberResult.IsSuccess)
         {
-            return Task.CompletedTask;
+            return;
         }
 
         // Find ticket in database from PodioItemId
-        if (!GetTicketFromApiDatabaseByPodioItemId(queryDispatcher, job.PodioItemId, cancellationToken, out Database.Contracts.Dtos.TicketDto? databaseTicketDto))
+        var databaseTicketResult = await GetTicketFromApiDatabaseByPodioItemId(ticketRepository, timeProvider, job.PodioItemId, cancellationToken);
+        if (!databaseTicketResult.IsSuccess)
         {
-            return Task.CompletedTask;
+            return;
         }
 
         // Get ticket from Deskpro
-        if (!GetDeskproTicket(queryDispatcher, databaseTicketDto!.DeskproId, cancellationToken, out TicketDto? deskproTicketDto))
+        var deskproTicket = await getDeskproTicketHandler.Handle(databaseTicketResult.Value.DeskproId, cancellationToken);
+        if (deskproTicket == null)
         {
-            return Task.CompletedTask;
+            _logger.LogError("Error getting ticket {id} from Deskpro", databaseTicketResult.Value.DeskproId);
+            return;
         }
 
-        // Get Deskpro ticket agent, if any (returns (string.Empty, string.Empty) if there is no agent)
-        GetDeskproTicketAgent(queryDispatcher, deskproTicketDto!.Agent, cancellationToken, out (string Name, string Email) agent);
+        var agent = await deskproHelper.GetAgent(getDeskproPersonHandler, deskproTicket.Value.Agent?.Id ?? 0, cancellationToken);
 
         if (useOpenOrchestrator)
         {
             // Create OpenOrchestrator queue item
             var payload = new
             {
-                SagsNummer = caseNumber,
+                SagsNummer = caseNumberResult.Value,
                 agent.Email,
                 Navn = agent.Name,
                 PodioID = job.PodioItemId,
-                DeskproID = deskproTicketDto.Id,
-                Titel = deskproTicketDto.Subject
+                DeskproID = deskproTicket.Value.Id,
+                Titel = deskproTicket.Value.Subject
             };
 
-            BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {caseNumber}", payload.ToJson(), CancellationToken.None));
+            BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {caseNumberResult}", payload.ToJson(), CancellationToken.None));
         }
         else
         {
             var payload = new
             {
-                SagsNummer = caseNumber,
+                SagsNummer = caseNumberResult.Value,
                 agent.Email,
                 Navn = agent.Name,
                 PodioID = job.PodioItemId,
-                DeskproID = deskproTicketDto.Id,
-                Titel = deskproTicketDto.Subject
+                DeskproID = deskproTicket.Value.Id,
+                Titel = deskproTicket.Value.Subject
             };
 
-            BackgroundJob.Enqueue<CreateUiPathQueueItem>(x => x.Run(uiPathQueueName, $"PodioItemID {job.PodioItemId}: {caseNumber}", payload.ToJson(), CancellationToken.None));
+            BackgroundJob.Enqueue<CreateUiPathQueueItem>(x => x.Run(uiPathQueueName, $"PodioItemID {job.PodioItemId}: {caseNumberResult}", payload.ToJson(), CancellationToken.None));
         }
-
-        return Task.CompletedTask;
     }
 
-    private bool GetCaseNumberFromPodioItem(IQueryDispatcher queryDispatcher, int podioAppId, long podioItemId, int podioFieldId, CancellationToken cancellationToken, out string caseNumber)
+    private async Task<Result<string>> GetCaseNumberFromPodioItem(IGetPodioItemHandler handler, int podioAppId, long podioItemId, int podioFieldId, CancellationToken cancellationToken)
     {
-        caseNumber = string.Empty;
+        var getPodioItemResult = await handler.Handle(podioAppId, podioItemId, cancellationToken);
 
-        var getPodioItemQuery = new GetItemQuery(podioAppId, podioItemId);
-        var getPodioItemQueryResult = queryDispatcher.Dispatch(getPodioItemQuery, cancellationToken).GetAwaiter().GetResult();
-
-        if (!getPodioItemQueryResult.IsSuccess)
+        if (!getPodioItemResult.IsSuccess)
         {
             _logger.LogError("Could not get item {itemId} from Podio", podioItemId);
-            return false;
+            return Result.Error();
         }
 
-        caseNumber = getPodioItemQueryResult.Value.GetField(podioFieldId)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
+        var caseNumber = getPodioItemResult.Value.GetField(podioFieldId)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
 
         if (string.IsNullOrEmpty(caseNumber))
         {
-            _logger.LogError("Could not get case number field value from Podio Item {itemId} fieldId {fieldId}", podioItemId, podioFieldId);
-            return false;
+            _logger.LogError("Case number field is null or empty on Podio item {itemId} fieldId {fieldId}", podioItemId, podioFieldId);
         }
 
-        return true;
+        return caseNumber;
     }
 
-    private bool GetTicketFromApiDatabaseByPodioItemId(IQueryDispatcher queryDispatcher, long podioItemId, CancellationToken cancellationToken, out Database.Contracts.Dtos.TicketDto? ticketDto)
+    private async Task<Result<Ticket>> GetTicketFromApiDatabaseByPodioItemId(ITicketRepository ticketRepository, ITimeProvider timeProvider, long podioItemId, CancellationToken cancellationToken)
     {
         var retriesCount = 10;
         var counter = 1;
         var delay = TimeSpan.FromSeconds(5);
-        ticketDto = null;
-
-        var getTicketByPodioItemIdQuery = new GetTicketsQuery(null, podioItemId, null);
 
         // Try get some data from the database API based on the provided podioItemId
         // This might fail initially since Podio triggers both the create event and DocumentListTrigger event almost at the same time
@@ -128,85 +131,24 @@ internal class CreateDocumentListQueueItemJobHandler(ILogger<CreateDocumentListQ
         // after 10 retries something else is wrong.
         while (counter <= retriesCount || !cancellationToken.IsCancellationRequested)
         {
-            var getTicketByPodioItemIdQueryResult = queryDispatcher.Dispatch(getTicketByPodioItemIdQuery, cancellationToken).GetAwaiter().GetResult();
+            var ticket = await ticketRepository.GetByPodioItemId(podioItemId);
 
             // We have data: Exit the while loop
-            if (getTicketByPodioItemIdQueryResult.IsSuccess)
+            if (ticket != null)
             {
-                if (getTicketByPodioItemIdQueryResult.Value.Count() > 1)
-                {
-                    _logger.LogWarning("{count} Deskpro tickets found for PodioItemId {podioItemId}. Only processing the first.", getTicketByPodioItemIdQueryResult.Value.Count(), podioItemId);
-                }
-
-                if (getTicketByPodioItemIdQueryResult.Value.Count() > 0)
-                {
-                    _logger.LogInformation("Try {count}/{retries}: Database API ticket data for PodioItemId {id} found", counter, retriesCount, podioItemId);
-                    ticketDto = getTicketByPodioItemIdQueryResult.Value.First();
-                    break;
-                }
+                _logger.LogInformation("Try {count}/{retries}: Database API ticket data for PodioItemId {id} found", counter, retriesCount, podioItemId);
+                return ticket;
             }
 
             // No data was found: retry
             _logger.LogWarning("Try {count}/{retries}: Database API did not return any ticket data for PodioItemId {id}. Retry in {time} ...", counter, retriesCount, podioItemId, delay.ToString());
 
             counter++;
-            Task.Delay(delay).GetAwaiter().GetResult();
+            await timeProvider.Delay(delay, cancellationToken);
         }
 
-        if (ticketDto == null)
-        {
-            _logger.LogError("Final try: Database API did not return any ticket data for PodioItemId {id}", podioItemId);
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool GetDeskproTicket(IQueryDispatcher queryDispatcher, int deskproId, CancellationToken cancellationToken, out TicketDto? ticketDto)
-    {
-        ticketDto = null;
-
-        var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(deskproId);
-        var getDeskproTicketQueryResult = queryDispatcher.Dispatch(getDeskproTicketQuery, cancellationToken).GetAwaiter().GetResult();
-
-        if (!getDeskproTicketQueryResult.IsSuccess)
-        {
-            _logger.LogError("Deskpro ticket #{id} not found in Deskpro", deskproId);
-            return false;
-        }
-
-        ticketDto = getDeskproTicketQueryResult.Value;
-        return true;
-    }
-
-    private void GetDeskproTicketAgent(IQueryDispatcher queryDispatcher, PersonDto? person, CancellationToken cancellationToken, out (string AgentName, string AgentEmail) agent)
-    {
-        agent = (string.Empty, string.Empty);
-
-        if (person is null)
-        {
-            _logger.LogWarning("Person object is null");
-            return;
-        }
-
-        if (person.Id <= 0)
-        {
-            _logger.LogWarning("Agent Id is zero");
-            return;
-        }
-
-        var getAgentQuery = new GetDeskproPersonQuery(person.Id);
-        var getAgentResult = queryDispatcher.Dispatch(getAgentQuery, cancellationToken).GetAwaiter().GetResult();
-
-        if (getAgentResult.IsSuccess
-            && getAgentResult.Value is not null
-            && getAgentResult.Value.IsAgent)
-        {
-            agent = (getAgentResult.Value.FullName, getAgentResult.Value.Email);
-            return;
-        }
-
-        _logger.LogWarning("Deskpro agent not found for agentId #{id}", person.Id);
-        return;
+        
+        _logger.LogError("Final try: Database API did not return any ticket data for PodioItemId {id}", podioItemId);
+        return Result.Error();
     }
 }

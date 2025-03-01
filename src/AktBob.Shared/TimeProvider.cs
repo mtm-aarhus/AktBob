@@ -4,10 +4,13 @@
 
 public interface ITimeProvider
 {
-    Task Delay(int milliseconds, CancellationToken cancellationToken = default);
+    Task Delay(TimeSpan timeSpan, CancellationToken cancellationToken = default);
 }
 
 public class TimeProvider : ITimeProvider
 {
-    public Task Delay(int milliseconds, CancellationToken cancellationToken = default) => Delay(milliseconds, cancellationToken);
+    public async Task Delay(TimeSpan timeSpan, CancellationToken cancellationToken = default)
+    {
+        await Task.Delay(timeSpan, cancellationToken);
+    }
 }

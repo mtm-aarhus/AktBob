@@ -9,8 +9,6 @@ using AktBob.Database;
 using AktBob.Podio;
 using Hangfire.Dashboard.BasicAuthorization;
 using Ardalis.GuardClauses;
-using System.Reflection;
-using AktBob.Shared.CQRS;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,10 +49,9 @@ builder.Services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
 builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Configuration.GetConnectionString("Hangfire")));
 
 // Modules
-var cqrsHandlersAssemblies = new List<Assembly>();
-builder.Services.AddDatabaseModule(builder.Configuration, cqrsHandlersAssemblies);
-builder.Services.AddPodioModule(builder.Configuration, cqrsHandlersAssemblies);
-builder.Services.AddSharedModule(cqrsHandlersAssemblies);
+builder.Services.AddDatabaseModule(builder.Configuration);
+builder.Services.AddPodioModule(builder.Configuration);
+builder.Services.AddSharedModule();
 
 var app = builder.Build();
 

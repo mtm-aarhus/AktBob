@@ -1,6 +1,6 @@
-﻿using AktBob.Database.Contracts.Dtos;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.Dtos;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Tickets.UpdateTicket;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
@@ -12,13 +12,11 @@ internal record PatchTicketRequest
     public string? CaseNumber { get; set; }
     public string? CaseUrl { get; set; }
     public string? SharepointFolderName { get; set; }
-    public DateTime? TicketClosedAt { get; set; }
-    public DateTime? JournalizedAt { get; set; }
 }
 
-internal class PatchTicket(ICommandDispatcher commandDispatcher) : Endpoint<PatchTicketRequest, TicketDto>
+internal class PatchTicket(ITicketRepository ticketRepository) : Endpoint<PatchTicketRequest, TicketDto>
 {
-    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
+    private readonly ITicketRepository _ticketRepository = ticketRepository;
 
     public override void Configure()
     {
@@ -32,15 +30,52 @@ internal class PatchTicket(ICommandDispatcher commandDispatcher) : Endpoint<Patc
 
     public override async Task HandleAsync(PatchTicketRequest req, CancellationToken ct)
     {
-        var command = new UpdateTicketCommand(
-            Id: req.Id,
-            CaseNumber: req.CaseNumber,
-            CaseUrl: req.CaseUrl,
-            SharepointFolderName: req.SharepointFolderName,
-            TicketClosedAt: req.TicketClosedAt,
-            JournalizedAt: req.JournalizedAt);
+        // Get existing entity from repository
+        var ticket = await _ticketRepository.Get(req.Id);
 
-        var result = await _commandDispatcher.Dispatch(command, ct);
-        await this.SendResponse(result, r => r.Value);
+        if (ticket == null)
+        {
+            await SendNotFoundAsync();
+            return;
+        }
+
+
+        // Update entity properties
+        if (!string.IsNullOrEmpty(req.CaseNumber))
+        {
+            ticket.CaseNumber = req.CaseNumber;
+        }
+
+        if (!string.IsNullOrEmpty(req.CaseUrl))
+        {
+            ticket.CaseUrl = req.CaseUrl;
+        }
+
+        if (!string.IsNullOrEmpty(req.SharepointFolderName))
+        {
+            ticket.SharepointFolderName = req.SharepointFolderName;
+        }
+
+
+        // Update
+        var updated = await _ticketRepository.Update(ticket) == 1;
+
+
+        // Response
+        if (updated)
+        {
+            var updatedTicket = await _ticketRepository.Get(req.Id);
+
+            if (updatedTicket is null)
+            {
+                await SendErrorsAsync();
+                return;
+            }
+
+            await SendOkAsync(updatedTicket.ToDto());
+            return;
+        }
+
+        await SendErrorsAsync();
     }
 }

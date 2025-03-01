@@ -6,7 +6,7 @@ SELECT
 	,Tickets.Id 'TicketId'
 	,Tickets.DeskproId 'DeskproTicketId'
 	,Tickets.CaseNumber 'GOCaseNumber'
-	,[Messages].DeskproId 'DeskproMessageId'
+	,[Messages].DeskproMessageId 'DeskproMessageId'
 	,[Messages].GODocumentId 'GODocumentId'
 	,[Messages].MessageNumber 'MessageNumber'
 	

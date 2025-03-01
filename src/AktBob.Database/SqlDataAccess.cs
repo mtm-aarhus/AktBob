@@ -1,8 +1,5 @@
-﻿using Ardalis.Result;
-using Dapper;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using System.Data;
 
 namespace AktBob.Database;
@@ -10,57 +7,48 @@ namespace AktBob.Database;
 internal class SqlDataAccess : ISqlDataAccess
 {
     private readonly IConfiguration _configuration;
-    private readonly ILogger<SqlDataAccess> _logger;
 
-    public SqlDataAccess(IConfiguration configuration, ILogger<SqlDataAccess> logger)
+    public SqlDataAccess(IConfiguration configuration)
     {
         _configuration = configuration;
-        _logger = logger;
     }
 
     private string GetConnectionString() => _configuration.GetConnectionString("Database")!;
 
-    public async Task<Result<IEnumerable<T>>> ExecuteProcedure<T>(string procedureName, DynamicParameters parameters)
+    public async Task<T?> QuerySingle<T>(string sql, object? parameters)
     {
-        try
+        using (var connection = new SqlConnection(GetConnectionString()))
         {
-            var connectionString = GetConnectionString();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                var rows = await connection.QueryAsync<T>(procedureName, parameters, commandType: CommandType.StoredProcedure);
-                
-                if (rows.Any())
-                {
-                    return Result.Success(rows);
-                }
-
-                return Result.NotFound();
-            }
-        }
-        catch (SqlException ex)
-        {
-            _logger.LogCritical("Error executing stored procedure {procedureName}. {message}", procedureName, ex.Message);
-            return Result.CriticalError();
+            var entity = await connection.QuerySingleOrDefaultAsync<T>(sql, parameters, commandType: CommandType.Text);
+            return entity;
         }
     }
 
-    public async Task<Result> ExecuteProcedure(string procedureName, DynamicParameters parameters)
+    public async Task<IEnumerable<T>> Query<T>(string sql, object? parameters)
     {
-        try
+        using (var connection = new SqlConnection(GetConnectionString()))
         {
-            var connectionString = GetConnectionString();
-
-            using (var connection = new SqlConnection(connectionString))
-            {
-                await connection.QueryAsync(procedureName, parameters, commandType: CommandType.StoredProcedure);
-                return Result.Success();
-            }
+            return await connection.QueryAsync<T>(sql, parameters, commandType: CommandType.Text);
         }
-        catch (SqlException ex)
+    }
+
+    public async Task<int> ExecuteProcedure(string procedureName, DynamicParameters? parameters)
+    {
+        var connectionString = GetConnectionString();
+
+        using (var connection = new SqlConnection(connectionString))
         {
-            _logger.LogCritical("Error executing stored procedure {procedureName}. {message}", procedureName, ex.Message);
-            return Result.CriticalError();
+            return await connection.ExecuteAsync(procedureName, parameters, commandType: CommandType.StoredProcedure);
+        }
+    }
+
+    public async Task<int> Execute<T>(string sql, T? parameters)
+    {
+        var connectionString = GetConnectionString();
+
+        using (var connection = new SqlConnection(connectionString))
+        {
+            return await connection.ExecuteAsync(sql, parameters, commandType: CommandType.Text);
         }
     }
 }

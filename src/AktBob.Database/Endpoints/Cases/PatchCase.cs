@@ -1,5 +1,5 @@
 ﻿using AktBob.Database.Contracts;
-using AktBob.Database.Contracts.Dtos;
+using AktBob.Database.Dtos;
 using AktBob.Database.Extensions;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
@@ -16,9 +16,9 @@ internal record PatchCaseRequest
 
 }
 
-internal class PatchCase(ICommandDispatcher commandDispatcher) : Endpoint<PatchCaseRequest, CaseDto>
+internal class PatchCase(ICaseRepository caseRepository) : Endpoint<PatchCaseRequest, CaseDto>
 {
-    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
+    private readonly ICaseRepository _caseRepository = caseRepository;
 
     public override void Configure()
     {
@@ -32,14 +32,49 @@ internal class PatchCase(ICommandDispatcher commandDispatcher) : Endpoint<PatchC
 
     public override async Task HandleAsync(PatchCaseRequest req, CancellationToken ct)
     {
-        var command = new UpdateCaseCommand(
-            Id: req.Id,
-            PodioItemId: req.PodioItemId,
-            FilArkivCaseId: req.FilArkivCaseId,
-            CaseNumber: req.CaseNumber,
-            SharepointFolderName: req.SharepointFolderName);
+        // Get existing case from repository
+        var @case = await _caseRepository.Get(req.Id);
 
-        var result = await _commandDispatcher.Dispatch(command, ct);
-        await this.SendResponse(result, r => r.Value);
+        if (@case == null)
+        {
+            await SendNotFoundAsync(ct);
+            return;
+        }
+
+        // Update case properties
+        if (!string.IsNullOrEmpty(req.CaseNumber))
+        {
+            @case.CaseNumber = req.CaseNumber;
+        }
+
+        if (!string.IsNullOrEmpty(req.SharepointFolderName))
+        {
+            @case.SharepointFolderName = req.SharepointFolderName;
+        }
+
+        @case.PodioItemId = req.PodioItemId ?? @case.PodioItemId;
+        @case.FilArkivCaseId = req.FilArkivCaseId ?? @case.FilArkivCaseId;
+
+
+        // Update entity
+        var updated = await _caseRepository.Update(@case) == 1;
+
+
+        // Response
+        if (updated)
+        {
+            var updatedCase = await _caseRepository.Get(req.Id);
+
+            if (updatedCase == null)
+            {
+                await SendErrorsAsync(500, ct);
+                return;
+            }
+
+            await SendOkAsync(updatedCase.ToDto(), ct);
+            return;
+        }
+
+        await SendErrorsAsync(500, ct);
     }
 }

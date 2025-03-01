@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[Messages] (
-    [Id]           INT IDENTITY (1, 1) NOT NULL,
-    [TicketId]     INT NOT NULL,
-    [DeskproId]    INT NOT NULL,
+    [Id] INT IDENTITY (1, 1) NOT NULL,
+    [TicketId] INT NOT NULL,
+    [DeskproMessageId] INT NOT NULL,
     [GODocumentId] INT NULL,
     [Deleted] BIT NOT NULL DEFAULT 0, 
     [MessageNumber] INT NULL, 
@@ -12,4 +12,4 @@
 
 GO
 
-CREATE INDEX [IX_Messages_DeskproId] ON [dbo].[Messages] (DeskproId)
+CREATE INDEX [IX_Messages_DeskproMessageId] ON [dbo].[Messages] (DeskproMessageId)

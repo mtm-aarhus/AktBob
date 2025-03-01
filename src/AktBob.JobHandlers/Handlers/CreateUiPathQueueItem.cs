@@ -9,14 +9,13 @@ internal class CreateUiPathQueueItem(IServiceScopeFactory serviceScopeFactory, I
     public async Task Run(string queueName, string reference, string payload, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        var handler = scope.ServiceProvider.GetRequiredService<ICreateUiPathQueueItemHandler>();
 
         _logger.LogInformation("Creating UiPath queue item ...");
         _logger.LogInformation("Queue name: '{name}'", queueName);
         _logger.LogInformation("Reference: '{reference}'", reference);
         _logger.LogInformation("Payload: {payload}", payload.ToString());
 
-        var command = new AddQueueItemCommand(queueName, reference, payload);
-        await commandDispatcher.Dispatch(command);
+        await handler.Handle(queueName, reference, payload, cancellationToken);
     }
 }

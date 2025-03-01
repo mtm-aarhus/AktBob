@@ -1,13 +1,14 @@
 ﻿using AAK.GetOrganized;
+using AktBob.GetOrganized.Contracts;
+using AktBob.GetOrganized.Handlers;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace AktBob.GetOrganized;
 public static class ModuleServices
 {
-    public static IServiceCollection AddGetOrganizedModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> cqrsHandlersAssemblies)
+    public static IServiceCollection AddGetOrganizedModule(this IServiceCollection services, IConfiguration configuration)
     {
         // Add GetOrganized service
         var getOrganizedOptions = new GetOrganizedOptions
@@ -20,7 +21,11 @@ public static class ModuleServices
 
         services.AddGetOrganizedModule(getOrganizedOptions);
 
-        cqrsHandlersAssemblies.Add(typeof(ModuleServices).Assembly);
+        services.AddTransient<ICreateGetOrganizedCaseHandler, CreateGetOrganizedCaseHandler>();
+        services.AddTransient<IFinalizeGetOrganizedDocumentHandler, FinalizeGetOrganizedDocumentHandler>();
+        services.AddTransient<IGetOrganizedHandlers, GetOrganizedHandlers>();
+        services.AddTransient<IRelateGetOrganizedDocumentsHandler, RelateGetOrganizedDocumentsHandler>();
+        services.AddTransient<IUploadGetOrganizedDocumentHandler, UploadGetOrganizedDocumenHandler>();
 
         return services;
     }

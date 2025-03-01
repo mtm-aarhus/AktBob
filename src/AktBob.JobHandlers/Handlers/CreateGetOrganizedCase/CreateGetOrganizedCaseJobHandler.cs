@@ -1,5 +1,6 @@
 ﻿using AktBob.Shared.Contracts;
 using AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
+using AktBob.GetOrganized.Contracts;
 
 namespace AktBob.JobHandlers.Handlers.CreateGetOrganizedCase;
 internal class CreateGetOrganizedCaseJobHandler : IJobHandler<CreateGetOrganizedCaseJob>
@@ -21,9 +22,9 @@ internal class CreateGetOrganizedCaseJobHandler : IJobHandler<CreateGetOrganized
     public async Task Handle(CreateGetOrganizedCaseJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        var createGetOrganizedCaseHandler = scope.ServiceProvider.GetRequiredService<ICreateGetOrganizedCaseHandler>();
 
-        _logger.LogInformation("Creating GetOrganized case (Deskpro ID {deskproId}", job.DeskproId);
+        _logger.LogInformation("Creating GetOrganized case (Deskpro ID {deskproId})", job.DeskproId);
 
         var caseOwner = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:DefaultCaseOwner"));
         var facet = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:Facet"));
@@ -31,14 +32,13 @@ internal class CreateGetOrganizedCaseJobHandler : IJobHandler<CreateGetOrganized
         var caseStatus = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:CaseStatus"));
         var caseAccess = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:CaseAccess"));
 
-        var createCaseCommand = new GetOrganized.Contracts.CreateCaseCommand(
-            CaseTypePrefix: caseTypePrefix,
-            CaseTitle: job.CaseTitle,
-            Description: string.Empty,
-            Status: caseStatus,
-            Access: caseAccess);
-
-        var createCaseResult = await commandDispatcher.Dispatch(createCaseCommand, cancellationToken);
+        var createCaseResult = await createGetOrganizedCaseHandler.Handle(
+            caseTypePrefix: caseTypePrefix,
+            caseTitle: job.CaseTitle,
+            description: string.Empty,
+            status: caseStatus,
+            access: caseAccess,
+            cancellationToken: cancellationToken);
 
         if (!createCaseResult.IsSuccess)
         {

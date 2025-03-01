@@ -1,5 +1,6 @@
-﻿using AktBob.Database.Contracts.Dtos;
-using AktBob.Database.UseCases.Tickets;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.Dtos;
+using AktBob.Database.Extensions;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
@@ -7,9 +8,9 @@ namespace AktBob.Database.Endpoints.Tickets;
 
 internal record GetTicketRequest(int Id);
 
-internal class GetTicket(IQueryDispatcher queryDispatcher) : Endpoint<GetTicketRequest, TicketDto>
+internal class GetTicket(ITicketRepository ticketRepository) : Endpoint<GetTicketRequest, TicketDto>
 {
-    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
+    private readonly ITicketRepository _ticketRepository = ticketRepository;
 
     public override void Configure()
     {
@@ -24,16 +25,14 @@ internal class GetTicket(IQueryDispatcher queryDispatcher) : Endpoint<GetTicketR
 
     public override async Task HandleAsync(GetTicketRequest req, CancellationToken ct)
     {
-        var query = new GetTicketByIdQuery(req.Id);
-        var result = await _queryDispatcher.Dispatch(query, ct);
+        var ticket = await _ticketRepository.Get(req.Id);
 
-        if (!result.IsSuccess)
+        if (ticket is null)
         {
             await SendNotFoundAsync();
             return;
         }
 
-        var dto = result.Value;
-        await SendOkAsync(dto);
+        await SendOkAsync(ticket.ToDto());
     }
 }

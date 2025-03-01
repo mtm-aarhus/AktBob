@@ -6,7 +6,7 @@ using AktBob.CloudConvert.Contracts;
 using AktBob.JobHandlers.Utils;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Deskpro.Contracts;
-using AktBob.Database.Contracts.Messages;
+using AktBob.Database.Contracts;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 internal class AddMessageToGetOrganized(
@@ -24,22 +24,21 @@ internal class AddMessageToGetOrganized(
         }
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var cloudConvertHandlers = scope.ServiceProvider.GetRequiredService<ICloudConvertHandlers>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
+        var deskproHandlers = scope.ServiceProvider.GetRequiredService<IDeskproHandlers>();
+        var uploadGetOrganizedDocumentHandler = scope.ServiceProvider.GetRequiredService<IUploadGetOrganizedDocumentHandler>();
+
         try
         {
-            var getDatabaseMessageQuery = new GetMessageByDeskproMessageIdQuery(deskproMessageId);
-            var getDatabaseMessageResult = await queryDispatcher.Dispatch(getDatabaseMessageQuery, cancellationToken);
+            var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(deskproMessageId);
 
-            if (!getDatabaseMessageResult.IsSuccess || getDatabaseMessageResult.Value is null)
+            if (databaseMessage is null)
             {
                 _logger.LogError("Error getting databaese message by Deskpro message Id {id}", deskproMessageId);
                 return;
             }
-
-            var databaseMessage = getDatabaseMessageResult.Value;
-            var deskproTicketId = databaseMessage.DeskproTicketId;
 
             // Get message from database, check if documentId is null
             if (databaseMessage.GODocumentId is not null)
@@ -47,20 +46,26 @@ internal class AddMessageToGetOrganized(
                 // The message is already journalized -> do nothing
                 return;
             }
-            
+
+            var databaseTicket = await unitOfWork.Tickets.Get(databaseMessage.TicketId);
+            if (databaseTicket is null)
+            {
+                _logger.LogError("Database ticket {id} not found", databaseMessage.TicketId);
+                return;
+            }
+
             // Get Deskpro ticket (we need the deskpro ticket id to query the message ifself)
-            var deskproTicketResult = await deskproHelper.GetTicket(queryDispatcher, deskproTicketId);
+            var deskproTicketResult = await deskproHelper.GetTicket(deskproHandlers.GetDeskproTicket, databaseTicket.DeskproId, cancellationToken);
             if (!deskproTicketResult.IsSuccess)
             {
-                _logger.LogError("Error getting Deskpro ticket {id}", deskproTicketId);
+                _logger.LogError("Error getting Deskpro ticket {id}", databaseTicket.DeskproId);
                 return;
             }
 
             var deskproTicket = deskproTicketResult.Value;
 
             // Get Deskpro message
-            var getDeskproMessageQuery = new GetDeskproMessageByIdQuery(deskproTicketId, deskproMessageId);
-            var getDeskproMessageResult = await queryDispatcher.Dispatch(getDeskproMessageQuery, cancellationToken);
+            var getDeskproMessageResult = await deskproHandlers.GetDeskproMessage.Handle(databaseTicket.DeskproId, databaseMessage.DeskproMessageId, cancellationToken);
 
             if (!getDeskproMessageResult.IsSuccess)
             {
@@ -72,21 +77,21 @@ internal class AddMessageToGetOrganized(
             var deskproMessage = getDeskproMessageResult.Value;
 
             // Get Deskpro person
-            var personResult = await deskproHelper.GetPerson(queryDispatcher, deskproMessage.Person.Id);
+            var personResult = await deskproHelper.GetPerson(deskproHandlers.GetDeskproPerson, deskproMessage.Person.Id, cancellationToken);
             var person = personResult.Value;
 
             // Get attachments
             var attachments = Enumerable.Empty<AttachmentDto>();
             if (getDeskproMessageResult.Value.AttachmentIds.Any())
             {
-                attachments = await deskproHelper.GetMessageAttachments(queryDispatcher, deskproTicket.Id, deskproMessage.Id);
+                attachments = await deskproHelper.GetMessageAttachments(deskproHandlers.GetDeskproMessageAttachments, deskproTicket.Id, deskproMessage.Id, cancellationToken);
             }
 
 
             // Generate PDF document
             _logger.LogInformation("Generating PDF document from Deskpro message {id}", deskproMessageId);
 
-            var generateDocumentResult = await GenerateDocument(commandDispatcher, queryDispatcher, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, caseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
+            var generateDocumentResult = await GenerateDocument(cloudConvertHandlers, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, caseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
             if (!generateDocumentResult.IsSuccess)
             {
                 _logger.LogError("Error generating the message document for Deskpro message {id}", deskproMessageId);
@@ -107,9 +112,7 @@ internal class AddMessageToGetOrganized(
 
 
             // Upload parent document
-            var uploadDocumentCommand = new UploadDocumentCommand(generateDocumentResult.Value, caseNumber, fileName, metadata, false);
-            var uploadDocumentResult = await commandDispatcher.Dispatch(uploadDocumentCommand, cancellationToken);
-
+            var uploadDocumentResult = await uploadGetOrganizedDocumentHandler.Handle(generateDocumentResult.Value, caseNumber, fileName, metadata, false, cancellationToken);
             if (!uploadDocumentResult.IsSuccess)
             {
                 _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", deskproMessageId, caseNumber);
@@ -119,8 +122,9 @@ internal class AddMessageToGetOrganized(
 
             // Update database
             // TODO: improve this: We need call this directly here and not in a background job since adding the documentId to the message in the database prevents uploading the message again next time
-            var updateMessageCommand = new UpdateMessageSetGoDocumentIdCommand(deskproMessage.Id, uploadDocumentResult.Value);
-            await commandDispatcher.Dispatch(updateMessageCommand, cancellationToken);
+            databaseMessage.GODocumentId = uploadDocumentResult.Value;
+            await unitOfWork.Messages.Update(databaseMessage);
+
             _logger.LogInformation("Database updated: GetOrganized documentId {documentId} set for message {id}", uploadDocumentResult.Value, deskproMessage.Id);
 
             if (attachments.Any())
@@ -176,11 +180,17 @@ internal class AddMessageToGetOrganized(
     }
 
 
-    private async Task<Result<byte[]>> GenerateDocument(ICommandDispatcher commandDispatcher, IQueryDispatcher queryDispatcher, DateTime createdAt, string personName, string personEmail,
-        string content, string caseNumber, string caseTitle, int messageNumber,
-        IEnumerable<AttachmentDto> attachments, CancellationToken cancellationToken = default)
+    private async Task<Result<byte[]>> GenerateDocument(ICloudConvertHandlers cloudConvertHandlers,
+                                                        DateTime createdAt,
+                                                        string personName,
+                                                        string personEmail,
+                                                        string content,
+                                                        string caseNumber,
+                                                        string caseTitle,
+                                                        int messageNumber,
+                                                        IEnumerable<AttachmentDto> attachments,
+                                                        CancellationToken cancellationToken = default)
     {
-
         var html = HtmlHelper.GenerateMessageHtml(
             createdAt: createdAt,
             personName: personName,
@@ -192,18 +202,15 @@ internal class AddMessageToGetOrganized(
             attachments: attachments);
 
         var bytes = Encoding.UTF8.GetBytes(html);
+        var jobIdResult = await cloudConvertHandlers.ConvertHtmlToPdf.Handle([bytes], cancellationToken);
 
-        var convertCommand = new ConvertHtmlToPdfCommand([bytes]);
-        var convertResult = await commandDispatcher.Dispatch(convertCommand, cancellationToken);
-
-        if (!convertResult.IsSuccess)
+        if (!jobIdResult.IsSuccess)
         {
             // TODO
             return Result.Error();
         }
 
-        var jobQuery = new GetJobQuery(convertResult.Value.JobId);
-        var jobResult = await queryDispatcher.Dispatch(jobQuery, cancellationToken);
+        var jobResult = await cloudConvertHandlers.GetCloudConvertJob.Handle(jobIdResult.Value, cancellationToken);
 
         if (!jobResult.IsSuccess)
         {
@@ -212,6 +219,4 @@ internal class AddMessageToGetOrganized(
 
         return jobResult.Value;
     }
-
-
 }

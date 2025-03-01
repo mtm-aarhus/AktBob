@@ -1,8 +1,0 @@
-﻿namespace AktBob.Database.UseCases.Tickets.UpdateTicket;
-public record UpdateTicketCommand(
-    int Id,
-    string? CaseNumber,
-    string? CaseUrl,
-    string? SharepointFolderName,
-    DateTime? TicketClosedAt,
-    DateTime? JournalizedAt) : ICommand<Result<TicketDto>>;

@@ -1,6 +1,6 @@
 ﻿using AAK.Podio.Models;
 using AktBob.Database.Contracts;
-using AktBob.Database.UseCases.Cases.AddCase;
+using AktBob.Database.Entities;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Contracts;
 
@@ -13,27 +13,29 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
 
     public async Task Handle(RegisterPodioCaseJob job, CancellationToken cancellationToken = default)
     {
+        using var scope = _serviceScopeFactory.CreateScope();
+
+        // Services
+        var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+        // Variables
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
         var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(_configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioFieldConfigurationSection>())));
         var podioFieldDeskproId = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "DeskproId"));
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "CaseNumber"));
         Guard.Against.Null(podioFieldDeskproId.Value);
 
-        using var scope = _serviceScopeFactory.CreateScope();
-        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
-
+        
         // Get metadata from Podio
-        var getPodioItemQuery = new GetItemQuery(podioAppId, job.PodioItemId);
-        var getPodioItemQueryResult = await queryDispatcher.Dispatch(getPodioItemQuery, cancellationToken);
-
-        if (!getPodioItemQueryResult.IsSuccess)
+        var podioItemResult = await getPodioItemHandler.Handle(podioAppId, job.PodioItemId, cancellationToken);
+        if (!podioItemResult.IsSuccess)
         {
             _logger.LogError("Could not get item {itemId} from Podio", job.PodioItemId);
             return;
         }
 
-        var caseNumber = getPodioItemQueryResult.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
+        var caseNumber = podioItemResult.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
 
         if (string.IsNullOrEmpty(caseNumber))
         {
@@ -41,8 +43,7 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
             return;
         }
 
-        // Get metadata from Deskpro
-        var deskproIdString = getPodioItemQueryResult.Value.GetField(podioFieldDeskproId.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
+        var deskproIdString = podioItemResult.Value.GetField(podioFieldDeskproId.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(deskproIdString))
         {
             _logger.LogError("Could not get Deskpro Id field value from Podio Item {itemId}", job.PodioItemId);
@@ -55,28 +56,23 @@ internal class RegisterPodioCaseJobHandler(ILogger<RegisterPodioCaseJobHandler> 
             return;
         }
 
-        var ticketQuery = new GetTicketsQuery(deskproId, null, null);
-        var ticketResult = await queryDispatcher.Dispatch(ticketQuery, cancellationToken);
+        // Get ticket from repository
+        var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(deskproId);
 
-        if (!ticketResult.IsSuccess || ticketResult.Value.Count() == 0)
+        if (databaseTicket is null)
         {
             _logger.LogWarning("No tickets found in database for DeskproId '{deskproId}'", deskproId);
             return;
         }
 
-        if (ticketResult.Value.Count() > 1)
+        // Add case to database
+        var @case = new Case
         {
-            _logger.LogWarning("{count} tickets found in database for DeskproId '{deskproId}'", ticketResult.Value.Count(), deskproId);
-            return;
-        }
+            TicketId = databaseTicket.Id,
+            PodioItemId = job.PodioItemId,
+            CaseNumber = caseNumber
+        };
 
-        // Post case to database
-        var postCaseCommand = new AddCaseCommand(ticketResult.Value.First().Id, job.PodioItemId, caseNumber, null);
-        var postCaseCommandResult = await commandDispatcher.Dispatch(postCaseCommand, cancellationToken);
-
-        if (!postCaseCommandResult.IsSuccess)
-        {
-            _logger.LogError("Error adding case to database");
-        }
+        await unitOfWork.Cases.Add(@case);
     }
 }

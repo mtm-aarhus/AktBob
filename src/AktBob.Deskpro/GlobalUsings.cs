@@ -1,2 +1,4 @@
 ﻿global using Ardalis.Result;
-global using AktBob.Shared.CQRS;
+global using AktBob.Deskpro.Contracts;
+global using AktBob.Deskpro.Contracts.DTOs;
+global using Microsoft.Extensions.Logging;

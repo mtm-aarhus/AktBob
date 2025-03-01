@@ -1,4 +1,4 @@
-﻿using AktBob.Database.Contracts.Dtos;
+﻿using AktBob.Database.Dtos;
 using AktBob.Database.Entities;
 
 namespace AktBob.Database.Extensions;
@@ -11,11 +11,7 @@ internal static class MessageExtensions
             Id = message.Id,
             TicketId = message.TicketId,
             DeskproMessageId = message.DeskproMessageId,
-            DeskproTicketId = message.DeskproTicketId,
-            GOCaseNumber = message.GOCaseNumber,
             GODocumentId = message.GODocumentId,
-            Hash = message.Hash,
-            QueuedForJournalizationAt = message.QueuedForJournalizationAt,
             MessageNumber = message.MessageNumber
         };
     }

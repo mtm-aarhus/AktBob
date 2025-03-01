@@ -14,9 +14,7 @@ internal class CreateOpenOrchestratorQueueItem(IServiceScopeFactory serviceScope
         _logger.LogInformation("Payload: {payload}", payload.ToString());
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
-
-        var command = new CreateQueueItemCommand(queueName, payload, reference);
-        await commandDispatcher.Dispatch(command, cancellationToken);
+        var handler = scope.ServiceProvider.GetRequiredService<ICreateOpenOrchestratorQueueItemHandler>();
+        await handler.Handle(queueName, payload, reference, cancellationToken);
     }
 }

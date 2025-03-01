@@ -1,7 +1,7 @@
 ﻿using AAK.GetOrganized;
 using AAK.GetOrganized.UploadDocument;
 using AktBob.CloudConvert.Contracts;
-using AktBob.Database.Contracts.Messages;
+using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
@@ -18,12 +18,15 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
     public async Task Handle(AddOrUpdateDeskproTicketToGetOrganizedJob job, CancellationToken cancellationToken = default)
     {
         var scope = _serviceScopeFactory.CreateScope();
-        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
         var pendingsTickets = scope.ServiceProvider.GetRequiredService<PendingsTickets>();
-        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
 
+        var deskproHandlers = scope.ServiceProvider.GetRequiredService<IDeskproHandlers>();
+        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
+        var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
+        var cloudConvertHandlers = scope.ServiceProvider.GetRequiredService<ICloudConvertHandlers>();
+        var uploadGetOrganizedDocumentHandler = scope.ServiceProvider.GetRequiredService<IUploadGetOrganizedDocumentHandler>();
         var currentPendingTicket = new PendingTicket(job.TicketId, job.SubmittedAt);
+
         pendingsTickets.AddPendingTicket(currentPendingTicket);
 
         // Check if this submission is the most recent for the specified ticket
@@ -36,7 +39,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
 
 
         // Get Deskpro Ticket
-        var ticketResult = await deskproHelper.GetTicket(queryDispatcher, job.TicketId);
+        var ticketResult = await deskproHelper.GetTicket(deskproHandlers.GetDeskproTicket, job.TicketId, cancellationToken);
 
         if (!ticketResult.IsSuccess || ticketResult.Value is null)
         {
@@ -47,57 +50,19 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
         var ticket = ticketResult.Value;
         
 
-        // Get custom fields specification
-        var ticketCustomFieldsQuery = new GetDeskproCustomFieldSpecificationsQuery();
-        var ticketCustomFieldsResult = await queryDispatcher.Dispatch(ticketCustomFieldsQuery, cancellationToken); // TODO: Cache
-
+        // Get Deskpro custom fields specification
+        var ticketCustomFieldsResult = await deskproHandlers.GetDeskproCustomFieldSpecifications.Handle(cancellationToken); // TODO: Cache
         if (!ticketCustomFieldsResult.IsSuccess)
         {
             _logger.LogError("Error getting custom fields specifications from Deskpro");
             return;
         }
 
+        // Get Deskpro ticket agent
+        var agentResult = await deskproHelper.GetPerson(deskproHandlers.GetDeskproPerson, ticket.Agent?.Id ?? 0, cancellationToken);
 
-        // Get ticket agent
-        var agent = new PersonDto();
-        if (ticket.Agent?.Id is not null)
-        {
-            var agentResult = await deskproHelper.GetPerson(queryDispatcher, ticket.Agent.Id);
-            if (!agentResult.IsSuccess)
-            {
-                _logger.LogWarning("Error getting person {id} from Deskpro", ticket.Agent.Id);
-            }
-            else
-            {
-                agent = agentResult.Value;
-            }
-        }
-        else
-        {
-            _logger.LogWarning("Deskpro ticket {id} has no assigned agents", job.TicketId);
-        }
-
-
-        // Get ticket user
-        var user = new PersonDto();
-        if (ticket.Person?.Id is not null)
-        {
-            var userResult = await deskproHelper.GetPerson(queryDispatcher, ticket.Person.Id);
-            if (!userResult.IsSuccess)
-            {
-                _logger.LogWarning("Error getting person {id} from Deskpro", ticket.Person.Id);
-            }
-            else
-            {
-                user = userResult.Value;
-            }
-        }
-        else
-        {
-            _logger.LogWarning("Deskpro ticket {id} has no assigned agents", job.TicketId);
-        }
-        
-
+        // Get Deskpro ticket user
+        var userResult = await deskproHelper.GetPerson(deskproHandlers.GetDeskproPerson, ticket.Person?.Id ?? 0, cancellationToken);
 
         // Map ticket fields
         var customFields = GenerateCustomFieldValues(job.CustomFieldIds, ticketCustomFieldsResult.Value, ticket);
@@ -107,11 +72,11 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
         {
             { "ticketId", ticket.Id.ToString() },
             { "caseTitle", ticket.Subject },
-            { "userName", user.FullName },
-            { "userEmail", user.Email },
-            { "userPhone", string.Join(", ", user.PhoneNumbers) },
-            { "agentName", agent.FullName },
-            { "agentEmail", agent.Email },
+            { "userName", userResult.Value?.FullName ?? string.Empty },
+            { "userEmail", userResult.Value?.Email ?? string.Empty },
+            { "userPhone", string.Join(", ", userResult.Value?.PhoneNumbers ?? Enumerable.Empty<string>()) },
+            { "agentName", agentResult.Value?.FullName ?? string.Empty},
+            { "agentEmail", agentResult.Value ?.Email ?? string.Empty },
             { "custom-fields", string.Join("", customFields) },
             { "caseNumbers", string.Join("", caseNumbers) }
         };
@@ -121,35 +86,33 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
 
 
         // Messages
-        var getMessagesQuery = new GetDeskproMessagesQuery(ticket.Id);
-        var getMessagesResult = await queryDispatcher.Dispatch(getMessagesQuery, cancellationToken);
+        var getMessagesResult = await deskproHandlers.GetDeskproMessages.Handle(ticket.Id, cancellationToken);
 
         if (getMessagesResult.IsSuccess)
         {
             var messages = getMessagesResult.Value.OrderByDescending(x => x.CreatedAt);
             foreach (var message in messages)
             {
-                var person = await deskproHelper.GetPerson(queryDispatcher, message.Person?.Id);
+                var person = await deskproHelper.GetPerson(deskproHandlers.GetDeskproPerson, message.Person?.Id ?? 0, cancellationToken);
                 message.Person = person.Value;
 
                 var attachments = Enumerable.Empty<AttachmentDto>();
                 if (message.AttachmentIds.Any())
                 {
-                    attachments = await deskproHelper.GetMessageAttachments(queryDispatcher, ticket.Id, message.Id);
+                    attachments = await deskproHelper.GetMessageAttachments(deskproHandlers.GetDeskproMessageAttachments, ticket.Id, message.Id, cancellationToken);
                 }
 
                 // Get message number from API database
                 var messageNumber = 0;
-                var getDatabaseMessageQuery = new GetMessageByDeskproMessageIdQuery(message.Id);
-                var getDatabaseMessageResult = await queryDispatcher.Dispatch(getDatabaseMessageQuery, cancellationToken);
+                var databaseMessage = await messageRepository.GetByDeskproMessageId(message.Id);
 
-                if (!getDatabaseMessageResult.IsSuccess)
+                if (databaseMessage is null)
                 {
                     _logger.LogWarning("No message found in database for Deskpro message ID {id}", message.Id);
                 }
                 else
                 {
-                    messageNumber = getDatabaseMessageResult.Value.MessageNumber ?? 0;
+                    messageNumber = databaseMessage.MessageNumber ?? 0;
                 }
 
                 var messageHtml = HtmlHelper.GenerateMessageHtml(message.CreatedAt, message.Person.FullName, message.Person.Email, message.Content, job.GOCaseNumber, ticket.Subject, messageNumber, attachments);
@@ -160,21 +123,19 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
 
 
         // Generate PDF
-        var convertCommand = new ConvertHtmlToPdfCommand(content);
-        var convertResult = await commandDispatcher.Dispatch(convertCommand, cancellationToken);
+        var jobIdResult = await cloudConvertHandlers.ConvertHtmlToPdf.Handle(content, cancellationToken);
 
-        if (!convertResult.IsSuccess)
+        if (!jobIdResult.IsSuccess)
         {
             _logger.LogError("Error creating CloudConvert job generating PDF for Deskpro ticket {id}", job.TicketId);
             return;
         }
 
-        var getJobQuery = new GetJobQuery(convertResult.Value.JobId);
-        var getJobResult = await queryDispatcher.Dispatch(getJobQuery, cancellationToken);
+        var getJobResult = await cloudConvertHandlers.GetCloudConvertJob.Handle(jobIdResult.Value, cancellationToken);
 
         if (!getJobResult.IsSuccess)
         {
-            _logger.LogError("Error querying job '{id}' from PDF from CloudConvert", convertResult.Value.JobId);
+            _logger.LogError("Error querying job '{id}' from PDF from CloudConvert", jobIdResult.Value);
             return;
         }
 
@@ -194,9 +155,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
         };
 
         var fileName = "Samlet korrespondance.pdf";
-
-        var uploadDocumentCommand = new UploadDocumentCommand(getJobResult.Value, job.GOCaseNumber, fileName, metadata, true);
-        var uploadDocumentResult = await commandDispatcher.Dispatch(uploadDocumentCommand, cancellationToken);
+        var uploadDocumentResult = await uploadGetOrganizedDocumentHandler.Handle(getJobResult.Value, job.GOCaseNumber, fileName, metadata, true, cancellationToken);
 
         if (!uploadDocumentResult.IsSuccess)
         {

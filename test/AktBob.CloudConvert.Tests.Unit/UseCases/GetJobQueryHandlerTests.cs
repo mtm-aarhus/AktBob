@@ -1,9 +1,8 @@
 ﻿using AktBob.CloudConvert.Contracts;
 using AktBob.CloudConvert.Contracts.DTOs;
+using AktBob.CloudConvert.Handlers;
 using AktBob.CloudConvert.Models.JobResponse;
-using AktBob.CloudConvert.UseCases;
 using AktBob.Shared;
-using AktBob.Shared.CQRS;
 using Ardalis.Result;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;
@@ -14,15 +13,15 @@ namespace AktBob.CloudConvert.Tests.Unit.UseCases;
 
 public class GetJobQueryHandlerTests
 {
-    private readonly FakeLogger<GetJobQueryHandler> _logger = new FakeLogger<GetJobQueryHandler>();
+    private readonly FakeLogger<GetCloudConvertJobHandler> _logger = new FakeLogger<GetCloudConvertJobHandler>();
     private readonly ICloudConvertClient _cloudConvertClient = Substitute.For<ICloudConvertClient>();
-    private readonly IQueryDispatcher _queryDispatcher = Substitute.For<IQueryDispatcher>();
     private readonly ITimeProvider _timeProvider = Substitute.For<ITimeProvider>();
-    private readonly GetJobQueryHandler _sut;
+    private readonly IGetCloudConvertFileHandler _getCloudConvertFileHandler = Substitute.For<IGetCloudConvertFileHandler>();
+    private readonly GetCloudConvertJobHandler _sut;
 
     public GetJobQueryHandlerTests()
     {
-        _sut = new GetJobQueryHandler(_cloudConvertClient, _logger, _timeProvider, _queryDispatcher);
+        _sut = new GetCloudConvertJobHandler(_cloudConvertClient, _logger, _timeProvider, _getCloudConvertFileHandler);
     }
 
     [Fact]
@@ -30,7 +29,6 @@ public class GetJobQueryHandlerTests
     {
         // Arrange
         var jobId = Guid.NewGuid();
-        var query = new GetJobQuery(jobId);
         
         _cloudConvertClient
             .GetJob(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
@@ -71,15 +69,15 @@ public class GetJobQueryHandlerTests
         var fileDto = new FileDto(stream, "filename");
         var resultMock = Task.FromResult(Result.Success(fileDto));
 
-        _queryDispatcher
-            .Dispatch(Arg.Any<GetFileQuery>(), Arg.Any<CancellationToken>())
+        _getCloudConvertFileHandler
+            .Handle(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(resultMock);
 
         // Act
-        var result = await _sut.Handle(query, CancellationToken.None);
+        var result = await _sut.Handle(jobId, CancellationToken.None);
 
         // Assert
-        await _timeProvider.Received(2).Delay(2000, Arg.Any<CancellationToken>());
+        await _timeProvider.Received(2).Delay(TimeSpan.FromSeconds(2), Arg.Any<CancellationToken>());
         result.Value.Should().BeEquivalentTo(fileBytes);
     }
 }

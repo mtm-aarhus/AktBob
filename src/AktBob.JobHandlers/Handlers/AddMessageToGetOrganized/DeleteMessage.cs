@@ -1,4 +1,4 @@
-﻿using AktBob.Database.Contracts.Messages;
+﻿using AktBob.Database.Contracts;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 internal class DeleteMessage(IServiceScopeFactory serviceScopeFactory)
@@ -8,9 +8,7 @@ internal class DeleteMessage(IServiceScopeFactory serviceScopeFactory)
     public async Task Run(int id, CancellationToken cancellationToken = default)
     {
         var scope = _serviceScopeFactory.CreateScope();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
-
-        var deleteMessageCommand = new DeleteMessageCommand(id);
-        await commandDispatcher.Dispatch(deleteMessageCommand, cancellationToken);
+        var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
+        await messageRepository.Delete(id);
     }
 }

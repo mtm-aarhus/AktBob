@@ -1,5 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
+using AktBob.JobHandlers.Utils;
 using AktBob.Shared.Contracts;
 
 namespace AktBob.JobHandlers.Handlers;
@@ -17,15 +18,17 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
         var deskproAfdelingFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:AfdelingFieldId"));
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
+        var getDeskproPersonHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproPersonHandler>();
+        var getDeskproTicketHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproTicketHandler>();
+        var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
 
         // Get data from Deskpro
-        var getDeskproTicketQuery = new GetDeskproTicketByIdQuery(job.DeskproId);
-        var getDeskproTicketResult = await queryDispatcher.Dispatch(getDeskproTicketQuery, cancellationToken);
+        var getDeskproTicketResult = await getDeskproTicketHandler.Handle(job.DeskproTicketId, cancellationToken);
 
         if (!getDeskproTicketResult.IsSuccess)
         {
-            _logger.LogError("Error getting Deskpro ticket {id}", job.DeskproId);
+            _logger.LogError("Error getting Deskpro ticket {id}", job.DeskproTicketId);
             return;
         }
 
@@ -34,74 +37,55 @@ internal class CreateAfgørelsesskrivelseQueueItemJobHandler(IServiceScopeFactor
         var afdeling = deskproTicket.Fields.FirstOrDefault(x => x.Id == deskproAfdelingFieldId)?.Values.FirstOrDefault();
         if (string.IsNullOrEmpty(afdeling))
         {
-            _logger.LogWarning("Deskpro ticket {id} field 'Afdeling' is null or empty", job.DeskproId);
+            _logger.LogWarning("Deskpro ticket {id} field 'Afdeling' is null or empty", job.DeskproTicketId);
         }
 
 
         // Get person from Deskpro
         if (deskproTicket.Person == null)
         {
-            _logger.LogWarning("Deskpro ticket {id}: person is null", job.DeskproId);
+            _logger.LogWarning("Deskpro ticket {id}: person is null", job.DeskproTicketId);
         }
 
-        var getPersonResult = await GetDeskproPerson(queryDispatcher, deskproTicket.Person?.Id, cancellationToken);
-        var person = getPersonResult.Value;
+        var person = await deskproHelper.GetPerson(getDeskproPersonHandler, deskproTicket.Person?.Id ?? 0, cancellationToken);
 
+        if (!person.IsSuccess || person.Value is null)
+        {
+            _logger.LogWarning("Error getting person ID {id} from Deskpro", deskproTicket.Person?.Id ?? 0);
+        }
 
         // Get agent from Deskpro
         if (deskproTicket.Agent == null)
         {
-            _logger.LogWarning("Deskpro ticket {id}: agent is null", job.DeskproId);
+            _logger.LogWarning("Deskpro ticket {id}: agent is null", job.DeskproTicketId);
         }
 
-        var getAgentResult = await GetDeskproPerson(queryDispatcher, deskproTicket.Agent?.Id, cancellationToken);
-        var agent = getAgentResult.Value;
-
+        var agent = await deskproHelper.GetAgent(getDeskproPersonHandler, deskproTicket.Agent?.Id ?? 0, cancellationToken);
 
         // Get data from database
-        var getDatabaseTicketQuery = new GetTicketsQuery(job.DeskproId, null, null);
-        var getDatabaseTicketResult = await queryDispatcher.Dispatch(getDatabaseTicketQuery, cancellationToken);
+        var databaseTicket = await ticketRepository.GetByDeskproTicketId(job.DeskproTicketId);
 
-        if (!getDatabaseTicketResult.IsSuccess || getDatabaseTicketResult.Value == null || !getDatabaseTicketResult.Value.Any())
+        if (databaseTicket is null)
         {
-            _logger.LogError("Error ticket from database (DeskproId {id})", job.DeskproId);
+            _logger.LogError("Error ticket from database (DeskproId {id})", job.DeskproTicketId);
         }
 
-
-        var databaseTicket = getDatabaseTicketResult?.Value?.FirstOrDefault();
         if (string.IsNullOrEmpty(databaseTicket?.SharepointFolderName))
         {
-            _logger.LogError("Sharepoint folder name is null or empty (database ticket id {id}", job.DeskproId);
+            _logger.LogWarning("Sharepoint folder name is null or empty (database ticket id {id}", job.DeskproTicketId);
         }
 
 
         // Create OpenOrchestrator queue item
         var payload = new
         {
-            AnsøgerNavn = person?.FullName,
-            AnsøgerEmail = person?.Email,
+            AnsøgerNavn = person.Value?.FullName,
+            AnsøgerEmail = person.Value?.Email,
             Afdeling = afdeling,
             Aktindsigtsovermappe = databaseTicket?.SharepointFolderName,
-            SagsbehandlerEmail = agent?.Email
+            SagsbehandlerEmail = agent.Email
         };
 
-        BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"DeskproID {job.DeskproId}", payload.ToJson(), CancellationToken.None));
-    }
-
-    private async Task<Result<Deskpro.Contracts.DTOs.PersonDto>> GetDeskproPerson(IQueryDispatcher queryDispatcher, int? personId, CancellationToken cancellationToken)
-    {
-        if (personId is null)
-        {
-            return Result.Error();
-        }
-
-        var getPersonQuery = new GetDeskproPersonQuery((int)personId);
-        var getPersonResult = await queryDispatcher.Dispatch(getPersonQuery, cancellationToken);
-        if (!getPersonResult.IsSuccess)
-        {
-            _logger.LogWarning("Error getting person {id} from Deskpro", personId);
-        }
-
-        return getPersonResult;
+        BackgroundJob.Enqueue<CreateOpenOrchestratorQueueItem>(x => x.Run(openOrchestratorQueueName, $"DeskproID {job.DeskproTicketId}", payload.ToJson(), CancellationToken.None));
     }
 }

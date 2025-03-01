@@ -7,7 +7,5 @@ SELECT
 	,CaseNumber
 	,CaseUrl
 	,SharepointFolderName
-	,JournalizedAt
-	,TicketClosedAt
 
 FROM Tickets

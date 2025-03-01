@@ -1,5 +1,5 @@
 ﻿using AktBob.Database.Contracts;
-using AktBob.Database.Contracts.Messages;
+using AktBob.Database.Entities;
 using AktBob.Deskpro.Contracts;
 using AktBob.Shared.Contracts;
 
@@ -12,11 +12,12 @@ internal class RegisterMessagesJobHandler(ILogger<RegisterMessagesJobHandler> lo
     public async Task Handle(RegisterMessagesJob job, CancellationToken cancellationToken = default)
     {
         var scope = _serviceScopeFactory.CreateScope();
-        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var getDeskproMessagesHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproMessagesHandler>();
 
-        var getDeskproMessagesQuery = new GetDeskproMessagesQuery(job.DeskproTicketId);
-        var getDeskproMessagesResult = await queryDispatcher.Dispatch(getDeskproMessagesQuery, cancellationToken);
+
+        // Get message from Deskpro
+        var getDeskproMessagesResult = await getDeskproMessagesHandler.Handle(job.DeskproTicketId, cancellationToken);
 
         if (!getDeskproMessagesResult.IsSuccess)
         {
@@ -24,38 +25,25 @@ internal class RegisterMessagesJobHandler(ILogger<RegisterMessagesJobHandler> lo
             return;
         }
 
-        var deskproMessages = getDeskproMessagesResult.Value;
 
         // Persist the Deskpro ticket ID and message ID in the database
-        foreach (var deskproMessage in deskproMessages)
+        foreach (var deskproMessage in getDeskproMessagesResult.Value)
         {
-            var getDatabaseTicketsQuery = new GetTicketsQuery(job.DeskproTicketId, null, null, true);
-            var getDatabaseTicketsResult = await queryDispatcher.Dispatch(getDatabaseTicketsQuery, cancellationToken);
+            var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproTicketId);
 
-            if (!getDatabaseTicketsResult.IsSuccess || !getDatabaseTicketsResult.Value.Any())
+            if (databaseTicket is null)
             {
                 _logger.LogError("Error getting database ticket for DeskproTicketId {id}", job.DeskproTicketId);
                 return;
             }
 
-            if (getDatabaseTicketsResult.Value.Count() > 1)
+            var message = new Message
             {
-                _logger.LogError("More than 1 row in tickets table with Deskpro ticket ID {id}", job.DeskproTicketId);
-                return;
-            }
+                TicketId = databaseTicket.Id,
+                DeskproMessageId = deskproMessage.Id,
+            };
 
-            var databaseTicket = getDatabaseTicketsResult.Value.First();
-
-            var addMessageCommand = new AddMessageCommand(databaseTicket.Id, deskproMessage.Id); // The handler's stored procedure prevents from persisting duplicates, so we don't need to worry about it here
-            var addMessageResult = await commandDispatcher.Dispatch(addMessageCommand, cancellationToken);
-
-            if (!addMessageResult.IsSuccess)
-            {
-                _logger.LogError("Error adding message to database. Deskpro ticket Id {ticektId} Deskpro message Id {messageId}", job.DeskproTicketId, deskproMessage.Id);
-                return;
-            }
-
-            var databaseMessageId = addMessageResult.Value;
+            var databaseMessageId = await unitOfWork.Messages.Add(message);
 
             if (!string.IsNullOrEmpty(databaseTicket.CaseNumber))
             {

@@ -13,8 +13,8 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
     public async Task UploadToGetOrganized(int parentDocumentId, string caseNumber, DateTime timestamp, DocumentCategory documentCategory, IEnumerable<AttachmentDto> attachments, CancellationToken cancellationToken = default)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
-        var queryDispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+        var getDeskproMessageAttachmentHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproMessageAttachmentHandler>();
+        var getOrganizedHandlers = scope.ServiceProvider.GetRequiredService<IGetOrganizedHandlers>();
 
         DateTime createdAtDanishTime = timestamp.UtcToDanish();
         var childrenDocumentIds = new List<int>();
@@ -32,8 +32,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 using var stream = new MemoryStream();
                 
                 // Get the individual attachments from Deskpro
-                var getAttachmentStreamQuery = new GetDeskproMessageAttachmentQuery(attachment.DownloadUrl);
-                var getAttachmentStreamResult = await queryDispatcher.Dispatch(getAttachmentStreamQuery, cancellationToken);
+                var getAttachmentStreamResult = await getDeskproMessageAttachmentHandler.Handle(attachment.DownloadUrl, cancellationToken);
 
                 if (!getAttachmentStreamResult.IsSuccess)
                 {
@@ -48,8 +47,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 var filenameNoExtension = Path.GetFileNameWithoutExtension(attachment.FileName);
                 var fileExtension = Path.GetExtension(attachment.FileName);
                 var filename = $"{filenameNoExtension} ({timestamp.ToString("dd-MM-yyyy HH-mm-ss")}){fileExtension}";
-                var uploadDocumentCommand = new UploadDocumentCommand(attachmentBytes, caseNumber, filename, metadata, true);
-                var uploadDocumentResult = await commandDispatcher.Dispatch(uploadDocumentCommand, cancellationToken);
+                var uploadDocumentResult = await getOrganizedHandlers.UploadGetOrganziedDocument.Handle(attachmentBytes, caseNumber, filename, metadata, true, cancellationToken);
 
                 if (!uploadDocumentResult.IsSuccess)
                 {
@@ -71,8 +69,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
         }
 
         // Set attachments as children
-        var relateDocumentCommand = new RelateDocumentCommand(parentDocumentId, childrenDocumentIds.ToArray());
-        await commandDispatcher.Dispatch(relateDocumentCommand, cancellationToken);
+        await getOrganizedHandlers.RelateGetOrganizedDocuments.Handle(parentDocumentId, childrenDocumentIds.ToArray(), cancellationToken: cancellationToken);
 
 
         // Finalize the parent document

@@ -10,9 +10,6 @@ using AktBob.GetOrganized;
 using AktBob.Database;
 using AktBob.Worker;
 using AktBob.Email;
-using System.Reflection;
-using AktBob.Shared.CQRS;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using AktBob.Shared;
 
 var builder = Host.CreateDefaultBuilder(args)
@@ -27,18 +24,17 @@ var builder = Host.CreateDefaultBuilder(args)
         });
 
         // Modules
-        var cqrsHandlersAssemblies = new List<Assembly>();
-        services.AddUiPathModule(hostContext.Configuration, cqrsHandlersAssemblies);
-        services.AddDeskproModule(hostContext.Configuration, cqrsHandlersAssemblies);
-        services.AddPodioModule(hostContext.Configuration, cqrsHandlersAssemblies);
-        services.AddOpenOrchestratorModule(hostContext.Configuration, cqrsHandlersAssemblies);
-        services.AddCloudConvertModule(hostContext.Configuration, cqrsHandlersAssemblies);
-        services.AddGetOrganizedModule(hostContext.Configuration, cqrsHandlersAssemblies);
-        services.AddDatabaseModule(hostContext.Configuration, cqrsHandlersAssemblies);
+        services.AddUiPathModule(hostContext.Configuration);
+        services.AddDeskproModule(hostContext.Configuration);
+        services.AddPodioModule(hostContext.Configuration);
+        services.AddOpenOrchestratorModule(hostContext.Configuration);
+        services.AddCloudConvertModule(hostContext.Configuration);
+        services.AddGetOrganizedModule(hostContext.Configuration);
+        services.AddDatabaseModule(hostContext.Configuration);
         services.AddJobHandlers(hostContext.Configuration);
         services.AddJobHandlersModule(hostContext.Configuration);
-        services.AddEmailModuleServices(hostContext.Configuration, cqrsHandlersAssemblies);
-        services.AddSharedModule(cqrsHandlersAssemblies);
+        services.AddEmailModuleServices(hostContext.Configuration);
+        services.AddSharedModule();
 
         // Hangfire
         services.AddTransient<FailedJobNotificationFilter>();
@@ -52,6 +48,7 @@ var builder = Host.CreateDefaultBuilder(args)
 
 var host = builder.Build();
 
+// Setup filter for dispatching notifications when a Hangfire job fails
 var failedJobNotificationFilter = host.Services.GetRequiredService<FailedJobNotificationFilter>();
 GlobalJobFilters.Filters.Add(failedJobNotificationFilter);
 

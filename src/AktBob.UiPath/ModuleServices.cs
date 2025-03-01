@@ -1,12 +1,12 @@
-﻿using Ardalis.GuardClauses;
+﻿using AktBob.UiPath.Contracts;
+using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace AktBob.UiPath;
 public static class ModuleServices
 {
-    public static IServiceCollection AddUiPathModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> cqrsHandlersAssemblies)
+    public static IServiceCollection AddUiPathModule(this IServiceCollection services, IConfiguration configuration)
     {
         var tenancyName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("UiPath:TenancyName"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>($"UiPath:{tenancyName}:Username"));
@@ -22,7 +22,7 @@ public static class ModuleServices
             client.BaseAddress = new Uri(url);
         });
 
-        cqrsHandlersAssemblies.Add(typeof(ModuleServices).Assembly);
+        services.AddTransient<ICreateUiPathQueueItemHandler, CreateQueueItemHandler>();
 
         return services;
     }

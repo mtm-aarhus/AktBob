@@ -1,13 +1,13 @@
-﻿using AktBob.CloudConvert.UseCases;
+﻿using AktBob.CloudConvert.Handlers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace AktBob.CloudConvert;
 public static class ModuleServices
 {
-    public static IServiceCollection AddCloudConvertModule(this IServiceCollection services, IConfiguration configuration, List<Assembly> cqrsHandlersAssemblies)
+    public static IServiceCollection AddCloudConvertModule(this IServiceCollection services, IConfiguration configuration)
     {
+        // Add CloudConvert client
         var cloudConvertBaseUrl = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CloudConvert:BaseUrl"));
         var cloudConvertToken = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CloudConvert:Token"));
 
@@ -27,7 +27,11 @@ public static class ModuleServices
             return new CloudConvertClient(client, logger);
         });
 
-        cqrsHandlersAssemblies.Add(typeof(ModuleServices).Assembly);
+        // Add module handlers
+        services.AddTransient<IGetCloudConvertJobHandler, GetCloudConvertJobHandler>();
+        services.AddTransient<IGetCloudConvertFileHandler, GetCloudConvertFileHandler>();
+        services.AddTransient<IConvertHtmlToPdfHandler, ConvertHtmlToPdfHandler>();
+        services.AddTransient<ICloudConvertHandlers, CloudConvertHandlers>();
 
         return services;
     }

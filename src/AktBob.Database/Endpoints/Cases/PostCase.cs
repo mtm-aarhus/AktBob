@@ -1,6 +1,7 @@
-﻿using AktBob.Database.Contracts.Dtos;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.Dtos;
+using AktBob.Database.Entities;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Cases.AddCase;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -26,9 +27,9 @@ internal class PostCaseRequestValidator : Validator<PostCaseRequest>
 }
 
 
-internal class PostCase(ICommandDispatcher commandDispatcher) : Endpoint<PostCaseRequest, CaseDto>
+internal class PostCase(ICaseRepository caseRepository) : Endpoint<PostCaseRequest, CaseDto>
 {
-    private readonly ICommandDispatcher _commandDispatcher = commandDispatcher;
+    private readonly ICaseRepository _caseRepository = caseRepository;
 
     public override void Configure()
     {
@@ -42,20 +43,30 @@ internal class PostCase(ICommandDispatcher commandDispatcher) : Endpoint<PostCas
 
     public override async Task HandleAsync(PostCaseRequest req, CancellationToken ct)
     {
-        var addCaseCommand = new AddCaseCommand(
-            TicketId: req.TicketId,
-            PodioItemId: req.PodioItemId,
-            FilArkivCaseId: req.FilArkivCaseId,
-            CaseNumber: req.CaseNumber);
-
-        var result = await _commandDispatcher.Dispatch(addCaseCommand, ct);
-
-        if (result.IsSuccess)
+        var @case = new Case
         {
-            await SendCreatedAtAsync<GetCase>(routeValues: null, responseBody: result.Value, cancellation: ct);
+            TicketId = req.TicketId,
+            PodioItemId = req.PodioItemId,
+            CaseNumber = req.CaseNumber,
+            FilArkivCaseId = req.FilArkivCaseId
+        };
+
+        var caseId = await _caseRepository.Add(@case);
+
+        if (caseId == 0)
+        {
+            await SendErrorsAsync(500, ct);
             return;
         }
 
-        await this.SendResponse(result, r => r.Value);
+        var createdCase = await _caseRepository.Get(caseId);
+
+        if (createdCase == null)
+        {
+            await SendErrorsAsync(500, ct);
+            return;
+        }
+
+        await SendOkAsync(createdCase.ToDto(), ct);
     }
 }

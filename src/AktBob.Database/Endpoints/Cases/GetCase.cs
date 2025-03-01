@@ -1,6 +1,6 @@
-﻿using AktBob.Database.Contracts.Dtos;
+﻿using AktBob.Database.Contracts;
+using AktBob.Database.Dtos;
 using AktBob.Database.Extensions;
-using AktBob.Database.UseCases.Cases;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
@@ -8,9 +8,9 @@ namespace AktBob.Database.Endpoints.Cases;
 
 internal record GetCaseRequest(int Id);
 
-internal class GetCase(IQueryDispatcher queryDispatcher) : Endpoint<GetCaseRequest, CaseDto>
+internal class GetCase(ICaseRepository caseRepository) : Endpoint<GetCaseRequest, CaseDto>
 {
-    private readonly IQueryDispatcher _queryDispatcher = queryDispatcher;
+    private readonly ICaseRepository _caseRepository = caseRepository;
 
     public override void Configure()
     {
@@ -24,9 +24,14 @@ internal class GetCase(IQueryDispatcher queryDispatcher) : Endpoint<GetCaseReque
 
     public override async Task HandleAsync(GetCaseRequest req, CancellationToken ct)
     {
-        var getCaseByIdQuery = new GetCaseByIdQuery(req.Id);
-        var result = await _queryDispatcher.Dispatch(getCaseByIdQuery, ct);
+        var @case = await _caseRepository.Get(req.Id);
 
-        await this.SendResponse(result, r => r.Value);
+        if (@case == null)
+        {
+            await SendNotFoundAsync(ct);
+            return;
+        }
+
+        await SendOkAsync(@case.ToDto(), ct);
     }
 }

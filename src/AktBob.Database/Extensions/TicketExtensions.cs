@@ -1,4 +1,4 @@
-﻿using AktBob.Database.Contracts.Dtos;
+﻿using AktBob.Database.Dtos;
 using AktBob.Database.Entities;
 
 namespace AktBob.Database.Extensions;
@@ -13,8 +13,6 @@ internal static class TicketExtensions
             CaseNumber = ticket.CaseNumber,
             CaseUrl = ticket.CaseUrl,
             SharepointFolderName = ticket.SharepointFolderName,
-            TicketClosedAt = ticket.TicketClosedAt,
-            JournalizedAt = ticket.JournalizedAt,
             Cases = ticket.Cases.Select(c => c.ToDto())
         };
 

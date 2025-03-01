@@ -70,20 +70,9 @@
     <Build Include="dbo\Views\v_Cases.sql" />
     <Build Include="dbo\Views\v_Messages.sql" />
     <Build Include="dbo\Views\v_Tickets.sql" />
-    <Build Include="dbo\Stored Procedures\spMessage_Create.sql" />
-    <Build Include="dbo\Stored Procedures\spMessage_Update.sql" />
-    <Build Include="dbo\Stored Procedures\spMessage_GetAll.sql" />
-    <Build Include="dbo\Stored Procedures\spMessage_GetById.sql" />
+    <Build Include="dbo\Stored Procedures\spMessage_Insert.sql" />
     <Build Include="dbo\Stored Procedures\spTicket_Create.sql" />
     <Build Include="dbo\Stored Procedures\spCase_Create.sql" />
-    <Build Include="dbo\Stored Procedures\spCase_GetById.sql" />
-    <Build Include="dbo\Stored Procedures\spCase_GetByTicketId.sql" />
-    <Build Include="dbo\Stored Procedures\spCase_UpdateById.sql" />
-    <Build Include="dbo\Stored Procedures\spTicket_GetByDeskproId.sql" />
-    <Build Include="dbo\Stored Procedures\spTicket_GetById.sql" />
-    <Build Include="dbo\Stored Procedures\spTicket_UpdateById.sql" />
-    <Build Include="dbo\Stored Procedures\spMessage_Delete.sql" />
-    <Build Include="dbo\Stored Procedures\spMessage_GetByDeskproMessageId.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="AktBob.Database.SQL.refactorlog" />

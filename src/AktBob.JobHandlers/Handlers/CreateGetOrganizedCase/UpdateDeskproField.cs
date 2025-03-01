@@ -10,7 +10,7 @@ internal class UpdateDeskproField(ILogger<UpdateDeskproField> logger, IConfigura
     public async Task SetGetOrganizedCaseId(int deskproId, string caseId, string caseUrl, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        var invokeDeskproWebhookHandler = scope.ServiceProvider.GetRequiredService<IInvokeDeskproWebhookHandler>();
 
         var deskproWebhookId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("Deskpro:Webhooks:UpdateTicketSetGoCaseId"));
 
@@ -23,8 +23,7 @@ internal class UpdateDeskproField(ILogger<UpdateDeskproField> logger, IConfigura
             DeskproTicketId = deskproId
         };
 
-        var invokeWebhookCommand = new InvokeWebhookCommand(deskproWebhookId, payload);
-        await commandDispatcher.Dispatch(invokeWebhookCommand, cancellationToken);
+        await invokeDeskproWebhookHandler.Handle(deskproWebhookId, payload, cancellationToken);
 
         _logger.LogInformation("webhook ID {deskproWebhookId} invoked.Payload: getOrganizedCaseId = {caseId}, getOrganizedCaseUrl = {caseUrl}, deskproTicketId = {deskproId}", deskproWebhookId, caseId, caseUrl, deskproId);
     }

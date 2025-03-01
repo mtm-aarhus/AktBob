@@ -5,4 +5,3 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Hangfire;
 global using AktBob.Shared;
-global using AktBob.Shared.CQRS;
