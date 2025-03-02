@@ -3,15 +3,15 @@ internal class CloudConvertHandlers : ICloudConvertHandlers
 {
     public CloudConvertHandlers(
         IConvertHtmlToPdfHandler convertHtmlToPdfHandler,
-        IGetCloudConvertJobHandler getCloudConvertJobHandler,
+        IGetCloudConvertDownloadUrlHandler getCloudConvertDownloadUrlHandler,
         IGetCloudConvertFileHandler getCloudConvertFileHandler)
     {
         ConvertHtmlToPdf = convertHtmlToPdfHandler;
-        GetCloudConvertJob = getCloudConvertJobHandler;
+        GetCloudConvertDownloadUrl = getCloudConvertDownloadUrlHandler;
         GetCloudConvertFile = getCloudConvertFileHandler;
     }
 
     public IConvertHtmlToPdfHandler ConvertHtmlToPdf { get; }
-    public IGetCloudConvertJobHandler GetCloudConvertJob { get; }
+    public IGetCloudConvertDownloadUrlHandler GetCloudConvertDownloadUrl { get; }
     public IGetCloudConvertFileHandler GetCloudConvertFile { get; }
 }

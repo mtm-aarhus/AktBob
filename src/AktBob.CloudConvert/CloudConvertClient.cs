@@ -74,7 +74,7 @@ internal class CloudConvertClient : ICloudConvertClient
     }
 
 
-    public async Task<Result<Models.File>> GetFile(string url, CancellationToken cancellationToken = default)
+    public async Task<Result<byte[]>> GetFile(string url, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -92,13 +92,10 @@ internal class CloudConvertClient : ICloudConvertClient
             var contentDisposition = response.Content.Headers.ContentDisposition;
             var filename = contentDisposition?.FileName ?? string.Empty;
 
-            var file = new Models.File
-            {
-                Filename = filename.Replace("\"",""),
-                Stream = await response.Content.ReadAsStreamAsync()
-            };
-
-            return file;
+            using var stream = await response.Content.ReadAsStreamAsync();
+            using var memoryStream = new MemoryStream();
+            stream.CopyTo(memoryStream);
+            return memoryStream.ToArray();
         }
         catch (Exception ex)
         {

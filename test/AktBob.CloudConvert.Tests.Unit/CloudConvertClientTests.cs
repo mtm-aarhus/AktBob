@@ -164,17 +164,13 @@ public class CloudConvertClientTests
     public async Task GetFile_ShouldReturnFileObject_WhenRequestIsSuccessful()
     {
         // Arrange
-        var expectedFilename = "filename.txt";
-        var expectedFileContent = "File content";
-        var streamContent = new MemoryStream(Encoding.UTF8.GetBytes(expectedFileContent));
+        var expectedBytes = Encoding.UTF8.GetBytes("File content");
+        var streamContent = new MemoryStream(expectedBytes);
         var responseMessage = new HttpResponseMessage(statusCode: HttpStatusCode.OK)
         {
             Content = new StreamContent(streamContent)
         };
-        responseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment")
-        {
-            FileName = expectedFilename
-        };
+        
         var httpClient = HttpClientHelper.CreateClientThatReturns(responseMessage);
         var sut = new CloudConvertClient(httpClient, _logger);
 
@@ -184,14 +180,8 @@ public class CloudConvertClientTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value.Should().BeOfType(typeof(CloudConvert.Models.File));
-        result.Value.Filename.Should().Be(expectedFilename);
-        result.Value.Stream.Should().NotBeNull();
-        using(var reader = new StreamReader(result.Value.Stream))
-        {
-            var actualContent = await reader.ReadToEndAsync();
-            actualContent.Should().Be(expectedFileContent);
-        }
+        result.Value.Should().BeOfType(typeof(byte[]));
+        result.Value.Should().BeEquivalentTo(expectedBytes);
     }
 
 

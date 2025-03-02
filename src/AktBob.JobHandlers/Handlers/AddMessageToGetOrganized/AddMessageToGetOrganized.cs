@@ -210,13 +210,18 @@ internal class AddMessageToGetOrganized(
             return Result.Error();
         }
 
-        var jobResult = await cloudConvertHandlers.GetCloudConvertJob.Handle(jobIdResult.Value, cancellationToken);
-
-        if (!jobResult.IsSuccess)
+        var getUrlResult = await cloudConvertHandlers.GetCloudConvertDownloadUrl.Handle(jobIdResult.Value, cancellationToken);
+        if (!getUrlResult.IsSuccess || string.IsNullOrEmpty(getUrlResult))
         {
             return Result.Error();
         }
 
-        return jobResult.Value;
+        var fileResult = await cloudConvertHandlers.GetCloudConvertFile.Handle(getUrlResult, cancellationToken);
+        if (!fileResult.IsSuccess)
+        {
+            return Result.Error();
+        }
+
+        return fileResult.Value;
     }
 }

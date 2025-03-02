@@ -1,46 +1,38 @@
-﻿using AktBob.CloudConvert.Contracts.DTOs;
-using AktBob.CloudConvert.Handlers;
+﻿using AktBob.CloudConvert.Handlers;
 using Ardalis.Result;
 using FluentAssertions;
 using NSubstitute;
+using System.Text;
 
 namespace AktBob.CloudConvert.Tests.Unit.UseCases;
 
-public class GetFileQueryHandlerTests
+public class GetCloudConvertFileHandlerTests
 {
     private readonly ICloudConvertClient _cloudConvertClient = Substitute.For<ICloudConvertClient>();
     private readonly GetCloudConvertFileHandler _sut;
-    public GetFileQueryHandlerTests()
+    public GetCloudConvertFileHandlerTests()
     {
         _sut = new GetCloudConvertFileHandler(_cloudConvertClient);
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFileDto_WhenQueryIsValid()
+    public async Task Handle_ShouldReturnBytes_WhenDownloadIsSuccessful()
     {
         // Arrange
-        var filename = "filename.txt";
-        var file = new Models.File
-        {
-            Stream = new MemoryStream(),
-            Filename = filename
-        };
-        _cloudConvertClient.GetFile(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Result.Success(file));
-        var expectedDto = new FileDto(file.Stream, file.Filename);
+        var expected = Encoding.UTF8.GetBytes("some content");
+        _cloudConvertClient.GetFile(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Result.Success(expected));
 
         // Act
         var result = await _sut.Handle("http://localhost", CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().Be(expectedDto);
-        result.Value.Filename.Should().Be(filename);
-        result.Value.Stream.Should().BeSameAs(file.Stream);
+        result.Value.Should().BeSameAs(expected);
     }
 
 
     [Fact]
-    public async Task Handle_ShouldReturnError_WhenResultIsNotSuccessful()
+    public async Task Handle_ShouldReturnError_WhenDownloadFails()
     {
         // Arrange
         _cloudConvertClient.GetFile(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Result.Error());

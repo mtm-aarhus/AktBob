@@ -28,7 +28,7 @@ public static class ModuleServices
         });
 
         // Add module handlers
-        services.AddTransient<IGetCloudConvertJobHandler, GetCloudConvertJobHandler>();
+        services.AddTransient<IGetCloudConvertDownloadUrlHandler, GetCloudConvertDownloadUrlHandler>();
         services.AddTransient<IGetCloudConvertFileHandler, GetCloudConvertFileHandler>();
         services.AddTransient<IConvertHtmlToPdfHandler, ConvertHtmlToPdfHandler>();
         services.AddTransient<ICloudConvertHandlers, CloudConvertHandlers>();

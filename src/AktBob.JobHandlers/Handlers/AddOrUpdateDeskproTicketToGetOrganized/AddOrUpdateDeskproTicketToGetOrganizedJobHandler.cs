@@ -131,14 +131,20 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
             return;
         }
 
-        var getJobResult = await cloudConvertHandlers.GetCloudConvertJob.Handle(jobIdResult.Value, cancellationToken);
+        var urlResult = await cloudConvertHandlers.GetCloudConvertDownloadUrl.Handle(jobIdResult.Value, cancellationToken);
 
-        if (!getJobResult.IsSuccess)
+        if (!urlResult.IsSuccess)
         {
             _logger.LogError("Error querying job '{id}' from PDF from CloudConvert", jobIdResult.Value);
             return;
         }
 
+        var fileResult = await cloudConvertHandlers.GetCloudConvertFile.Handle(urlResult.Value, cancellationToken);
+        if (!fileResult.IsSuccess)
+        {
+            _logger.LogError("CloudConvert job {id}: Error downloading file from url: {url}", jobIdResult.Value, urlResult.Value);
+            return;
+        }
 
         // Check if this submission is the most recent for the specified ticket. Check this as late as possible.
         if (!IsMostRecentSubmission(currentPendingTicket, pendingsTickets))
@@ -155,7 +161,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
         };
 
         var fileName = "Samlet korrespondance.pdf";
-        var uploadDocumentResult = await uploadGetOrganizedDocumentHandler.Handle(getJobResult.Value, job.GOCaseNumber, fileName, metadata, true, cancellationToken);
+        var uploadDocumentResult = await uploadGetOrganizedDocumentHandler.Handle(fileResult.Value, job.GOCaseNumber, fileName, metadata, true, cancellationToken);
 
         if (!uploadDocumentResult.IsSuccess)
         {
