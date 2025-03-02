@@ -4,7 +4,7 @@ using FluentAssertions;
 using NSubstitute;
 using System.Text;
 
-namespace AktBob.CloudConvert.Tests.Unit.UseCases;
+namespace AktBob.CloudConvert.Tests.Unit.Handlers;
 
 public class GetCloudConvertFileHandlerTests
 {
@@ -39,7 +39,7 @@ public class GetCloudConvertFileHandlerTests
 
         // Act
         var result = await _sut.Handle("http://localhost", CancellationToken.None);
-        
+
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Status.Should().Be(ResultStatus.Error);

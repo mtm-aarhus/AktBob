@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 
-namespace AktBob.CloudConvert.Tests.Unit.UseCases;
+namespace AktBob.CloudConvert.Tests.Unit.Handlers;
 
 public class GetCloudConvertDownloadUrlHandlerTests
 {
@@ -27,16 +27,16 @@ public class GetCloudConvertDownloadUrlHandlerTests
         // Arrange
         var jobId = Guid.NewGuid();
         var expectedUrl = "the expected url";
-        
+
         _cloudConvertClient
             .GetJob(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(
                 Task.FromResult(Result.Success(new JobResponseRoot { Data = new JobResponseData { Id = jobId, Status = "processing" } })),
                 Task.FromResult(Result.Success(
                     new JobResponseRoot
-                    { 
-                        Data = new JobResponseData 
-                        { 
+                    {
+                        Data = new JobResponseData
+                        {
                             Id = jobId,
                             Status = "finished",
                             Tasks =
@@ -56,7 +56,7 @@ public class GetCloudConvertDownloadUrlHandlerTests
                                     }
                                 }
                             ]
-                        } 
+                        }
                     }
                 ))
             );
