@@ -19,15 +19,12 @@ internal class GetCloudConvertDownloadUrlHandler(ICloudConvertClient cloudConver
             var getJobResult = await _cloudConvertClient.GetJob(jobId, cancellationToken);
             if (!getJobResult.IsSuccess)
             {
-                // TODO
-                _logger.LogError("Error getting status for Cloud Convert job {id}", jobId);
-                return Result.Error();
+                return Result.Error($"Error getting status for Cloud Convert job {jobId}");
             }
 
             if (getJobResult.Value.Data.Status == "error")
             {
-                _logger.LogError("Cloud Convert job {id} errored", jobId);
-                return Result.Error();
+                return Result.Error($"Cloud Convert job {jobId} errored");
             }
 
             var file = getJobResult.Value?.Data.Tasks.Where(x => x.Operation == "export/url").FirstOrDefault()?.Result?.Files?.FirstOrDefault(x => !string.IsNullOrEmpty(x.Url));
