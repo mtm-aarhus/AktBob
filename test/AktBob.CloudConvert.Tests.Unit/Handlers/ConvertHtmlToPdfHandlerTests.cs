@@ -56,6 +56,7 @@ public class ConvertHtmlToPdfHandlerTests
 
         // Assert
         result.Status.Should().Be(ResultStatus.Error);
+        result.Errors.Should().NotBeEmpty();
         await _cloudConvertClient.DidNotReceive().CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
     }
 
@@ -71,11 +72,12 @@ public class ConvertHtmlToPdfHandlerTests
 
         // Assert
         result.Status.Should().Be(ResultStatus.Error);
+        result.Errors.Should().NotBeEmpty();
         await _cloudConvertClient.DidNotReceive().CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task Handle_ShoudlReturnError_WhenCreatingCloudConvertJobFails()
+    public async Task Handle_ShouldReturnError_WhenCreatingCloudConvertJobFails()
     {
         // Arrange
         var tasks = new Dictionary<Guid, object>
@@ -91,6 +93,7 @@ public class ConvertHtmlToPdfHandlerTests
 
         // Assert
         result.Status.Should().Be(ResultStatus.Error);
+        result.Errors.Should().NotBeEmpty();
         await _cloudConvertClient.Received(1).CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
     }
 }

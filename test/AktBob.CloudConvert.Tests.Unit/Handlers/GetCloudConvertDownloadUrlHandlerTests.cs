@@ -70,7 +70,7 @@ public class GetCloudConvertDownloadUrlHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ShouldLogErrorAndReturnResultError_WhenCloudConvertJobStatusIsError()
+    public async Task Handle_ShouldReturnResultError_WhenCloudConvertJobStatusIsError()
     {
         // Arrange
         var jobId = Guid.NewGuid();
@@ -84,11 +84,11 @@ public class GetCloudConvertDownloadUrlHandlerTests
         // Assert
         result.Value.Should().BeNull();
         result.Status.Should().Be(ResultStatus.Error);
-        _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
+        result.Errors.Should().NotBeEmpty();
     }
 
     [Fact]
-    public async Task Handle_ShouldLogErrorAndReturnResultError_WhenCloudConvertClientResultIsNotSuccessful()
+    public async Task Handle_ShouldReturnResultError_WhenCloudConvertClientResultIsNotSuccessful()
     {
         // Arrange
         var jobId = Guid.NewGuid();
@@ -102,6 +102,6 @@ public class GetCloudConvertDownloadUrlHandlerTests
         // Assert
         result.Value.Should().BeNull();
         result.Status.Should().Be(ResultStatus.Error);
-        _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
+        result.Errors.Should().NotBeEmpty();
     }
 }
