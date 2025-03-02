@@ -32,6 +32,7 @@ public static class ModuleServices
         services.AddTransient<IGetCloudConvertFileHandler, GetCloudConvertFileHandler>();
         services.AddTransient<IConvertHtmlToPdfHandler, ConvertHtmlToPdfHandler>();
         services.AddTransient<ICloudConvertHandlers, CloudConvertHandlers>();
+        services.AddTransient<IGenerateCloudConvertTasksHandler, GenerateCloudConvertTasksHandler>();
 
         return services;
     }

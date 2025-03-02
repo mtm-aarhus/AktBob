@@ -123,8 +123,14 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
 
 
         // Generate PDF
-        var jobIdResult = await cloudConvertHandlers.ConvertHtmlToPdf.Handle(content, cancellationToken);
+        var generateTasksResult = cloudConvertHandlers.GenerateCloudConvertTasks.Handle(content);
+        if (!generateTasksResult.IsSuccess)
+        {
+            _logger.LogError("Error generating CloudConvert tasks dictionary for Deskpro ticket {id}", job.TicketId);
+            return;
+        }
 
+        var jobIdResult = await cloudConvertHandlers.ConvertHtmlToPdf.Handle(generateTasksResult.Value, cancellationToken);
         if (!jobIdResult.IsSuccess)
         {
             _logger.LogError("Error creating CloudConvert job generating PDF for Deskpro ticket {id}", job.TicketId);
@@ -132,7 +138,6 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
         }
 
         var urlResult = await cloudConvertHandlers.GetCloudConvertDownloadUrl.Handle(jobIdResult.Value, cancellationToken);
-
         if (!urlResult.IsSuccess)
         {
             _logger.LogError("Error querying job '{id}' from PDF from CloudConvert", jobIdResult.Value);

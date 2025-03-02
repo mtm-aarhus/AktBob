@@ -1,79 +1,37 @@
 ﻿using AktBob.CloudConvert.Models;
 
 namespace AktBob.CloudConvert.Handlers;
-internal class ConvertHtmlToPdfHandler(ICloudConvertClient cloudConvertClient) : IConvertHtmlToPdfHandler
+internal class ConvertHtmlToPdfHandler(ICloudConvertClient cloudConvertClient, ILogger<ConvertHtmlToPdfHandler> logger) : IConvertHtmlToPdfHandler
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
+    private readonly ILogger<ConvertHtmlToPdfHandler> _logger = logger;
 
-    public async Task<Result<Guid>> Handle(IEnumerable<byte[]> content, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(Dictionary<Guid, object> tasks, CancellationToken cancellationToken)
     {
-        var importTasks = new Dictionary<Guid, ImportTask>();
-        var convertTasks = new Dictionary<Guid, ConvertTask>();
-        var tasks = new Dictionary<Guid, object>();
-
-
-        // Import tasks
-        foreach (var item in content)
+        if (!tasks.Any())
         {
-            var id = Guid.NewGuid();
-            var task = new ImportTask
-            {
-                File = Convert.ToBase64String(item),
-                Filename = $"{id}.html"
-            };
-
-            importTasks.Add(id, task);
-            tasks.Add(id, task);
+            _logger.LogError("No tasks was provided. Cannot invoke CloudConvert with empty payload");
+            return Result.Error();
         }
 
-
-        // Convert tasks
-        foreach (var item in importTasks)
+        if (tasks.Any(x => x.Value == null))
         {
-            var id = Guid.NewGuid();
-            var task = new ConvertTask
-            {
-                Input = [item.Key.ToString()]
-            };
-
-            convertTasks.Add(id, task);
-            tasks.Add(id, task);
+            _logger.LogError("One or more values in tasks dictionary is null. Cannot invoke CloudConvert with empty tasks");
+            return Result.Error();
         }
-
-
-        // Merge tasks
-        var mergeTaskId = Guid.NewGuid();
-        var mergeTask = new MergeTask
-        {
-            Input = convertTasks.Keys.Select(x => x.ToString()).ToArray()
-        };
-
-
-        // Export tasks
-        var exportTaskId = Guid.NewGuid();
-        var exportTask = new ExportTask
-        {
-            Input = [convertTasks.First().Key.ToString()]
-        };
-
-
-        // If there is more than one convert tasks, we need to utilize
-        // the merge task to combine all converted tasks
-        if (convertTasks.Count() > 1)
-        {
-            tasks.Add(mergeTaskId, mergeTask);
-            exportTask.Input = [mergeTaskId.ToString()];
-        }
-
-
-        tasks.Add(exportTaskId, exportTask);
 
         var payload = new Payload
         {
             Tasks = tasks
         };
 
+        // Invoke CloudConvert and return job id
         var result = await _cloudConvertClient.CreateJob(payload, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            _logger.LogError("Error invoking CloudConvert. Payload: {payload}", payload);
+        }
+
         return result;
     }
 }

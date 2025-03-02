@@ -7,6 +7,7 @@ using AktBob.JobHandlers.Utils;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
+using Hangfire.Common;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 internal class AddMessageToGetOrganized(
@@ -202,8 +203,14 @@ internal class AddMessageToGetOrganized(
             attachments: attachments);
 
         var bytes = Encoding.UTF8.GetBytes(html);
-        var jobIdResult = await cloudConvertHandlers.ConvertHtmlToPdf.Handle([bytes], cancellationToken);
 
+        var generateTasksResult = cloudConvertHandlers.GenerateCloudConvertTasks.Handle([bytes]);
+        if (!generateTasksResult.IsSuccess)
+        {
+            return Result.Error();
+        }
+
+        var jobIdResult = await cloudConvertHandlers.ConvertHtmlToPdf.Handle(generateTasksResult.Value, cancellationToken);
         if (!jobIdResult.IsSuccess)
         {
             // TODO
