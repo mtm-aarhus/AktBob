@@ -1,5 +1,6 @@
 ﻿using AktBob.CloudConvert.Handlers;
 using AktBob.Email.Contracts;
+using AktBob.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -45,13 +46,13 @@ public static class ModuleServices
             var withLogging = new CloudConvertModuleLoggingDecorator(
                 inner,
                 provider.GetRequiredService<ILogger<CloudConvertModuleLoggingDecorator>>(),
-                provider.GetRequiredService<ISendEmailHandler>(),
+                provider.GetRequiredService<IJobDispatcher>(),
                 provider.GetRequiredService<IConfiguration>());
 
             var withExceptionHandling = new CloudConvertModuleExceptionDecorator(
                 withLogging,
                 provider.GetRequiredService<ILogger<CloudConvertModuleExceptionDecorator>>(),
-                provider.GetRequiredService<ISendEmailHandler>(),
+                provider.GetRequiredService<IJobDispatcher>(),
                 provider.GetRequiredService<IConfiguration>());
 
             return withExceptionHandling;

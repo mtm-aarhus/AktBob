@@ -20,15 +20,16 @@ public static class ModuleServices
         services.AddDeskpro(deskproOptions);
 
         // Add module handlers
-        services.AddTransient<IGetDeskproCustomFieldSpecificationsHandler, GetDeskproCustomFieldSpecificationsHandler>();
-        services.AddTransient<IGetDeskproMessageAttachmentHandler, GetDeskproMessageAttachmentHandler>();
-        services.AddTransient<IGetDeskproMessageAttachmentsHandler, GetDeskproMessageAttachmentsHandler>();
-        services.AddTransient<IGetDeskproMessageHandler, GetDeskproMessageHandler>();
-        services.AddTransient<IGetDeskproMessagesHandler, GetDeskproMessagesHandler>();
-        services.AddTransient<IGetDeskproPersonHandler, GetDeskproPersonHandler>();
-        services.AddTransient<IGetDeskproTicketHandler, GetDeskproTicketHandler>();
-        services.AddTransient<IGetDeskproTicketsByFieldSearchHandler, GetDeskproTicketsByFieldSearchHandler>();
-        services.AddTransient<IInvokeDeskproWebhookHandler, InvokeDeskproWebhookHandler>();
+        services.AddScoped<IGetDeskproCustomFieldSpecificationsHandler, GetDeskproCustomFieldSpecificationsHandler>();
+        services.AddScoped<IGetDeskproMessageAttachmentHandler, GetDeskproMessageAttachmentHandler>();
+        services.AddScoped<IGetDeskproMessageAttachmentsHandler, GetDeskproMessageAttachmentsHandler>();
+        services.AddScoped<IGetDeskproMessageHandler, GetDeskproMessageHandler>();
+        services.AddScoped<IGetDeskproMessagesHandler, GetDeskproMessagesHandler>();
+        services.AddScoped<IGetDeskproPersonHandler, GetDeskproPersonHandler>();
+        services.AddScoped<IGetDeskproTicketHandler, GetDeskproTicketHandler>();
+        services.AddScoped<IGetDeskproTicketsByFieldSearchHandler, GetDeskproTicketsByFieldSearchHandler>();
+        services.AddScoped<IInvokeDeskproWebhookHandler, InvokeDeskproWebhookHandler>();
+        services.AddScoped<IDeskproHandlers, DeskproHandlers>();
 
         return services;
     }

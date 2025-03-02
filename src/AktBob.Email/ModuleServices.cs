@@ -1,4 +1,5 @@
 ﻿using AktBob.Email.Contracts;
+using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +13,8 @@ public static class ModuleServices
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:From"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:Smtp"));
 
-        services.AddTransient<ISendEmailHandler, SendEmailHandler>();
+        //services.AddTransient<ISendEmailHandler, SendEmailHandler>();
+        services.AddScoped<IJobHandler<SendEmailJob>, SendEmailJobHandler>();
 
         return services;
     }

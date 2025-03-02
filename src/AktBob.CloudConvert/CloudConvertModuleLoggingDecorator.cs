@@ -1,4 +1,5 @@
 ﻿using AktBob.Email.Contracts;
+using AktBob.Shared;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.CloudConvert;
@@ -6,14 +7,14 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
 {
     private readonly ICloudConvertModule _inner;
     private readonly ILogger<CloudConvertModuleLoggingDecorator> _logger;
-    private readonly ISendEmailHandler _sendEmail;
+    private readonly IJobDispatcher _jobDispatcher;
     private readonly string _emailNotificationReceiver;
 
-    public CloudConvertModuleLoggingDecorator(ICloudConvertModule inner, ILogger<CloudConvertModuleLoggingDecorator> logger, ISendEmailHandler sendEmail, IConfiguration configuration)
+    public CloudConvertModuleLoggingDecorator(ICloudConvertModule inner, ILogger<CloudConvertModuleLoggingDecorator> logger, IJobDispatcher jobDispatcher, IConfiguration configuration)
     {
         _inner = inner;
         _logger = logger;
-        _sendEmail = sendEmail;
+        _jobDispatcher = jobDispatcher;
         _emailNotificationReceiver = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailNotificationReceiver"));
     }
 
@@ -27,7 +28,7 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
         if (!result.IsSuccess)
         {
             _logger.LogWarning("{name} failed: {error}", nameof(ConvertHtmlToPdf), result.Errors);
-            await _sendEmail.Handle(_emailNotificationReceiver, $"{nameof(ConvertHtmlToPdf)} error", string.Join(", ", result.Errors), false, cancellationToken);
+            _jobDispatcher.Dispatch(new SendEmailJob(_emailNotificationReceiver, $"{nameof(ConvertHtmlToPdf)} error", string.Join(", ", result.Errors)));
             return result;
         }
 
@@ -46,7 +47,7 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
         if (!result.IsSuccess)
         {
             _logger.LogWarning("{name} failed: {error}", nameof(GenerateTasks), result.Errors);
-            _sendEmail.Handle(_emailNotificationReceiver, $"{nameof(GenerateTasks)} error", string.Join(", ", result.Errors), false, CancellationToken.None).GetAwaiter().GetResult();
+            _jobDispatcher.Dispatch(new SendEmailJob(_emailNotificationReceiver, $"{nameof(GenerateTasks)} error", string.Join(", ", result.Errors)));
             return result;
         }
 
@@ -65,7 +66,7 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
         if (!result.IsSuccess)
         {
             _logger.LogWarning("{name} failed: {error}", nameof(GetDownloadUrl), result.Errors);
-            await _sendEmail.Handle(_emailNotificationReceiver, $"{nameof(GetDownloadUrl)} error", string.Join(", ", result.Errors), false, cancellationToken);
+            _jobDispatcher.Dispatch(new SendEmailJob(_emailNotificationReceiver, $"{nameof(GetDownloadUrl)} error", string.Join(", ", result.Errors)));
             return result;
         }
 
@@ -84,7 +85,7 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
         if (!result.IsSuccess)
         {
             _logger.LogWarning("{name} failed: {error}", nameof(GetFile), result.Errors);
-            await _sendEmail.Handle(_emailNotificationReceiver, $"{nameof(GetFile)} error", string.Join(", ", result.Errors), false, cancellationToken);
+            _jobDispatcher.Dispatch(new SendEmailJob(_emailNotificationReceiver, $"{nameof(GetFile)} error", string.Join(", ", result.Errors)));
             return result;
         }
 

@@ -1,15 +1,16 @@
 ﻿using AktBob.Email.Contracts;
+using AktBob.Shared;
 using Hangfire.States;
 using Hangfire.Storage;
 
 namespace AktBob.Worker;
-internal class FailedJobNotificationFilter(ISendEmailHandler sendEmailHandler, ILogger<FailedJobNotificationFilter> logger, IConfiguration configuration) : IApplyStateFilter
+internal class FailedJobNotificationFilter(IJobDispatcher jobDispatcher, ILogger<FailedJobNotificationFilter> logger, IConfiguration configuration) : IApplyStateFilter
 {
-    private readonly ISendEmailHandler _sendEmailHandler = sendEmailHandler;
+    private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<FailedJobNotificationFilter> _logger = logger;
 
-    public async void OnStateApplied(ApplyStateContext context, IWriteOnlyTransaction transaction)
+    public void OnStateApplied(ApplyStateContext context, IWriteOnlyTransaction transaction)
     {
         if (context.NewState is FailedState failedState)
         {
@@ -26,7 +27,7 @@ internal class FailedJobNotificationFilter(ISendEmailHandler sendEmailHandler, I
             }
 
             var subject = $"AktBob.Worker job {jobId} failed";
-            await _sendEmailHandler.Handle(to, subject, exceptionMessage ?? string.Empty, false, CancellationToken.None);
+            _jobDispatcher.Dispatch(new SendEmailJob(to, subject, exceptionMessage ?? string.Empty));
         }
     }
 

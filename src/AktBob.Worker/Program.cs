@@ -11,6 +11,7 @@ using AktBob.Database;
 using AktBob.Worker;
 using AktBob.Email;
 using AktBob.Shared;
+using AktBob.Email.Contracts;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -37,6 +38,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddSharedModule();
 
         // Hangfire
+        services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
         services.AddTransient<FailedJobNotificationFilter>();
         services.AddHangfire(config =>
         {

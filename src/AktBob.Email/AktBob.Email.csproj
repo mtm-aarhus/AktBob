@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AktBob.Email.Contracts\AktBob.Email.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
   </ItemGroup>

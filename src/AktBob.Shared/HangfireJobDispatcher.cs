@@ -1,7 +1,6 @@
-﻿using AktBob.Shared;
-using Hangfire;
+﻿using Hangfire;
 
-namespace AktBob.Api;
+namespace AktBob.Shared;
 
 public class HangfireJobDispatcher(IBackgroundJobClient backgroundJobClient, IServiceProvider serviceProvider) : IJobDispatcher
 {
