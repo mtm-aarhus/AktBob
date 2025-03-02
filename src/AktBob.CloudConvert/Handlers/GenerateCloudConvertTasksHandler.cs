@@ -5,7 +5,7 @@ internal class GenerateCloudConvertTasksHandler(ILogger<GenerateCloudConvertTask
 {
     private readonly ILogger<GenerateCloudConvertTasksHandler> _logger = logger;
 
-    public Result<Dictionary<Guid, object>> Handle(IEnumerable<byte[]> items)
+    public Result<IReadOnlyDictionary<Guid, object>> Handle(IEnumerable<byte[]> items)
     {
         var importTasks = new Dictionary<Guid, ImportTask>();
         var convertTasks = new Dictionary<Guid, ConvertTask>();

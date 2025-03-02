@@ -7,7 +7,6 @@ using AktBob.JobHandlers.Utils;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
-using Hangfire.Common;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 internal class AddMessageToGetOrganized(
@@ -26,7 +25,7 @@ internal class AddMessageToGetOrganized(
 
         using var scope = _serviceScopeFactory.CreateScope();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var cloudConvertHandlers = scope.ServiceProvider.GetRequiredService<ICloudConvertHandlers>();
+        var cloudConvertModule = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var deskproHandlers = scope.ServiceProvider.GetRequiredService<IDeskproHandlers>();
         var uploadGetOrganizedDocumentHandler = scope.ServiceProvider.GetRequiredService<IUploadGetOrganizedDocumentHandler>();
@@ -92,7 +91,7 @@ internal class AddMessageToGetOrganized(
             // Generate PDF document
             _logger.LogInformation("Generating PDF document from Deskpro message {id}", deskproMessageId);
 
-            var generateDocumentResult = await GenerateDocument(cloudConvertHandlers, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, caseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
+            var generateDocumentResult = await GenerateDocument(cloudConvertModule, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, caseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
             if (!generateDocumentResult.IsSuccess)
             {
                 _logger.LogError("Error generating the message document for Deskpro message {id}", deskproMessageId);
@@ -181,7 +180,7 @@ internal class AddMessageToGetOrganized(
     }
 
 
-    private async Task<Result<byte[]>> GenerateDocument(ICloudConvertHandlers cloudConvertHandlers,
+    private async Task<Result<byte[]>> GenerateDocument(ICloudConvertModule cloudConvertModule,
                                                         DateTime createdAt,
                                                         string personName,
                                                         string personEmail,
@@ -204,26 +203,26 @@ internal class AddMessageToGetOrganized(
 
         var bytes = Encoding.UTF8.GetBytes(html);
 
-        var generateTasksResult = cloudConvertHandlers.GenerateCloudConvertTasks.Handle([bytes]);
+        var generateTasksResult = cloudConvertModule.GenerateTasks([bytes]);
         if (!generateTasksResult.IsSuccess)
         {
             return Result.Error();
         }
 
-        var jobIdResult = await cloudConvertHandlers.ConvertHtmlToPdf.Handle(generateTasksResult.Value, cancellationToken);
+        var jobIdResult = await cloudConvertModule.ConvertHtmlToPdf(generateTasksResult.Value, cancellationToken);
         if (!jobIdResult.IsSuccess)
         {
             // TODO
             return Result.Error();
         }
 
-        var getUrlResult = await cloudConvertHandlers.GetCloudConvertDownloadUrl.Handle(jobIdResult.Value, cancellationToken);
+        var getUrlResult = await cloudConvertModule.GetDownloadUrl(jobIdResult.Value, cancellationToken);
         if (!getUrlResult.IsSuccess || string.IsNullOrEmpty(getUrlResult))
         {
             return Result.Error();
         }
 
-        var fileResult = await cloudConvertHandlers.GetCloudConvertFile.Handle(getUrlResult, cancellationToken);
+        var fileResult = await cloudConvertModule.GetFile(getUrlResult, cancellationToken);
         if (!fileResult.IsSuccess)
         {
             return Result.Error();

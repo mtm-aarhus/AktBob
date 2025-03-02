@@ -1,4 +1,5 @@
 ﻿using AktBob.CloudConvert.Handlers;
+using AktBob.Email.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,7 +17,7 @@ public static class ModuleServices
             client.BaseAddress = new Uri(cloudConvertBaseUrl);
         });
 
-        services.AddTransient<ICloudConvertClient>(serviceProvider =>
+        services.AddScoped<ICloudConvertClient>(serviceProvider =>
         {
             var logger = serviceProvider.GetRequiredService<ILogger<CloudConvertClient>>();
             var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
@@ -28,11 +29,33 @@ public static class ModuleServices
         });
 
         // Add module handlers
-        services.AddTransient<IGetCloudConvertDownloadUrlHandler, GetCloudConvertDownloadUrlHandler>();
-        services.AddTransient<IGetCloudConvertFileHandler, GetCloudConvertFileHandler>();
-        services.AddTransient<IConvertHtmlToPdfHandler, ConvertHtmlToPdfHandler>();
-        services.AddTransient<ICloudConvertHandlers, CloudConvertHandlers>();
-        services.AddTransient<IGenerateCloudConvertTasksHandler, GenerateCloudConvertTasksHandler>();
+        services.AddScoped<IGetCloudConvertDownloadUrlHandler, GetCloudConvertDownloadUrlHandler>();
+        services.AddScoped<IGetCloudConvertFileHandler, GetCloudConvertFileHandler>();
+        services.AddScoped<IConvertHtmlToPdfHandler, ConvertHtmlToPdfHandler>();
+        services.AddScoped<IGenerateCloudConvertTasksHandler, GenerateCloudConvertTasksHandler>();
+        
+        services.AddScoped<ICloudConvertModule>(provider =>
+        {
+            var inner = new CloudConvertModule(
+                provider.GetRequiredService<IConvertHtmlToPdfHandler>(),
+                provider.GetRequiredService<IGetCloudConvertDownloadUrlHandler>(),
+                provider.GetRequiredService<IGetCloudConvertFileHandler>(),
+                provider.GetRequiredService<IGenerateCloudConvertTasksHandler>());
+
+            var withLogging = new CloudConvertModuleLoggingDecorator(
+                inner,
+                provider.GetRequiredService<ILogger<CloudConvertModuleLoggingDecorator>>(),
+                provider.GetRequiredService<ISendEmailHandler>(),
+                provider.GetRequiredService<IConfiguration>());
+
+            var withExceptionHandling = new CloudConvertModuleExceptionDecorator(
+                withLogging,
+                provider.GetRequiredService<ILogger<CloudConvertModuleExceptionDecorator>>(),
+                provider.GetRequiredService<ISendEmailHandler>(),
+                provider.GetRequiredService<IConfiguration>());
+
+            return withExceptionHandling;
+        });
 
         return services;
     }

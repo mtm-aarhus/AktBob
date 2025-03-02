@@ -1,5 +1,5 @@
 ﻿namespace AktBob.CloudConvert.Contracts;
-public interface IGetCloudConvertDownloadUrlHandler
+internal interface IGetCloudConvertDownloadUrlHandler
 {
     Task<Result<string>> Handle(Guid jobId, CancellationToken cancellationToken = default);
 }

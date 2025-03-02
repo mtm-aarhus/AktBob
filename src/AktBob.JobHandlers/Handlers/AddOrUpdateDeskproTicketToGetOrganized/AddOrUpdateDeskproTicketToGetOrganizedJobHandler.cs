@@ -23,7 +23,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
         var deskproHandlers = scope.ServiceProvider.GetRequiredService<IDeskproHandlers>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
-        var cloudConvertHandlers = scope.ServiceProvider.GetRequiredService<ICloudConvertHandlers>();
+        var cloudConvertModule = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
         var uploadGetOrganizedDocumentHandler = scope.ServiceProvider.GetRequiredService<IUploadGetOrganizedDocumentHandler>();
         var currentPendingTicket = new PendingTicket(job.TicketId, job.SubmittedAt);
 
@@ -123,28 +123,28 @@ internal class AddOrUpdateDeskproTicketToGetOrganizedJobHandler(ILogger<AddOrUpd
 
 
         // Generate PDF
-        var generateTasksResult = cloudConvertHandlers.GenerateCloudConvertTasks.Handle(content);
+        var generateTasksResult = cloudConvertModule.GenerateTasks(content);
         if (!generateTasksResult.IsSuccess)
         {
             _logger.LogError("Error generating CloudConvert tasks dictionary for Deskpro ticket {id}", job.TicketId);
             return;
         }
 
-        var jobIdResult = await cloudConvertHandlers.ConvertHtmlToPdf.Handle(generateTasksResult.Value, cancellationToken);
+        var jobIdResult = await cloudConvertModule.ConvertHtmlToPdf(generateTasksResult.Value, cancellationToken);
         if (!jobIdResult.IsSuccess)
         {
             _logger.LogError("Error creating CloudConvert job generating PDF for Deskpro ticket {id}", job.TicketId);
             return;
         }
 
-        var urlResult = await cloudConvertHandlers.GetCloudConvertDownloadUrl.Handle(jobIdResult.Value, cancellationToken);
+        var urlResult = await cloudConvertModule.GetDownloadUrl(jobIdResult.Value, cancellationToken);
         if (!urlResult.IsSuccess)
         {
             _logger.LogError("Error querying job '{id}' from PDF from CloudConvert", jobIdResult.Value);
             return;
         }
 
-        var fileResult = await cloudConvertHandlers.GetCloudConvertFile.Handle(urlResult.Value, cancellationToken);
+        var fileResult = await cloudConvertModule.GetFile(urlResult.Value, cancellationToken);
         if (!fileResult.IsSuccess)
         {
             _logger.LogError("CloudConvert job {id}: Error downloading file from url: {url}", jobIdResult.Value, urlResult.Value);

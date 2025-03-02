@@ -2,8 +2,6 @@
 using AktBob.CloudConvert.Models;
 using Ardalis.Result;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 
 namespace AktBob.CloudConvert.Tests.Unit.Handlers;
@@ -12,10 +10,9 @@ public class ConvertHtmlToPdfHandlerTests
 {
     private readonly ConvertHtmlToPdfHandler _sut;
     private readonly ICloudConvertClient _cloudConvertClient = Substitute.For<ICloudConvertClient>();
-    private readonly FakeLogger<ConvertHtmlToPdfHandler> _logger = new FakeLogger<ConvertHtmlToPdfHandler>();
     public ConvertHtmlToPdfHandlerTests()
     {
-        _sut = new ConvertHtmlToPdfHandler(_cloudConvertClient, _logger);
+        _sut = new ConvertHtmlToPdfHandler(_cloudConvertClient);
     }
 
     [Fact]
@@ -59,7 +56,6 @@ public class ConvertHtmlToPdfHandlerTests
 
         // Assert
         result.Status.Should().Be(ResultStatus.Error);
-        _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
         await _cloudConvertClient.DidNotReceive().CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
     }
 
@@ -75,7 +71,6 @@ public class ConvertHtmlToPdfHandlerTests
 
         // Assert
         result.Status.Should().Be(ResultStatus.Error);
-        _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
         await _cloudConvertClient.DidNotReceive().CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
     }
 
@@ -96,7 +91,6 @@ public class ConvertHtmlToPdfHandlerTests
 
         // Assert
         result.Status.Should().Be(ResultStatus.Error);
-        _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
         await _cloudConvertClient.Received(1).CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
     }
 }

@@ -7,11 +7,12 @@
   </PropertyGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="AktBob.CloudConvert.Tests.Unit"/>
+        <InternalsVisibleTo Include="AktBob.CloudConvert.Tests.Unit" />
     </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AktBob.CloudConvert.Contracts\AktBob.CloudConvert.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.Email.Contracts\AktBob.Email.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
   </ItemGroup>
 
