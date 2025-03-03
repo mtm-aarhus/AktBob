@@ -5,6 +5,7 @@ using AktBob.Deskpro.Contracts;
 using AktBob.JobHandlers.Utils;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
+using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using AktBob.UiPath.Contracts;
 

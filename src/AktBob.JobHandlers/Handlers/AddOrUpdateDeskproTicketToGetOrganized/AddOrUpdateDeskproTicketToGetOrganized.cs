@@ -6,6 +6,7 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
 using AktBob.JobHandlers.Utils;
+using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text;
 

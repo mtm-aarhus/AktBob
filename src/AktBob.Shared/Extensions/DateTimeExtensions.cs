@@ -1,4 +1,4 @@
-﻿namespace AktBob.Shared;
+﻿namespace AktBob.Shared.Extensions;
 public static class DateTimeExtensions
 {
     // Get utc time and convert to Danish time zone

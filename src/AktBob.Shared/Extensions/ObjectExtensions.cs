@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace AktBob.Shared;
+namespace AktBob.Shared.Extensions;
 public static class ObjectExtensions
 {
     public static string ToJson(this object obj)

@@ -9,6 +9,7 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Database.Jobs;
 using AktBob.GetOrganized.Contracts.Jobs;
+using AktBob.Shared.Extensions;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 

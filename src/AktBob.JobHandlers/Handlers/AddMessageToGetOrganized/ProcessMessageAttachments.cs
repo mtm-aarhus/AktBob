@@ -4,6 +4,7 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Database.Jobs;
+using AktBob.Shared.Extensions;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 
