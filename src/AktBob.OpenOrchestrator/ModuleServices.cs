@@ -1,4 +1,5 @@
 ﻿using AktBob.OpenOrchestrator.Contracts;
+using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +10,8 @@ public static class ModuleServices
     public static IServiceCollection AddOpenOrchestratorModule(this IServiceCollection services, IConfiguration configuration)
     {
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("OpenOrchestratorDb"));
-        services.AddTransient<ICreateOpenOrchestratorQueueItemHandler, CreateQueueItemHandler>();
+        services.AddScoped<ICreateOpenOrchestratorQueueItemHandler, CreateQueueItemHandler>();
+        services.AddScoped<IJobHandler<CreateOpenOrchestratorQueueItemJob>, CreateQueueItem>();
         return services;
     }
 }

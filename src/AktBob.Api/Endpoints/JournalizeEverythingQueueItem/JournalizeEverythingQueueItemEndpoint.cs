@@ -1,5 +1,5 @@
 ﻿using AktBob.Shared;
-using AktBob.Shared.Contracts;
+using AktBob.Shared.Jobs;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.JournalizeEverythingQueueItem;

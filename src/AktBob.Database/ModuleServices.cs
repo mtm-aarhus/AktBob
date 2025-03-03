@@ -1,5 +1,8 @@
 ﻿using AktBob.Database.Contracts;
+using AktBob.Database.JobHandlers;
+using AktBob.Database.Jobs;
 using AktBob.Database.Repositories;
+using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +25,9 @@ public static class ModuleServices
         services.AddScoped<ICaseRepository, CaseRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         
+        // Jobs
+        services.AddScoped<IJobHandler<DeleteMessageJob>, DeleteMessage>();
+
         return services;
     }
 }

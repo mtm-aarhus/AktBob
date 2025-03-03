@@ -1,6 +1,9 @@
 ﻿using AAK.GetOrganized;
 using AktBob.GetOrganized.Contracts;
+using AktBob.GetOrganized.Contracts.Jobs;
 using AktBob.GetOrganized.Handlers;
+using AktBob.GetOrganized.JobHandlers;
+using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,11 +24,15 @@ public static class ModuleServices
 
         services.AddGetOrganizedModule(getOrganizedOptions);
 
+        // Handlers
         services.AddTransient<ICreateGetOrganizedCaseHandler, CreateGetOrganizedCaseHandler>();
         services.AddTransient<IFinalizeGetOrganizedDocumentHandler, FinalizeGetOrganizedDocumentHandler>();
         services.AddTransient<IGetOrganizedHandlers, GetOrganizedHandlers>();
         services.AddTransient<IRelateGetOrganizedDocumentsHandler, RelateGetOrganizedDocumentsHandler>();
         services.AddTransient<IUploadGetOrganizedDocumentHandler, UploadGetOrganizedDocumenHandler>();
+
+        // Jobs
+        services.AddScoped<IJobHandler<FinalizeDocumentJob>, FinalizeDocument>();
 
         return services;
     }

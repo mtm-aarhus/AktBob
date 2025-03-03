@@ -3,36 +3,40 @@ using AAK.GetOrganized;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
+using AktBob.Database.Jobs;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
-internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactory, ILogger<ProcessMessageAttachments> logger)
+
+internal record ProcessMessageAttachmentsJob(int ParentDocumentId, string CaseNumber, DateTime Timestamp, DocumentCategory DocumentCategory, IEnumerable<AttachmentDto> Attachments);
+internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactory, ILogger<ProcessMessageAttachments> logger) : IJobHandler<ProcessMessageAttachmentsJob>
 {
     private readonly IServiceScopeFactory serviceScopeFactory = serviceScopeFactory;
     private readonly ILogger<ProcessMessageAttachments> _logger = logger;
 
-    public async Task UploadToGetOrganized(int parentDocumentId, string caseNumber, DateTime timestamp, DocumentCategory documentCategory, IEnumerable<AttachmentDto> attachments, CancellationToken cancellationToken = default)
+    public async Task Handle(ProcessMessageAttachmentsJob job, CancellationToken cancellationToken = default)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var getDeskproMessageAttachmentHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproMessageAttachmentHandler>();
+        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
+        var deskproModule = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var getOrganizedHandlers = scope.ServiceProvider.GetRequiredService<IGetOrganizedHandlers>();
 
-        DateTime createdAtDanishTime = timestamp.UtcToDanish();
+        DateTime createdAtDanishTime = job.Timestamp.UtcToDanish();
         var childrenDocumentIds = new List<int>();
 
         var metadata = new UploadDocumentMetadata
         {
             DocumentDate = createdAtDanishTime,
-            DocumentCategory = documentCategory
+            DocumentCategory = job.DocumentCategory
         };
 
         try
         {
-            foreach (var attachment in attachments)
+            foreach (var attachment in job.Attachments)
             {
                 using var stream = new MemoryStream();
                 
                 // Get the individual attachments from Deskpro
-                var getAttachmentStreamResult = await getDeskproMessageAttachmentHandler.Handle(attachment.DownloadUrl, cancellationToken);
+                var getAttachmentStreamResult = await deskproModule.GetMessageAttachment(attachment.DownloadUrl, cancellationToken);
 
                 if (!getAttachmentStreamResult.IsSuccess)
                 {
@@ -46,19 +50,19 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 // Upload the attachment to GO
                 var filenameNoExtension = Path.GetFileNameWithoutExtension(attachment.FileName);
                 var fileExtension = Path.GetExtension(attachment.FileName);
-                var filename = $"{filenameNoExtension} ({timestamp.ToString("dd-MM-yyyy HH-mm-ss")}){fileExtension}";
-                var uploadDocumentResult = await getOrganizedHandlers.UploadGetOrganziedDocument.Handle(attachmentBytes, caseNumber, filename, metadata, true, cancellationToken);
+                var filename = $"{filenameNoExtension} ({job.Timestamp.ToString("dd-MM-yyyy HH-mm-ss")}){fileExtension}";
+                var uploadedDocumentIdResult = await getOrganizedHandlers.UploadGetOrganziedDocument.Handle(attachmentBytes, job.CaseNumber, filename, metadata, true, cancellationToken);
 
-                if (!uploadDocumentResult.IsSuccess)
+                if (!uploadedDocumentIdResult.IsSuccess)
                 {
                     _logger.LogError("Error upload Deskpro message attachment to GetOrganized (Filename: '{filename}' Download URL: {url})", attachment.FileName, attachment.DownloadUrl);
                     continue;
                 }
 
-                childrenDocumentIds.Add(uploadDocumentResult.Value);
+                childrenDocumentIds.Add(uploadedDocumentIdResult.Value);
 
                 // Finalize the attachment
-                BackgroundJob.Enqueue<FinalizeDocument>(x => x.Run(uploadDocumentResult.Value, CancellationToken.None));
+                jobDispatcher.Dispatch(new DeleteMessageJob(uploadedDocumentIdResult.Value));
             }
         }
         catch (Exception ex)
@@ -69,11 +73,11 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
         }
 
         // Set attachments as children
-        await getOrganizedHandlers.RelateGetOrganizedDocuments.Handle(parentDocumentId, childrenDocumentIds.ToArray(), cancellationToken: cancellationToken);
+        await getOrganizedHandlers.RelateGetOrganizedDocuments.Handle(job.ParentDocumentId, childrenDocumentIds.ToArray(), cancellationToken: cancellationToken);
 
 
         // Finalize the parent document
         // The parent document must not be finalized before the attachments has been set as children
-        BackgroundJob.Enqueue<FinalizeDocument>(x => x.Run(parentDocumentId, CancellationToken.None));
+        jobDispatcher.Dispatch(new DeleteMessageJob(job.ParentDocumentId));
     }
 }

@@ -7,23 +7,29 @@ using AktBob.JobHandlers.Utils;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
+using AktBob.Database.Jobs;
+using AktBob.GetOrganized.Contracts.Jobs;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
-internal class AddMessageToGetOrganized(
-    ILogger<AddMessageToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory)
+
+internal record AddMessageToGetOrganizedJob(int DeskproMessageId, string CaseNumber);
+
+internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddMessageToGetOrganizedJob>
 {
     private readonly ILogger<AddMessageToGetOrganized> _logger = logger;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
-    public async Task Run(int deskproMessageId, string caseNumber, CancellationToken cancellationToken = default)
+    public async Task Handle(AddMessageToGetOrganizedJob job, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(caseNumber))
+        if (string.IsNullOrWhiteSpace(job.CaseNumber))
         {
-            _logger.LogError("DeskproMessageId {id}: Case number is null or empty", deskproMessageId);
+            _logger.LogError("DeskproMessageId {id}: Case number is null or empty", job.DeskproMessageId);
             return;
         }
 
         using var scope = _serviceScopeFactory.CreateScope();
+        var deskproModule = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
+        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var cloudConvertModule = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
@@ -32,11 +38,11 @@ internal class AddMessageToGetOrganized(
 
         try
         {
-            var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(deskproMessageId);
+            var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(job.DeskproMessageId);
 
             if (databaseMessage is null)
             {
-                _logger.LogError("Error getting databaese message by Deskpro message Id {id}", deskproMessageId);
+                _logger.LogError("Error getting databaese message by Deskpro message Id {id}", job.DeskproMessageId);
                 return;
             }
 
@@ -69,8 +75,8 @@ internal class AddMessageToGetOrganized(
 
             if (!getDeskproMessageResult.IsSuccess)
             {
-                _logger.LogError("Error requesting Deskpro message ID {id}. Message will be marked 'deleted' in database.", deskproMessageId);
-                BackgroundJob.Enqueue<DeleteMessage>(x => x.Run(databaseMessage.Id, CancellationToken.None)); // Important: Use the database row ID here!
+                _logger.LogError("Error requesting Deskpro message ID {id}. Message will be marked 'deleted' in database.", job.DeskproMessageId);
+                jobDispatcher.Dispatch(new DeleteMessageJob(databaseMessage.Id)); // Important: Use the database row ID here!
                 return;
             }
 
@@ -84,17 +90,17 @@ internal class AddMessageToGetOrganized(
             var attachments = Enumerable.Empty<AttachmentDto>();
             if (getDeskproMessageResult.Value.AttachmentIds.Any())
             {
-                attachments = await deskproHelper.GetMessageAttachments(deskproHandlers.GetDeskproMessageAttachments, deskproTicket.Id, deskproMessage.Id, cancellationToken);
+                attachments = await deskproHelper.GetMessageAttachments(deskproModule, deskproTicket.Id, deskproMessage.Id, cancellationToken);
             }
 
 
             // Generate PDF document
-            _logger.LogInformation("Generating PDF document from Deskpro message {id}", deskproMessageId);
+            _logger.LogInformation("Generating PDF document from Deskpro message {id}", job.DeskproMessageId);
 
-            var generateDocumentResult = await GenerateDocument(cloudConvertModule, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, caseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
+            var generateDocumentResult = await GenerateDocument(cloudConvertModule, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, job.CaseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
             if (!generateDocumentResult.IsSuccess)
             {
-                _logger.LogError("Error generating the message document for Deskpro message {id}", deskproMessageId);
+                _logger.LogError("Error generating the message document for Deskpro message {id}", job.DeskproMessageId);
                 return;
             }
 
@@ -112,31 +118,31 @@ internal class AddMessageToGetOrganized(
 
 
             // Upload parent document
-            var uploadDocumentResult = await uploadGetOrganizedDocumentHandler.Handle(generateDocumentResult.Value, caseNumber, fileName, metadata, false, cancellationToken);
-            if (!uploadDocumentResult.IsSuccess)
+            var uploadedDocumentIdResult = await uploadGetOrganizedDocumentHandler.Handle(generateDocumentResult.Value, job.CaseNumber, fileName, metadata, false, cancellationToken);
+            if (!uploadedDocumentIdResult.IsSuccess)
             {
-                _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", deskproMessageId, caseNumber);
+                _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", job.DeskproMessageId, job.CaseNumber);
                 return;
             }
 
 
             // Update database
             // TODO: improve this: We need call this directly here and not in a background job since adding the documentId to the message in the database prevents uploading the message again next time
-            databaseMessage.GODocumentId = uploadDocumentResult.Value;
+            databaseMessage.GODocumentId = uploadedDocumentIdResult.Value;
             await unitOfWork.Messages.Update(databaseMessage);
 
-            _logger.LogInformation("Database updated: GetOrganized documentId {documentId} set for message {id}", uploadDocumentResult.Value, deskproMessage.Id);
+            _logger.LogInformation("Database updated: GetOrganized documentId {documentId} set for message {id}", uploadedDocumentIdResult.Value, deskproMessage.Id);
 
             if (attachments.Any())
             {
                 // Handle message attachments
                 // Note: the attachments handler also finalizing the parent document
-                BackgroundJob.Enqueue<ProcessMessageAttachments>(x => x.UploadToGetOrganized(uploadDocumentResult.Value, caseNumber, deskproMessage.CreatedAt, documentCategory, attachments, CancellationToken.None));
+                jobDispatcher.Dispatch(new ProcessMessageAttachmentsJob(uploadedDocumentIdResult.Value, job.CaseNumber, deskproMessage.CreatedAt, documentCategory, attachments));
             }
             else
             {
                 // Finalize the parent document
-                BackgroundJob.Enqueue<FinalizeDocument>(x => x.Run(uploadDocumentResult.Value, CancellationToken.None));
+                jobDispatcher.Dispatch(new FinalizeDocumentJob(uploadedDocumentIdResult.Value));
             }
         }
         catch (Exception ex)
@@ -230,4 +236,5 @@ internal class AddMessageToGetOrganized(
 
         return fileResult.Value;
     }
+
 }

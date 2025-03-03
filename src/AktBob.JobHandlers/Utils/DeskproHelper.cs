@@ -84,11 +84,11 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     }
 
 
-    public async Task<IEnumerable<AttachmentDto>> GetMessageAttachments(IGetDeskproMessageAttachmentsHandler handler, int deskproTicketId, int deskproMessageId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<AttachmentDto>> GetMessageAttachments(IDeskproModule deskproModule, int deskproTicketId, int deskproMessageId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting Deskpro message #{id} attachments", deskproMessageId);
 
-        var result = await handler.Handle(deskproTicketId, deskproMessageId, cancellationToken);
+        var result = await deskproModule.GetDeskproMessageAttachments(deskproTicketId, deskproMessageId, cancellationToken);
 
         if (!result.IsSuccess)
         {

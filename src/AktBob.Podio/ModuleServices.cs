@@ -1,6 +1,9 @@
 ﻿using AAK.Podio;
 using AktBob.Podio.Contracts;
+using AktBob.Podio.Contracts.Jobs;
 using AktBob.Podio.Handlers;
+using AktBob.Podio.JobHandlers;
+using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,10 +17,14 @@ public static class ModuleServices
         var podioAppTokens = Guard.Against.NullOrEmpty(configuration.GetSection("Podio:AppTokens").GetChildren().ToDictionary(x => x.Key, x => x.Value));
         services.AddPodioFactory(new Uri(Guard.Against.NullOrEmpty(configuration.GetValue<string>("Podio:BaseAddress"))));
 
+        // Handlers
         services.AddTransient<IGetPodioItemHandler, GetPodioItemHandler>();
         services.AddTransient<IPostPodioItemCommentHandler, PostPodioItemCommentHandler>();
         services.AddTransient<IUpdatePodioFieldHandler, UpdatePodioFieldHandler>();
 
+        // Jobs
+        services.AddScoped<IJobHandler<UpdatePodioTextFieldJob>, UpdateTextField>();
+        services.AddScoped<IJobHandler<PostCommentJob>, PostComment>();
         return services;
     }
 }

@@ -1,4 +1,4 @@
-﻿using AktBob.Shared.Contracts;
+﻿using AktBob.Shared.Jobs;
 using AktBob.Shared;
 using FastEndpoints;
 using AktBob.Api.Endpoints.CreateAfgørelsesskrivelseQueueItem;

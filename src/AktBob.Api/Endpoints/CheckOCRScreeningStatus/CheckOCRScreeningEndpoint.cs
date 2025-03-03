@@ -1,6 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Shared;
-using AktBob.Shared.Contracts;
+using AktBob.Shared.Jobs;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.CheckOCRScreeningStatus;
@@ -25,7 +25,7 @@ internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher,
 
     public override async Task HandleAsync(CheckOCRScreeningRequest req, CancellationToken ct)
     {
-        var job = new CheckOCRScreeningStatusJob(req.FilArkivCaseId, req.PodioItemId);
+        var job = new CheckOCRScreeningStatusRegisterFilesJob(req.FilArkivCaseId, req.PodioItemId);
         _jobDispatcher.Dispatch(job);
         
         await UpdateDatabaseSetFilArkivCaseId(req.FilArkivCaseId, req.PodioItemId, ct);

@@ -1,29 +1,40 @@
 ﻿using AktBob.PodioHookProcessor.UseCases;
-using AktBob.Shared.Contracts;
 using AktBob.JobHandlers.Handlers;
 using AktBob.JobHandlers.Utils;
 using AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 using FilArkivCore.Web.Client;
 using AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
+using AktBob.JobHandlers.Handlers.AddOrUpdateDeskproTicketToGetOrganized;
+using AktBob.Shared.Jobs;
 
 namespace AktBob.JobHandlers;
 public static class ModuleServices
 {
     public static IServiceCollection AddJobHandlers(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<IJobHandler<RegisterMessagesJob>, RegisterMessagesJobHandler>();
-        services.AddTransient<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, Handlers.AddOrUpdateDeskproTicketToGetOrganized.AddOrUpdateDeskproTicketToGetOrganizedJobHandler>();
-        services.AddTransient<IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>, CreateAfgørelsesskrivelseQueueItemJobHandler>();
-        services.AddTransient<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItemJobHandler>();
-        services.AddTransient<IJobHandler<CreateGetOrganizedCaseJob>, Handlers.CreateGetOrganizedCase.CreateGetOrganizedCaseJobHandler>();
-        services.AddTransient<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateToFilArkivQueueItemJobHandler>();
-        services.AddTransient<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItemJobHandler>();
-        services.AddTransient<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItemJobHandler>();
-        services.AddTransient<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCaseJobHandler>();
-        services.AddTransient<IJobHandler<CheckOCRScreeningStatusJob>, RegisterFilesJobHandler>();
+        // JOBS
 
-        services.AddTransient<DeskproHelper>();
-        services.AddSingleton<Handlers.AddOrUpdateDeskproTicketToGetOrganized.PendingsTickets>();
+        // AddMessagesToGetOrganized workflow
+        services.AddScoped<IJobHandler<AddMessageToGetOrganizedJob>, AddMessageToGetOrganized>();
+        services.AddScoped<IJobHandler<ProcessMessageAttachmentsJob>, ProcessMessageAttachments>();
+        services.AddScoped<IJobHandler<RegisterMessagesJob>, RegisterMessages>();
+
+        // AddOrUpdateDeskproTicketToGetOrganized workflow
+        services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
+        services.AddSingleton<PendingsTickets>();
+
+        services.AddScoped<IJobHandler<QueryFilesProcessingStatusJob>, QueryFilesProcessingStatus>();
+        services.AddScoped<IJobHandler<CheckOCRScreeningStatusRegisterFilesJob>, CheckOCRScreeningStatusRegisterFiles>();
+        services.AddScoped<IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>, CreateAfgørelsesskrivelseQueueItem>();
+        services.AddScoped<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItem>();
+        services.AddScoped<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCase>();
+        services.AddScoped<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateToFilArkivQueueItem>();
+        services.AddScoped<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItem>();
+        services.AddScoped<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItem>();
+        services.AddScoped<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCase>();
+        services.AddScoped<IJobHandler<CheckOCRScreeningStatusRegisterFilesJob>, CheckOCRScreeningStatusRegisterFiles>();
+
+        services.AddScoped<DeskproHelper>();
 
         return services;
     }
@@ -37,7 +48,7 @@ public static class ModuleServices
         services.AddFilArkivApiClient(filArkivUrl, filArkivClientId, filArkivClientSecret);
 
         services.AddSingleton<CachedData>();
-        services.AddSingleton<CheckOCRScreeningStatusSettings>();
+        services.AddSingleton<Settings>();
 
         return services;
     }
