@@ -24,8 +24,8 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
         using var scope = _serviceScopeFactory.CreateScope();
 
         // Services
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
+        var uiPath = scope.ServiceProvider.GetRequiredService<IUiPathModule>();
         var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
@@ -98,7 +98,7 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
                 Titel = deskproTicket.Value.Subject
             };
 
-            jobDispatcher.Dispatch(new CreateUiPathQueueItemJob(uiPathQueueName, $"PodioItemID {job.PodioItemId}: {caseNumberResult}", payload.ToJson()));
+            uiPath.CreateQueueItem(uiPathQueueName, $"PodioItemID {job.PodioItemId}: {caseNumberResult}", payload.ToJson());
         }
     }
 

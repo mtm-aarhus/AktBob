@@ -3,11 +3,14 @@ using AktBob.UiPath.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AktBob.UiPath;
-internal class CreateQueueItem(IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateUiPathQueueItemJob>
+
+internal record CreateQueueItemJob(string QueueName, string Reference, string Payload);
+
+internal class CreateQueueItem(IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateQueueItemJob>
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
-    public async Task Handle(CreateUiPathQueueItemJob job, CancellationToken cancellationToken = default)
+    public async Task Handle(CreateQueueItemJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var handler = scope.ServiceProvider.GetRequiredService<ICreateUiPathQueueItemHandler>();

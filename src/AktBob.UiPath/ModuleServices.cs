@@ -15,14 +15,15 @@ public static class ModuleServices
 
         services.AddMemoryCache();
 
-        services.AddTransient<IUiPathOrchestratorApi, UiPathOrchestratorApi>();
+        services.AddScoped<IUiPathOrchestratorApi, UiPathOrchestratorApi>();
         services.AddHttpClient<IUiPathOrchestratorApi, UiPathOrchestratorApi>(client =>
         {
             var url = Guard.Against.NullOrEmpty(configuration.GetValue<string>("UiPath:Url"));
             client.BaseAddress = new Uri(url);
         });
 
-        services.AddTransient<ICreateUiPathQueueItemHandler, CreateQueueItemHandler>();
+        services.AddScoped<ICreateUiPathQueueItemHandler, CreateQueueItemHandler>();
+        services.AddScoped<IUiPathModule, Module>();
 
         return services;
     }
