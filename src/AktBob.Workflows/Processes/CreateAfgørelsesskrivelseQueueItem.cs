@@ -19,7 +19,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         using var scope = _serviceScopeFactory.CreateScope();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
 
 
@@ -67,7 +67,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         var agent = await deskproHelper.GetAgent(deskpro, deskproTicket.Agent?.Id ?? 0, cancellationToken);
 
         // Get data from database
-        var databaseTicket = await ticketRepository.GetByDeskproTicketId(job.DeskproTicketId);
+        var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproTicketId);
 
         if (databaseTicket is null)
         {

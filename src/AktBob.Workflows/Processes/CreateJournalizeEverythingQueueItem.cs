@@ -20,7 +20,7 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
 
         // Services
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
         var uiPath = scope.ServiceProvider.GetRequiredService<IUiPathModule>();
@@ -35,7 +35,7 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
 
 
         // Get ticket from repository
-        var databaseTicket = await ticketRepository.GetByDeskproTicketId(job.DeskproId);
+        var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproId);
 
         if (databaseTicket is null)
         {

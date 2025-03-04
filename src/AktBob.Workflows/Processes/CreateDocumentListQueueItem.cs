@@ -29,7 +29,7 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
         var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
-        var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var timeProvider = scope.ServiceProvider.GetRequiredService<ITimeProvider>();
 
         // UiPath variables
@@ -56,7 +56,7 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
         }
 
         // Find ticket in database from PodioItemId
-        var databaseTicketResult = await GetTicketFromApiDatabaseByPodioItemId(ticketRepository, timeProvider, job.PodioItemId, cancellationToken);
+        var databaseTicketResult = await GetTicketFromApiDatabaseByPodioItemId(unitOfWork, timeProvider, job.PodioItemId, cancellationToken);
         if (!databaseTicketResult.IsSuccess)
         {
             return;
@@ -122,7 +122,7 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
         return caseNumber;
     }
 
-    private async Task<Result<Ticket>> GetTicketFromApiDatabaseByPodioItemId(ITicketRepository ticketRepository, ITimeProvider timeProvider, long podioItemId, CancellationToken cancellationToken)
+    private async Task<Result<Ticket>> GetTicketFromApiDatabaseByPodioItemId(IUnitOfWork unitOfWork, ITimeProvider timeProvider, long podioItemId, CancellationToken cancellationToken)
     {
         var retriesCount = 10;
         var counter = 1;
@@ -134,7 +134,7 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
         // after 10 retries something else is wrong.
         while (counter <= retriesCount || !cancellationToken.IsCancellationRequested)
         {
-            var ticket = await ticketRepository.GetByPodioItemId(podioItemId);
+            var ticket = await unitOfWork.Tickets.GetByPodioItemId(podioItemId);
 
             // We have data: Exit the while loop
             if (ticket != null)
