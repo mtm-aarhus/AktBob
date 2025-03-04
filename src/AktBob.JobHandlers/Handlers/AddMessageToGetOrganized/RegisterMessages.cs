@@ -14,11 +14,11 @@ internal class RegisterMessages(ILogger<RegisterMessages> logger, IServiceScopeF
         var scope = _serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var getDeskproMessagesHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproMessagesHandler>();
+        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
 
 
         // Get message from Deskpro
-        var getDeskproMessagesResult = await getDeskproMessagesHandler.Handle(job.DeskproTicketId, cancellationToken);
+        var getDeskproMessagesResult = await deskpro.GetMessages(job.DeskproTicketId, cancellationToken);
 
         if (!getDeskproMessagesResult.IsSuccess)
         {

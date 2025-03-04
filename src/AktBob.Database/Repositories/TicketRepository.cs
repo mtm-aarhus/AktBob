@@ -1,6 +1,5 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
-using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
 using System.Data;
 
 namespace AktBob.Database.Repositories;

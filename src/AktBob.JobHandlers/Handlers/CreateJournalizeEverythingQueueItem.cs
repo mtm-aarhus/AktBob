@@ -20,9 +20,8 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
 
         // Services
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
+        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
-        var getDeskproTicketHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproTicketHandler>();
-        var getDeskproPersonHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproPersonHandler>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
 
         // UiPath variables
@@ -51,7 +50,7 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
 
 
         // Get ticket from Deskpro
-        var deskproTicketResult = await getDeskproTicketHandler.Handle(job.DeskproId, cancellationToken);
+        var deskproTicketResult = await deskpro.GetTicket(job.DeskproId, cancellationToken);
 
         if (!deskproTicketResult.IsSuccess)
         {
@@ -59,7 +58,7 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
             return;
         }
 
-        var agent = await deskproHelper.GetAgent(getDeskproPersonHandler, deskproTicketResult.Value.Agent?.Id ?? 0, cancellationToken);
+        var agent = await deskproHelper.GetAgent(deskpro, deskproTicketResult.Value.Agent?.Id ?? 0, cancellationToken);
 
         // CREATE QUEUE ITEM
         if (useOpenOrchestrator)

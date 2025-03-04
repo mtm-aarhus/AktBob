@@ -12,7 +12,7 @@ internal class InvokeWebhook(IServiceScopeFactory serviceScopeFactory) : IJobHan
     public async Task Handle(InvokeWebhookJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var handler = scope.ServiceProvider.GetRequiredService<IInvokeDeskproWebhookHandler>();
+        var handler = scope.ServiceProvider.GetRequiredService<IInvokeWebhookHandler>();
         await handler.Handle(job.WebhookId, job.Payload, cancellationToken);
     }
 }

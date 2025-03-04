@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 
 namespace AktBob.Deskpro.Handlers;
-internal class GetDeskproPersonHandler(IDeskproClient deskpro, IMemoryCache cache) : IGetDeskproPersonHandler
+internal class GetPersonHandler(IDeskproClient deskpro, IMemoryCache cache) : IGetPersonHandler
 {
     private readonly IDeskproClient _deskpro = deskpro;
     private readonly IMemoryCache _cache = cache;

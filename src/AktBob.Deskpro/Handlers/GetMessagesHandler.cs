@@ -1,10 +1,10 @@
 ﻿using AAK.Deskpro;
 
 namespace AktBob.Deskpro.Handlers;
-internal class GetDeskproMessagesHandler(IDeskproClient deskpro, IGetDeskproPersonHandler getDeskproPersonHandler) : IGetDeskproMessagesHandler
+internal class GetMessagesHandler(IDeskproClient deskpro, IGetPersonHandler getDeskproPersonHandler) : IGetMessagesHandler
 {
     private readonly IDeskproClient _deskpro = deskpro;
-    private readonly IGetDeskproPersonHandler _getDeskproPersonHandler = getDeskproPersonHandler;
+    private readonly IGetPersonHandler _getDeskproPersonHandler = getDeskproPersonHandler;
 
     public async Task<Result<IEnumerable<MessageDto>>> Handle(int ticketId, CancellationToken cancellationToken)
     {

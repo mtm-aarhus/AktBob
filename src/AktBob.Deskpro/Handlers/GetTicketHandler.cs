@@ -1,7 +1,7 @@
 ﻿using AAK.Deskpro;
 
 namespace AktBob.Deskpro.Handlers;
-internal class GetDeskproTicketHandler(IDeskproClient deskproClient) : IGetDeskproTicketHandler
+internal class GetTicketHandler(IDeskproClient deskproClient) : IGetTicketHandler
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
 

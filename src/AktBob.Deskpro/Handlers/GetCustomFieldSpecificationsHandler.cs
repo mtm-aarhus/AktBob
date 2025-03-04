@@ -2,14 +2,14 @@
 using Microsoft.Extensions.Caching.Memory;
 
 namespace AktBob.Deskpro.Handlers;
-internal class GetDeskproCustomFieldSpecificationsHandler(
+internal class GetCustomFieldSpecificationsHandler(
     IDeskproClient deskproClient,
     IMemoryCache cache,
-    ILogger<GetDeskproCustomFieldSpecificationsHandler> logger) : IGetDeskproCustomFieldSpecificationsHandler
+    ILogger<GetCustomFieldSpecificationsHandler> logger) : IGetCustomFieldSpecificationsHandler
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
     private readonly IMemoryCache _cache = cache;
-    private readonly ILogger<GetDeskproCustomFieldSpecificationsHandler> _logger = logger;
+    private readonly ILogger<GetCustomFieldSpecificationsHandler> _logger = logger;
     private const string CACHE_KEY = "DeskproCustomFieldSpecifications";
 
     public async Task<Result<IEnumerable<CustomFieldSpecificationDto>>> Handle(CancellationToken cancellationToken)

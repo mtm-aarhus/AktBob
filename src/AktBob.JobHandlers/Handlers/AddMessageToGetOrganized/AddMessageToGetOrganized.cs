@@ -34,7 +34,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var cloudConvertModule = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
-        var deskproHandlers = scope.ServiceProvider.GetRequiredService<IDeskproHandlers>();
+        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var uploadGetOrganizedDocumentHandler = scope.ServiceProvider.GetRequiredService<IUploadGetOrganizedDocumentHandler>();
 
         try
@@ -62,7 +62,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             }
 
             // Get Deskpro ticket (we need the deskpro ticket id to query the message ifself)
-            var deskproTicketResult = await deskproHelper.GetTicket(deskproHandlers.GetDeskproTicket, databaseTicket.DeskproId, cancellationToken);
+            var deskproTicketResult = await deskpro.GetTicket(databaseTicket.DeskproId, cancellationToken);
             if (!deskproTicketResult.IsSuccess)
             {
                 _logger.LogError("Error getting Deskpro ticket {id}", databaseTicket.DeskproId);
@@ -72,7 +72,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             var deskproTicket = deskproTicketResult.Value;
 
             // Get Deskpro message
-            var getDeskproMessageResult = await deskproHandlers.GetDeskproMessage.Handle(databaseTicket.DeskproId, databaseMessage.DeskproMessageId, cancellationToken);
+            var getDeskproMessageResult = await deskpro.GetMessage(databaseTicket.DeskproId, databaseMessage.DeskproMessageId, cancellationToken);
 
             if (!getDeskproMessageResult.IsSuccess)
             {
@@ -84,14 +84,15 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             var deskproMessage = getDeskproMessageResult.Value;
 
             // Get Deskpro person
-            var personResult = await deskproHelper.GetPerson(deskproHandlers.GetDeskproPerson, deskproMessage.Person.Id, cancellationToken);
+            var personResult = await deskproHelper.GetPerson(deskpro, deskproMessage.Person.Id, cancellationToken);
             var person = personResult.Value;
 
             // Get attachments
             var attachments = Enumerable.Empty<AttachmentDto>();
             if (getDeskproMessageResult.Value.AttachmentIds.Any())
             {
-                attachments = await deskproHelper.GetMessageAttachments(deskproModule, deskproTicket.Id, deskproMessage.Id, cancellationToken);
+                var getAttachmentsResult = await deskpro.GetMessageAttachments(deskproTicket.Id, deskproMessage.Id, cancellationToken);
+                attachments = getAttachmentsResult.Value ?? Enumerable.Empty<AttachmentDto>();
             }
 
 

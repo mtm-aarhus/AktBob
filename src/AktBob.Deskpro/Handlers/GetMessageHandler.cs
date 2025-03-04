@@ -1,7 +1,7 @@
 ﻿using AAK.Deskpro;
 
 namespace AktBob.Deskpro.Handlers;
-internal class GetDeskproMessageHandler(IDeskproClient deskproClient) : IGetDeskproMessageHandler
+internal class GetMessageHandler(IDeskproClient deskproClient) : IGetMessageHandler
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
 

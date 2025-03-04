@@ -19,8 +19,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         using var scope = _serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
-        var getDeskproPersonHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproPersonHandler>();
-        var getDeskproTicketHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproTicketHandler>();
+        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
 
 
@@ -29,7 +28,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
 
 
         // Get data from Deskpro
-        var getDeskproTicketResult = await getDeskproTicketHandler.Handle(job.DeskproTicketId, cancellationToken);
+        var getDeskproTicketResult = await deskpro.GetTicket(job.DeskproTicketId, cancellationToken);
 
         if (!getDeskproTicketResult.IsSuccess)
         {
@@ -52,7 +51,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             _logger.LogWarning("Deskpro ticket {id}: person is null", job.DeskproTicketId);
         }
 
-        var person = await deskproHelper.GetPerson(getDeskproPersonHandler, deskproTicket.Person?.Id ?? 0, cancellationToken);
+        var person = await deskproHelper.GetPerson(deskpro, deskproTicket.Person?.Id ?? 0, cancellationToken);
 
         if (!person.IsSuccess || person.Value is null)
         {
@@ -65,7 +64,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             _logger.LogWarning("Deskpro ticket {id}: agent is null", job.DeskproTicketId);
         }
 
-        var agent = await deskproHelper.GetAgent(getDeskproPersonHandler, deskproTicket.Agent?.Id ?? 0, cancellationToken);
+        var agent = await deskproHelper.GetAgent(deskpro, deskproTicket.Agent?.Id ?? 0, cancellationToken);
 
         // Get data from database
         var databaseTicket = await ticketRepository.GetByDeskproTicketId(job.DeskproTicketId);

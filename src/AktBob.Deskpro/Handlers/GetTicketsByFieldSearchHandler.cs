@@ -2,7 +2,7 @@
 using AAK.Deskpro.Models;
 
 namespace AktBob.Deskpro.Handlers;
-internal class GetDeskproTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetDeskproTicketsByFieldSearchHandler
+internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTicketsByFieldSearchHandler
 {
     private readonly IDeskproClient _deskpro = deskpro;
 

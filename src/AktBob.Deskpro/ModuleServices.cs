@@ -1,5 +1,6 @@
 ﻿using AAK.Deskpro;
 using AktBob.Deskpro.Handlers;
+using AktBob.Deskpro.Contracts;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,16 +21,15 @@ public static class ModuleServices
         services.AddDeskpro(deskproOptions);
 
         // Add module handlers
-        services.AddScoped<IGetDeskproCustomFieldSpecificationsHandler, GetDeskproCustomFieldSpecificationsHandler>();
-        services.AddScoped<IGetDeskproMessageAttachmentHandler, GetDeskproMessageAttachmentHandler>();
-        services.AddScoped<IGetDeskproMessageAttachmentsHandler, GetDeskproMessageAttachmentsHandler>();
-        services.AddScoped<IGetDeskproMessageHandler, GetDeskproMessageHandler>();
-        services.AddScoped<IGetDeskproMessagesHandler, GetDeskproMessagesHandler>();
-        services.AddScoped<IGetDeskproPersonHandler, GetDeskproPersonHandler>();
-        services.AddScoped<IGetDeskproTicketHandler, GetDeskproTicketHandler>();
-        services.AddScoped<IGetDeskproTicketsByFieldSearchHandler, GetDeskproTicketsByFieldSearchHandler>();
-        services.AddScoped<IInvokeDeskproWebhookHandler, InvokeDeskproWebhookHandler>();
-        services.AddScoped<IDeskproHandlers, DeskproHandlers>();
+        services.AddScoped<IGetCustomFieldSpecificationsHandler, GetCustomFieldSpecificationsHandler>();
+        services.AddScoped<IGetMessageAttachmentHandler, GetMessageAttachmentHandler>();
+        services.AddScoped<IGetMessageAttachmentsHandler, GetMessageAttachmentsHandler>();
+        services.AddScoped<IGetMessageHandler, GetMessageHandler>();
+        services.AddScoped<IGetMessagesHandler, GetMessagesHandler>();
+        services.AddScoped<IGetPersonHandler, GetPersonHandler>();
+        services.AddScoped<IGetTicketHandler, GetTicketHandler>();
+        services.AddScoped<IGetTicketsByFieldSearchHandler, GetTicketsByFieldSearchHandler>();
+        services.AddScoped<IInvokeWebhookHandler, InvokeDeskproWebhookHandler>();
 
         return services;
     }

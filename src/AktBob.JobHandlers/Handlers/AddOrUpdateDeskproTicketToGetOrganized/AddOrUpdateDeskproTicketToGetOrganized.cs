@@ -21,8 +21,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         var scope = _serviceScopeFactory.CreateScope();
         var pendingsTickets = scope.ServiceProvider.GetRequiredService<PendingsTickets>();
 
-        var deskproHandlers = scope.ServiceProvider.GetRequiredService<IDeskproHandlers>();
-        var deskproModule = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
+        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
         var cloudConvertModule = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
@@ -41,7 +40,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
 
 
         // Get Deskpro Ticket
-        var ticketResult = await deskproHelper.GetTicket(deskproHandlers.GetDeskproTicket, job.TicketId, cancellationToken);
+        var ticketResult = await deskpro.GetTicket(job.TicketId, cancellationToken);
 
         if (!ticketResult.IsSuccess || ticketResult.Value is null)
         {
@@ -53,7 +52,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         
 
         // Get Deskpro custom fields specification
-        var ticketCustomFieldsResult = await deskproModule.GetCustomFieldSpecifications(cancellationToken); // TODO: Cache
+        var ticketCustomFieldsResult = await deskpro.GetCustomFieldSpecifications(cancellationToken); // TODO: Cache
         if (!ticketCustomFieldsResult.IsSuccess)
         {
             _logger.LogError("Error getting custom fields specifications from Deskpro");
@@ -61,10 +60,10 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         }
 
         // Get Deskpro ticket agent
-        var agentResult = await deskproHelper.GetPerson(deskproHandlers.GetDeskproPerson, ticket.Agent?.Id ?? 0, cancellationToken);
+        var agentResult = await deskproHelper.GetPerson(deskpro, ticket.Agent?.Id ?? 0, cancellationToken);
 
         // Get Deskpro ticket user
-        var userResult = await deskproHelper.GetPerson(deskproHandlers.GetDeskproPerson, ticket.Person?.Id ?? 0, cancellationToken);
+        var userResult = await deskproHelper.GetPerson(deskpro, ticket.Person?.Id ?? 0, cancellationToken);
 
         // Map ticket fields
         var customFields = GenerateCustomFieldValues(job.CustomFieldIds, ticketCustomFieldsResult.Value, ticket);
@@ -88,20 +87,22 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
 
 
         // Messages
-        var getMessagesResult = await deskproHandlers.GetDeskproMessages.Handle(ticket.Id, cancellationToken);
+        var getMessagesResult = await deskpro.GetMessages(ticket.Id, cancellationToken);
 
         if (getMessagesResult.IsSuccess)
         {
             var messages = getMessagesResult.Value.OrderByDescending(x => x.CreatedAt);
             foreach (var message in messages)
             {
-                var person = await deskproHelper.GetPerson(deskproHandlers.GetDeskproPerson, message.Person?.Id ?? 0, cancellationToken);
+                var person = await deskproHelper.GetPerson(deskpro, message.Person?.Id ?? 0, cancellationToken);
                 message.Person = person.Value;
 
                 var attachments = Enumerable.Empty<AttachmentDto>();
                 if (message.AttachmentIds.Any())
                 {
-                    attachments = await deskproHelper.GetMessageAttachments(deskproHandlers.GetDeskproMessageAttachments, ticket.Id, message.Id, cancellationToken);
+
+                    var getAttachmentsResult = await deskpro.GetMessageAttachments(ticket.Id, message.Id, cancellationToken);
+                    attachments = getAttachmentsResult.Value ?? Enumerable.Empty<AttachmentDto>();
                 }
 
                 // Get message number from API database

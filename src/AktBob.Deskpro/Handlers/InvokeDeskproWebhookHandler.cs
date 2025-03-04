@@ -1,7 +1,7 @@
 ﻿using AAK.Deskpro;
 
 namespace AktBob.Deskpro.Handlers;
-internal class InvokeDeskproWebhookHandler(IDeskproClient deskproClient) : IInvokeDeskproWebhookHandler
+internal class InvokeDeskproWebhookHandler(IDeskproClient deskproClient) : IInvokeWebhookHandler
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
 

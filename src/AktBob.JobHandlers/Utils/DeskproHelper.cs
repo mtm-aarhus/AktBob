@@ -8,23 +8,7 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     private readonly ILogger<DeskproHelper> _logger = logger;
     private readonly IMemoryCache _cache = cache;
 
-    public async Task<Result<TicketDto>> GetTicket(IGetDeskproTicketHandler handler, int ticketId, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Getting Deskpro ticket #{id}", ticketId);
-
-        var getDeskproTicketQueryResult = await handler.Handle(ticketId, cancellationToken);
-
-        if (!getDeskproTicketQueryResult.IsSuccess)
-        {
-            _logger.LogError("Error requesting Deskpro ticket #{id}", ticketId);
-            return Result.Error();
-        }
-
-        return getDeskproTicketQueryResult.Value;
-    }
-
-
-    public async Task<Result<PersonDto>> GetPerson(IGetDeskproPersonHandler handler, int personId, CancellationToken cancellationToken)
+    public async Task<Result<PersonDto>> GetPerson(IDeskproModule deskpro, int personId, CancellationToken cancellationToken)
     {
         if (personId == 0)
         {
@@ -43,7 +27,7 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
 
         _logger.LogInformation("Getting Deskpro person #{id}", personId);
 
-        var result = await handler.Handle((int)personId, cancellationToken);
+        var result = await deskpro.GetPerson((int)personId, cancellationToken);
 
         if (!result.IsSuccess)
         {
@@ -61,7 +45,7 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     }
 
 
-    public async Task<(string Name, string Email)> GetAgent(IGetDeskproPersonHandler handler, int agentId, CancellationToken cancellationToken)
+    public async Task<(string Name, string Email)> GetAgent(IDeskproModule deskpro, int agentId, CancellationToken cancellationToken)
     {
         if (agentId == 0)
         {
@@ -69,7 +53,7 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
             return (string.Empty, string.Empty);
         }
 
-        var result = await handler.Handle(agentId, cancellationToken);
+        var result = await deskpro.GetPerson(agentId, cancellationToken);
 
         if (result.IsSuccess && result.Value.IsAgent)
         {
@@ -84,18 +68,18 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
     }
 
 
-    public async Task<IEnumerable<AttachmentDto>> GetMessageAttachments(IDeskproModule deskproModule, int deskproTicketId, int deskproMessageId, CancellationToken cancellationToken)
-    {
-        _logger.LogInformation("Getting Deskpro message #{id} attachments", deskproMessageId);
+    //public async Task<IEnumerable<AttachmentDto>> GetMessageAttachments(IDeskproModule deskpro, int deskproTicketId, int deskproMessageId, CancellationToken cancellationToken)
+    //{
+    //    _logger.LogInformation("Getting Deskpro message #{id} attachments", deskproMessageId);
 
-        var result = await deskproModule.GetDeskproMessageAttachments(deskproTicketId, deskproMessageId, cancellationToken);
+    //    var result = await deskpro.GetMessageAttachments(deskproTicketId, deskproMessageId, cancellationToken);
 
-        if (!result.IsSuccess)
-        {
-            _logger.LogError("Error getting attachments for Deskpro message #{id}.", deskproMessageId);
-            return Enumerable.Empty<AttachmentDto>();
-        }
+    //    if (!result.IsSuccess)
+    //    {
+    //        _logger.LogError("Error getting attachments for Deskpro message #{id}.", deskproMessageId);
+    //        return Enumerable.Empty<AttachmentDto>();
+    //    }
 
-        return result.Value;
-    }
+    //    return result.Value;
+    //}
 }

@@ -21,11 +21,10 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
 
         // Services
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
+        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var getDeskproTicketHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproTicketHandler>();
-        var getDeskproPersonHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproPersonHandler>();
 
         // Variables
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateToFilArkivQueueItemJobHandler:OpenOrchestratorQueueName"));
@@ -81,7 +80,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         }
 
         // Get data from Deskpro
-        var deskproTicketResult = await getDeskproTicketHandler.Handle(databaseTicket.DeskproId, cancellationToken);
+        var deskproTicketResult = await deskpro.GetTicket(databaseTicket.DeskproId, cancellationToken);
 
         if (!deskproTicketResult.IsSuccess)
         {
@@ -90,7 +89,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         }
 
         // Get Deskpro agent
-        var  agent = await deskproHelper.GetAgent(getDeskproPersonHandler, deskproTicketResult.Value.Agent?.Id ?? 0, cancellationToken);
+        var agent = await deskproHelper.GetAgent(deskpro, deskproTicketResult.Value.Agent?.Id ?? 0, cancellationToken);
 
         // Create queue item
         var payload = new

@@ -25,8 +25,7 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
         
         // Services
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
-        var getDeskproTicketHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproTicketHandler>();
-        var getDeskproPersonHandler = scope.ServiceProvider.GetRequiredService<IGetDeskproPersonHandler>();
+        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
         var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
@@ -63,14 +62,14 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
         }
 
         // Get ticket from Deskpro
-        var deskproTicket = await getDeskproTicketHandler.Handle(databaseTicketResult.Value.DeskproId, cancellationToken);
+        var deskproTicket = await deskpro.GetTicket(databaseTicketResult.Value.DeskproId, cancellationToken);
         if (deskproTicket == null)
         {
             _logger.LogError("Error getting ticket {id} from Deskpro", databaseTicketResult.Value.DeskproId);
             return;
         }
 
-        var agent = await deskproHelper.GetAgent(getDeskproPersonHandler, deskproTicket.Value.Agent?.Id ?? 0, cancellationToken);
+        var agent = await deskproHelper.GetAgent(deskpro, deskproTicket.Value.Agent?.Id ?? 0, cancellationToken);
 
         if (useOpenOrchestrator)
         {
