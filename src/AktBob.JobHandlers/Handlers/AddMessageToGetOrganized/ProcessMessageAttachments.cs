@@ -3,7 +3,6 @@ using AAK.GetOrganized;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
-using AktBob.Database.Jobs;
 using AktBob.Shared.Extensions;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
@@ -17,7 +16,6 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
     public async Task Handle(ProcessMessageAttachmentsJob job, CancellationToken cancellationToken = default)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var deskproModule = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
 
@@ -63,7 +61,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 childrenDocumentIds.Add(uploadedDocumentIdResult.Value);
 
                 // Finalize the attachment
-                jobDispatcher.Dispatch(new DeleteMessageJob(uploadedDocumentIdResult.Value));
+                getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value);
             }
         }
         catch (Exception ex)
@@ -79,6 +77,6 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
 
         // Finalize the parent document
         // The parent document must not be finalized before the attachments has been set as children
-        jobDispatcher.Dispatch(new DeleteMessageJob(job.ParentDocumentId));
+        getOrganized.FinalizeDocument(job.ParentDocumentId);
     }
 }

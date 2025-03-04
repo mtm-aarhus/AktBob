@@ -7,8 +7,6 @@ using AktBob.JobHandlers.Utils;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
-using AktBob.Database.Jobs;
-using AktBob.GetOrganized.Contracts.Jobs;
 using AktBob.Shared.Extensions;
 
 namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
@@ -29,13 +27,12 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         }
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var deskproModule = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var cloudConvertModule = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
+        var cloudConvert = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
         var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
+        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
         try
         {
@@ -77,7 +74,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             if (!getDeskproMessageResult.IsSuccess)
             {
                 _logger.LogError("Error requesting Deskpro message ID {id}. Message will be marked 'deleted' in database.", job.DeskproMessageId);
-                jobDispatcher.Dispatch(new DeleteMessageJob(databaseMessage.Id)); // Important: Use the database row ID here!
+                await unitOfWork.Messages.Delete(databaseMessage.Id); // Important: Use the database row ID here!
                 return;
             }
 
@@ -99,7 +96,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             // Generate PDF document
             _logger.LogInformation("Generating PDF document from Deskpro message {id}", job.DeskproMessageId);
 
-            var generateDocumentResult = await GenerateDocument(cloudConvertModule, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, job.CaseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
+            var generateDocumentResult = await GenerateDocument(cloudConvert, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, job.CaseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
             if (!generateDocumentResult.IsSuccess)
             {
                 _logger.LogError("Error generating the message document for Deskpro message {id}", job.DeskproMessageId);
@@ -144,7 +141,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             else
             {
                 // Finalize the parent document
-                jobDispatcher.Dispatch(new FinalizeDocumentJob(uploadedDocumentIdResult.Value));
+                getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value);
             }
         }
         catch (Exception ex)

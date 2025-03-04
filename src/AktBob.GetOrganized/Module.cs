@@ -2,7 +2,7 @@
 using AAK.GetOrganized.UploadDocument;
 using AktBob.GetOrganized.Contracts;
 using AktBob.GetOrganized.Contracts.DTOs;
-using AktBob.GetOrganized.Contracts.Jobs;
+using AktBob.GetOrganized.Jobs;
 using AktBob.Shared;
 using Ardalis.Result;
 

@@ -1,9 +1,11 @@
 ﻿using AktBob.GetOrganized.Contracts;
-using AktBob.GetOrganized.Contracts.Jobs;
 using AktBob.Shared;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AktBob.GetOrganized.JobHandlers;
+namespace AktBob.GetOrganized.Jobs;
+
+internal record class FinalizeDocumentJob(int DocumentId);
+
 internal class FinalizeDocument(IServiceScopeFactory serviceScopeFactory) : IJobHandler<FinalizeDocumentJob>
 {
     private readonly IServiceScopeFactory serviceScopeFactory = serviceScopeFactory;

@@ -1,8 +1,7 @@
 ﻿using AAK.GetOrganized;
 using AktBob.GetOrganized.Contracts;
-using AktBob.GetOrganized.Contracts.Jobs;
 using AktBob.GetOrganized.Handlers;
-using AktBob.GetOrganized.JobHandlers;
+using AktBob.GetOrganized.Jobs;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
