@@ -13,8 +13,8 @@ public static class ModuleServices
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:From"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:Smtp"));
 
-        //services.AddTransient<ISendEmailHandler, SendEmailHandler>();
         services.AddScoped<IJobHandler<SendEmailJob>, SendEmailJobHandler>();
+        services.AddScoped<IEmailModule, EmailModule>();
 
         return services;
     }

@@ -1,6 +1,5 @@
 ﻿using AktBob.CloudConvert.Handlers;
 using AktBob.Email.Contracts;
-using AktBob.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -35,6 +34,7 @@ public static class ModuleServices
         services.AddScoped<IConvertHtmlToPdfHandler, ConvertHtmlToPdfHandler>();
         services.AddScoped<IGenerateCloudConvertTasksHandler, GenerateCloudConvertTasksHandler>();
         
+        // Decorator
         services.AddScoped<ICloudConvertModule>(provider =>
         {
             var inner = new CloudConvertModule(
@@ -46,13 +46,13 @@ public static class ModuleServices
             var withLogging = new CloudConvertModuleLoggingDecorator(
                 inner,
                 provider.GetRequiredService<ILogger<CloudConvertModuleLoggingDecorator>>(),
-                provider.GetRequiredService<IJobDispatcher>(),
+                provider.GetRequiredService<IEmailModule>(),
                 provider.GetRequiredService<IConfiguration>());
 
             var withExceptionHandling = new CloudConvertModuleExceptionDecorator(
                 withLogging,
                 provider.GetRequiredService<ILogger<CloudConvertModuleExceptionDecorator>>(),
-                provider.GetRequiredService<IJobDispatcher>(),
+                provider.GetRequiredService<IEmailModule>(),
                 provider.GetRequiredService<IConfiguration>());
 
             return withExceptionHandling;
