@@ -1,6 +1,5 @@
 ﻿using AAK.Deskpro;
 using AktBob.Deskpro.Handlers;
-using AktBob.Deskpro.Contracts;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +29,9 @@ public static class ModuleServices
         services.AddScoped<IGetTicketHandler, GetTicketHandler>();
         services.AddScoped<IGetTicketsByFieldSearchHandler, GetTicketsByFieldSearchHandler>();
         services.AddScoped<IInvokeWebhookHandler, InvokeDeskproWebhookHandler>();
+
+        // Module service orchestration
+        services.AddScoped<IDeskproModule, Module>();
 
         return services;
     }

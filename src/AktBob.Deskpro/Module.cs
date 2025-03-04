@@ -2,7 +2,7 @@
 using AktBob.Shared;
 
 namespace AktBob.Deskpro;
-internal class DeskproModule(
+internal class Module(
     IJobDispatcher jobDispatcher,
     IGetCustomFieldSpecificationsHandler getCustomFieldSpecificationsHandler,
     IGetMessageAttachmentHandler getMessageAttachmentHandler,
