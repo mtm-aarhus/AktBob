@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace AktBob.JobHandlers.Extensions;
+namespace AktBob.Workflows.Extensions;
 internal static class StringExtensions
 {
     public static string ReplacePlaceholders(this string? input, Dictionary<string, string> values)

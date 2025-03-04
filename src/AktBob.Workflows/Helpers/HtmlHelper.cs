@@ -1,7 +1,8 @@
 ﻿using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.JobHandlers.Extensions;
+using AktBob.Workflows.Extensions;
+using AktBob.Shared.Extensions;
 
-namespace AktBob.JobHandlers.Utils;
+namespace AktBob.Workflows.Helpers;
 internal static class HtmlHelper
 {
     public static string GenerateHtml(string templateFileName, Dictionary<string, string> dictionary)

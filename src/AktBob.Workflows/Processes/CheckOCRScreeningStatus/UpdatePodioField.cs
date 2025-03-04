@@ -1,6 +1,6 @@
 ﻿using AktBob.Podio.Contracts;
 
-namespace AktBob.JobHandlers.Processes.CheckOCRScreeningStatus;
+namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 internal static class UpdatePodioField
 {
     record FieldSection(int AppId, string Label);

@@ -4,7 +4,7 @@ using AktBob.Database.Entities;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Jobs;
 
-namespace AktBob.JobHandlers.Processes;
+namespace AktBob.Workflows.Processes;
 internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<RegisterPodioCaseJob>
 {
     private readonly ILogger<RegisterPodioCase> _logger = logger;

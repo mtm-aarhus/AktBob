@@ -2,7 +2,7 @@
 using AktBob.Deskpro.Contracts.DTOs;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace AktBob.JobHandlers.Utils;
+namespace AktBob.Workflows.Helpers;
 internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
 {
     private readonly ILogger<DeskproHelper> _logger = logger;
@@ -27,7 +27,7 @@ internal class DeskproHelper(ILogger<DeskproHelper> logger, IMemoryCache cache)
 
         _logger.LogInformation("Getting Deskpro person #{id}", personId);
 
-        var result = await deskpro.GetPerson((int)personId, cancellationToken);
+        var result = await deskpro.GetPerson(personId, cancellationToken);
 
         if (!result.IsSuccess)
         {

@@ -1,4 +1,4 @@
-﻿namespace AktBob.JobHandlers.Processes.CheckOCRScreeningStatus;
+﻿namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
 internal class Settings(IConfiguration configuration)
 {

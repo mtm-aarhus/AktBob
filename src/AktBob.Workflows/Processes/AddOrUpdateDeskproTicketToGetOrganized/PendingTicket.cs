@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace AktBob.JobHandlers.Processes.AddOrUpdateDeskproTicketToGetOrganized;
+namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class PendingTicket
 {
     public int TicketId { get; init; }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace AktBob.JobHandlers.Processes.CheckOCRScreeningStatus;
+namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
 internal class CachedData
 {

@@ -1,11 +1,11 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
-using AktBob.JobHandlers.Utils;
+using AktBob.Workflows.Helpers;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 
-namespace AktBob.JobHandlers.Processes;
+namespace AktBob.Workflows.Processes;
 internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceScopeFactory,
                                                             ILogger<CreateAfgørelsesskrivelseQueueItem> logger,
                                                             IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>

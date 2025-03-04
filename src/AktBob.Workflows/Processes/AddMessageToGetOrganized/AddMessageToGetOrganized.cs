@@ -3,14 +3,13 @@ using AAK.GetOrganized;
 using AktBob.Deskpro.Contracts.DTOs;
 using System.Text;
 using AktBob.CloudConvert.Contracts;
-using AktBob.JobHandlers.Utils;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Shared.Extensions;
-using AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
+using AktBob.Workflows.Helpers;
 
-namespace AktBob.JobHandlers.Processes.AddMessageToGetOrganized;
+namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
 internal record AddMessageToGetOrganizedJob(int DeskproMessageId, string CaseNumber);
 

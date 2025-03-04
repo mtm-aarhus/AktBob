@@ -2,7 +2,7 @@
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.FileProcess;
 
-namespace AktBob.JobHandlers.Processes.CheckOCRScreeningStatus;
+namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
 internal record QueryFilesProcessingStatusJob(Guid CacheId);
 

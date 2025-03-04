@@ -1,12 +1,12 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
-using AktBob.JobHandlers.Utils;
+using AktBob.Workflows.Helpers;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using AktBob.UiPath.Contracts;
 
-namespace AktBob.JobHandlers.Processes;
+namespace AktBob.Workflows.Processes;
 internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration, ILogger<CreateJournalizeEverythingQueueItem> logger) : IJobHandler<CreateJournalizeEverythingQueueItemJob>
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;

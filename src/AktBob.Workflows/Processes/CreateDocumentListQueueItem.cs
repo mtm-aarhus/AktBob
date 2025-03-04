@@ -2,14 +2,14 @@
 using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Deskpro.Contracts;
-using AktBob.JobHandlers.Utils;
+using AktBob.Workflows.Helpers;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using AktBob.UiPath.Contracts;
 
-namespace AktBob.JobHandlers.Processes;
+namespace AktBob.Workflows.Processes;
 internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> logger,
                                                      IConfiguration configuration,
                                                      IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateDocumentListQueueItemJob>

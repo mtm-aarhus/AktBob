@@ -5,12 +5,12 @@ using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
-using AktBob.JobHandlers.Utils;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text;
+using AktBob.Workflows.Helpers;
 
-namespace AktBob.JobHandlers.Processes.AddOrUpdateDeskproTicketToGetOrganized;
+namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
 {
     private readonly ILogger<AddOrUpdateDeskproTicketToGetOrganized> _logger = logger;

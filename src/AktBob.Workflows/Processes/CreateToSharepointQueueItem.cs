@@ -1,14 +1,14 @@
 ﻿using AAK.Podio.Models;
 using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
-using AktBob.JobHandlers.Utils;
+using AktBob.Workflows.Helpers;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text.RegularExpressions;
 
-namespace AktBob.JobHandlers.Processes;
+namespace AktBob.Workflows.Processes;
 internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateToSharepointQueueItemJob>
 {
     private readonly ILogger<CreateToSharepointQueueItem> _logger = logger;

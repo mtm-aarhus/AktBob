@@ -1,15 +1,15 @@
-﻿using AktBob.JobHandlers.Utils;
-using FilArkivCore.Web.Client;
-using AktBob.JobHandlers.Processes.AddOrUpdateDeskproTicketToGetOrganized;
-using AktBob.JobHandlers.Processes.CheckOCRScreeningStatus;
+﻿using FilArkivCore.Web.Client;
+using AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 using AktBob.Shared.Jobs;
-using AktBob.JobHandlers.Processes.AddMessageToGetOrganized;
-using AktBob.JobHandlers.Processes;
+using AktBob.Workflows.Processes.AddMessageToGetOrganized;
+using AktBob.Workflows.Processes;
+using AktBob.Workflows.Processes.CheckOCRScreeningStatus;
+using AktBob.Workflows.Helpers;
 
-namespace AktBob.JobHandlers;
+namespace AktBob.Workflows;
 public static class ModuleServices
 {
-    public static IServiceCollection AddJobHandlers(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddWorkflowJobs(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<IJobHandler<RegisterMessagesJob>, RegisterMessages>();
         services.AddTransient<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
@@ -28,7 +28,7 @@ public static class ModuleServices
         return services;
     }
 
-    public static IServiceCollection AddJobHandlersModule(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddWorkflowModule(this IServiceCollection services, IConfiguration configuration)
     {
         // FilArkiv client
         var filArkivUrl = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:BaseAddress"));
@@ -37,7 +37,7 @@ public static class ModuleServices
         services.AddFilArkivApiClient(filArkivUrl, filArkivClientId, filArkivClientSecret);
 
         services.AddSingleton<Processes.CheckOCRScreeningStatus.CachedData>();
-        services.AddSingleton<Processes.CheckOCRScreeningStatus.Settings>();
+        services.AddSingleton<Settings>();
 
         return services;
     }

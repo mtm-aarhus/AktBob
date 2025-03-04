@@ -5,13 +5,12 @@ using AktBob.Podio;
 using AktBob.OpenOrchestrator;
 using AktBob.CloudConvert;
 using Hangfire;
-using AktBob.JobHandlers;
+using AktBob.Workflows;
 using AktBob.GetOrganized;
 using AktBob.Database;
 using AktBob.Worker;
 using AktBob.Email;
 using AktBob.Shared;
-using AktBob.Email.Contracts;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -32,8 +31,8 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddCloudConvertModule(hostContext.Configuration);
         services.AddGetOrganizedModule(hostContext.Configuration);
         services.AddDatabaseModule(hostContext.Configuration);
-        services.AddJobHandlers(hostContext.Configuration);
-        services.AddJobHandlersModule(hostContext.Configuration);
+        services.AddWorkflowJobs(hostContext.Configuration);
+        services.AddWorkflowModule(hostContext.Configuration);
         services.AddEmailModuleServices(hostContext.Configuration);
         services.AddSharedModule();
 
