@@ -11,7 +11,7 @@ internal class FinalizeDocument(IServiceScopeFactory serviceScopeFactory) : IJob
     public async Task Handle(FinalizeDocumentJob job, CancellationToken cancellationToken = default)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var finalizeGetOrganizedDocumentsHandler = scope.ServiceProvider.GetRequiredService<IFinalizeGetOrganizedDocumentHandler>();
-        await finalizeGetOrganizedDocumentsHandler.Handle(job.DocumentId, false, cancellationToken);
+        var handler = scope.ServiceProvider.GetRequiredService<IFinalizeDocumentHandler>();
+        await handler.Handle(job.DocumentId, false, cancellationToken);
     }
 }

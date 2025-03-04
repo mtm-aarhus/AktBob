@@ -3,7 +3,7 @@ using AAK.GetOrganized.RelateDocuments;
 using AktBob.GetOrganized.Contracts;
 
 namespace AktBob.GetOrganized.Handlers;
-internal class RelateGetOrganizedDocumentsHandler(IGetOrganizedClient getOrganizedClient) : IRelateGetOrganizedDocumentsHandler
+internal class RelateGetOrganizedDocumentsHandler(IGetOrganizedClient getOrganizedClient) : IRelateDocumentsHandler
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 

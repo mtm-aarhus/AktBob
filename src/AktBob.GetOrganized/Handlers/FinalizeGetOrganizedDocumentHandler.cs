@@ -2,7 +2,7 @@
 using AktBob.GetOrganized.Contracts;
 
 namespace AktBob.GetOrganized.Handlers;
-internal class FinalizeGetOrganizedDocumentHandler(IGetOrganizedClient getOrganizedClient) : IFinalizeGetOrganizedDocumentHandler
+internal class FinalizeGetOrganizedDocumentHandler(IGetOrganizedClient getOrganizedClient) : IFinalizeDocumentHandler
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 

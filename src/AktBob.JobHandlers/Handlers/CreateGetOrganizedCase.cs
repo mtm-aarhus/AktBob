@@ -26,7 +26,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var deskproModule = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var createGetOrganizedCaseHandler = scope.ServiceProvider.GetRequiredService<ICreateGetOrganizedCaseHandler>();
+        var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
 
         _logger.LogInformation("Creating GetOrganized case (Deskpro ID {deskproId})", job.DeskproId);
 
@@ -38,7 +38,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
 
 
         // Create GO-case
-        var createCaseResult = await createGetOrganizedCaseHandler.Handle(
+        var createCaseResult = await getOrganized.CreateCase(
             caseTypePrefix: caseTypePrefix,
             caseTitle: job.CaseTitle,
             description: string.Empty,

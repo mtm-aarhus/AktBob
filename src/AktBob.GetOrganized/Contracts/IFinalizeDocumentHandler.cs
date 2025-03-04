@@ -1,5 +1,5 @@
 ﻿namespace AktBob.GetOrganized.Contracts;
-public interface IFinalizeGetOrganizedDocumentHandler
+internal interface IFinalizeDocumentHandler
 {
     Task Handle(int documentId, bool shouldCloseOpenTasks = false, CancellationToken cancellationToken = default);
 }

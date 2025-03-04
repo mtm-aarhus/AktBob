@@ -19,7 +19,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
         using var scope = serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var deskproModule = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var getOrganizedHandlers = scope.ServiceProvider.GetRequiredService<IGetOrganizedHandlers>();
+        var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
 
         DateTime createdAtDanishTime = job.Timestamp.UtcToDanish();
         var childrenDocumentIds = new List<int>();
@@ -52,7 +52,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 var filenameNoExtension = Path.GetFileNameWithoutExtension(attachment.FileName);
                 var fileExtension = Path.GetExtension(attachment.FileName);
                 var filename = $"{filenameNoExtension} ({job.Timestamp.ToString("dd-MM-yyyy HH-mm-ss")}){fileExtension}";
-                var uploadedDocumentIdResult = await getOrganizedHandlers.UploadGetOrganziedDocument.Handle(attachmentBytes, job.CaseNumber, filename, metadata, true, cancellationToken);
+                var uploadedDocumentIdResult = await getOrganized.UploadDocument(attachmentBytes, job.CaseNumber, filename, metadata, true, cancellationToken);
 
                 if (!uploadedDocumentIdResult.IsSuccess)
                 {
@@ -74,7 +74,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
         }
 
         // Set attachments as children
-        await getOrganizedHandlers.RelateGetOrganizedDocuments.Handle(job.ParentDocumentId, childrenDocumentIds.ToArray(), cancellationToken: cancellationToken);
+        await getOrganized.RelateDocuments(job.ParentDocumentId, childrenDocumentIds.ToArray(), cancellationToken: cancellationToken);
 
 
         // Finalize the parent document

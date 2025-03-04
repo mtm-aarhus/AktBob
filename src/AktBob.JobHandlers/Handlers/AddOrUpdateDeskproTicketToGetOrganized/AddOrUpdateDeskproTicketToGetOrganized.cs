@@ -25,7 +25,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
         var cloudConvertModule = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
-        var uploadGetOrganizedDocumentHandler = scope.ServiceProvider.GetRequiredService<IUploadGetOrganizedDocumentHandler>();
+        var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
         var currentPendingTicket = new PendingTicket(job.TicketId, job.SubmittedAt);
 
         pendingsTickets.AddPendingTicket(currentPendingTicket);
@@ -169,7 +169,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         };
 
         var fileName = "Samlet korrespondance.pdf";
-        var uploadDocumentResult = await uploadGetOrganizedDocumentHandler.Handle(fileResult.Value, job.GOCaseNumber, fileName, metadata, true, cancellationToken);
+        var uploadDocumentResult = await getOrganized.UploadDocument(fileResult.Value, job.GOCaseNumber, fileName, metadata, true, cancellationToken);
 
         if (!uploadDocumentResult.IsSuccess)
         {

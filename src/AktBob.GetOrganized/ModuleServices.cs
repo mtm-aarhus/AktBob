@@ -25,14 +25,16 @@ public static class ModuleServices
         services.AddGetOrganizedModule(getOrganizedOptions);
 
         // Handlers
-        services.AddTransient<ICreateGetOrganizedCaseHandler, CreateGetOrganizedCaseHandler>();
-        services.AddTransient<IFinalizeGetOrganizedDocumentHandler, FinalizeGetOrganizedDocumentHandler>();
-        services.AddTransient<IGetOrganizedHandlers, GetOrganizedHandlers>();
-        services.AddTransient<IRelateGetOrganizedDocumentsHandler, RelateGetOrganizedDocumentsHandler>();
-        services.AddTransient<IUploadGetOrganizedDocumentHandler, UploadGetOrganizedDocumenHandler>();
+        services.AddScoped<ICreateCaseHandler, CreateGetOrganizedCaseHandler>();
+        services.AddScoped<IFinalizeDocumentHandler, FinalizeGetOrganizedDocumentHandler>();
+        services.AddScoped<IRelateDocumentsHandler, RelateGetOrganizedDocumentsHandler>();
+        services.AddScoped<IUploadDocumentHandler, UploadGetOrganizedDocumenHandler>();
 
         // Jobs
         services.AddScoped<IJobHandler<FinalizeDocumentJob>, FinalizeDocument>();
+
+        // Module Service orchestration
+        services.AddScoped<IGetOrganizedModule, Module>();
 
         return services;
     }

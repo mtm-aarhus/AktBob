@@ -35,7 +35,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var cloudConvertModule = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var uploadGetOrganizedDocumentHandler = scope.ServiceProvider.GetRequiredService<IUploadGetOrganizedDocumentHandler>();
+        var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
 
         try
         {
@@ -120,7 +120,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
 
 
             // Upload parent document
-            var uploadedDocumentIdResult = await uploadGetOrganizedDocumentHandler.Handle(generateDocumentResult.Value, job.CaseNumber, fileName, metadata, false, cancellationToken);
+            var uploadedDocumentIdResult = await getOrganized.UploadDocument(generateDocumentResult.Value, job.CaseNumber, fileName, metadata, false, cancellationToken);
             if (!uploadedDocumentIdResult.IsSuccess)
             {
                 _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", job.DeskproMessageId, job.CaseNumber);
