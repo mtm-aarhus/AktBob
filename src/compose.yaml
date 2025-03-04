@@ -9,7 +9,7 @@ services:
       - "8080:8080"
     depends_on:
       - sql
-
+    
   sql:
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
@@ -17,3 +17,9 @@ services:
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "mhYQ%I9l*aOqYwQzCXip"
+
+  mailserver:
+    image: jijiechen/papercut:latest
+    ports:
+      - "25:25"
+      - "37408:37408"
