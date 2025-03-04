@@ -5,7 +5,7 @@ using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 
-namespace AktBob.JobHandlers.Handlers;
+namespace AktBob.JobHandlers.Processes;
 internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceScopeFactory,
                                                             ILogger<CreateAfgørelsesskrivelseQueueItem> logger,
                                                             IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>

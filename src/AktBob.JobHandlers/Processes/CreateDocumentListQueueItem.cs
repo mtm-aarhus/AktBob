@@ -9,7 +9,7 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using AktBob.UiPath.Contracts;
 
-namespace AktBob.JobHandlers.Handlers;
+namespace AktBob.JobHandlers.Processes;
 internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> logger,
                                                      IConfiguration configuration,
                                                      IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateDocumentListQueueItemJob>

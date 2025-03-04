@@ -3,7 +3,7 @@ using AktBob.Shared.Jobs;
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.Documents;
 
-namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
+namespace AktBob.JobHandlers.Processes.CheckOCRScreeningStatus;
 
 internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory serviceScopeFactory, ILogger<CheckOCRScreeningStatusRegisterFiles> logger, IConfiguration configuration) : IJobHandler<CheckOCRScreeningStatusRegisterFilesJob>
 {

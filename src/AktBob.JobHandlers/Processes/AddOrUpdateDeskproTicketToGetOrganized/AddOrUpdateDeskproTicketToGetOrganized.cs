@@ -10,7 +10,7 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text;
 
-namespace AktBob.JobHandlers.Handlers.AddOrUpdateDeskproTicketToGetOrganized;
+namespace AktBob.JobHandlers.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
 {
     private readonly ILogger<AddOrUpdateDeskproTicketToGetOrganized> _logger = logger;

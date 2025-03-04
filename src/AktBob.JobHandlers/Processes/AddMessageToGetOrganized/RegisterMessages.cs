@@ -3,7 +3,7 @@ using AktBob.Database.Entities;
 using AktBob.Deskpro.Contracts;
 using AktBob.Shared.Jobs;
 
-namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
+namespace AktBob.JobHandlers.Processes.AddMessageToGetOrganized;
 internal class RegisterMessages(ILogger<RegisterMessages> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<RegisterMessagesJob>
 {
     private readonly ILogger<RegisterMessages> _logger = logger;

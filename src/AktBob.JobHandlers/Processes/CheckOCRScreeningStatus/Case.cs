@@ -1,4 +1,4 @@
-﻿namespace AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
+﻿namespace AktBob.JobHandlers.Processes.CheckOCRScreeningStatus;
 public class Case
 {
     public Guid FilArkivCaseId { get; }

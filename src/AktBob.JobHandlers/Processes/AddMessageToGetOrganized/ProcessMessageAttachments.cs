@@ -5,7 +5,7 @@ using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Shared.Extensions;
 
-namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
+namespace AktBob.JobHandlers.Processes.AddMessageToGetOrganized;
 
 internal record ProcessMessageAttachmentsJob(int ParentDocumentId, string CaseNumber, DateTime Timestamp, DocumentCategory DocumentCategory, IEnumerable<AttachmentDto> Attachments);
 internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactory, ILogger<ProcessMessageAttachments> logger) : IJobHandler<ProcessMessageAttachmentsJob>

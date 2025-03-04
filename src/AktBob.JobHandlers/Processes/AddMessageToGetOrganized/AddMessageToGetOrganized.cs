@@ -8,8 +8,9 @@ using AktBob.GetOrganized.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Shared.Extensions;
+using AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
 
-namespace AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
+namespace AktBob.JobHandlers.Processes.AddMessageToGetOrganized;
 
 internal record AddMessageToGetOrganizedJob(int DeskproMessageId, string CaseNumber);
 

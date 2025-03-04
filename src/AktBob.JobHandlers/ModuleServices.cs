@@ -1,40 +1,29 @@
-﻿using AktBob.PodioHookProcessor.UseCases;
-using AktBob.JobHandlers.Handlers;
-using AktBob.JobHandlers.Utils;
-using AktBob.JobHandlers.Handlers.AddMessageToGetOrganized;
+﻿using AktBob.JobHandlers.Utils;
 using FilArkivCore.Web.Client;
-using AktBob.JobHandlers.Handlers.CheckOCRScreeningStatus;
-using AktBob.JobHandlers.Handlers.AddOrUpdateDeskproTicketToGetOrganized;
+using AktBob.JobHandlers.Processes.AddOrUpdateDeskproTicketToGetOrganized;
+using AktBob.JobHandlers.Processes.CheckOCRScreeningStatus;
 using AktBob.Shared.Jobs;
+using AktBob.JobHandlers.Processes.AddMessageToGetOrganized;
+using AktBob.JobHandlers.Processes;
 
 namespace AktBob.JobHandlers;
 public static class ModuleServices
 {
     public static IServiceCollection AddJobHandlers(this IServiceCollection services, IConfiguration configuration)
     {
-        // JOBS
+        services.AddTransient<IJobHandler<RegisterMessagesJob>, RegisterMessages>();
+        services.AddTransient<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
+        services.AddTransient<IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>, CreateAfgørelsesskrivelseQueueItem>();
+        services.AddTransient<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItem>();
+        services.AddTransient<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCase>();
+        services.AddTransient<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateToFilArkivQueueItem>();
+        services.AddTransient<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItem>();
+        services.AddTransient<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItem>();
+        services.AddTransient<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCase>();
+        services.AddTransient<IJobHandler<CheckOCRScreeningStatusRegisterFilesJob>, CheckOCRScreeningStatusRegisterFiles>();
 
-        // AddMessagesToGetOrganized workflow
-        services.AddScoped<IJobHandler<AddMessageToGetOrganizedJob>, AddMessageToGetOrganized>();
-        services.AddScoped<IJobHandler<ProcessMessageAttachmentsJob>, ProcessMessageAttachments>();
-        services.AddScoped<IJobHandler<RegisterMessagesJob>, RegisterMessages>();
-
-        // AddOrUpdateDeskproTicketToGetOrganized workflow
-        services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
+        services.AddTransient<DeskproHelper>();
         services.AddSingleton<PendingsTickets>();
-
-        services.AddScoped<IJobHandler<QueryFilesProcessingStatusJob>, QueryFilesProcessingStatus>();
-        services.AddScoped<IJobHandler<CheckOCRScreeningStatusRegisterFilesJob>, CheckOCRScreeningStatusRegisterFiles>();
-        services.AddScoped<IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>, CreateAfgørelsesskrivelseQueueItem>();
-        services.AddScoped<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItem>();
-        services.AddScoped<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCase>();
-        services.AddScoped<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateToFilArkivQueueItem>();
-        services.AddScoped<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItem>();
-        services.AddScoped<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItem>();
-        services.AddScoped<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCase>();
-        services.AddScoped<IJobHandler<CheckOCRScreeningStatusRegisterFilesJob>, CheckOCRScreeningStatusRegisterFiles>();
-
-        services.AddScoped<DeskproHelper>();
 
         return services;
     }
@@ -47,8 +36,8 @@ public static class ModuleServices
         var filArkivClientSecret = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientSecret"));
         services.AddFilArkivApiClient(filArkivUrl, filArkivClientId, filArkivClientSecret);
 
-        services.AddSingleton<CachedData>();
-        services.AddSingleton<Settings>();
+        services.AddSingleton<Processes.CheckOCRScreeningStatus.CachedData>();
+        services.AddSingleton<Processes.CheckOCRScreeningStatus.Settings>();
 
         return services;
     }

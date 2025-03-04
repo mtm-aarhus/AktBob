@@ -3,7 +3,7 @@ using AktBob.GetOrganized.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 
-namespace AktBob.JobHandlers.Handlers;
+namespace AktBob.JobHandlers.Processes;
 internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
 {
     private readonly IConfiguration _configuration;

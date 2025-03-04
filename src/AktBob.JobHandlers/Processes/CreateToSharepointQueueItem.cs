@@ -8,7 +8,7 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text.RegularExpressions;
 
-namespace AktBob.PodioHookProcessor.UseCases;
+namespace AktBob.JobHandlers.Processes;
 internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateToSharepointQueueItemJob>
 {
     private readonly ILogger<CreateToSharepointQueueItem> _logger = logger;

@@ -8,7 +8,7 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text.RegularExpressions;
 
-namespace AktBob.PodioHookProcessor.UseCases;
+namespace AktBob.JobHandlers.Processes;
 internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateGoToFilArkivQueueItemJob>
 {
     private readonly ILogger<CreateToFilArkivQueueItem> _logger = logger;
