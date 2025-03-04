@@ -20,7 +20,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
         using var scope = _serviceScopeFactory.CreateScope();
 
         // Services
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
+        var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
@@ -107,7 +107,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
             FilarkivCaseID = databaseCase.FilArkivCaseId
         };
 
-        jobDispatcher.Dispatch(new CreateOpenOrchestratorQueueItemJob(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}", payload.ToJson()));
+        openOrchestrator.CreateQueueItem(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}", payload.ToJson());
     }
 
     private bool IsNovaCase(string caseNumber)

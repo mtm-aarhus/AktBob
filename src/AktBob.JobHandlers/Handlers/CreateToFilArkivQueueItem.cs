@@ -21,6 +21,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
 
         // Services
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
+        var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
@@ -106,7 +107,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             AktSagsURL = databaseTicket.CaseUrl
         };
 
-        jobDispatcher.Dispatch(new CreateOpenOrchestratorQueueItemJob(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}", payload.ToJson()));
+        openOrchestrator.CreateQueueItem(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}", payload.ToJson());
     }
 
     private bool IsNovaCase(string caseNumber)

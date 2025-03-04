@@ -22,9 +22,10 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
     public async Task Handle(CreateDocumentListQueueItemJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        
+
         // Services
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
+        var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
@@ -83,7 +84,7 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
                 Titel = deskproTicket.Value.Subject
             };
 
-            jobDispatcher.Dispatch(new CreateOpenOrchestratorQueueItemJob(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {caseNumberResult}", payload.ToJson()));
+            openOrchestrator.CreateQueueItem(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {caseNumberResult}", payload.ToJson());
         }
         else
         {

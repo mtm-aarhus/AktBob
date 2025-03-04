@@ -23,6 +23,7 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
+        var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
 
         // UiPath variables
         var uiPathTenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
@@ -73,7 +74,7 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
                 Overmappenavn = databaseTicket.SharepointFolderName
             };
 
-            jobDispatcher.Dispatch(new CreateOpenOrchestratorQueueItemJob(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload.ToJson()));
+            openOrchestrator.CreateQueueItem(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload.ToJson());
         }
         else
         {

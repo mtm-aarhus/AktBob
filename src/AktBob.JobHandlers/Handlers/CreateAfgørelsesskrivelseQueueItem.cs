@@ -17,10 +17,10 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
     public async Task Handle(CreateAfgørelsesskrivelseQueueItemJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
+        var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
 
 
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateAfgørelsesskrivelseQueueItemJobHandler:OpenOrchestratorQueueName"));
@@ -90,6 +90,6 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             SagsbehandlerEmail = agent.Email
         };
 
-        jobDispatcher.Dispatch(new CreateOpenOrchestratorQueueItemJob(openOrchestratorQueueName, $"DeskproID {job.DeskproTicketId}", payload.ToJson()));
+        openOrchestrator.CreateQueueItem(openOrchestratorQueueName, $"DeskproID {job.DeskproTicketId}", payload.ToJson());
     }
 }
