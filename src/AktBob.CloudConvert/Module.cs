@@ -1,5 +1,5 @@
 ﻿namespace AktBob.CloudConvert;
-internal class CloudConvertModule(
+internal class Module(
     IConvertHtmlToPdfHandler convertHtmlToPdfHandler,
     IGetCloudConvertDownloadUrlHandler getCloudConvertDownloadUrlHandler,
     IGetCloudConvertFileHandler getCloudConvertFileHandler,
