@@ -4,7 +4,7 @@ using AktBob.GetOrganized.Contracts.DTOs;
 using Ardalis.Result;
 
 namespace AktBob.GetOrganized.Handlers;
-internal class CreateGetOrganizedCaseHandler(IGetOrganizedClient getOrganizedClient) : ICreateCaseHandler
+internal class CreateCaseHandler(IGetOrganizedClient getOrganizedClient) : ICreateCaseHandler
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 

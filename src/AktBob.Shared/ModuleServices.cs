@@ -5,7 +5,7 @@ public static class ModuleServices
 {
     public static IServiceCollection AddSharedModule(this IServiceCollection services)
     {
-        services.AddTransient<ITimeProvider, TimeProvider>();
+        services.AddSingleton<ITimeProvider, TimeProvider>();
         services.AddMemoryCache();
 
         return services;

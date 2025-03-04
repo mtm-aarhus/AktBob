@@ -1,6 +1,6 @@
 ﻿namespace AktBob.UiPath.Contracts;
 
-internal interface ICreateUiPathQueueItemHandler
+internal interface ICreateQueueItemHandler
 {
     Task Handle(string queueName, string reference, string payload, CancellationToken cancellationToken);
 }

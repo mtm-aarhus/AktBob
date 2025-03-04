@@ -10,7 +10,8 @@ public static class ModuleServices
     public static IServiceCollection AddOpenOrchestratorModule(this IServiceCollection services, IConfiguration configuration)
     {
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("OpenOrchestratorDb"));
-        services.AddScoped<ICreateOpenOrchestratorQueueItemHandler, CreateQueueItemHandler>();
+
+        services.AddScoped<ICreateQueueItemHandler, CreateQueueItemHandler>();
         services.AddScoped<IJobHandler<CreateQueueItemJob>, CreateQueueItem>();
         services.AddScoped<IOpenOrchestratorModule, Module>();
         return services;

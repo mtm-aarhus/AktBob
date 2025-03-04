@@ -13,7 +13,7 @@ internal class CreateQueueItem(IServiceScopeFactory serviceScopeFactory) : IJobH
     public async Task Handle(CreateQueueItemJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var handler = scope.ServiceProvider.GetRequiredService<ICreateUiPathQueueItemHandler>();
+        var handler = scope.ServiceProvider.GetRequiredService<ICreateQueueItemHandler>();
         await handler.Handle(job.QueueName, job.Reference, job.Payload, cancellationToken);
     }
 }

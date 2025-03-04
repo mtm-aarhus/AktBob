@@ -1,4 +1,5 @@
-﻿using AktBob.UiPath.Contracts;
+﻿using AktBob.Shared;
+using AktBob.UiPath.Contracts;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,8 @@ public static class ModuleServices
             client.BaseAddress = new Uri(url);
         });
 
-        services.AddScoped<ICreateUiPathQueueItemHandler, CreateQueueItemHandler>();
+        services.AddScoped<ICreateQueueItemHandler, CreateQueueItemHandler>();
+        services.AddScoped<IJobHandler<CreateQueueItemJob>, CreateQueueItem>();
         services.AddScoped<IUiPathModule, Module>();
 
         return services;

@@ -1,4 +1,5 @@
-﻿using AktBob.Deskpro.JobHandlers;
+﻿using AktBob.Deskpro.Jobs;
+
 using AktBob.Shared;
 
 namespace AktBob.Deskpro;

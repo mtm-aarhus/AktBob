@@ -17,9 +17,9 @@ public static class ModuleServices
         services.AddPodioFactory(new Uri(Guard.Against.NullOrEmpty(configuration.GetValue<string>("Podio:BaseAddress"))));
 
         // Handlers
-        services.AddTransient<IGetItemHandler, GetItemHandler>();
-        services.AddTransient<IPostCommentHandler, PostCommentHandler>();
-        services.AddTransient<IUpdateTextFieldHandler, UpdateTextFieldHandler>();
+        services.AddScoped<IGetItemHandler, GetItemHandler>();
+        services.AddScoped<IPostCommentHandler, PostCommentHandler>();
+        services.AddScoped<IUpdateTextFieldHandler, UpdateTextFieldHandler>();
 
         // Jobs
         services.AddScoped<IJobHandler<UpdateTextFieldJob>, UpdateTextField>();

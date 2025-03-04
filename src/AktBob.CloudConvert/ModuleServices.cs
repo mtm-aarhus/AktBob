@@ -29,10 +29,10 @@ public static class ModuleServices
         });
 
         // Add module handlers
-        services.AddScoped<IGetCloudConvertDownloadUrlHandler, GetCloudConvertDownloadUrlHandler>();
-        services.AddScoped<IGetCloudConvertFileHandler, GetCloudConvertFileHandler>();
         services.AddScoped<IConvertHtmlToPdfHandler, ConvertHtmlToPdfHandler>();
         services.AddScoped<IGenerateCloudConvertTasksHandler, GenerateCloudConvertTasksHandler>();
+        services.AddScoped<IGetCloudConvertDownloadUrlHandler, GetCloudConvertDownloadUrlHandler>();
+        services.AddScoped<IGetCloudConvertFileHandler, GetCloudConvertFileHandler>();
 
         // Module service orchestration
         services.AddScoped<ICloudConvertModule>(provider =>

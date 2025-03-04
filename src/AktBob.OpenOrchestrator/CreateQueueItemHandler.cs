@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace AktBob.OpenOrchestrator;
 
-internal class CreateQueueItemHandler(IConfiguration configuration, ILogger<CreateQueueItemHandler> logger) : ICreateOpenOrchestratorQueueItemHandler
+internal class CreateQueueItemHandler(IConfiguration configuration, ILogger<CreateQueueItemHandler> logger) : ICreateQueueItemHandler
 {
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<CreateQueueItemHandler> _logger = logger;

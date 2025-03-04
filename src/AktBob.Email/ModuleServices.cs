@@ -11,7 +11,7 @@ public static class ModuleServices
     public static IServiceCollection AddEmailModuleServices(this IServiceCollection services, IConfiguration configuration)
     {
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:From"));
-        Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:Smtp"));
+        Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:SmtpUrl"));
 
         services.AddScoped<IJobHandler<SendEmailJob>, SendEmailJobHandler>();
         services.AddScoped<IEmailModule, EmailModule>();

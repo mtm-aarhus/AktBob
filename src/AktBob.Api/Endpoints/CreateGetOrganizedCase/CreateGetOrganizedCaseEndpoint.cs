@@ -3,13 +3,13 @@ using AktBob.Shared.Jobs;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.GetOrganizedCase;
-internal class GetOrganizedCaseEndpoint(IJobDispatcher jobDispatcher) : Endpoint<GetOrganizedCaseRequest>
+internal class CreateGetOrganizedCaseEndpoint(IJobDispatcher jobDispatcher) : Endpoint<CreateGetOrganizedCaseRequest>
 {
     private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public override void Configure()
     {
-        Post("/Jobs/GetOrganizedCase");
+        Post("/Jobs/CreateGetOrganizedCase");
         Options(x => x.WithTags("Jobs"));
         Summary(s =>
         {
@@ -17,10 +17,9 @@ internal class GetOrganizedCaseEndpoint(IJobDispatcher jobDispatcher) : Endpoint
         });
     }
 
-    public override async Task HandleAsync(GetOrganizedCaseRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CreateGetOrganizedCaseRequest req, CancellationToken ct)
     {
-        var createCaseCommand = new CreateGetOrganizedCaseJob(req.DeskproTicketId, req.CaseTitle);
-        _jobDispatcher.Dispatch(createCaseCommand);
+        _jobDispatcher.Dispatch(new CreateGetOrganizedCaseJob(req.DeskproTicketId));
         await SendNoContentAsync(ct);
     }
 }

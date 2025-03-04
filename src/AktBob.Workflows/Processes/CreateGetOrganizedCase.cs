@@ -24,7 +24,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
-        var deskproModule = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
+        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
 
@@ -37,10 +37,19 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         var caseAccess = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:CaseAccess"));
 
 
+        // Get subject from Deskpro
+        var deskproTicketResult = await deskpro.GetTicket(job.DeskproId, cancellationToken);
+        if (!deskproTicketResult.IsSuccess)
+        {
+            _logger.LogError("Error getting Deskpro ticket {id}", job.DeskproId);
+            return;
+        }
+
+
         // Create GO-case
         var createCaseResult = await getOrganized.CreateCase(
             caseTypePrefix: caseTypePrefix,
-            caseTitle: job.CaseTitle,
+            caseTitle: deskproTicketResult.Value.Subject ?? "Uden titel",
             description: string.Empty,
             status: caseStatus,
             access: caseAccess,
@@ -57,7 +66,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
 
         _logger.LogInformation("GO case {getOrganizedCaseId} created (Deskpro ID: {deskproId}, GO Case Url: {getOrganizedCaseUrl})", caseId, job.DeskproId, caseUrl);
 
-        UpdatePodioSetGetOrganizedCaseId(deskproModule, job.DeskproId, caseId, caseUrl);
+        UpdateDeskproSetGetOrganizedCaseId(deskpro, job.DeskproId, caseId, caseUrl);
         await UpdateDatabaseSetGetOrganizedCaseId(job.DeskproId, unitOfWork, caseId, caseUrl);
         jobDispatcher.Dispatch(new RegisterMessagesJob(job.DeskproId), TimeSpan.FromMinutes(2)); // Add Deskpro messages to the just created GO-case
     }
@@ -77,7 +86,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         await unitOfWork.Tickets.Update(ticket);
     }
 
-    private void UpdatePodioSetGetOrganizedCaseId(IDeskproModule deskproModule, int deskproId, string caseId, string caseUrl)
+    private void UpdateDeskproSetGetOrganizedCaseId(IDeskproModule deskproModule, int deskproId, string caseId, string caseUrl)
     {
         var deskproWebhookId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("Deskpro:Webhooks:UpdateTicketSetGoCaseId"));
         var payload = new

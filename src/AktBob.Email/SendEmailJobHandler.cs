@@ -1,11 +1,12 @@
-﻿using AktBob.Email.Contracts;
-using AktBob.Shared;
+﻿using AktBob.Shared;
 using Ardalis.GuardClauses;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 
 namespace AktBob.Email;
+
+internal record SendEmailJob(string To, string Subject, string Body);
 internal class SendEmailJobHandler(IConfiguration configuration) : IJobHandler<SendEmailJob>
 {
     private readonly IConfiguration _configuration = configuration;

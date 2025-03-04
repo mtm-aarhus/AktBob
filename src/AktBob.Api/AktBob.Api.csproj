@@ -14,10 +14,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AktBob.CloudConvert\AktBob.CloudConvert.csproj" />
     <ProjectReference Include="..\AktBob.Database\AktBob.Database.csproj" />
-    <ProjectReference Include="..\AktBob.JobHandlers\AktBob.JobHandlers.csproj" />
+    <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
+    <ProjectReference Include="..\AktBob.Email\AktBob.Email.csproj" />
+    <ProjectReference Include="..\AktBob.GetOrganized\AktBob.GetOrganized.csproj" />
+    <ProjectReference Include="..\AktBob.OpenOrchestrator\AktBob.OpenOrchestrator.csproj" />
     <ProjectReference Include="..\AktBob.Podio\AktBob.Podio.csproj" />
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
+    <ProjectReference Include="..\AktBob.UiPath\AktBob.UiPath.csproj" />
+    <ProjectReference Include="..\AktBob.Workflows\AktBob.Workflows.csproj" />
   </ItemGroup>
 
   <ItemGroup>

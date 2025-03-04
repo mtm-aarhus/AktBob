@@ -18,7 +18,7 @@ internal class FailedJobNotificationFilter(IEmailModule email, ILogger<FailedJob
 
             _logger.LogCritical("Job {jobId} failed: {exceptionMessage}", jobId, exceptionMessage);
 
-            var to = _configuration.GetValue<string>("FailedJobNotificationEmailTo");
+            var to = _configuration.GetValue<string>("EmailNotificationReceiver");
 
             if (string.IsNullOrEmpty(to))
             {

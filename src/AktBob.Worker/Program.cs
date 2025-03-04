@@ -38,7 +38,7 @@ var builder = Host.CreateDefaultBuilder(args)
 
         // Hangfire
         services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
-        services.AddTransient<FailedJobNotificationFilter>();
+        services.AddScoped<FailedJobNotificationFilter>();
         services.AddHangfire(config =>
         {
             config.UseSqlServerStorage(hostContext.Configuration.GetConnectionString("Hangfire"));
@@ -50,7 +50,8 @@ var builder = Host.CreateDefaultBuilder(args)
 var host = builder.Build();
 
 // Setup filter for dispatching notifications when a Hangfire job fails
-var failedJobNotificationFilter = host.Services.GetRequiredService<FailedJobNotificationFilter>();
+using var scope = host.Services.CreateScope();
+var failedJobNotificationFilter = scope.ServiceProvider.GetRequiredService<FailedJobNotificationFilter>();
 GlobalJobFilters.Filters.Add(failedJobNotificationFilter);
 
 host.Run();

@@ -2,11 +2,10 @@
 using FluentValidation;
 
 namespace AktBob.Api.Endpoints.GetOrganizedCase;
-internal class GetOrganizedCaseRequestValidator : Validator<GetOrganizedCaseRequest>
+internal class CreateGetOrganizedCaseRequestValidator : Validator<CreateGetOrganizedCaseRequest>
 {
-    public GetOrganizedCaseRequestValidator()
+    public CreateGetOrganizedCaseRequestValidator()
     {
         RuleFor(x => x.DeskproTicketId).NotNull().GreaterThan(0);
-        RuleFor(x => x.CaseTitle).NotEmpty();
     }
 }

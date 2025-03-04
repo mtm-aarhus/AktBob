@@ -1,7 +1,7 @@
 ﻿using AktBob.UiPath.Contracts;
 
 namespace AktBob.UiPath;
-internal class CreateQueueItemHandler(IUiPathOrchestratorApi uiPathOrchestratorApi) : ICreateUiPathQueueItemHandler
+internal class CreateQueueItemHandler(IUiPathOrchestratorApi uiPathOrchestratorApi) : ICreateQueueItemHandler
 {
     private readonly IUiPathOrchestratorApi _uiPathOrchestratorApi = uiPathOrchestratorApi;
 

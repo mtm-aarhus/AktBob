@@ -43,7 +43,7 @@ internal class MessageRepository : IMessageRepository
         var sql = @"
             UPDATE Messages SET
                 TicketId = @TicketId,
-                DeskproId = @DeskproId,
+                DeskproMessageId = @DeskproMessageId,
                 GODocumentId = @GODocumentId,
                 Deleted = @Deleted,
                 MessageNumber = @MessageNumber

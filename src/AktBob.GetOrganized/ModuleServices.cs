@@ -24,10 +24,10 @@ public static class ModuleServices
         services.AddGetOrganizedModule(getOrganizedOptions);
 
         // Handlers
-        services.AddScoped<ICreateCaseHandler, CreateGetOrganizedCaseHandler>();
-        services.AddScoped<IFinalizeDocumentHandler, FinalizeGetOrganizedDocumentHandler>();
-        services.AddScoped<IRelateDocumentsHandler, RelateGetOrganizedDocumentsHandler>();
-        services.AddScoped<IUploadDocumentHandler, UploadGetOrganizedDocumenHandler>();
+        services.AddScoped<ICreateCaseHandler, CreateCaseHandler>();
+        services.AddScoped<IFinalizeDocumentHandler, FinalizeDocumentHandler>();
+        services.AddScoped<IRelateDocumentsHandler, RelateDocumentsHandler>();
+        services.AddScoped<IUploadDocumentHandler, UploadDocumenHandler>();
 
         // Jobs
         services.AddScoped<IJobHandler<FinalizeDocumentJob>, FinalizeDocument>();

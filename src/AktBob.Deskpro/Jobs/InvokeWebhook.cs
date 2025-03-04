@@ -1,7 +1,7 @@
 ﻿using AktBob.Shared;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AktBob.Deskpro.JobHandlers;
+namespace AktBob.Deskpro.Jobs;
 
 internal record InvokeWebhookJob(string WebhookId, object Payload);
 

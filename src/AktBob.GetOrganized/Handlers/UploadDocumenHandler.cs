@@ -6,9 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.GetOrganized.Handlers;
-internal class UploadGetOrganizedDocumenHandler(ILogger<UploadGetOrganizedDocumenHandler> logger, IConfiguration configuration, IGetOrganizedClient getOrganizedClient) : IUploadDocumentHandler
+internal class UploadDocumenHandler(ILogger<UploadDocumenHandler> logger, IConfiguration configuration, IGetOrganizedClient getOrganizedClient) : IUploadDocumentHandler
 {
-    private readonly ILogger<UploadGetOrganizedDocumenHandler> _logger = logger;
+    private readonly ILogger<UploadDocumenHandler> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 
