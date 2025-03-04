@@ -1,4 +1,4 @@
-﻿using AktBob.Podio.Contracts.Jobs;
+﻿using AktBob.Podio.Contracts;
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.FileProcess;
 
@@ -15,7 +15,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
     public Task Handle(QueryFilesProcessingStatusJob job, CancellationToken cancellationToken = default)
     {
         var scope = _serviceProviderFactory.CreateScope();
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
+        var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var filArkivCoreClient = scope.ServiceProvider.GetRequiredService<FilArkivCoreClient>();
         var cachedData = scope.ServiceProvider.GetRequiredService<CachedData>();
         var settings = scope.ServiceProvider.GetRequiredService<Settings>();
@@ -79,13 +79,13 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
 
         if (!settings.UpdatePodioItemImmediately)
         {
-            UpdatePodioField.SetFilArkivCaseId(jobDispatcher, _configuration, @case.FilArkivCaseId, @case.PodioItemId);
+            UpdatePodioField.SetFilArkivCaseId(podio, _configuration, @case.FilArkivCaseId, @case.PodioItemId);
         }
 
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int>("Podio:AppId"));
         var commentText = "OCR screening af dokumenterne i FilArkiv er færdig.";
 
-        jobDispatcher.Dispatch(new PostCommentJob(podioAppId, @case.PodioItemId, commentText));
+        podio.PostComment(podioAppId, @case.PodioItemId, commentText);
 
         return Task.CompletedTask;
     }

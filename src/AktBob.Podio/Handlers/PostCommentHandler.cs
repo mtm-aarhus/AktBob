@@ -4,11 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Podio.Handlers;
-public class PostPodioItemCommentHandler(IPodioFactory podioFactory, IConfiguration configuration, ILogger<PostPodioItemCommentHandler> logger) : IPostPodioItemCommentHandler
+public class PostCommentHandler(IPodioFactory podioFactory, IConfiguration configuration, ILogger<PostCommentHandler> logger) : IPostCommentHandler
 {
     private readonly IPodioFactory _podioFactory = podioFactory;
     private readonly IConfiguration _configuration = configuration;
-    private readonly ILogger<PostPodioItemCommentHandler> _logger = logger;
+    private readonly ILogger<PostCommentHandler> _logger = logger;
 
     public async Task Handle(int appId, long itemId, string comment, CancellationToken cancellationToken)
     {

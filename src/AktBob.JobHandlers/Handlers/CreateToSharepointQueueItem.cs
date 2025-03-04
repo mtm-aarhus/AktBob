@@ -23,7 +23,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
-        var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
+        var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
         // Variables
@@ -35,7 +35,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
 
 
         // Get metadata from Podio
-        var podioItemResult = await getPodioItemHandler.Handle(podioAppId, job.PodioItemId, cancellationToken);
+        var podioItemResult = await podio.GetItem(podioAppId, job.PodioItemId, cancellationToken);
 
         if (!podioItemResult.IsSuccess)
         {

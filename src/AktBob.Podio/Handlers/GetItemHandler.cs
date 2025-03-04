@@ -4,7 +4,7 @@ using AktBob.Podio.Contracts;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Podio.Handlers;
-internal class GetPodioItemHandler(IPodioFactory podioFactory, IConfiguration configuration) : IGetPodioItemHandler
+internal class GetItemHandler(IPodioFactory podioFactory, IConfiguration configuration) : IGetItemHandler
 {
     private readonly IPodioFactory _podioFactory = podioFactory;
     private readonly IConfiguration _configuration = configuration;

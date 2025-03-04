@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Podio.Endpoints;
-internal class UpdateDokumentlisteField(IConfiguration configuration, IUpdatePodioFieldHandler handler) : Endpoint<UpdatePodioFieldRequest>
+internal class UpdateDokumentlisteField(IConfiguration configuration, IUpdateTextFieldHandler handler) : Endpoint<UpdatePodioFieldRequest>
 {
     private readonly IConfiguration _configuration = configuration;
-    private readonly IUpdatePodioFieldHandler _handler = handler;
+    private readonly IUpdateTextFieldHandler _handler = handler;
 
     public override void Configure()
     {

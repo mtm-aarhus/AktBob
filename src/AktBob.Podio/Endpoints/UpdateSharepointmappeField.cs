@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Podio.Endpoints;
-internal class UpdateSharepointmappeField(IUpdatePodioFieldHandler handler, IConfiguration configuration) : Endpoint<UpdatePodioFieldRequest>
+internal class UpdateSharepointmappeField(IUpdateTextFieldHandler handler, IConfiguration configuration) : Endpoint<UpdatePodioFieldRequest>
 {
-    private readonly IUpdatePodioFieldHandler _handler = handler;
+    private readonly IUpdateTextFieldHandler _handler = handler;
     private readonly IConfiguration _configuration = configuration;
 
     public override void Configure()

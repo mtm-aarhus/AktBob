@@ -20,11 +20,10 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         using var scope = _serviceScopeFactory.CreateScope();
 
         // Services
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
-        var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
+        var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
         // Variables
@@ -36,7 +35,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
 
 
         // Get metadata from Podio
-        var getPodioItemResult = await getPodioItemHandler.Handle(podioAppId, job.PodioItemId, cancellationToken);
+        var getPodioItemResult = await podio.GetItem(podioAppId, job.PodioItemId, cancellationToken);
 
         if (!getPodioItemResult.IsSuccess)
         {

@@ -26,9 +26,9 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
         // Services
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
+        var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
-        var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
         var ticketRepository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
         var timeProvider = scope.ServiceProvider.GetRequiredService<ITimeProvider>();
 
@@ -49,7 +49,7 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
 
 
         // Get metadata from Podio
-        var caseNumberResult = await GetCaseNumberFromPodioItem(getPodioItemHandler, podioAppId, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken);
+        var caseNumberResult = await GetCaseNumberFromPodioItem(podio, podioAppId, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken);
         if (!caseNumberResult.IsSuccess)
         {
             return;
@@ -102,9 +102,9 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
         }
     }
 
-    private async Task<Result<string>> GetCaseNumberFromPodioItem(IGetPodioItemHandler handler, int podioAppId, long podioItemId, int podioFieldId, CancellationToken cancellationToken)
+    private async Task<Result<string>> GetCaseNumberFromPodioItem(IPodioModule podio, int podioAppId, long podioItemId, int podioFieldId, CancellationToken cancellationToken)
     {
-        var getPodioItemResult = await handler.Handle(podioAppId, podioItemId, cancellationToken);
+        var getPodioItemResult = await podio.GetItem(podioAppId, podioItemId, cancellationToken);
 
         if (!getPodioItemResult.IsSuccess)
         {

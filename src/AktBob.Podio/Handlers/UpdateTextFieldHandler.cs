@@ -4,10 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Podio.Handlers;
-internal class UpdatePodioFieldHandler(IPodioFactory podioFactory, ILogger<UpdatePodioFieldHandler> logger, IConfiguration configuration) : IUpdatePodioFieldHandler
+internal class UpdateTextFieldHandler(IPodioFactory podioFactory, ILogger<UpdateTextFieldHandler> logger, IConfiguration configuration) : IUpdateTextFieldHandler
 {
     private readonly IPodioFactory _podioFactory = podioFactory;
-    private readonly ILogger<UpdatePodioFieldHandler> _logger = logger;
+    private readonly ILogger<UpdateTextFieldHandler> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
 
     public async Task Handle(int appId, long itemId, int fieldId, string value, CancellationToken cancellationToken)

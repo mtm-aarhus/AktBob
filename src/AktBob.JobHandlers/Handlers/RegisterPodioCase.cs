@@ -16,7 +16,7 @@ internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfigurati
         using var scope = _serviceScopeFactory.CreateScope();
 
         // Services
-        var getPodioItemHandler = scope.ServiceProvider.GetRequiredService<IGetPodioItemHandler>();
+        var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
         // Variables
@@ -28,7 +28,7 @@ internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfigurati
 
         
         // Get metadata from Podio
-        var podioItemResult = await getPodioItemHandler.Handle(podioAppId, job.PodioItemId, cancellationToken);
+        var podioItemResult = await podio.GetItem(podioAppId, job.PodioItemId, cancellationToken);
         if (!podioItemResult.IsSuccess)
         {
             _logger.LogError("Could not get item {itemId} from Podio", job.PodioItemId);
