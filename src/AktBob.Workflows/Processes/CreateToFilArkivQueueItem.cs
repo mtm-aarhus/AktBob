@@ -7,6 +7,7 @@ using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text.RegularExpressions;
+using AktBob.Workflows.Extensions;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateGoToFilArkivQueueItemJob>
@@ -101,18 +102,11 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             PodioID = job.PodioItemId,
             Overmappe = databaseTicket.SharepointFolderName,
             Undermappe = databaseCase.SharepointFolderName,
-            GeoSag = !IsNovaCase(caseNumber),
-            NovaSag = IsNovaCase(caseNumber),
+            GeoSag = !caseNumber.IsNovaCase(),
+            NovaSag = caseNumber.IsNovaCase(),
             AktSagsURL = databaseTicket.CaseUrl
         };
 
         openOrchestrator.CreateQueueItem(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}", payload.ToJson());
-    }
-
-    private bool IsNovaCase(string caseNumber)
-    {
-        string pattern = @"^[A-Za-z]\d{4}-\d{1,10}$";
-        Regex regex = new Regex(pattern);
-        return regex.IsMatch(caseNumber);
     }
 }

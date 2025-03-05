@@ -21,7 +21,7 @@ public static class ModuleServices
             Password = Guard.Against.NullOrEmpty(configuration.GetValue<string>($"GetOrganized:Password"))
         };
 
-        services.AddGetOrganizedModule(getOrganizedOptions);
+        services.AddGetOrganized(getOrganizedOptions);
 
         // Handlers
         services.AddScoped<ICreateCaseHandler, CreateCaseHandler>();

@@ -14,8 +14,8 @@ internal class Module(
     IRelateDocumentsHandler relateDocumentsHandler,
     IUploadDocumentHandler uploadDocumentHandler) : IGetOrganizedModule
 {
-    public async Task<Result<CreateCaseResponse>> CreateCase(string caseTypePrefix, string caseTitle, string description, string status, string access, CancellationToken cancellationToken)
-        => await createCaseHandler.Handle(caseTypePrefix, caseTitle, description, status, access, cancellationToken);
+    public async Task<Result<CreateCaseResponse>> CreateCase(string caseTitle, string caseProfile, string status, string access, string department, string facet, string kle, CancellationToken cancellationToken)
+        => await createCaseHandler.Handle(caseTitle, caseProfile, status, access, department, facet, kle, cancellationToken);
 
     public void FinalizeDocument(int documentId) => jobDispatcher.Dispatch(new FinalizeDocumentJob(documentId));
 

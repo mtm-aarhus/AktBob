@@ -2,6 +2,8 @@
 using AktBob.GetOrganized.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Contracts.DTOs;
+using System.Linq;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
@@ -20,6 +22,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         _serviceScopeFactory = serviceScopeFactory;
     }
 
+
     public async Task Handle(CreateGetOrganizedCaseJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
@@ -30,12 +33,6 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
 
         _logger.LogInformation("Creating GetOrganized case (Deskpro ID {deskproId})", job.DeskproId);
 
-        var caseOwner = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:DefaultCaseOwner"));
-        var facet = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:Facet"));
-        var caseTypePrefix = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:CaseTypePrefix"));
-        var caseStatus = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:CaseStatus"));
-        var caseAccess = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("GetOrganized:CaseAccess"));
-
 
         // Get subject from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(job.DeskproId, cancellationToken);
@@ -45,14 +42,15 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
             return;
         }
 
-
         // Create GO-case
         var createCaseResult = await getOrganized.CreateCase(
-            caseTypePrefix: caseTypePrefix,
             caseTitle: deskproTicketResult.Value.Subject ?? "Uden titel",
-            description: string.Empty,
-            status: caseStatus,
-            access: caseAccess,
+            caseProfile: Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseProfile")),
+            status: Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseStatus")),
+            access: Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseAccess")),
+            department: MapDepartment(deskproTicketResult.Value.Fields),
+            facet: Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:Facet")),
+            kle: MapKle(deskproTicketResult.Value.Fields),
             cancellationToken: cancellationToken);
 
         if (!createCaseResult.IsSuccess)
@@ -69,6 +67,36 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         UpdateDeskproSetGetOrganizedCaseId(deskpro, job.DeskproId, caseId, caseUrl);
         await UpdateDatabaseSetGetOrganizedCaseId(job.DeskproId, unitOfWork, caseId, caseUrl);
         jobDispatcher.Dispatch(new RegisterMessagesJob(job.DeskproId), TimeSpan.FromMinutes(2)); // Add Deskpro messages to the just created GO-case
+    }
+
+    // Map Deskpro field "afdeling" to GetOrganized department
+    private string MapDepartment(IEnumerable<FieldDto> fields)
+    {
+        var mapping = _configuration.GetSection("CreateGetOrganizedCase:DepartmentMapping").GetChildren().ToDictionary(x => x.Key, x => x.Value);
+        var fieldId = _configuration.GetValue<int?>("Deskpro:Fields:Afdeling");
+        var fieldChoices = fields.FirstOrDefault(x => x.Id == fieldId)?.Values ?? [];
+
+        if (!fieldChoices.Any() || mapping.Count() == 0)
+        {
+            return string.Empty;
+        }
+
+        return mapping.Where(m => fieldChoices.Contains(m.Key)).Select(m => m.Value).FirstOrDefault() ?? string.Empty;
+    }
+
+    // Determine from Deskpro field "afdeling" if we can set the KLE
+    private string MapKle(IEnumerable<FieldDto> fields)
+    {
+        var mapping = _configuration.GetSection("CreateGetOrganizedCase:KleMapping").GetChildren().ToDictionary(x => x.Key, x => x.Value);
+        var fieldId = _configuration.GetValue<int?>("Deskpro:Fields:Afdeling");
+        var fieldChoices = fields.FirstOrDefault(x => x.Id == fieldId)?.Values ?? [];
+
+        if (!fieldChoices.Any() || mapping.Count() == 0)
+        {
+            return string.Empty;
+        }
+
+        return mapping.Where(m => fieldChoices.Contains(m.Key)).Select(m => m.Value).FirstOrDefault() ?? string.Empty;
     }
 
     private async Task UpdateDatabaseSetGetOrganizedCaseId(int deskproId, IUnitOfWork unitOfWork, string caseId, string caseUrl)

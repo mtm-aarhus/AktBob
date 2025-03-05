@@ -16,4 +16,11 @@ internal static class StringExtensions
             return values.ContainsKey(key) ? values[key] : match.Value; // Keep placeholder if key not found
         });
     }
+
+    public static bool IsNovaCase(this string caseNumber)
+    {
+        string pattern = @"^[A-Za-z]\d{4}-\d{1,10}$";
+        Regex regex = new Regex(pattern);
+        return regex.IsMatch(caseNumber);
+    }
 }
