@@ -34,13 +34,12 @@ internal class CloudConvertClient : ICloudConvertClient
             var response = await _httpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var data = JsonSerializer.Deserialize<JobResponseRoot>(content);
+            var content = await response.Content.ReadFromJsonAsync<JobResponseRoot>();
 
-            if (data?.Data is not null)
+            if (content?.Data is not null)
             {
-                _logger.LogInformation("Cloud Convert job created: {id}", data.Data.Id);
-                return data.Data.Id;
+                _logger.LogInformation("Cloud Convert job created: {id}", content.Data.Id);
+                return content.Data.Id;
             }
 
             _logger.LogError("Error creating Cloud Convert job");
@@ -102,6 +101,5 @@ internal class CloudConvertClient : ICloudConvertClient
             _logger.LogError(ex, "Error getting file {url}", url);
             return Result.Error();
         }
-
     }
 }

@@ -7,8 +7,8 @@ using AktBob.Shared.Jobs;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceScopeFactory,
-                                                            ILogger<CreateAfgørelsesskrivelseQueueItem> logger,
-                                                            IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>
+                                                  ILogger<CreateAfgørelsesskrivelseQueueItem> logger,
+                                                  IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly ILogger<CreateAfgørelsesskrivelseQueueItem> _logger = logger;
@@ -21,7 +21,6 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
-
 
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateAfgørelsesskrivelseQueueItemJobHandler:OpenOrchestratorQueueName"));
         var deskproAfdelingFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:AfdelingFieldId"));
