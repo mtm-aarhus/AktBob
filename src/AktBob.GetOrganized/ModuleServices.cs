@@ -28,6 +28,7 @@ public static class ModuleServices
         services.AddScoped<IFinalizeDocumentHandler, FinalizeDocumentHandler>();
         services.AddScoped<IRelateDocumentsHandler, RelateDocumentsHandler>();
         services.AddScoped<IUploadDocumentHandler, UploadDocumenHandler>();
+        services.AddScoped<IGetAggregatedCaseHandler, GetAggregatedCaseHandler>();
 
         // Jobs
         services.AddScoped<IJobHandler<FinalizeDocumentJob>, FinalizeDocument>();

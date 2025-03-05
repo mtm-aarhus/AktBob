@@ -1,6 +1,7 @@
 ﻿using AktBob.Deskpro.Jobs;
 
 using AktBob.Shared;
+using System.Text;
 
 namespace AktBob.Deskpro;
 internal class Module(
@@ -14,7 +15,12 @@ internal class Module(
     IGetTicketHandler getTicketHandler,
     IGetTicketsByFieldSearchHandler getTicketsByFieldSearchHandler) : IDeskproModule
 {
-    public void InvokeWebhook(string WebhookId, object Payload) => jobDispatcher.Dispatch(new InvokeWebhookJob(WebhookId, Payload));
+    public void InvokeWebhook(string webhookId, string payload)
+    {
+        var bytes = Encoding.UTF8.GetBytes(payload);
+        var base64Payload = Convert.ToBase64String(bytes);
+        jobDispatcher.Dispatch(new InvokeWebhookJob(webhookId, base64Payload));
+    }
     
     public async Task<Result<IEnumerable<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken) => await getCustomFieldSpecificationsHandler.Handle(cancellationToken);
 

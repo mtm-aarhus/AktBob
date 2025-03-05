@@ -34,6 +34,7 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<CreateJournalizeEverythingQueueItemJob>, CreateJournalizeEverythingQueueItem>();
         services.AddScoped<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItem>();
         services.AddScoped<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCase>();
+        services.AddScoped<IJobHandler<UpdateDeskproSetGetOrganizedAggregatedCaseNumbersJob>, UpdateDeskproSetGetOrganizedAggregatedCaseNumbers>();
 
         services.AddScoped<DeskproHelper>();
 

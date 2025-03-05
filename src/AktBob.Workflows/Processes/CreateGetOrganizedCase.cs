@@ -3,6 +3,7 @@ using AktBob.GetOrganized.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
+using System.Text.Json;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
@@ -123,6 +124,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
             DeskproTicketId = deskproId
         };
 
-        deskproModule.InvokeWebhook(deskproWebhookId, payload);
+        var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        deskproModule.InvokeWebhook(deskproWebhookId, json);
     }
 }
