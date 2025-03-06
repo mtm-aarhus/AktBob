@@ -11,15 +11,52 @@ using AktBob.Database;
 using AktBob.Worker;
 using AktBob.Email;
 using AktBob.Shared;
+using Ardalis.GuardClauses;
+using Serilog.Formatting.Display;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
     .ConfigureServices((hostContext, services) =>
     {
+        var configuration = hostContext.Configuration;
+
         // Serilog
         services.AddSerilog(config =>
         {
             config.Enrich.FromLogContext();
+
+            if (hostContext.HostingEnvironment.IsDevelopment())
+            {
+                config.WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{SourceContext}] {Message:j} {NewLine}{Exception}");
+            }
+
+            if (hostContext.HostingEnvironment.IsProduction())
+            {
+                config.WriteTo.File(
+                    outputTemplate: "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{SourceContext}] {Message:j} {NewLine}{Exception}",
+                    rollingInterval: RollingInterval.Day,
+                    shared: true,
+                    path: Guard.Against.NullOrEmpty(configuration.GetValue<string>("LogFilesPath")));
+            }
+
+            if (hostContext.Configuration.GetValue<bool?>("EmailLogEvents:Enabled") ?? false)
+            {
+                config.WriteTo.Email(
+                    options: new()
+                    {
+                        To = Guard.Against.NullOrEmpty(configuration.GetValue<string[]>("EmailLogEvents:To")).ToList(),
+                        From = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailLogEvents:From")),
+                        Host = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailLogEvents:Host")),
+                        Port = Guard.Against.Null(configuration.GetValue<int?>("EmailLogEvents:Port")),
+                        Subject = new MessageTemplateTextFormatter("{Timestamp:HH:mm:ss.fff} AktBob log messages")
+                    },
+                    batchingOptions: new()
+                    {
+                        BufferingTimeLimit = TimeSpan.FromMinutes(Guard.Against.Null(configuration.GetValue<int?>("EmailLogEvents:TimeLimitMinutes"))),
+                        EagerlyEmitFirstEvent = false
+                    });
+            }
+
             config.ReadFrom.Configuration(hostContext.Configuration);
         });
 

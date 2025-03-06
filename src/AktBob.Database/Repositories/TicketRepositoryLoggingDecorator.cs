@@ -21,7 +21,7 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
 
         if (rowsAffected == 0)
         {
-            _logger.LogWarning("Not added to database {ticket}", ticket);
+            _logger.LogWarning("No rows were affected when trying to add {ticket}", ticket);
         }
 
         return rowsAffected;
@@ -76,7 +76,7 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
 
         if (rowsAffected == 0)
         {
-            _logger.LogWarning("No rows affected when trying to update {ticket}", ticket);
+            _logger.LogWarning("No rows were affected when trying to update {ticket}", ticket);
         }
 
         return rowsAffected;

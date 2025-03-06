@@ -1,20 +1,13 @@
-﻿using AktBob.Email.Contracts;
-using Microsoft.Extensions.Configuration;
-
-namespace AktBob.CloudConvert;
+﻿namespace AktBob.CloudConvert;
 internal class CloudConvertModuleExceptionDecorator : ICloudConvertModule
 {
     private readonly ICloudConvertModule _inner;
     private readonly ILogger<CloudConvertModuleExceptionDecorator> _logger;
-    private readonly IEmailModule _email;
-    private readonly string _emailNotificationReceiver;
 
-    public CloudConvertModuleExceptionDecorator(ICloudConvertModule inner, ILogger<CloudConvertModuleExceptionDecorator> logger, IEmailModule email, IConfiguration configuration)
+    public CloudConvertModuleExceptionDecorator(ICloudConvertModule inner, ILogger<CloudConvertModuleExceptionDecorator> logger)
     {
         _inner = inner;
         _logger = logger;
-        _email = email;
-        _emailNotificationReceiver = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailNotificationReceiver"));
     }
 
 
@@ -27,7 +20,6 @@ internal class CloudConvertModuleExceptionDecorator : ICloudConvertModule
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {name}", nameof(ConvertHtmlToPdf));
-            _email.Send(_emailNotificationReceiver, $"{nameof(ConvertHtmlToPdf)} failure", ex.Message);
             throw;
         }
     }
@@ -41,7 +33,6 @@ internal class CloudConvertModuleExceptionDecorator : ICloudConvertModule
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {name}", nameof(GenerateTasks));
-            _email.Send(_emailNotificationReceiver, $"{nameof(GenerateTasks)} failure", ex.Message);
             throw;
         }
     }
@@ -55,7 +46,6 @@ internal class CloudConvertModuleExceptionDecorator : ICloudConvertModule
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {name}", nameof(GetDownloadUrl));
-            _email.Send(_emailNotificationReceiver, $"{nameof(GetDownloadUrl)} failure", ex.Message);
             throw;
         }
     }
@@ -69,7 +59,6 @@ internal class CloudConvertModuleExceptionDecorator : ICloudConvertModule
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {name}", nameof(GetFile));
-            _email.Send(_emailNotificationReceiver, $"{nameof(GetFile)} failure", ex.Message);
             throw;
         }
     }

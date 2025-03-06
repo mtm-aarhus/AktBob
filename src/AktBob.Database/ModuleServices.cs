@@ -4,6 +4,7 @@ using Ardalis.GuardClauses;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Data;
 
 namespace AktBob.Database;
@@ -17,9 +18,51 @@ public static class ModuleServices
         services.AddScoped<ISqlDataAccess, SqlDataAccess>();
 
         // Repositories
-        services.AddScoped<IMessageRepository, MessageRepository>();
-        services.AddScoped<ITicketRepository, TicketRepository>();
-        services.AddScoped<ICaseRepository, CaseRepository>();
+        services.AddScoped<IMessageRepository>(provider =>
+        {
+            var inner = new MessageRepository(provider.GetRequiredService<ISqlDataAccess>());
+
+            var withLogging = new MessageRepositoryLoggingDecorator(
+                inner,
+                provider.GetRequiredService<ILogger<MessageRepositoryLoggingDecorator>>());
+
+            var withExceptionHandling = new MessageRepositoryExceptionDecorator(
+                withLogging,
+                provider.GetRequiredService<ILogger<MessageRepositoryExceptionDecorator>>());
+
+            return withExceptionHandling;
+        });
+
+        services.AddScoped<ITicketRepository>(provider =>
+        {
+            var inner = new TicketRepository(provider.GetRequiredService<ISqlDataAccess>());
+            
+            var withLogging = new TicketRepositoryLoggingDecorator(
+                inner,
+                provider.GetRequiredService<ILogger<TicketRepositoryLoggingDecorator>>());
+
+            var withExceptionHandling = new TicketRepositoryExceptionDecorator(
+                withLogging,
+                provider.GetRequiredService<ILogger<TicketRepositoryExceptionDecorator>>());
+
+            return withExceptionHandling;
+        });
+
+        services.AddScoped<ICaseRepository>(provider =>
+        {
+            var inner = new CaseRepository(provider.GetRequiredService<ISqlDataAccess>());
+
+            var withLogging = new CaseRepositoryLoggingDecorator(
+                inner,
+                provider.GetRequiredService<ILogger<CaseRepositoryLoggingDecorator>>());
+
+            var withExceptionHandling = new CaseRepositoryExceptionDecorator(
+                withLogging,
+                provider.GetRequiredService<ILogger<CaseRepositoryExceptionDecorator>>());
+
+            return withExceptionHandling;
+        });
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         
         return services;

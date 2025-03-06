@@ -45,15 +45,11 @@ public static class ModuleServices
 
             var withLogging = new CloudConvertModuleLoggingDecorator(
                 inner,
-                provider.GetRequiredService<ILogger<CloudConvertModuleLoggingDecorator>>(),
-                provider.GetRequiredService<IEmailModule>(),
-                provider.GetRequiredService<IConfiguration>());
+                provider.GetRequiredService<ILogger<CloudConvertModuleLoggingDecorator>>());
 
             var withExceptionHandling = new CloudConvertModuleExceptionDecorator(
                 withLogging,
-                provider.GetRequiredService<ILogger<CloudConvertModuleExceptionDecorator>>(),
-                provider.GetRequiredService<IEmailModule>(),
-                provider.GetRequiredService<IConfiguration>());
+                provider.GetRequiredService<ILogger<CloudConvertModuleExceptionDecorator>>());
 
             return withExceptionHandling;
         });

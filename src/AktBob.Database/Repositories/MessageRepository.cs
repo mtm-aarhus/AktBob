@@ -34,7 +34,7 @@ internal class MessageRepository : IMessageRepository
 
     public async Task<int> Delete(int id) => await _sqlDataAccess.Execute("UPDATE Messages SET Deleted = 1 WHERE Id = @Id", new { Id = id });
     
-    public async Task<Message?> GetById(int id) => await _sqlDataAccess.QuerySingle<Message>("SELECT * FROM v_Messages WHERE Id = @Id", new { Id = id });
+    public async Task<Message?> Get(int id) => await _sqlDataAccess.QuerySingle<Message>("SELECT * FROM v_Messages WHERE Id = @Id", new { Id = id });
     
     public async Task<Message?> GetByDeskproMessageId(int deskproMessageId) => await _sqlDataAccess.QuerySingle<Message>("SELECT * FROM v_Messages WHERE DeskproMessageId = @DeskproMessageId", new { DeskproMessageId = deskproMessageId });
 

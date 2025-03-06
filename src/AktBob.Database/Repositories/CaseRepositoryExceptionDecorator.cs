@@ -3,22 +3,17 @@ using AktBob.Database.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Database.Repositories;
-internal class TicketRepositoryExceptionDecorator : ITicketRepository
+
+internal class CaseRepositoryExceptionDecorator(ICaseRepository inner, ILogger<CaseRepositoryExceptionDecorator> logger) : ICaseRepository
 {
-    private readonly ITicketRepository _inner;
-    private readonly ILogger<TicketRepositoryExceptionDecorator> _logger;
+    private readonly ICaseRepository _inner = inner;
+    private readonly ILogger<CaseRepositoryExceptionDecorator> _logger = logger;
 
-    public TicketRepositoryExceptionDecorator(ITicketRepository inner, ILogger<TicketRepositoryExceptionDecorator> logger)
-    {
-        _inner = inner;
-        _logger = logger;
-    }
-
-    public async Task<int> Add(Ticket ticket)
+    public async Task<int> Add(Case @case)
     {
         try
         {
-            return await _inner.Add(ticket);
+            return await _inner.Add(@case);
         }
         catch (Exception ex)
         {
@@ -27,7 +22,7 @@ internal class TicketRepositoryExceptionDecorator : ITicketRepository
         }
     }
 
-    public async Task<Ticket?> Get(int id)
+    public async Task<Case?> Get(int id)
     {
         try
         {
@@ -40,20 +35,20 @@ internal class TicketRepositoryExceptionDecorator : ITicketRepository
         }
     }
 
-    public async Task<Ticket?> GetByDeskproTicketId(int deskproTicketId)
+    public async Task<IEnumerable<Case>> GetAll(long? podioItemId, Guid? filArkivCaseId)
     {
         try
         {
-            return await _inner.GetByDeskproTicketId(deskproTicketId);
+            return await _inner.GetAll(podioItemId, filArkivCaseId);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in {name}", nameof(GetByDeskproTicketId));
+            _logger.LogError(ex, "Error in {name}", nameof(GetAll));
             throw;
         }
     }
 
-    public async Task<Ticket?> GetByPodioItemId(long podioItemId)
+    public async Task<Case?> GetByPodioItemId(long podioItemId)
     {
         try
         {
@@ -66,11 +61,24 @@ internal class TicketRepositoryExceptionDecorator : ITicketRepository
         }
     }
 
-    public async Task<int> Update(Ticket ticket)
+    public async Task<Case?> GetByTicketId(int ticketId)
     {
         try
         {
-            return await _inner.Update(ticket);
+            return await _inner.GetByTicketId(ticketId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {name}", nameof(GetByTicketId));
+            throw;
+        }
+    }
+
+    public async Task<int> Update(Case @case)
+    {
+        try
+        {
+            return await _inner.Update(@case);
         }
         catch (Exception ex)
         {
