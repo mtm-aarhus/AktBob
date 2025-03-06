@@ -36,7 +36,29 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<InvokeWebhookJob>, InvokeWebhook>();
 
         // Module service orchestration
-        services.AddScoped<IDeskproModule, Module>();
+        services.AddScoped<IDeskproModule>(provider =>
+        {
+            var inner = new Module(
+                provider.GetRequiredService<IJobDispatcher>(),
+                provider.GetRequiredService<IGetCustomFieldSpecificationsHandler>(),
+                provider.GetRequiredService<IGetMessageAttachmentHandler>(),
+                provider.GetRequiredService<IGetMessageAttachmentsHandler>(),
+                provider.GetRequiredService<IGetMessageHandler>(),
+                provider.GetRequiredService<IGetMessagesHandler>(),
+                provider.GetRequiredService<IGetPersonHandler>(),
+                provider.GetRequiredService<IGetTicketHandler>(),
+                provider.GetRequiredService<IGetTicketsByFieldSearchHandler>());
+
+            var withLogging = new ModuleLoggingDecorator(
+                inner,
+                provider.GetRequiredService<ILogger<ModuleLoggingDecorator>>());
+
+            var withExceptionHandling = new ModuleExceptionDecorator(
+                withLogging,
+                provider.GetRequiredService<ILogger<ModuleExceptionDecorator>>());
+
+            return withExceptionHandling;
+        });
 
         return services;
     }
