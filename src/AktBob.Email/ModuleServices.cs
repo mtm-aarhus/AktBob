@@ -3,6 +3,7 @@ using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AktBob.Email;
 
@@ -14,7 +15,21 @@ public static class ModuleServices
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:SmtpUrl"));
 
         services.AddScoped<IJobHandler<SendEmailJob>, SendEmailJobHandler>();
-        services.AddScoped<IEmailModule, EmailModule>();
+
+        services.AddScoped<IEmailModule>(provider =>
+        {
+            var inner = new Module(provider.GetRequiredService<IJobDispatcher>());
+
+            var withLogging = new ModuleLoggingDecorator(
+                inner,
+                provider.GetRequiredService<ILogger<ModuleLoggingDecorator>>());
+
+            var withExceptionHandling = new ModuleExceptionDecorator(
+                withLogging,
+                provider.GetRequiredService<ILogger<ModuleExceptionDecorator>>());
+
+            return withExceptionHandling;
+        });
 
         return services;
     }
