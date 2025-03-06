@@ -1,4 +1,5 @@
 ﻿using AktBob.Database.Contracts;
+using AktBob.Database.DataAccess;
 using AktBob.Database.Repositories;
 using Ardalis.GuardClauses;
 using Microsoft.Data.SqlClient;
@@ -15,7 +16,21 @@ public static class ModuleServices
         var connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("Database"));
 
         services.AddScoped<IDbConnection>(x => new SqlConnection(connectionString));
-        services.AddScoped<ISqlDataAccess, SqlDataAccess>();
+
+        services.AddScoped<ISqlDataAccess>(provider =>
+        {
+            var inner = new SqlDataAccess(provider.GetRequiredService<IDbConnection>());
+
+            var withLogging = new SqlDataAccessLoggingDecorator(
+                inner,
+                provider.GetRequiredService<ILogger<SqlDataAccessLoggingDecorator>>());
+
+            var withException = new SqlDataAccessExceptionDecorator(
+                withLogging,
+                provider.GetRequiredService<ILogger<SqlDataAccessExceptionDecorator>>());
+
+            return withException;
+        });
 
         // Repositories
         services.AddScoped<IMessageRepository>(provider =>

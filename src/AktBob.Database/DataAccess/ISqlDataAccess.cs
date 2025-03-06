@@ -1,5 +1,4 @@
-﻿
-namespace AktBob.Database;
+﻿namespace AktBob.Database.DataAccess;
 public interface ISqlDataAccess
 {
     /// <summary>

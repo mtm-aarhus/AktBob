@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace AktBob.Database;
+namespace AktBob.Database.DataAccess;
 
 internal class SqlDataAccess : ISqlDataAccess
 {
