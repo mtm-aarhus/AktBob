@@ -29,7 +29,7 @@ var builder = Host.CreateDefaultBuilder(args)
             {
                 config.WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{SourceContext}] {Message:j} {NewLine}{Exception}");
             }
-
+            
             if (hostContext.HostingEnvironment.IsProduction())
             {
                 config.WriteTo.File(
@@ -44,7 +44,7 @@ var builder = Host.CreateDefaultBuilder(args)
                 config.WriteTo.Email(
                     options: new()
                     {
-                        To = Guard.Against.NullOrEmpty(configuration.GetValue<string[]>("EmailLogEvents:To")).ToList(),
+                        To = Guard.Against.NullOrEmpty(configuration.GetSection("EmailLogEvents:To").Get<IEnumerable<string>>()).ToList(),
                         From = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailLogEvents:From")),
                         Host = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailLogEvents:Host")),
                         Port = Guard.Against.Null(configuration.GetValue<int?>("EmailLogEvents:Port")),
