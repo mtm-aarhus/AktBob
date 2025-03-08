@@ -1,2 +1,2 @@
 ﻿namespace AktBob.Shared.Jobs;
-public record RegisterPodioCaseJob(long PodioItemId);
+public record RegisterPodioCaseJob(PodioItemId PodioItemId);

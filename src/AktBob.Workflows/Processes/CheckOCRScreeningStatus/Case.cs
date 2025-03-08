@@ -2,10 +2,10 @@
 public class Case
 {
     public Guid FilArkivCaseId { get; }
-    public long PodioItemId { get; }
+    public PodioItemId PodioItemId { get; }
     public List<Guid> Files { get; set; } = new();
 
-    public Case(Guid filArkivCaseId, long podioItemId)
+    public Case(Guid filArkivCaseId, PodioItemId podioItemId)
     {
         FilArkivCaseId = filArkivCaseId;
         PodioItemId = podioItemId;

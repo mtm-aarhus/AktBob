@@ -1,17 +1,20 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Shared;
 using AktBob.Shared.Jobs;
+using Ardalis.GuardClauses;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.CheckOCRScreeningStatus;
 
 internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher,
                                          ICaseRepository caseRepository,
-                                         ILogger<CheckOCRScreeningEndpoint> logger) : Endpoint<CheckOCRScreeningRequest>
+                                         ILogger<CheckOCRScreeningEndpoint> logger,
+                                         IConfiguration configuration) : Endpoint<CheckOCRScreeningRequest>
 {
     private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
     private readonly ICaseRepository _caseRepository = caseRepository;
     private readonly ILogger<CheckOCRScreeningEndpoint> _logger = logger;
+    private readonly IConfiguration _configuration = configuration;
 
     public override void Configure()
     {
@@ -25,16 +28,20 @@ internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher,
 
     public override async Task HandleAsync(CheckOCRScreeningRequest req, CancellationToken ct)
     {
-        var job = new CheckOCRScreeningStatusRegisterFilesJob(req.FilArkivCaseId, req.PodioItemId);
+        var appId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AktindsigtApp:Id"));
+        var podioItemId = new PodioItemId(appId, req.PodioItemId);
+
+        var job = new CheckOCRScreeningStatusRegisterFilesJob(req.FilArkivCaseId, podioItemId);
+
         _jobDispatcher.Dispatch(job);
         
-        await UpdateDatabaseSetFilArkivCaseId(req.FilArkivCaseId, req.PodioItemId, ct);
+        await UpdateDatabaseSetFilArkivCaseId(req.FilArkivCaseId, podioItemId, ct);
         await SendNoContentAsync();
     }
 
-    private async Task UpdateDatabaseSetFilArkivCaseId(Guid filArkivCaseId, long podioItemId, CancellationToken cancellationToken)
+    private async Task UpdateDatabaseSetFilArkivCaseId(Guid filArkivCaseId, PodioItemId podioItemId, CancellationToken cancellationToken)
     {
-        var @case = await _caseRepository.GetByPodioItemId(podioItemId);
+        var @case = await _caseRepository.GetByPodioItemId(podioItemId.Id);
 
         if (@case is null )
         {

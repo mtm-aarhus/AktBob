@@ -47,16 +47,15 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
 
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
-
         // Get metadata from Podio
-        var caseNumberResult = await GetCaseNumberFromPodioItem(podio, podioAppId, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken);
+        var caseNumberResult = await GetCaseNumberFromPodioItem(podio, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken);
         if (!caseNumberResult.IsSuccess)
         {
             return;
         }
 
         // Find ticket in database from PodioItemId
-        var databaseTicketResult = await GetTicketFromApiDatabaseByPodioItemId(unitOfWork, timeProvider, job.PodioItemId, cancellationToken);
+        var databaseTicketResult = await GetTicketFromApiDatabaseByPodioItemId(unitOfWork, timeProvider, job.PodioItemId.Id, cancellationToken);
         if (!databaseTicketResult.IsSuccess)
         {
             return;
@@ -79,7 +78,7 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
                 SagsNummer = caseNumberResult.Value,
                 agent.Email,
                 Navn = agent.Name,
-                PodioID = job.PodioItemId,
+                PodioID = job.PodioItemId.Id,
                 DeskproID = deskproTicket.Value.Id,
                 Titel = deskproTicket.Value.Subject
             };
@@ -94,18 +93,18 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
                 SagsNummer = caseNumberResult.Value,
                 agent.Email,
                 Navn = agent.Name,
-                PodioID = job.PodioItemId,
+                PodioID = job.PodioItemId.Id,
                 DeskproID = deskproTicket.Value.Id,
                 Titel = deskproTicket.Value.Subject
             };
 
-            uiPath.CreateQueueItem(uiPathQueueName, $"PodioItemID {job.PodioItemId}: {caseNumberResult}", payload.ToJson());
+            uiPath.CreateQueueItem(uiPathQueueName, $"Podio {job.PodioItemId}: {caseNumberResult}", payload.ToJson());
         }
     }
 
-    private async Task<Result<string>> GetCaseNumberFromPodioItem(IPodioModule podio, int podioAppId, long podioItemId, int podioFieldId, CancellationToken cancellationToken)
+    private async Task<Result<string>> GetCaseNumberFromPodioItem(IPodioModule podio, PodioItemId podioItemId, int podioFieldId, CancellationToken cancellationToken)
     {
-        var getPodioItemResult = await podio.GetItem(podioAppId, podioItemId, cancellationToken);
+        var getPodioItemResult = await podio.GetItem(podioItemId, cancellationToken);
 
         if (!getPodioItemResult.IsSuccess)
         {

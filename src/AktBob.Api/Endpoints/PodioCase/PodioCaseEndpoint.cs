@@ -1,12 +1,14 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Jobs;
+using Ardalis.GuardClauses;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.PodioCase;
 
-internal class PodioCaseEndpoint(IJobDispatcher jobDispatcher) : Endpoint<PodioCaseRequet>
+internal class PodioCaseEndpoint(IJobDispatcher jobDispatcher, IConfiguration configuration) : Endpoint<PodioCaseRequet>
 {
     private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
+    private readonly IConfiguration _configuration = configuration;
 
     public override void Configure()
     {
@@ -22,7 +24,10 @@ internal class PodioCaseEndpoint(IJobDispatcher jobDispatcher) : Endpoint<PodioC
 
     public override async Task HandleAsync(PodioCaseRequet req, CancellationToken ct)
     {
-        var job = new RegisterPodioCaseJob(req.PodioItemId);
+        var appId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AktindsigtApp:Id"));
+        var podioItemId = new PodioItemId(appId, req.PodioItemId);
+
+        var job = new RegisterPodioCaseJob(podioItemId);
         _jobDispatcher.Dispatch(job);
         await SendNoContentAsync(ct);
     }

@@ -34,9 +34,8 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "CaseNumber"));
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
-
         // Get metadata from Podio
-        var getPodioItemResult = await podio.GetItem(podioAppId, job.PodioItemId, cancellationToken);
+        var getPodioItemResult = await podio.GetItem(job.PodioItemId, cancellationToken);
 
         if (!getPodioItemResult.IsSuccess)
         {
@@ -52,7 +51,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         }
 
         // Find database ticket by PodioItemId
-        var databaseTicket = await unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId);
+        var databaseTicket = await unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId.Id);
         if (databaseTicket is null)
         {
             _logger.LogError("Ticket related to PodioItemId {id} not found in database", job.PodioItemId);
@@ -67,7 +66,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         }
 
         // Find database cases
-        var databaseCase = await unitOfWork.Cases.GetByPodioItemId(job.PodioItemId);
+        var databaseCase = await unitOfWork.Cases.GetByPodioItemId(job.PodioItemId.Id);
         if (databaseCase is null)
         {
             _logger.LogError("Case related to PodioItemId {id} not found in database", job.PodioItemId);
@@ -99,7 +98,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             MailModtager = agent.Email,
             DeskProID = databaseTicket.DeskproId,
             DeskProTitel = deskproTicketResult.Value.Subject,
-            PodioID = job.PodioItemId,
+            PodioID = job.PodioItemId.Id,
             Overmappe = databaseTicket.SharepointFolderName,
             Undermappe = databaseCase.SharepointFolderName,
             GeoSag = !caseNumber.IsNovaCase(),
@@ -107,7 +106,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             AktSagsURL = databaseTicket.CaseUrl
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}", payload.ToJson());
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AktBob.Podio.Jobs;
 
-internal record UpdateTextFieldJob(int AppId, long ItemId, int FieldId, string TextValue);
+internal record UpdateTextFieldJob(PodioItemId PodioItemId, int FieldId, string TextValue);
 
 internal class UpdateTextField(IServiceScopeFactory serviceScopeFactory) : IJobHandler<UpdateTextFieldJob>
 {
@@ -14,6 +14,8 @@ internal class UpdateTextField(IServiceScopeFactory serviceScopeFactory) : IJobH
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var handler = scope.ServiceProvider.GetRequiredService<IUpdateTextFieldHandler>();
-        await handler.Handle(job.AppId, job.ItemId, job.FieldId, job.TextValue, cancellationToken);
+
+        var command = new UpdateTextFieldCommand(job.PodioItemId, job.FieldId, job.TextValue);
+        await handler.Handle(command, cancellationToken);
     }
 }

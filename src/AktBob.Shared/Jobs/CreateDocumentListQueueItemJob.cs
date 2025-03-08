@@ -1,2 +1,2 @@
 ﻿namespace AktBob.Shared.Jobs;
-public record CreateDocumentListQueueItemJob(long PodioItemId);
+public record CreateDocumentListQueueItemJob(PodioItemId PodioItemId);

@@ -6,7 +6,6 @@ using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
-using System.Text.RegularExpressions;
 using AktBob.Workflows.Extensions;
 
 namespace AktBob.Workflows.Processes;
@@ -36,7 +35,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
 
 
         // Get metadata from Podio
-        var podioItemResult = await podio.GetItem(podioAppId, job.PodioItemId, cancellationToken);
+        var podioItemResult = await podio.GetItem(job.PodioItemId, cancellationToken);
 
         if (!podioItemResult.IsSuccess)
         {
@@ -52,7 +51,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
         }
 
         // Find database case from PodioItemID
-        var databaseCase = await unitOfWork.Cases.GetByPodioItemId(job.PodioItemId);
+        var databaseCase = await unitOfWork.Cases.GetByPodioItemId(job.PodioItemId.Id);
 
         if (databaseCase is null)
         {
@@ -67,7 +66,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
         }
 
         // Find database ticket from PodioItemId
-        var databaseTicket = await unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId);
+        var databaseTicket = await unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId.Id);
 
         if (databaseTicket is null)
         {
@@ -75,7 +74,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
             return;
         }
 
-        var filArkivCaseId = databaseTicket.Cases?.FirstOrDefault(c => c.PodioItemId == job.PodioItemId)?.FilArkivCaseId;
+        var filArkivCaseId = databaseTicket.Cases?.FirstOrDefault(c => c.PodioItemId == job.PodioItemId.Id)?.FilArkivCaseId;
         if (filArkivCaseId == null)
         {
             _logger.LogError("FilArkivCaseId not found for PodioItemId {podioItemId}", job.PodioItemId);
@@ -99,7 +98,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
             MailModtager = agent.Email,
             DeskProID = deskproTicketResult.Value.Id,
             DeskProTitel = deskproTicketResult.Value.Subject,
-            PodioID = job.PodioItemId,
+            PodioID = job.PodioItemId.Id,
             Overmappe = databaseTicket.SharepointFolderName,
             Undermappe = databaseCase.SharepointFolderName,
             GeoSag = !caseNumber.IsNovaCase(),
@@ -108,7 +107,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
             FilarkivCaseID = databaseCase.FilArkivCaseId
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}", payload.ToJson());
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
     }
 }

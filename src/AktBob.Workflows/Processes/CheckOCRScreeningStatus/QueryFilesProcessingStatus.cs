@@ -76,16 +76,16 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
         _logger.LogInformation("Finished querying processing statusses for files for FilArkiv Case {id}, PodioItemId {podioItemId}", @case.FilArkivCaseId, @case.PodioItemId);
 
         cachedData.Cases.TryRemove(job.CacheId, out Case? removedCase);
-
+        
         if (!settings.UpdatePodioItemImmediately)
         {
             UpdatePodioField.SetFilArkivCaseId(podio, _configuration, @case.FilArkivCaseId, @case.PodioItemId);
         }
 
-        var podioAppId = Guard.Against.Null(_configuration.GetValue<int>("Podio:AppId"));
         var commentText = "OCR screening af dokumenterne i FilArkiv er færdig.";
 
-        podio.PostComment(podioAppId, @case.PodioItemId, commentText);
+        var postCommandCommand = new PostCommentCommand(@case.PodioItemId, commentText);
+        podio.PostComment(postCommandCommand);
 
         return Task.CompletedTask;
     }

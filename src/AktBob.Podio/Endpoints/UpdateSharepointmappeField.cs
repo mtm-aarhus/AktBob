@@ -1,4 +1,5 @@
 ﻿using AktBob.Podio.Contracts;
+using AktBob.Shared;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -20,7 +21,8 @@ internal class UpdateSharepointmappeField(IUpdateTextFieldHandler handler, IConf
         var appId = _configuration.GetValue<int>("Podio:AktindsigtApp:Id");
         var fieldId = _configuration.GetValue<int>("Podio:AktindsigtApp:Fields:Sharepointmappe");
 
-        await _handler.Handle(appId, req.ItemId, fieldId, req.Value, ct);
+        var command = new UpdateTextFieldCommand(new PodioItemId(appId, req.ItemId), fieldId, req.Value);
+        await _handler.Handle(command, ct);
         await SendNoContentAsync(ct);
     }
 }

@@ -28,7 +28,7 @@ internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfigurati
 
         
         // Get metadata from Podio
-        var podioItemResult = await podio.GetItem(podioAppId, job.PodioItemId, cancellationToken);
+        var podioItemResult = await podio.GetItem(job.PodioItemId, cancellationToken);
         if (!podioItemResult.IsSuccess)
         {
             _logger.LogError("Could not get item {itemId} from Podio", job.PodioItemId);
@@ -69,7 +69,7 @@ internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfigurati
         var @case = new Case
         {
             TicketId = databaseTicket.Id,
-            PodioItemId = job.PodioItemId,
+            PodioItemId = job.PodioItemId.Id,
             CaseNumber = caseNumber
         };
 

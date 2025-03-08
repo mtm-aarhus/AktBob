@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AktBob.Podio.Jobs;
 
-internal record PostCommentJob(int AppId, long ItemId, string TextValue);
+internal record PostCommentJob(PodioItemId PodioItemId, string TextValue);
 
 internal class PostComment(IServiceScopeFactory serviceScopeFactory) : IJobHandler<PostCommentJob>
 {
@@ -14,6 +14,8 @@ internal class PostComment(IServiceScopeFactory serviceScopeFactory) : IJobHandl
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var postPodioCommentHandler = scope.ServiceProvider.GetRequiredService<IPostCommentHandler>();
-        await postPodioCommentHandler.Handle(job.AppId, job.ItemId, job.TextValue, cancellationToken);
+
+        var command = new PostCommentCommand(job.PodioItemId, job.TextValue);
+        await postPodioCommentHandler.Handle(command, cancellationToken);
     }
 }

@@ -10,18 +10,18 @@ public class PostCommentHandler(IPodioFactory podioFactory, IConfiguration confi
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<PostCommentHandler> _logger = logger;
 
-    public async Task Handle(int appId, long itemId, string comment, CancellationToken cancellationToken)
+    public async Task Handle(PostCommentCommand command, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Posting comment on Podio item. ItemId {itemId} Value: '{value}'", itemId, comment);
+        _logger.LogInformation("Posting comment on Podio item. ItemId {itemId} Value: '{value}'", command.PodioItemId.Id, command.TextValue);
 
         var podio = _podioFactory.Create(
-            appId: appId,
-            appToken: ConfigurationHelper.GetAppToken(_configuration, appId),
+            appId: command.PodioItemId.AppId,
+            appToken: ConfigurationHelper.GetAppToken(_configuration, command.PodioItemId.AppId),
             clientId: ConfigurationHelper.GetClientId(_configuration),
             clientSecret: ConfigurationHelper.GetClientSecret(_configuration));
 
-        await podio.PostItemComment(appId, itemId, comment, cancellationToken);
+        await podio.PostItemComment(command.PodioItemId.AppId, command.PodioItemId.Id, command.TextValue, cancellationToken);
 
-        _logger.LogInformation("Comment posted on Podio item. ItemId {itemId} Value: '{value}'", itemId, comment);
+        _logger.LogInformation("Comment posted on Podio item. ItemId {itemId} Value: '{value}'", command.PodioItemId.Id, command.TextValue);
     }
 }

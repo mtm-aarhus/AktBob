@@ -1,2 +1,2 @@
 ﻿namespace AktBob.Shared.Jobs;
-public record CreateToSharepointQueueItemJob(long PodioItemId);
+public record CreateToSharepointQueueItemJob(PodioItemId PodioItemId);
