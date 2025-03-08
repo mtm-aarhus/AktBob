@@ -1,6 +1,4 @@
-﻿using AAK.GetOrganized;
-using AAK.GetOrganized.UploadDocument;
-using AktBob.CloudConvert.Contracts;
+﻿using AktBob.CloudConvert.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
@@ -160,16 +158,17 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
             return;
         }
 
-
         // Upload to GO
-        var metadata = new UploadDocumentMetadata
-        {
-            DocumentDate = DateTime.UtcNow.UtcToDanish(),
-            DocumentCategory = DocumentCategory.Intern
-        };
+        var uploadDocumentCommand = new UploadDocumentCommand(
+            fileResult.Value,
+            job.GOCaseNumber,
+            "Samlet korrespondance.pdf",
+            string.Empty,
+            DateTime.UtcNow.UtcToDanish(),
+            UploadDocumentCategory.Internal,
+            true);
 
-        var fileName = "Samlet korrespondance.pdf";
-        var uploadDocumentResult = await getOrganized.UploadDocument(fileResult.Value, job.GOCaseNumber, fileName, metadata, true, cancellationToken);
+        var uploadDocumentResult = await getOrganized.UploadDocument(uploadDocumentCommand, cancellationToken);
 
         if (!uploadDocumentResult.IsSuccess)
         {

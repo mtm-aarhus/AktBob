@@ -7,11 +7,11 @@ internal class RelateDocumentsHandler(IGetOrganizedClient getOrganizedClient) : 
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 
-    public async Task Handle(int parentDocumentId, int[] childDocumentIds, RelationType relationType = RelationType.Bilag, CancellationToken cancellationToken = default)
+    public async Task Handle(RelateDocumentsCommand command, CancellationToken cancellationToken = default)
     {
-        if (childDocumentIds.Any())
+        if (command.ChildrenDocumentsIds.Any())
         {
-            await _getOrganizedClient.RelateDocuments(parentDocumentId, childDocumentIds, relationType, cancellationToken);
+            await _getOrganizedClient.RelateDocuments(command.ParentDocumentId, command.ChildrenDocumentsIds, RelationType.Bilag, cancellationToken);
         }
     }
 }

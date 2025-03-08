@@ -1,6 +1,4 @@
-﻿using AAK.GetOrganized.UploadDocument;
-using AAK.GetOrganized;
-using AktBob.Deskpro.Contracts.DTOs;
+﻿using AktBob.Deskpro.Contracts.DTOs;
 using System.Text;
 using AktBob.CloudConvert.Contracts;
 using AktBob.GetOrganized.Contracts;
@@ -105,19 +103,20 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
 
 
             DateTime createdAtDanishTime = getDeskproMessageResult!.Value.CreatedAt.UtcToDanish();
-            var documentCategory = getDeskproMessageResult.Value.IsAgentNote ? DocumentCategory.Intern : MapDocumentCategoryFromPerson(personResult.Value);
-
-            var metadata = new UploadDocumentMetadata
-            {
-                DocumentDate = createdAtDanishTime,
-                DocumentCategory = documentCategory
-            };
-
+            var documentCategory = getDeskproMessageResult.Value.IsAgentNote ? UploadDocumentCategory.Internal : MapDocumentCategoryFromPerson(personResult.Value);
             var fileName = GenerateFileName(databaseMessage.MessageNumber ?? 0, person.FullName, createdAtDanishTime);
 
-
             // Upload parent document
-            var uploadedDocumentIdResult = await getOrganized.UploadDocument(generateDocumentResult.Value, job.CaseNumber, fileName, metadata, false, cancellationToken);
+            var upoadDocumentCommand = new UploadDocumentCommand(
+                generateDocumentResult.Value,
+                job.CaseNumber,
+                fileName,
+                string.Empty,
+                createdAtDanishTime,
+                documentCategory,
+                false);
+
+            var uploadedDocumentIdResult = await getOrganized.UploadDocument(upoadDocumentCommand, cancellationToken);
             if (!uploadedDocumentIdResult.IsSuccess)
             {
                 _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", job.DeskproMessageId, job.CaseNumber);
@@ -175,14 +174,14 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
     }
 
 
-    private DocumentCategory MapDocumentCategoryFromPerson(PersonDto? person)
+    private UploadDocumentCategory MapDocumentCategoryFromPerson(PersonDto? person)
     {
         if (person is null)
         {
-            return DocumentCategory.Intern;
+            return UploadDocumentCategory.Internal;
         }
 
-        return person.IsAgent ? DocumentCategory.Udgående : DocumentCategory.Indgående;
+        return person.IsAgent ? UploadDocumentCategory.Outgoing : UploadDocumentCategory.Incoming;
     }
 
 

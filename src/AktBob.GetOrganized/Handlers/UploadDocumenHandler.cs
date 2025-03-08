@@ -3,44 +3,54 @@ using AAK.GetOrganized.UploadDocument;
 using AktBob.GetOrganized.Contracts;
 using Ardalis.Result;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.GetOrganized.Handlers;
-internal class UploadDocumenHandler(ILogger<UploadDocumenHandler> logger, IConfiguration configuration, IGetOrganizedClient getOrganizedClient) : IUploadDocumentHandler
+internal class UploadDocumenHandler(IConfiguration configuration, IGetOrganizedClient getOrganizedClient) : IUploadDocumentHandler
 {
-    private readonly ILogger<UploadDocumenHandler> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 
-    public async Task<Result<int>> Handle(byte[] bytes, string caseNumber, string fileName, UploadDocumentMetadata metadata, bool overwrite, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(UploadDocumentCommand command, CancellationToken cancellationToken)
     {
-        try
+        var metadata = new UploadDocumentMetadata
         {
-            _logger.LogInformation("Uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}', file size (bytes): {filesize}) ...", caseNumber, fileName, bytes.Length);
-            var listName = _configuration.GetValue<string>("GetOrganized:DefaultListName") ?? "Dokumenter";
+            CustomProperty = command.CustomProperty,
+            DocumentCategory = MapDocumentCategory(command.Category),
+            DocumentDate = command.DocumentDate
+        };
 
-            var result = await _getOrganizedClient.UploadDocument(bytes,
-                                                                  caseNumber,
-                                                                  listName,
-                                                                  string.Empty,
-                                                                  fileName,
-                                                                  metadata,
-                                                                  overwrite,
-                                                                  cancellationToken);
+        var listName = _configuration.GetValue<string>("GetOrganized:DefaultListName") ?? "Dokumenter";
 
-            if (result is not null)
-            {
-                _logger.LogInformation("Document uploaded to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}').", caseNumber, fileName);
-                return result.DocumentId;
-            }
+        var result = await _getOrganizedClient.UploadDocument(command.Bytes,
+                                                              command.CaseNumber,
+                                                              listName,
+                                                              string.Empty,
+                                                              command.FileName,
+                                                              metadata,
+                                                              command.OverwriteExisting,
+                                                              cancellationToken);
 
-            _logger.LogError("Error uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}')", caseNumber, fileName);
-            return Result.Error();
+        if (result is not null)
+        {
+            return result.DocumentId;
         }
-        catch
+
+        return Result.Error($"Error uploading document to GetOrganized (CaseNumber: {command.CaseNumber}, FileName: '{command.FileName}')");
+    }
+
+    private DocumentCategory MapDocumentCategory(UploadDocumentCategory category)
+    {
+        switch (category)
         {
-            _logger.LogError("Error uploading document to GetOrganized (CaseNumber: {caseNumber}, FileName: '{filename}')", caseNumber, fileName);
-            return Result.Error();
+            case UploadDocumentCategory.Internal:
+            default:
+                return DocumentCategory.Intern;
+
+            case UploadDocumentCategory.Incoming:
+                return DocumentCategory.Indgående;
+
+            case UploadDocumentCategory.Outgoing:
+                return DocumentCategory.Udgående;
         }
     }
 }

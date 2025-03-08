@@ -57,11 +57,11 @@ internal class ModuleExceptionDecorator : IGetOrganizedModule
         }
     }
 
-    public async Task RelateDocuments(int parentDocumentId, int[] childDocumentIds, RelationType relationType = RelationType.Bilag, CancellationToken cancellationToken = default)
+    public async Task RelateDocuments(RelateDocumentsCommand command, CancellationToken cancellationToken = default)
     {
         try
         {
-            await _inner.RelateDocuments(parentDocumentId, childDocumentIds, relationType, cancellationToken);
+            await _inner.RelateDocuments(command, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -70,11 +70,11 @@ internal class ModuleExceptionDecorator : IGetOrganizedModule
         }
     }
 
-    public async Task<Result<int>> UploadDocument(byte[] bytes, string caseNumber, string fileName, UploadDocumentMetadata metadata, bool overwrite, CancellationToken cancellationToken)
+    public async Task<Result<int>> UploadDocument(UploadDocumentCommand command, CancellationToken cancellationToken)
     {
         try
         {
-            return await _inner.UploadDocument(bytes, caseNumber, fileName, metadata, overwrite, cancellationToken);
+            return await _inner.UploadDocument(command, cancellationToken);
         }
         catch (Exception ex)
         {

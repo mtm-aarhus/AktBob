@@ -1,8 +1,7 @@
-﻿using AAK.GetOrganized.UploadDocument;
-using Ardalis.Result;
+﻿using Ardalis.Result;
 
 namespace AktBob.GetOrganized.Contracts;
 public interface IUploadDocumentHandler
 {
-    Task<Result<int>> Handle(byte[] bytes, string caseNumber, string fileName, UploadDocumentMetadata metadata, bool overwrite, CancellationToken cancellationToken);
+    Task<Result<int>> Handle(UploadDocumentCommand command, CancellationToken cancellationToken);
 }

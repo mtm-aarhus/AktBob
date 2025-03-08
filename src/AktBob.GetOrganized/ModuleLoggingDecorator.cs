@@ -1,6 +1,4 @@
-﻿using AAK.GetOrganized.RelateDocuments;
-using AAK.GetOrganized.UploadDocument;
-using AktBob.GetOrganized.Contracts;
+﻿using AktBob.GetOrganized.Contracts;
 using AktBob.GetOrganized.Contracts.DTOs;
 using Ardalis.Result;
 using Microsoft.Extensions.Logging;
@@ -27,7 +25,7 @@ internal class ModuleLoggingDecorator(IGetOrganizedModule inner, ILogger<ModuleL
 
     public void FinalizeDocument(FinalizeDocumentCommand command)
     {
-        _logger.LogInformation("Enqueuing job: Finalize GetOrganized document {id}", command.DocumentId);
+        _logger.LogInformation("Enqueuing job: Finalize GetOrganized document {command}", command);
         _inner.FinalizeDocument(command);
     }
 
@@ -50,20 +48,20 @@ internal class ModuleLoggingDecorator(IGetOrganizedModule inner, ILogger<ModuleL
         return result!;
     }
 
-    public async Task RelateDocuments(int parentDocumentId, int[] childDocumentIds, RelationType relationType = RelationType.Bilag, CancellationToken cancellationToken = default)
+    public async Task RelateDocuments(RelateDocumentsCommand command, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Relating GetOrganized documents. Parent: {parent}, Children: {children}", parentDocumentId, childDocumentIds);
-        await _inner.RelateDocuments(parentDocumentId, childDocumentIds, relationType, cancellationToken);
+        _logger.LogInformation("Relating GetOrganized documents. {command}", command);
+        await _inner.RelateDocuments(command, cancellationToken);
     }
 
-    public async Task<Result<int>> UploadDocument(byte[] bytes, string caseNumber, string fileName, UploadDocumentMetadata metadata, bool overwrite, CancellationToken cancellationToken)
+    public async Task<Result<int>> UploadDocument(UploadDocumentCommand command, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Uploading document to GetOrganized case. CaseId = {caseId}, Filename = {filename}, Metadata = {metadata}", caseNumber, fileName, metadata);
+        _logger.LogInformation("Uploading document to GetOrganized case. CaseId = {caseId}, Filename = {filename}", command.CaseNumber, command.FileName);
 
-        var result = await _inner.UploadDocument(bytes, caseNumber, fileName, metadata, overwrite, cancellationToken);
+        var result = await _inner.UploadDocument(command, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning("Error uploading document to GetOrganized case. CaseId = {caseId}, Filename = {filename}, Metadata = {metadata}", caseNumber, fileName, metadata);
+            _logger.LogWarning(string.Join(",", result.Errors));
         }
 
         return result;
