@@ -1,6 +1,4 @@
-﻿using AAK.GetOrganized.RelateDocuments;
-using AAK.GetOrganized.UploadDocument;
-using AktBob.GetOrganized.Contracts;
+﻿using AktBob.GetOrganized.Contracts;
 using AktBob.GetOrganized.Contracts.DTOs;
 using Ardalis.Result;
 using Microsoft.Extensions.Logging;

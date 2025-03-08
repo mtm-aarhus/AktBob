@@ -6,8 +6,8 @@ internal class FinalizeDocumentHandler(IGetOrganizedClient getOrganizedClient) :
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 
-    public async Task Handle(FinalizeDocumentCommand command, CancellationToken cancellationToken = default)
+    public async Task Handle(int documentId, bool shouldCloseOpenTasks = false, CancellationToken cancellationToken = default)
     {
-        await _getOrganizedClient.FinalizeDocument(command.DocumentId, command.ShouldCloseOpenTasks, cancellationToken);
+        await _getOrganizedClient.FinalizeDocument(documentId, shouldCloseOpenTasks, cancellationToken);
     }
 }
