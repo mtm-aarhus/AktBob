@@ -1,4 +1,6 @@
-﻿namespace AktBob.Deskpro;
+﻿using AktBob.Shared.Extensions;
+
+namespace AktBob.Deskpro;
 
 internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<ModuleLoggingDecorator> logger) : IDeskproModule
 {
@@ -12,7 +14,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<ModuleLoggin
         var result = await _inner.GetCustomFieldSpecifications(cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogError("Error getting Deskpro custom field specifications");
+            _logger.LogError(result.Errors.AsString());
         }
 
         return result;

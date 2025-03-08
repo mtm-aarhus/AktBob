@@ -3,6 +3,7 @@ using AktBob.Deskpro.Handlers;
 using AktBob.Deskpro.Jobs;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -49,8 +50,13 @@ public static class ModuleServices
                 provider.GetRequiredService<IGetTicketHandler>(),
                 provider.GetRequiredService<IGetTicketsByFieldSearchHandler>());
 
-            var withLogging = new ModuleLoggingDecorator(
+            var withCaching = new ModuleCachingDecorator(
                 inner,
+                provider.GetRequiredService<ILogger<ModuleCachingDecorator>>(),
+                provider.GetRequiredService<IMemoryCache>());
+
+            var withLogging = new ModuleLoggingDecorator(
+                withCaching,
                 provider.GetRequiredService<ILogger<ModuleLoggingDecorator>>());
 
             var withExceptionHandling = new ModuleExceptionDecorator(
