@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AktBob.GetOrganized.Jobs;
 
-internal record class FinalizeDocumentJob(int DocumentId);
+internal record class FinalizeDocumentJob(FinalizeDocumentCommand Command);
 
 internal class FinalizeDocument(IServiceScopeFactory serviceScopeFactory) : IJobHandler<FinalizeDocumentJob>
 {
@@ -14,6 +14,6 @@ internal class FinalizeDocument(IServiceScopeFactory serviceScopeFactory) : IJob
     {
         using var scope = serviceScopeFactory.CreateScope();
         var handler = scope.ServiceProvider.GetRequiredService<IFinalizeDocumentHandler>();
-        await handler.Handle(job.DocumentId, false, cancellationToken);
+        await handler.Handle(job.Command, cancellationToken);
     }
 }

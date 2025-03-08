@@ -18,7 +18,7 @@ internal class Module(
     public async Task<Result<CreateCaseResponse>> CreateCase(CreateGetOrganizedCaseCommand command, CancellationToken cancellationToken)
         => await createCaseHandler.Handle(command, cancellationToken);
 
-    public void FinalizeDocument(int documentId) => jobDispatcher.Dispatch(new FinalizeDocumentJob(documentId));
+    public void FinalizeDocument(FinalizeDocumentCommand command) => jobDispatcher.Dispatch(new FinalizeDocumentJob(command));
 
     public async Task<IReadOnlyCollection<string>> GetAggregatedCase(string aggregatedCaseId, CancellationToken cancellationToken) => await aggregatedCaseHandler.Handle(aggregatedCaseId, cancellationToken);
 

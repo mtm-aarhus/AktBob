@@ -141,7 +141,8 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             else
             {
                 // Finalize the parent document
-                getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value);
+                var finalizeDocumentCommand = new FinalizeDocumentCommand(uploadedDocumentIdResult.Value);
+                getOrganized.FinalizeDocument(finalizeDocumentCommand);
             }
         }
         catch (Exception ex)

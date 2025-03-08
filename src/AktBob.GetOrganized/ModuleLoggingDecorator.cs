@@ -25,10 +25,10 @@ internal class ModuleLoggingDecorator(IGetOrganizedModule inner, ILogger<ModuleL
         return result;
     }
 
-    public void FinalizeDocument(int documentId)
+    public void FinalizeDocument(FinalizeDocumentCommand command)
     {
-        _logger.LogInformation("Enqueuing job: Finalize GetOrganized document {id}", documentId);
-        _inner.FinalizeDocument(documentId);
+        _logger.LogInformation("Enqueuing job: Finalize GetOrganized document {id}", command.DocumentId);
+        _inner.FinalizeDocument(command);
     }
 
     public async Task<IReadOnlyCollection<string>> GetAggregatedCase(string aggregatedCaseId, CancellationToken cancellationToken)

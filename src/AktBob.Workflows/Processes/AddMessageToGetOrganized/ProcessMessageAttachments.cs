@@ -61,7 +61,8 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 childrenDocumentIds.Add(uploadedDocumentIdResult.Value);
 
                 // Finalize the attachment
-                getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value);
+                var finalizeDocumentCommand = new FinalizeDocumentCommand(uploadedDocumentIdResult.Value);
+                getOrganized.FinalizeDocument(finalizeDocumentCommand);
             }
         }
         catch (Exception ex)
@@ -77,6 +78,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
 
         // Finalize the parent document
         // The parent document must not be finalized before the attachments has been set as children
-        getOrganized.FinalizeDocument(job.ParentDocumentId);
+        var finalizeParentDocumentCommand = new FinalizeDocumentCommand(job.ParentDocumentId);
+        getOrganized.FinalizeDocument(finalizeParentDocumentCommand);
     }
 }

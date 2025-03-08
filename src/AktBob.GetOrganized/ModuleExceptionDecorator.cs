@@ -31,11 +31,11 @@ internal class ModuleExceptionDecorator : IGetOrganizedModule
         }
     }
 
-    public void FinalizeDocument(int documentId)
+    public void FinalizeDocument(FinalizeDocumentCommand command)
     {
         try
         {
-            _inner.FinalizeDocument(documentId);
+            _inner.FinalizeDocument(command);
         }
         catch (Exception ex)
         {
