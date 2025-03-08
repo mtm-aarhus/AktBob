@@ -64,40 +64,40 @@ internal class TicketRepository : ITicketRepository
         return await _sqlDataAccess.Execute(sql, ticket);
     }
 
-    //public async Task<IEnumerable<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
-    //{
-    //    // Prepare filter
-    //    var filter = new List<string>();
+    public async Task<IEnumerable<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
+    {
+        // Prepare filter
+        var filter = new List<string>();
 
-    //    if (deskproId != null)
-    //    {
-    //        filter.Add("t.DeskproId = @DeskproId");
-    //    }
+        if (deskproId != null)
+        {
+            filter.Add("t.DeskproId = @DeskproId");
+        }
 
-    //    if (podioItemId != null)
-    //    {
-    //        filter.Add("c.PodioItemId = @PodioItemId");
-    //    } 
+        if (podioItemId != null)
+        {
+            filter.Add("c.PodioItemId = @PodioItemId");
+        }
 
-    //    if (filArkivCaseId != null)
-    //    {
-    //        filter.Add("c.FilArkivCaseId = @FilArkivCaseId");
-    //    }
+        if (filArkivCaseId != null)
+        {
+            filter.Add("c.FilArkivCaseId = @FilArkivCaseId");
+        }
 
-    //    var filterString = string.Join(" AND ", filter);
+        var filterString = string.Join(" AND ", filter);
 
-    //    if (!string.IsNullOrEmpty(filterString))
-    //    {
-    //        return await GetTicketsWithCases(filterString, new 
-    //        {
-    //            DeskproId = deskproId,
-    //            PodioItemId = podioItemId,
-    //            FilArkivCaseId = filArkivCaseId
-    //        });
-    //    }
+        if (!string.IsNullOrEmpty(filterString))
+        {
+            return await GetTicketsWithCases(filterString, new
+            {
+                DeskproId = deskproId,
+                PodioItemId = podioItemId,
+                FilArkivCaseId = filArkivCaseId
+            });
+        }
 
-    //    return await GetTicketsWithCases(string.Empty, new {});
-    //}
+        return await GetTicketsWithCases(string.Empty, new { });
+    }
 
     private async Task<IEnumerable<Ticket>> GetTicketsWithCases(string where, object parameters)
     {

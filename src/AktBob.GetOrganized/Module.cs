@@ -15,12 +15,12 @@ internal class Module(
     IUploadDocumentHandler uploadDocumentHandler,
     IGetAggregatedCaseHandler aggregatedCaseHandler) : IGetOrganizedModule
 {
-    public async Task<Result<CreateCaseResponse>> CreateCase(string caseTitle, string caseProfile, string status, string access, string department, string facet, string kle, CancellationToken cancellationToken)
-        => await createCaseHandler.Handle(caseTitle, caseProfile, status, access, department, facet, kle, cancellationToken);
+    public async Task<Result<CreateCaseResponse>> CreateCase(CreateGetOrganizedCaseCommand command, CancellationToken cancellationToken)
+        => await createCaseHandler.Handle(command, cancellationToken);
 
     public void FinalizeDocument(int documentId) => jobDispatcher.Dispatch(new FinalizeDocumentJob(documentId));
 
-    public async Task<string[]> GetAggregatedCase(string aggregatedCaseId, CancellationToken cancellationToken) => await aggregatedCaseHandler.Handle(aggregatedCaseId, cancellationToken);
+    public async Task<IReadOnlyCollection<string>> GetAggregatedCase(string aggregatedCaseId, CancellationToken cancellationToken) => await aggregatedCaseHandler.Handle(aggregatedCaseId, cancellationToken);
 
     public async Task RelateDocuments(int parentDocumentId, int[] childDocumentIds, RelationType relationType = RelationType.Bilag, CancellationToken cancellationToken = default)
         => await relateDocumentsHandler.Handle(parentDocumentId, childDocumentIds, relationType, cancellationToken);

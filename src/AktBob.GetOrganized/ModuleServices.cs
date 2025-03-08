@@ -6,6 +6,7 @@ using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AktBob.GetOrganized;
 public static class ModuleServices
@@ -34,7 +35,21 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<FinalizeDocumentJob>, FinalizeDocument>();
 
         // Module Service orchestration
-        services.AddScoped<IGetOrganizedModule, Module>();
+        services.AddScoped<IGetOrganizedModule>(provider =>
+        {
+            var inner = new Module(
+                provider.GetRequiredService<IJobDispatcher>(),
+                provider.GetRequiredService<ICreateCaseHandler>(),
+                provider.GetRequiredService<IRelateDocumentsHandler>(),
+                provider.GetRequiredService<IUploadDocumentHandler>(),
+                provider.GetRequiredService<IGetAggregatedCaseHandler>());
+
+            var withLogging = new ModuleLoggingDecorator(
+                inner,
+                provider.GetRequiredService<ILogger<ModuleLoggingDecorator>>());
+
+            return withLogging;
+        });
 
         return services;
     }

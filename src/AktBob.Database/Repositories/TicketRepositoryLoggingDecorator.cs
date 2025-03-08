@@ -40,6 +40,15 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
         return ticket;
     }
 
+    public async Task<IEnumerable<Ticket>> GetAll(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId)
+    {
+        _logger.LogInformation("Getting all tickets by DeskproId = {deskproId}, PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", DeskproId, PodioItemId, FilArkivCaseId);
+        var tickets = await _inner.GetAll(DeskproId, PodioItemId, FilArkivCaseId);
+
+        _logger.LogInformation("{count} tickets found by DeskproId = {deskproId}, PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", tickets.Count(), DeskproId, PodioItemId, FilArkivCaseId);
+        return tickets;
+    }
+
     public async Task<Ticket?> GetByDeskproTicketId(int deskproTicketId)
     {
         _logger.LogWarning("Getting ticket by Deskpro ticket id {id}", deskproTicketId);

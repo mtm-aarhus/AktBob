@@ -8,24 +8,24 @@ internal class CreateCaseHandler(IGetOrganizedClient getOrganizedClient) : ICrea
 {
     private readonly IGetOrganizedClient _getOrganizedClient = getOrganizedClient;
 
-    public async Task<Result<CreateCaseResponse>> Handle(string caseTitle, string caseProfile, string status, string access, string department, string facet, string kle, CancellationToken cancellationToken)
+    public async Task<Result<CreateCaseResponse>> Handle(CreateGetOrganizedCaseCommand command, CancellationToken cancellationToken)
     {
         var createCaseCommand = new AAK.GetOrganized.CreateCase.CreateAKTCaseCommand
         {
-            Access = access,
-            CaseProfile = caseProfile,
-            CaseTitle = caseTitle,
-            Department = department,
-            Facet = facet,
-            KLE = kle,
-            Status = status
+            Access = command.Access,
+            CaseProfile = command.CaseProfile,
+            CaseTitle = command.CaseTitle,
+            Department = command.Department,
+            Facet = command.Facet,
+            KLE = command.Kle,
+            Status = command.Status
         };
         
         var createCaseResponse = await _getOrganizedClient.CreateCase(createCaseCommand);
 
         if (createCaseResponse == null)
         {
-            return Result.Error();
+            return Result.Error("Error creating GetOrganized case");
         }
 
         var response = new CreateCaseResponse(createCaseResponse.CaseId, createCaseResponse.CaseUrl);

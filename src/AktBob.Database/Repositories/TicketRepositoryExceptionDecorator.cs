@@ -40,6 +40,19 @@ internal class TicketRepositoryExceptionDecorator : ITicketRepository
         }
     }
 
+    public async Task<IEnumerable<Ticket>> GetAll(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId)
+    {
+        try
+        {
+            return await _inner.GetAll(DeskproId, PodioItemId, FilArkivCaseId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {name}", nameof(GetAll));
+            throw;
+        }
+    }
+
     public async Task<Ticket?> GetByDeskproTicketId(int deskproTicketId)
     {
         try

@@ -43,15 +43,16 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         }
 
         // Create GO-case
-        var createCaseResult = await getOrganized.CreateCase(
-            caseTitle: deskproTicketResult.Value.Subject ?? "Uden titel",
-            caseProfile: Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseProfile")),
-            status: Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseStatus")),
-            access: Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseAccess")),
-            department: MapDepartment(deskproTicketResult.Value.Fields),
-            facet: Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:Facet")),
-            kle: MapKle(deskproTicketResult.Value.Fields),
-            cancellationToken: cancellationToken);
+        var caseTitle = deskproTicketResult.Value.Subject ?? "Uden titel";
+        var caseProfile = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseProfile"));
+        var status = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseStatus"));
+        var access = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseAccess"));
+        var department = MapDepartment(deskproTicketResult.Value.Fields);
+        var facet = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:Facet"));
+        var kle = MapKle(deskproTicketResult.Value.Fields);
+
+        var createCaseCommand = new CreateGetOrganizedCaseCommand(caseTitle, caseProfile, status, access, department, facet, kle);
+        var createCaseResult = await getOrganized.CreateCase(createCaseCommand, cancellationToken: cancellationToken);
 
         if (!createCaseResult.IsSuccess)
         {

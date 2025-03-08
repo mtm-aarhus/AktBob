@@ -2,5 +2,5 @@
 
 internal interface IGetAggregatedCaseHandler
 {
-    Task<string[]> Handle(string aggregatedCaseId, CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<string>> Handle(string aggregatedCaseId, CancellationToken cancellationToken);
 }
