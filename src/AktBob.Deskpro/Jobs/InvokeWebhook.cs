@@ -1,7 +1,6 @@
 ﻿using AktBob.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text;
-using System.Text.Json;
 
 namespace AktBob.Deskpro.Jobs;
 

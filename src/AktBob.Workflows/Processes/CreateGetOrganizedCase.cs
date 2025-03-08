@@ -25,14 +25,13 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
 
     public async Task Handle(CreateGetOrganizedCaseJob job, CancellationToken cancellationToken = default)
     {
+        Guard.Against.NegativeOrZero(job.DeskproId);
+
         using var scope = _serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
-
-        _logger.LogInformation("Creating GetOrganized case (Deskpro ID {deskproId})", job.DeskproId);
-
 
         // Get subject from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(job.DeskproId, cancellationToken);
@@ -63,11 +62,9 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         var caseId = createCaseResult.Value.CaseId;
         var caseUrl = createCaseResult.Value.CaseUrl.Replace("ad.", "");
 
-        _logger.LogInformation("GO case {getOrganizedCaseId} created (Deskpro ID: {deskproId}, GO Case Url: {getOrganizedCaseUrl})", caseId, job.DeskproId, caseUrl);
-
         UpdateDeskproSetGetOrganizedCaseId(deskpro, job.DeskproId, caseId, caseUrl);
         await UpdateDatabaseSetGetOrganizedCaseId(job.DeskproId, unitOfWork, caseId, caseUrl);
-        jobDispatcher.Dispatch(new RegisterMessagesJob(job.DeskproId), TimeSpan.FromMinutes(2)); // Add Deskpro messages to the just created GO-case
+        jobDispatcher.Dispatch(new RegisterMessagesJob(job.DeskproId), TimeSpan.FromMinutes(1)); // Add Deskpro messages to the just created GO-case
     }
 
     // Map Deskpro field "afdeling" to GetOrganized department

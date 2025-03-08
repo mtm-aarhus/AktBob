@@ -13,6 +13,9 @@ internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfigurati
 
     public async Task Handle(RegisterPodioCaseJob job, CancellationToken cancellationToken = default)
     {
+        Guard.Against.NegativeOrZero(job.PodioItemId.AppId);
+        Guard.Against.NegativeOrZero(job.PodioItemId.Id);
+
         using var scope = _serviceScopeFactory.CreateScope();
 
         // Services
@@ -36,7 +39,6 @@ internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfigurati
         }
 
         var caseNumber = podioItemResult.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
-
         if (string.IsNullOrEmpty(caseNumber))
         {
             _logger.LogError("Could not get case number field value from Podio Item {id}", job.PodioItemId);

@@ -22,7 +22,6 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
 
         if (!cachedData.Cases.TryGetValue(job.CacheId, out var @case))
         {
-            _logger.LogWarning("Cached case not found");
             return Task.CompletedTask;
         }
 
@@ -39,20 +38,12 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
                     FileId = fileId
                 };
 
-                var first = true;
-
                 while (true)
                 {
-                    var delay = 20000 + random.Next(-2000, 2000);
+                    var delay = 30000 + random.Next(-2000, 2000);
                     await Task.Delay(delay);
 
                     var response = await filArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
-
-                    if (first)
-                    {
-                        _logger.LogInformation("Case {caseId} File {fileId} IsBeingProcessed: {isBeingProcessed} IsInQueue: {isInQueue} ({queueNumber}) ('{fileName}')", @case.FilArkivCaseId, fileId, response.IsBeingProcessed, response.IsInQueue, response.QueueNumber, response.FileName);
-                        first = false;
-                    }
 
                     if (!response.IsInQueue)
                     {
@@ -76,7 +67,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
         _logger.LogInformation("Finished querying processing statusses for files for FilArkiv Case {id}, PodioItemId {podioItemId}", @case.FilArkivCaseId, @case.PodioItemId);
 
         cachedData.Cases.TryRemove(job.CacheId, out Case? removedCase);
-        
+
         if (!settings.UpdatePodioItemImmediately)
         {
             UpdatePodioField.SetFilArkivCaseId(podio, _configuration, @case.FilArkivCaseId, @case.PodioItemId);
@@ -86,6 +77,8 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
 
         var postCommandCommand = new PostCommentCommand(@case.PodioItemId, commentText);
         podio.PostComment(postCommandCommand);
+
+        _logger.LogDebug("Executed {name} with {job}", nameof(QueryFilesProcessingStatus), job);
 
         return Task.CompletedTask;
     }

@@ -14,8 +14,14 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
     private readonly ILogger<AddOrUpdateDeskproTicketToGetOrganized> _logger = logger;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
+    record ContentElement(DateTime Timestamp, byte[] Bytes);
+
     public async Task Handle(AddOrUpdateDeskproTicketToGetOrganizedJob job, CancellationToken cancellationToken = default)
     {
+        // Validate job parameters
+        Guard.Against.NegativeOrZero(job.TicketId);
+        Guard.Against.NullOrEmpty(job.GOCaseNumber);
+
         var scope = _serviceScopeFactory.CreateScope();
         var pendingsTickets = scope.ServiceProvider.GetRequiredService<PendingsTickets>();
 
@@ -34,12 +40,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
             return;
         }
 
-        List<byte[]> content = new();
-
-
-        // Get Deskpro Ticket
         var ticketResult = await deskpro.GetTicket(job.TicketId, cancellationToken);
-
         if (!ticketResult.IsSuccess || ticketResult.Value is null)
         {
             _logger.LogError("Error getting ticket {id} from Deskpro", job.TicketId);
@@ -47,50 +48,51 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         }
 
         var ticket = ticketResult.Value;
-        
 
-        // Get Deskpro custom fields specification
-        var ticketCustomFieldsResult = await deskpro.GetCustomFieldSpecifications(cancellationToken); // TODO: Cache
-        if (!ticketCustomFieldsResult.IsSuccess)
+        var getTicketCustomFields = deskpro.GetCustomFieldSpecifications(cancellationToken);
+        var getAgent = deskproHelper.GetPerson(deskpro, ticket.Agent?.Id ?? 0, cancellationToken);
+        var getUser = deskproHelper.GetPerson(deskpro, ticket.Person?.Id ?? 0, cancellationToken);
+
+        Task.WaitAll([
+            getTicketCustomFields,
+                getAgent,
+                getUser]);
+
+        if (!getTicketCustomFields.Result.IsSuccess)
         {
-            _logger.LogError("Error getting custom fields specifications from Deskpro");
             return;
         }
 
-        // Get Deskpro ticket agent
-        var agentResult = await deskproHelper.GetPerson(deskpro, ticket.Agent?.Id ?? 0, cancellationToken);
-
-        // Get Deskpro ticket user
-        var userResult = await deskproHelper.GetPerson(deskpro, ticket.Person?.Id ?? 0, cancellationToken);
-
         // Map ticket fields
-        var customFields = GenerateCustomFieldValues(job.CustomFieldIds, ticketCustomFieldsResult.Value, ticket);
+        var customFields = GenerateCustomFieldValues(job.CustomFieldIds, getTicketCustomFields.Result.Value, ticket);
         var caseNumbers = HtmlHelper.GenerateListOfFieldValues(job.CaseNumberFieldIds, ticket, "ticket-case-numbers.html");
 
         var ticketDictionary = new Dictionary<string, string>
         {
             { "ticketId", ticket.Id.ToString() },
             { "caseTitle", ticket.Subject },
-            { "userName", userResult.Value?.FullName ?? string.Empty },
-            { "userEmail", userResult.Value?.Email ?? string.Empty },
-            { "userPhone", string.Join(", ", userResult.Value?.PhoneNumbers ?? Enumerable.Empty<string>()) },
-            { "agentName", agentResult.Value?.FullName ?? string.Empty},
-            { "agentEmail", agentResult.Value ?.Email ?? string.Empty },
+            { "userName", getUser.Result.Value?.FullName ?? string.Empty },
+            { "userEmail", getUser.Result.Value?.Email ?? string.Empty },
+            { "userPhone", string.Join(", ", getUser.Result.Value?.PhoneNumbers ?? Enumerable.Empty<string>()) },
+            { "agentName", getAgent.Result.Value?.FullName ?? string.Empty},
+            { "agentEmail", getAgent.Result.Value ?.Email ?? string.Empty },
             { "custom-fields", string.Join("", customFields) },
             { "caseNumbers", string.Join("", caseNumbers) }
         };
 
-        var ticketHtml = HtmlHelper.GenerateHtml("ticket.html", ticketDictionary);
-        content.Add(Encoding.UTF8.GetBytes(ticketHtml));
+        List<ContentElement> contentElements = new();
 
+        var ticketHtml = HtmlHelper.GenerateHtml("ticket.html", ticketDictionary);
+        contentElements.Add(new(DateTime.MaxValue, Encoding.UTF8.GetBytes(ticketHtml)));
 
         // Messages
         var getMessagesResult = await deskpro.GetMessages(ticket.Id, cancellationToken);
-
         if (getMessagesResult.IsSuccess)
         {
             var messages = getMessagesResult.Value.OrderByDescending(x => x.CreatedAt);
-            foreach (var message in messages)
+
+            // Get and handle all messages at the same time
+            Task.WaitAll(messages.Select(async message =>
             {
                 var person = await deskproHelper.GetPerson(deskpro, message.Person?.Id ?? 0, cancellationToken);
                 message.Person = person.Value;
@@ -117,72 +119,76 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
                 }
 
                 var messageHtml = HtmlHelper.GenerateMessageHtml(message.CreatedAt, message.Person.FullName, message.Person.Email, message.Content, job.GOCaseNumber, ticket.Subject, messageNumber, attachments);
-                content.Add(Encoding.UTF8.GetBytes(messageHtml));
-            }
+                contentElements.Add(new(message.CreatedAt, Encoding.UTF8.GetBytes(messageHtml)));
+            }));
         }
 
+        var fileResult = await GeneratePDF(cloudConvertModule, contentElements, cancellationToken);
+        if (!fileResult.IsSuccess)
+        {
+            _logger.LogError(fileResult.Errors.AsString());
+            return;
+        }
 
+        // Check if this submission is the most recent for the specified ticket. Check this as late as possible.
+        if (IsMostRecentSubmission(currentPendingTicket, pendingsTickets))
+        {
+            // Upload to GO
+            var uploadDocumentCommand = new UploadDocumentCommand(
+                fileResult.Value,
+                job.GOCaseNumber,
+                "Samlet korrespondance.pdf",
+                string.Empty,
+                DateTime.UtcNow.UtcToDanish(),
+                UploadDocumentCategory.Internal,
+                true);
 
+            var uploadDocumentResult = await getOrganized.UploadDocument(uploadDocumentCommand, cancellationToken);
+
+            if (!uploadDocumentResult.IsSuccess)
+            {
+                _logger.LogError("Error uploading full ticket document to GetOrganized: Deskpro ticket {ticketId}, GO case '{goCaseNumber}'", job.TicketId, job.GOCaseNumber);
+            }
+
+            pendingsTickets.RemovePendingTicket(currentPendingTicket);
+        }
+    }
+
+    private async Task<Result<byte[]>> GeneratePDF(ICloudConvertModule cloudConvertModule, IList<ContentElement> contentElements, CancellationToken cancellationToken)
+    {
         // Generate PDF
-        var generateTasksResult = cloudConvertModule.GenerateTasks(content);
+        var orderedContentElements = contentElements.OrderByDescending(x => x.Timestamp).Select(x => x.Bytes);
+        var generateTasksResult = cloudConvertModule.GenerateTasks(orderedContentElements);
         if (!generateTasksResult.IsSuccess)
         {
-            _logger.LogError("Error generating CloudConvert tasks dictionary for Deskpro ticket {id}", job.TicketId);
-            return;
+            return Result.Error("Error generating CloudConvert tasks dictionary");
         }
 
         var jobIdResult = await cloudConvertModule.ConvertHtmlToPdf(generateTasksResult.Value, cancellationToken);
         if (!jobIdResult.IsSuccess)
         {
-            _logger.LogError("Error creating CloudConvert job generating PDF for Deskpro ticket {id}", job.TicketId);
-            return;
+            return Result.Error("Error creating CloudConvert job");
         }
 
         var urlResult = await cloudConvertModule.GetDownloadUrl(jobIdResult.Value, cancellationToken);
         if (!urlResult.IsSuccess)
         {
-            _logger.LogError("Error querying job '{id}' from PDF from CloudConvert", jobIdResult.Value);
-            return;
+            return Result.Error($"Error querying job '{jobIdResult.Value}' from PDF from CloudConvert");
         }
 
         var fileResult = await cloudConvertModule.GetFile(urlResult.Value, cancellationToken);
         if (!fileResult.IsSuccess)
         {
-            _logger.LogError("CloudConvert job {id}: Error downloading file from url: {url}", jobIdResult.Value, urlResult.Value);
-            return;
+            return Result.Error($"CloudConvert job {jobIdResult.Value}: Error downloading file from url: {urlResult.Value}");
         }
 
-        // Check if this submission is the most recent for the specified ticket. Check this as late as possible.
-        if (!IsMostRecentSubmission(currentPendingTicket, pendingsTickets))
-        {
-            return;
-        }
-
-        // Upload to GO
-        var uploadDocumentCommand = new UploadDocumentCommand(
-            fileResult.Value,
-            job.GOCaseNumber,
-            "Samlet korrespondance.pdf",
-            string.Empty,
-            DateTime.UtcNow.UtcToDanish(),
-            UploadDocumentCategory.Internal,
-            true);
-
-        var uploadDocumentResult = await getOrganized.UploadDocument(uploadDocumentCommand, cancellationToken);
-
-        if (!uploadDocumentResult.IsSuccess)
-        {
-            _logger.LogError("Error uploading full ticket document to GetOrganized: Deskpro ticket {ticketId}, GO case '{goCaseNumber}'", job.TicketId, job.GOCaseNumber);
-        }
-        
-        pendingsTickets.RemovePendingTicket(currentPendingTicket);
+        return fileResult;
     }
 
     private bool IsMostRecentSubmission(PendingTicket pendingTicket, PendingsTickets pendingsTickets)
     {
         if (!pendingsTickets.IsMostRecent(pendingTicket))
         {
-            _logger.LogInformation("Not the most current submission for updating the Deskpro PDF document. (Deskpro ticket {id}, submittedAt {submittedAt})", pendingTicket.TicketId, pendingTicket.SubmittedAt);
             pendingsTickets.RemovePendingTicket(pendingTicket);
             return false;
         }

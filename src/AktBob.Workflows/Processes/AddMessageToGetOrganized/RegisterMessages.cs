@@ -11,11 +11,13 @@ internal class RegisterMessages(ILogger<RegisterMessages> logger, IServiceScopeF
 
     public async Task Handle(RegisterMessagesJob job, CancellationToken cancellationToken = default)
     {
+        // Validate job parameters
+        Guard.Against.NegativeOrZero(job.DeskproTicketId);
+
         var scope = _serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-
 
         // Get message from Deskpro
         var getDeskproMessagesResult = await deskpro.GetMessages(job.DeskproTicketId, cancellationToken);

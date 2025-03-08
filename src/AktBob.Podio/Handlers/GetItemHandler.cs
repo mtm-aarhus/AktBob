@@ -19,12 +19,11 @@ internal class GetItemHandler(IPodioFactory podioFactory, IConfiguration configu
             clientSecret: ConfigurationHelper.GetClientSecret(_configuration));
 
         var item = await podio.GetItem(podioItemId.AppId, podioItemId.Id, cancellationToken);
-
         if (item == null)
         {
-            return Result.NotFound();
+            return Result.Error($"Error getting item {podioItemId} from Podio");
         }
 
-        return Result.Success(item);
+        return item;
     }
 }

@@ -10,9 +10,10 @@ using AktBob.Shared.Jobs;
 using AktBob.UiPath.Contracts;
 
 namespace AktBob.Workflows.Processes;
-internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> logger,
-                                                     IConfiguration configuration,
-                                                     IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateDocumentListQueueItemJob>
+internal class CreateDocumentListQueueItem(
+    ILogger<CreateDocumentListQueueItem> logger,
+    IConfiguration configuration,
+    IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateDocumentListQueueItemJob>
 {
     private readonly ILogger<CreateDocumentListQueueItem> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
@@ -21,6 +22,10 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
 
     public async Task Handle(CreateDocumentListQueueItemJob job, CancellationToken cancellationToken = default)
     {
+        // Validate job parameters
+        Guard.Against.NegativeOrZero(job.PodioItemId.AppId);
+        Guard.Against.NegativeOrZero(job.PodioItemId.Id);
+
         using var scope = _serviceScopeFactory.CreateScope();
 
         // Services
@@ -47,35 +52,30 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
 
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
-        // Get metadata from Podio
-        var caseNumberResult = await GetCaseNumberFromPodioItem(podio, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken);
-        if (!caseNumberResult.IsSuccess)
+        var getCaseNumber = GetCaseNumberFromPodioItem(podio, job.PodioItemId, podioFieldCaseNumber.Key, cancellationToken);
+        var getDatabaseTicket = GetTicketFromApiDatabaseByPodioItemId(unitOfWork, timeProvider, job.PodioItemId.Id, cancellationToken);
+
+        Task.WaitAll([getCaseNumber, getDatabaseTicket]);
+        
+        if (!getCaseNumber.Result.IsSuccess || !getDatabaseTicket.Result.IsSuccess)
         {
             return;
         }
 
-        // Find ticket in database from PodioItemId
-        var databaseTicketResult = await GetTicketFromApiDatabaseByPodioItemId(unitOfWork, timeProvider, job.PodioItemId.Id, cancellationToken);
-        if (!databaseTicketResult.IsSuccess)
-        {
-            return;
-        }
-
-        // Get ticket from Deskpro
-        var deskproTicket = await deskpro.GetTicket(databaseTicketResult.Value.DeskproId, cancellationToken);
+        var deskproTicket = await deskpro.GetTicket(getDatabaseTicket.Result.Value.DeskproId, cancellationToken);
         if (deskproTicket == null)
         {
-            _logger.LogError("Error getting ticket {id} from Deskpro", databaseTicketResult.Value.DeskproId);
+            _logger.LogError("Error getting ticket {id} from Deskpro", getDatabaseTicket.Result.Value.DeskproId);
             return;
         }
 
-        var agent = await deskproHelper.GetAgent(deskpro, deskproTicket.Value.Agent?.Id ?? 0, cancellationToken);
+        (string Name, string Email) agent = deskproTicket.Value.Agent?.Id != null ? await deskproHelper.GetAgent(deskpro, deskproTicket.Value.Agent.Id, cancellationToken) : (string.Empty, string.Empty);
 
         if (useOpenOrchestrator)
         {
             var payload = new
             {
-                SagsNummer = caseNumberResult.Value,
+                SagsNummer = getCaseNumber.Result.Value,
                 agent.Email,
                 Navn = agent.Name,
                 PodioID = job.PodioItemId.Id,
@@ -83,14 +83,14 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
                 Titel = deskproTicket.Value.Subject
             };
 
-            var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {caseNumberResult}", payload.ToJson());
+            var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {getCaseNumber}", payload.ToJson());
             openOrchestrator.CreateQueueItem(command);
         }
         else
         {
             var payload = new
             {
-                SagsNummer = caseNumberResult.Value,
+                SagsNummer = getCaseNumber.Result.Value,
                 agent.Email,
                 Navn = agent.Name,
                 PodioID = job.PodioItemId.Id,
@@ -98,7 +98,7 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
                 Titel = deskproTicket.Value.Subject
             };
 
-            uiPath.CreateQueueItem(uiPathQueueName, $"Podio {job.PodioItemId}: {caseNumberResult}", payload.ToJson());
+            uiPath.CreateQueueItem(uiPathQueueName, $"Podio {job.PodioItemId}: {getCaseNumber}", payload.ToJson());
         }
     }
 

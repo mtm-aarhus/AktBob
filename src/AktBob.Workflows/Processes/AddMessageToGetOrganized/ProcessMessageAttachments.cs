@@ -2,6 +2,7 @@
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Shared.Extensions;
+using System.Collections.ObjectModel;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
@@ -13,13 +14,16 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
 
     public async Task Handle(ProcessMessageAttachmentsJob job, CancellationToken cancellationToken = default)
     {
+        // Validate job parameters
+        Guard.Against.Zero(job.ParentDocumentId);
+        Guard.Against.NullOrEmpty(job.CaseNumber);
+
         using var scope = serviceScopeFactory.CreateScope();
         var deskproModule = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
 
         DateTime createdAtDanishTime = job.Timestamp.UtcToDanish();
-        var childrenDocumentIds = new List<int>();
-
+        var childrenDocumentIds = new Collection<int>();
 
         foreach (var attachment in job.Attachments)
         {
@@ -66,11 +70,12 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
             getOrganized.FinalizeDocument(finalizeDocumentCommand);
         }
 
-
-        // Set attachments as children
-        var relatedDocumentsCommand = new RelateDocumentsCommand(job.ParentDocumentId, childrenDocumentIds.ToArray());
-        await getOrganized.RelateDocuments(relatedDocumentsCommand, cancellationToken);
-
+        if (childrenDocumentIds.Count > 0)
+        {
+            // Set attachments as children
+            var relatedDocumentsCommand = new RelateDocumentsCommand(job.ParentDocumentId, childrenDocumentIds.ToArray());
+            await getOrganized.RelateDocuments(relatedDocumentsCommand, cancellationToken);
+        }
 
         // Finalize the parent document
         // The parent document must not be finalized before the attachments has been set as children

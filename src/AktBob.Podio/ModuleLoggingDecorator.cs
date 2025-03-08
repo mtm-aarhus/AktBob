@@ -1,6 +1,7 @@
 ﻿using AAK.Podio.Models;
 using AktBob.Podio.Contracts;
 using AktBob.Shared;
+using AktBob.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Podio;
@@ -17,7 +18,7 @@ internal class ModuleLoggingDecorator(IPodioModule inner, ILogger<ModuleLoggingD
         var result = await _inner.GetItem(podioItemId, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning("Podio did not return an item when requesting ID {id}", podioItemId);
+            _logger.LogWarning(result.Errors.AsString());
         }
 
         return result;

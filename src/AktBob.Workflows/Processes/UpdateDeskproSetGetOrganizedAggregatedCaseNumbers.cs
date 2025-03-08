@@ -12,6 +12,13 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
 
     public Task Handle(UpdateDeskproSetGetOrganizedAggregatedCaseNumbersJob job, CancellationToken cancellationToken = default)
     {
+        if (job.AggregatedCaseIds.Length == 0)
+        {
+            return Task.CompletedTask;
+        }
+
+        Guard.Against.NegativeOrZero(job.DeskproTicketId);
+
         var scope = _serviceScopeFactory.CreateScope();
         var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();

@@ -18,11 +18,9 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
 
     public async Task Handle(AddMessageToGetOrganizedJob job, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(job.CaseNumber))
-        {
-            _logger.LogError("DeskproMessageId {id}: Case number is null or empty", job.DeskproMessageId);
-            return;
-        }
+        // Validate job parameters
+        Guard.Against.NullOrEmpty(job.CaseNumber);
+        Guard.Against.Zero(job.DeskproMessageId);
 
         using var scope = _serviceScopeFactory.CreateScope();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
@@ -32,122 +30,116 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-        try
+        var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(job.DeskproMessageId);
+
+        if (databaseMessage is null)
         {
-            var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(job.DeskproMessageId);
-
-            if (databaseMessage is null)
-            {
-                _logger.LogError("Error getting databaese message by Deskpro message Id {id}", job.DeskproMessageId);
-                return;
-            }
-
-            // Get message from database, check if documentId is null
-            if (databaseMessage.GODocumentId is not null)
-            {
-                // The message is already journalized -> do nothing
-                return;
-            }
-
-            var databaseTicket = await unitOfWork.Tickets.Get(databaseMessage.TicketId);
-            if (databaseTicket is null)
-            {
-                _logger.LogError("Database ticket {id} not found", databaseMessage.TicketId);
-                return;
-            }
-
-            // Get Deskpro ticket (we need the deskpro ticket id to query the message ifself)
-            var deskproTicketResult = await deskpro.GetTicket(databaseTicket.DeskproId, cancellationToken);
-            if (!deskproTicketResult.IsSuccess)
-            {
-                _logger.LogError("Error getting Deskpro ticket {id}", databaseTicket.DeskproId);
-                return;
-            }
-
-            var deskproTicket = deskproTicketResult.Value;
-
-            // Get Deskpro message
-            var getDeskproMessageResult = await deskpro.GetMessage(databaseTicket.DeskproId, databaseMessage.DeskproMessageId, cancellationToken);
-
-            if (!getDeskproMessageResult.IsSuccess)
-            {
-                _logger.LogError("Error requesting Deskpro message ID {id}. Message will be marked 'deleted' in database.", job.DeskproMessageId);
-                await unitOfWork.Messages.Delete(databaseMessage.Id); // Important: Use the database row ID here!
-                return;
-            }
-
-            var deskproMessage = getDeskproMessageResult.Value;
-
-            // Get Deskpro person
-            var personResult = await deskproHelper.GetPerson(deskpro, deskproMessage.Person.Id, cancellationToken);
-            var person = personResult.Value;
-
-            // Get attachments
-            var attachments = Enumerable.Empty<AttachmentDto>();
-            if (getDeskproMessageResult.Value.AttachmentIds.Any())
-            {
-                var getAttachmentsResult = await deskpro.GetMessageAttachments(deskproTicket.Id, deskproMessage.Id, cancellationToken);
-                attachments = getAttachmentsResult.Value ?? Enumerable.Empty<AttachmentDto>();
-            }
-
-
-            // Generate PDF document
-            _logger.LogInformation("Generating PDF document from Deskpro message {id}", job.DeskproMessageId);
-
-            var generateDocumentResult = await GenerateDocument(cloudConvert, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, job.CaseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
-            if (!generateDocumentResult.IsSuccess)
-            {
-                _logger.LogError("Error generating the message document for Deskpro message {id}", job.DeskproMessageId);
-                return;
-            }
-
-
-            DateTime createdAtDanishTime = getDeskproMessageResult!.Value.CreatedAt.UtcToDanish();
-            var documentCategory = getDeskproMessageResult.Value.IsAgentNote ? UploadDocumentCategory.Internal : MapDocumentCategoryFromPerson(personResult.Value);
-            var fileName = GenerateFileName(databaseMessage.MessageNumber ?? 0, person.FullName, createdAtDanishTime);
-
-            // Upload parent document
-            var upoadDocumentCommand = new UploadDocumentCommand(
-                generateDocumentResult.Value,
-                job.CaseNumber,
-                fileName,
-                string.Empty,
-                createdAtDanishTime,
-                documentCategory,
-                false);
-
-            var uploadedDocumentIdResult = await getOrganized.UploadDocument(upoadDocumentCommand, cancellationToken);
-            if (!uploadedDocumentIdResult.IsSuccess)
-            {
-                _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", job.DeskproMessageId, job.CaseNumber);
-                return;
-            }
-
-
-            // Update database
-            // TODO: improve this: We need call this directly here and not in a background job since adding the documentId to the message in the database prevents uploading the message again next time
-            databaseMessage.GODocumentId = uploadedDocumentIdResult.Value;
-            await unitOfWork.Messages.Update(databaseMessage);
-
-            _logger.LogInformation("Database updated: GetOrganized documentId {documentId} set for message {id}", uploadedDocumentIdResult.Value, deskproMessage.Id);
-
-            if (attachments.Any())
-            {
-                // Handle message attachments
-                // Note: the attachments handler also finalizing the parent document
-                jobDispatcher.Dispatch(new ProcessMessageAttachmentsJob(uploadedDocumentIdResult.Value, job.CaseNumber, deskproMessage.CreatedAt, documentCategory, attachments));
-            }
-            else
-            {
-                // Finalize the parent document
-                var finalizeDocumentCommand = new FinalizeDocumentCommand(uploadedDocumentIdResult.Value);
-                getOrganized.FinalizeDocument(finalizeDocumentCommand);
-            }
+            _logger.LogError("Error getting database message by Deskpro message Id {id}", job.DeskproMessageId);
+            return;
         }
-        catch (Exception ex)
+
+        // Get message from database, check if documentId is null
+        if (databaseMessage.GODocumentId is not null)
         {
-            _logger.LogError("{name}: {e}", nameof(AddMessageToGetOrganized), ex.Message);
+            // The message is already journalized -> do nothing
+            return;
         }
+
+        var databaseTicket = await unitOfWork.Tickets.Get(databaseMessage.TicketId);
+        if (databaseTicket is null)
+        {
+            _logger.LogError("Database ticket {id} not found", databaseMessage.TicketId);
+            return;
+        }
+
+        // Get Deskpro ticket (we need the deskpro ticket id to query the message ifself)
+        var deskproTicketResult = await deskpro.GetTicket(databaseTicket.DeskproId, cancellationToken);
+        if (!deskproTicketResult.IsSuccess)
+        {
+            _logger.LogError("Error getting Deskpro ticket {id}", databaseTicket.DeskproId);
+            return;
+        }
+
+        var deskproTicket = deskproTicketResult.Value;
+
+        // Get Deskpro message
+        var getDeskproMessageResult = await deskpro.GetMessage(databaseTicket.DeskproId, databaseMessage.DeskproMessageId, cancellationToken);
+
+        if (!getDeskproMessageResult.IsSuccess)
+        {
+            _logger.LogError("Error requesting Deskpro message ID {id}. Message will be marked 'deleted' in database.", job.DeskproMessageId);
+            await unitOfWork.Messages.Delete(databaseMessage.Id); // Important: Use the database row ID here!
+            return;
+        }
+
+        var deskproMessage = getDeskproMessageResult.Value;
+
+        // Get Deskpro person
+        var personResult = await deskproHelper.GetPerson(deskpro, deskproMessage.Person.Id, cancellationToken);
+        var person = personResult.Value;
+
+        // Get attachments
+        var attachments = Enumerable.Empty<AttachmentDto>();
+        if (getDeskproMessageResult.Value.AttachmentIds.Any())
+        {
+            var getAttachmentsResult = await deskpro.GetMessageAttachments(deskproTicket.Id, deskproMessage.Id, cancellationToken);
+            attachments = getAttachmentsResult.Value ?? Enumerable.Empty<AttachmentDto>();
+        }
+
+
+        // Generate PDF document
+        _logger.LogInformation("Generating PDF document from Deskpro message {id}", job.DeskproMessageId);
+
+        var generateDocumentResult = await GenerateDocument(cloudConvert, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, job.CaseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
+        if (!generateDocumentResult.IsSuccess)
+        {
+            _logger.LogError("Error generating the message document for Deskpro message {id}", job.DeskproMessageId);
+            return;
+        }
+
+
+        DateTime createdAtDanishTime = getDeskproMessageResult!.Value.CreatedAt.UtcToDanish();
+        var documentCategory = getDeskproMessageResult.Value.IsAgentNote ? UploadDocumentCategory.Internal : MapDocumentCategoryFromPerson(personResult.Value);
+        var fileName = GenerateFileName(databaseMessage.MessageNumber ?? 0, person.FullName, createdAtDanishTime);
+
+        // Upload parent document
+        var upoadDocumentCommand = new UploadDocumentCommand(
+            generateDocumentResult.Value,
+            job.CaseNumber,
+            fileName,
+            string.Empty,
+            createdAtDanishTime,
+            documentCategory,
+            false);
+
+        var uploadedDocumentIdResult = await getOrganized.UploadDocument(upoadDocumentCommand, cancellationToken);
+        if (!uploadedDocumentIdResult.IsSuccess)
+        {
+            _logger.LogError("Error uploading document to GetOrganized: Deskpro message {messageId}, GO case '{goCaseNumber}'", job.DeskproMessageId, job.CaseNumber);
+            return;
+        }
+
+
+        // Update database
+        // TODO: improve this: We need call this directly here and not in a background job since adding the documentId to the message in the database prevents uploading the message again next time
+        databaseMessage.GODocumentId = uploadedDocumentIdResult.Value;
+        await unitOfWork.Messages.Update(databaseMessage);
+
+        _logger.LogInformation("Database updated: GetOrganized documentId {documentId} set for message {id}", uploadedDocumentIdResult.Value, deskproMessage.Id);
+
+        if (attachments.Any())
+        {
+            // Handle message attachments
+            // Note: the attachments handler also finalizing the parent document
+            jobDispatcher.Dispatch(new ProcessMessageAttachmentsJob(uploadedDocumentIdResult.Value, job.CaseNumber, deskproMessage.CreatedAt, documentCategory, attachments));
+        }
+        else
+        {
+            // Finalize the parent document
+            var finalizeDocumentCommand = new FinalizeDocumentCommand(uploadedDocumentIdResult.Value);
+            getOrganized.FinalizeDocument(finalizeDocumentCommand);
+        }
+        
     }
 
 

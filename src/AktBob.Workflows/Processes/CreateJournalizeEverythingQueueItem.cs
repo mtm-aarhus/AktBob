@@ -16,6 +16,8 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
 
     public async Task Handle(CreateJournalizeEverythingQueueItemJob job, CancellationToken cancellationToken = default)
     {
+        Guard.Against.NegativeOrZero(job.DeskproId);
+
         var scope = _serviceScopeFactory.CreateScope();
 
         // Services

@@ -30,12 +30,10 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
         }
 
         bool moveToNextPage = true;
-        int pageIndex = 0;
+        int pageIndex = 1; // First page = pageIndex = 1
 
         while (moveToNextPage)
         {
-            pageIndex++; // First page = pageIndex = 1
-
             var documentOverviewParameters = new DocumentOverviewParameters
             {
                 CaseId = @case.FilArkivCaseId.ToString(),
@@ -56,13 +54,14 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
                 moveToNextPage = false;
             }
 
-
             // Add files to cached case object
             foreach (var document in documentOverview.Items)
             {
                 var documentFileIds = document.Files.Select(f => f.Id);
                 @case.Files.AddRange(documentFileIds);
             }
+
+            pageIndex++;
         }
 
         _logger.LogInformation("Case {caseId}: {count} files registered", @case.FilArkivCaseId, @case.Files.Count());
