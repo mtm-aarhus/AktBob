@@ -1,10 +1,10 @@
 ﻿using AAK.Deskpro;
 
 namespace AktBob.Deskpro.Handlers;
-internal class GetMessagesHandler(IDeskproClient deskpro, IGetPersonHandler getDeskproPersonHandler) : IGetMessagesHandler
+internal class GetMessagesHandler(IDeskproClient deskproClient, IDeskproModule deskproModule) : IGetMessagesHandler
 {
-    private readonly IDeskproClient _deskpro = deskpro;
-    private readonly IGetPersonHandler _getDeskproPersonHandler = getDeskproPersonHandler;
+    private readonly IDeskproClient _deskproClient = deskproClient;
+    private readonly IDeskproModule _deskproModule = deskproModule;
 
     public async Task<Result<IEnumerable<MessageDto>>> Handle(int ticketId, CancellationToken cancellationToken)
     {
@@ -15,7 +15,7 @@ internal class GetMessagesHandler(IDeskproClient deskpro, IGetPersonHandler getD
 
         do
         {
-            var deskproMessages = await _deskpro.GetTicketMessages(ticketId, page, count, cancellationToken);
+            var deskproMessages = await _deskproClient.GetTicketMessages(ticketId, page, count, cancellationToken);
 
             if (deskproMessages != null)
             {
@@ -40,11 +40,15 @@ internal class GetMessagesHandler(IDeskproClient deskpro, IGetPersonHandler getD
 
         } while (page <= totalPages);
 
+        if (messages is null)
+        {
+            return Result.Error($"Error getting ticket {ticketId} messages");
+        }
 
         // Add people to the messages 
         foreach (var message in messages)
         {
-            var getPersonResult = await _getDeskproPersonHandler.Handle(message.Person.Id, cancellationToken);
+            var getPersonResult = await _deskproModule.GetPerson(message.Person.Id, cancellationToken);
 
             var person = getPersonResult.Value;
             if (person != null)

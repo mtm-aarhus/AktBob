@@ -35,6 +35,11 @@ public class GetMessageAttachmentsHandler(IDeskproClient deskpro) : IGetMessageA
         }
         while (pageNumber <= totalPageCount);
 
+        if (attachments is null)
+        {
+            return Result.Error($"Error getting message attachments list from Deskpro (ticket {ticketId} message {messageId})");
+        }
+
         return attachments;
     }
 }

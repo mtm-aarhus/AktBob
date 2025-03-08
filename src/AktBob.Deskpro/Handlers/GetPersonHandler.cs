@@ -1,32 +1,19 @@
 ﻿using AAK.Deskpro;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace AktBob.Deskpro.Handlers;
-internal class GetPersonHandler(IDeskproClient deskpro, IMemoryCache cache) : IGetPersonHandler
+internal class GetPersonHandler(IDeskproClient deskpro) : IGetPersonHandler
 {
     private readonly IDeskproClient _deskpro = deskpro;
-    private readonly IMemoryCache _cache = cache;
-    private const string CACHE_KEY = "DeskproPerson";
 
     public async Task<Result<PersonDto>> Handle(int personId, CancellationToken cancellationToken)
-
     {
-        if (_cache.TryGetValue(CACHE_KEY + personId.ToString(), out PersonDto? dto))
-        {
-            if (dto != null)
-            {
-                return Result.Success(dto);
-            }
-        }
-
         var person = await _deskpro.GetPersonById(personId);
-
         if (person is null)
         {
-            return Result.NotFound();
+            return Result.Error($"Error getting person {personId} from Deskpro.");
         }
 
-        dto = new PersonDto
+        var dto = new PersonDto
         {
             Id = person.Id,
             IsAgent = person.IsAgent,
@@ -37,8 +24,6 @@ internal class GetPersonHandler(IDeskproClient deskpro, IMemoryCache cache) : IG
             FullName = person.FullName,
             PhoneNumbers = person.PhoneNumbers
         };
-
-        _cache.Set(CACHE_KEY + personId, dto, TimeSpan.FromHours(24));
 
         return Result.Success(dto);
     }

@@ -11,7 +11,7 @@ internal class GetTicketHandler(IDeskproClient deskproClient) : IGetTicketHandle
 
         if (ticket == null)
         {
-            return Result.NotFound();
+            return Result.Error($"Error getting ticket {ticketId} from Deskpro");
         }
 
         var dto = new TicketDto
