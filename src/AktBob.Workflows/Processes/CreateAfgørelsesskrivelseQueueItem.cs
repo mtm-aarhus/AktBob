@@ -89,6 +89,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             SagsbehandlerEmail = agent.Email
         };
 
-        openOrchestrator.CreateQueueItem(openOrchestratorQueueName, $"DeskproID {job.DeskproTicketId}", payload.ToJson());
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"DeskproID {job.DeskproTicketId}", payload.ToJson());
+        openOrchestrator.CreateQueueItem(command);
     }
 }

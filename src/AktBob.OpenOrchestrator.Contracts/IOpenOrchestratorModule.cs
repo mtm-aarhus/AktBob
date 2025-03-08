@@ -2,5 +2,5 @@
 
 public interface IOpenOrchestratorModule
 {
-    void CreateQueueItem(string QueueName, string Reference, string Payload);
+    void CreateQueueItem(CreateQueueItemCommand command);
 }

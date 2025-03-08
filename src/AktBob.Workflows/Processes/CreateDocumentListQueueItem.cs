@@ -84,7 +84,8 @@ internal class CreateDocumentListQueueItem(ILogger<CreateDocumentListQueueItem> 
                 Titel = deskproTicket.Value.Subject
             };
 
-            openOrchestrator.CreateQueueItem(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {caseNumberResult}", payload.ToJson());
+            var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {caseNumberResult}", payload.ToJson());
+            openOrchestrator.CreateQueueItem(command);
         }
         else
         {

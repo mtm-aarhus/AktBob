@@ -74,7 +74,8 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
                 Overmappenavn = databaseTicket.SharepointFolderName
             };
 
-            openOrchestrator.CreateQueueItem(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload.ToJson());
+            var createOpenOrchestratorQueueItemCommand = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload.ToJson());
+            openOrchestrator.CreateQueueItem(createOpenOrchestratorQueueItemCommand);
         }
         else
         {
