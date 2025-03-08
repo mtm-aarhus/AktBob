@@ -6,6 +6,7 @@ using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AktBob.Podio;
 
@@ -26,7 +27,23 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<PostCommentJob>, PostComment>();
 
         // Module service orchestrator
-        services.AddScoped<IPodioModule, Module>();
+        services.AddScoped<IPodioModule>(provider =>
+        {
+            var inner = new Module(
+                provider.GetRequiredService<IJobDispatcher>(),
+                provider.GetRequiredService<IGetItemHandler>());
+
+            var withLogging = new ModuleLoggingDecorator(
+                inner,
+                provider.GetRequiredService<ILogger<ModuleLoggingDecorator>>());
+
+            var withExceptionHandling = new ModuleExceptionDecorator(
+                withLogging,
+                provider.GetRequiredService<ILogger<ModuleExceptionDecorator>>());
+
+            return withExceptionHandling;
+        });
+
         return services;
     }
 }
