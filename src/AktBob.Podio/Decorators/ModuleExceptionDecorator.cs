@@ -3,7 +3,7 @@ using AktBob.Podio.Contracts;
 using AktBob.Shared;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.Podio;
+namespace AktBob.Podio.Decorators;
 
 internal class ModuleExceptionDecorator(IPodioModule inner, ILogger<ModuleExceptionDecorator> logger) : IPodioModule
 {

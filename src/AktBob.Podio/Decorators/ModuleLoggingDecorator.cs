@@ -4,7 +4,7 @@ using AktBob.Shared;
 using AktBob.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.Podio;
+namespace AktBob.Podio.Decorators;
 
 internal class ModuleLoggingDecorator(IPodioModule inner, ILogger<ModuleLoggingDecorator> logger) : IPodioModule
 {
