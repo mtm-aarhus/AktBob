@@ -23,7 +23,6 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         Guard.Against.Zero(job.DeskproMessageId);
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var cloudConvert = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
         var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
@@ -75,7 +74,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var deskproMessage = getDeskproMessageResult.Value;
 
         // Get Deskpro person
-        var personResult = await deskproHelper.GetPerson(deskpro, deskproMessage.Person.Id, cancellationToken);
+        var personResult = await deskpro.GetPerson(deskproMessage.Person.Id, cancellationToken);
         var person = personResult.Value;
 
         // Get attachments

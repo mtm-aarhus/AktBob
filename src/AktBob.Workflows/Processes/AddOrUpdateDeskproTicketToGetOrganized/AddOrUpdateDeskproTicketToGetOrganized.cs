@@ -26,7 +26,6 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         var pendingsTickets = PendingsTickets.Instance;
 
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
         var cloudConvertModule = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
         var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
@@ -50,8 +49,14 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         var ticket = ticketResult.Value;
 
         var getTicketCustomFields = deskpro.GetCustomFieldSpecifications(cancellationToken);
-        var getAgent = deskproHelper.GetPerson(deskpro, ticket.Agent?.Id ?? 0, cancellationToken);
-        var getUser = deskproHelper.GetPerson(deskpro, ticket.Person?.Id ?? 0, cancellationToken);
+
+        var getAgent = ticket.Agent != null
+            ? deskpro.GetPerson(ticket.Agent.Id, cancellationToken)
+            : Task.FromResult(Result<PersonDto>.Error());
+
+        var getUser = ticket.Person != null
+            ? deskpro.GetPerson(ticket.Person.Id, cancellationToken)
+            : Task.FromResult(Result<PersonDto>.Error());
 
         Task.WaitAll([
             getTicketCustomFields,
@@ -94,7 +99,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
             // Get and handle all messages at the same time
             Task.WaitAll(messages.Select(async message =>
             {
-                var person = await deskproHelper.GetPerson(deskpro, message.Person?.Id ?? 0, cancellationToken);
+                var person = await deskpro.GetPerson(message.Person.Id, cancellationToken);
                 message.Person = person.Value;
 
                 var attachments = Enumerable.Empty<AttachmentDto>();

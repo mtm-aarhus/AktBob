@@ -1,6 +1,5 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
-using AktBob.Workflows.Helpers;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
@@ -20,7 +19,6 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         Guard.Against.NegativeOrZero(job.DeskproTicketId);
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
@@ -39,8 +37,14 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
 
         var deskproTicket = getDeskproTicketResult.Value;
 
-        var getPerson = GetPerson(deskproHelper, deskpro, deskproTicket.Person, cancellationToken);
-        var getAgent = GetAgent(deskproHelper, deskpro, deskproTicket.Agent, cancellationToken);
+        var getPerson = deskproTicket.Person != null
+            ? deskpro.GetPerson(deskproTicket.Person.Id, cancellationToken)
+            : Task.FromResult(Result<PersonDto>.Error());
+
+        var getAgent = deskproTicket.Agent != null
+            ? deskpro.GetPerson(deskproTicket.Agent.Id, cancellationToken)
+            : Task.FromResult(Result<PersonDto>.Error());
+
         var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproTicketId);
 
         Task.WaitAll([
@@ -54,31 +58,11 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             AnsøgerNavn = getPerson.Result.Value?.FullName,
             AnsøgerEmail = getPerson.Result.Value?.Email,
             Afdeling = deskproTicket.Fields.FirstOrDefault(x => x.Id == deskproAfdelingFieldId)?.Values.FirstOrDefault(),
-            Aktindsigtsovermappe = getDatabaseTicket?.Result?.SharepointFolderName,
-            SagsbehandlerEmail = getAgent.Result.Email
+            Aktindsigtsovermappe = getDatabaseTicket.Result?.SharepointFolderName,
+            SagsbehandlerEmail = getAgent.Result.Value?.Email
         };
 
         var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"DeskproID {job.DeskproTicketId}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
-    }
-
-    private async Task<Result<PersonDto>> GetPerson(DeskproHelper deskproHelper, IDeskproModule deskpro, PersonDto? person, CancellationToken cancellationToken)
-    {
-        if (person != null)
-        {
-            return await deskproHelper.GetPerson(deskpro, person.Id, cancellationToken);
-        }
-
-        return Result.Error();
-    }
-
-    private async Task<(string? Name, string? Email)> GetAgent(DeskproHelper deskproHelper, IDeskproModule deskpro, PersonDto? agent, CancellationToken cancellationToken)
-    {
-        if (agent != null)
-        {
-            return await deskproHelper.GetAgent(deskpro, agent.Id, cancellationToken);
-        }
-
-        return (null, null);
     }
 }

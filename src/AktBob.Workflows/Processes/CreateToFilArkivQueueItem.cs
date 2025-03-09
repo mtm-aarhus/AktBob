@@ -1,7 +1,7 @@
 ﻿using AAK.Podio.Models;
 using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
-using AktBob.Workflows.Helpers;
+using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
@@ -25,7 +25,6 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         // Services
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
@@ -85,13 +84,15 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         }
 
         // Get Deskpro agent
-        var agent = await deskproHelper.GetAgent(deskpro, deskproTicketResult.Value.Agent?.Id ?? 0, cancellationToken);
+        var agent = deskproTicketResult.Value.Agent?.Id != null
+            ? await deskpro.GetPerson(deskproTicketResult.Value.Agent.Id, cancellationToken)
+            : Result<PersonDto>.Error();
 
         // Create queue item
         var payload = new
         {
             Sagsnummer = caseNumber,
-            MailModtager = agent.Email,
+            MailModtager = agent.Value.Email,
             DeskProID = getDatabaseTicket.Result.DeskproId,
             DeskProTitel = deskproTicketResult.Value.Subject,
             PodioID = job.PodioItemId.Id,

@@ -2,12 +2,12 @@
 using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Deskpro.Contracts;
-using AktBob.Workflows.Helpers;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using AktBob.UiPath.Contracts;
+using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateDocumentListQueueItem(
@@ -33,7 +33,6 @@ internal class CreateDocumentListQueueItem(
         var uiPath = scope.ServiceProvider.GetRequiredService<IUiPathModule>();
         var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var timeProvider = scope.ServiceProvider.GetRequiredService<ITimeProvider>();
 
@@ -69,15 +68,17 @@ internal class CreateDocumentListQueueItem(
             return;
         }
 
-        (string Name, string Email) agent = deskproTicket.Value.Agent?.Id != null ? await deskproHelper.GetAgent(deskpro, deskproTicket.Value.Agent.Id, cancellationToken) : (string.Empty, string.Empty);
+        var agent = deskproTicket.Value.Agent?.Id != null
+            ? await deskpro.GetPerson(deskproTicket.Value.Agent.Id, cancellationToken) 
+            : Result<PersonDto>.Error();
 
         if (useOpenOrchestrator)
         {
             var payload = new
             {
                 SagsNummer = getCaseNumber.Result.Value,
-                agent.Email,
-                Navn = agent.Name,
+                agent.Value.Email,
+                Navn = agent.Value.FullName,
                 PodioID = job.PodioItemId.Id,
                 DeskproID = deskproTicket.Value.Id,
                 Titel = deskproTicket.Value.Subject
@@ -91,8 +92,8 @@ internal class CreateDocumentListQueueItem(
             var payload = new
             {
                 SagsNummer = getCaseNumber.Result.Value,
-                agent.Email,
-                Navn = agent.Name,
+                agent.Value.FullName,
+                Navn = agent.Value.FullName,
                 PodioID = job.PodioItemId.Id,
                 DeskproID = deskproTicket.Value.Id,
                 Titel = deskproTicket.Value.Subject

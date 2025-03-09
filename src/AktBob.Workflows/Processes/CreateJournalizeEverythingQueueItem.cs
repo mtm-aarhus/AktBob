@@ -1,6 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
-using AktBob.Workflows.Helpers;
+using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
@@ -23,7 +23,6 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
         // Services
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
         var uiPath = scope.ServiceProvider.GetRequiredService<IUiPathModule>();
 
@@ -61,7 +60,9 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
             return;
         }
 
-        var agent = await deskproHelper.GetAgent(deskpro, deskproTicketResult.Value.Agent?.Id ?? 0, cancellationToken);
+        var agent = deskproTicketResult.Value.Agent?.Id != null
+            ? await deskpro.GetPerson(deskproTicketResult.Value.Agent.Id, cancellationToken)
+            : Result<PersonDto>.Error();
 
         // CREATE QUEUE ITEM
         if (useOpenOrchestrator)
@@ -70,8 +71,8 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
             var payload = new
             {
                 Aktindsigtssag = databaseTicket.CaseNumber,
-                Email = agent.Email,
-                Navn = agent.Name,
+                Email = agent.Value.Email,
+                Navn = agent.Value.FullName,
                 DeskproID = job.DeskproId,
                 Overmappenavn = databaseTicket.SharepointFolderName
             };
@@ -85,8 +86,8 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
             var payload = new
             {
                 Aktindsigtssag = databaseTicket.CaseNumber,
-                Email = agent.Email,
-                Navn = agent.Name,
+                Email = agent.Value.Email,
+                Navn = agent.Value.FullName,
                 DeskproID = job.DeskproId,
                 Overmappenavn = databaseTicket.SharepointFolderName
             };
