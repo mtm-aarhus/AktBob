@@ -13,7 +13,7 @@ internal class MessageRepository : IMessageRepository
         _sqlDataAccess = sqlDataAccess;
     }
 
-    public async Task<int> Add(Message message)
+    public async Task<bool> Add(Message message)
     {
         // The stored procedure prevents from persisting duplicates, so we don't need to check this before called the database
         var parameters = new DynamicParameters();
@@ -26,11 +26,11 @@ internal class MessageRepository : IMessageRepository
         if (rowsAffected == 0)
         {
             // TODO
-            throw new Exception($"Error inserting message {message}");
+            return false;
         }
 
-        var id = parameters.Get<int>("Id");
-        return id;
+        message.Id = parameters.Get<int>("Id");
+        return true;
     }
 
     public async Task<int> Delete(int id) => await _sqlDataAccess.Execute("UPDATE Messages SET Deleted = 1 WHERE Id = @Id", new { Id = id });
@@ -46,7 +46,6 @@ internal class MessageRepository : IMessageRepository
                 TicketId = @TicketId,
                 DeskproMessageId = @DeskproMessageId,
                 GODocumentId = @GODocumentId,
-                Deleted = @Deleted,
                 MessageNumber = @MessageNumber
             WHERE Id = @Id";
             

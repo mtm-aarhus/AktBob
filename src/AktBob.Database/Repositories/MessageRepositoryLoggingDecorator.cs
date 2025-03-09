@@ -9,17 +9,17 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
     private readonly IMessageRepository _inner = inner;
     private readonly ILogger<MessageRepositoryLoggingDecorator> _logger = logger;
 
-    public async Task<int> Add(Message message)
+    public async Task<bool> Add(Message message)
     {
         _logger.LogInformation("Adding {message}", message);
 
-        var rowsAffected = await _inner.Add(message);
-        if (rowsAffected == 0)
+        if (await _inner.Add(message))
         {
-            _logger.LogWarning("No rows were affected when trying to add {message}", message);
+            return true;
         }
 
-        return rowsAffected;
+        _logger.LogWarning("No rows were affected when trying to add {message}", message);
+        return false;
     }
 
     public async Task<int> Delete(int id)

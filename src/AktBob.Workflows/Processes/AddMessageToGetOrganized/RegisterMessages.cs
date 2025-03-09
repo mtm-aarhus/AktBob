@@ -46,7 +46,7 @@ internal class RegisterMessages(ILogger<RegisterMessages> logger, IServiceScopeF
                 DeskproMessageId = deskproMessage.Id,
             };
 
-            var databaseMessageId = await unitOfWork.Messages.Add(message);
+            await unitOfWork.Messages.Add(message);
 
             if (!string.IsNullOrEmpty(databaseTicket.CaseNumber))
             {

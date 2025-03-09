@@ -9,7 +9,7 @@ internal class MessageRepositoryExceptionDecorator(IMessageRepository inner, ILo
     private readonly IMessageRepository _inner = inner;
     private readonly ILogger<MessageRepositoryExceptionDecorator> _logger = logger;
 
-    public async Task<int> Add(Message message)
+    public async Task<bool> Add(Message message)
     {
         try
         {
