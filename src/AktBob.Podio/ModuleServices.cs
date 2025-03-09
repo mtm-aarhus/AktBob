@@ -25,17 +25,7 @@ public static class ModuleServices
 
         // Jobs
         services.AddScoped<IJobHandler<UpdateTextFieldJob>, UpdateTextField>();
-
-        services.AddScoped<IJobHandler<PostCommentJob>>(provider =>
-        {
-            var inner = new PostComment(provider.GetRequiredService<IServiceScopeFactory>());
-
-            var withLogging = new PostCommentLoggingDecorator(
-                inner,
-                provider.GetRequiredService<ILogger<PostCommentLoggingDecorator>>());
-
-            return withLogging;
-        });
+        services.AddScoped<IJobHandler<PostCommentJob>, PostComment>();
 
         // Module service orchestrator
         services.AddScoped<IPodioModule>(provider =>
