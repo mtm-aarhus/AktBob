@@ -2,7 +2,9 @@
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
-internal class CachedData
+internal sealed class CachedData
 {
+    private static readonly Lazy<CachedData> _instance = new(() => new());
+    public static CachedData Instance => _instance.Value;
     public ConcurrentDictionary<Guid, Case> Cases { get; set; } = new();
 }

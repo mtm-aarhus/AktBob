@@ -1,5 +1,4 @@
 ﻿using AktBob.Deskpro.Jobs;
-
 using AktBob.Shared;
 using System.Text;
 

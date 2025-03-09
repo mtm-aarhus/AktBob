@@ -1,8 +1,6 @@
 ﻿namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
-internal class Settings(IConfiguration configuration)
+internal static class Settings
 {
-    private readonly IConfiguration _configuration = configuration;
-
-    public bool UpdatePodioItemImmediately => _configuration.GetValue<bool?>("CheckOCRScreeningStatus:UpdatePodioItemSetFilArkivUrlImmediately") ?? false;
+    public static bool ShouldUpdatePodioItemImmediately(IConfiguration configuration) => configuration.GetValue<bool?>("CheckOCRScreeningStatus:UpdatePodioItemSetFilArkivUrlImmediately") ?? false;
 }

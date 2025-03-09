@@ -17,8 +17,7 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
         var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var filArkivCoreClient = scope.ServiceProvider.GetRequiredService<FilArkivCoreClient>();
-        var cachedData = scope.ServiceProvider.GetRequiredService<CachedData>();
-        var settings = scope.ServiceProvider.GetRequiredService<Settings>();
+        var cachedData = CachedData.Instance;
 
         var @case = new Case(job.FilArkivCaseId, job.PodioItemId);
         var cacheId = Guid.NewGuid();
@@ -69,7 +68,7 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
         // Enqueue job: query files processing status
         jobDispatcher.Dispatch(new QueryFilesProcessingStatusJob(cacheId));
 
-        if (settings.UpdatePodioItemImmediately)
+        if (Settings.ShouldUpdatePodioItemImmediately(_configuration))
         {
             UpdatePodioField.SetFilArkivCaseId(podio, _configuration, @case.FilArkivCaseId, @case.PodioItemId);
         }

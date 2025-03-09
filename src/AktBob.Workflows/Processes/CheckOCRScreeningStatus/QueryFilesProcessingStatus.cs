@@ -18,7 +18,6 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
         var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var filArkivCoreClient = scope.ServiceProvider.GetRequiredService<FilArkivCoreClient>();
         var cachedData = scope.ServiceProvider.GetRequiredService<CachedData>();
-        var settings = scope.ServiceProvider.GetRequiredService<Settings>();
 
         if (!cachedData.Cases.TryGetValue(job.CacheId, out var @case))
         {
@@ -68,7 +67,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
 
         cachedData.Cases.TryRemove(job.CacheId, out Case? removedCase);
 
-        if (!settings.UpdatePodioItemImmediately)
+        if (!Settings.ShouldUpdatePodioItemImmediately(_configuration))
         {
             UpdatePodioField.SetFilArkivCaseId(podio, _configuration, @case.FilArkivCaseId, @case.PodioItemId);
         }

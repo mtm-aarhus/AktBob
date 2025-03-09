@@ -18,8 +18,6 @@ public static class ModuleServices
         // CheckOCRScreeningStatus
         services.AddScoped<IJobHandler<CheckOCRScreeningStatusRegisterFilesJob>, CheckOCRScreeningStatusRegisterFiles>();
         services.AddScoped<IJobHandler<QueryFilesProcessingStatusJob>, QueryFilesProcessingStatus>();
-        services.AddSingleton<Processes.CheckOCRScreeningStatus.CachedData>();
-        services.AddSingleton<Settings>();
 
         // AddOrUpdateDeskproTicketToGetOrganized
         services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
