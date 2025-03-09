@@ -51,22 +51,14 @@ internal class PostCase(ICaseRepository caseRepository) : Endpoint<PostCaseReque
             FilArkivCaseId = req.FilArkivCaseId
         };
 
-        var caseId = await _caseRepository.Add(@case);
+        var success = await _caseRepository.Add(@case);
 
-        if (caseId == 0)
+        if (!success)
         {
             await SendErrorsAsync(500, ct);
             return;
         }
 
-        var createdCase = await _caseRepository.Get(caseId);
-
-        if (createdCase == null)
-        {
-            await SendErrorsAsync(500, ct);
-            return;
-        }
-
-        await SendOkAsync(createdCase.ToDto(), ct);
+        await SendOkAsync(@case.ToDto(), ct);
     }
 }

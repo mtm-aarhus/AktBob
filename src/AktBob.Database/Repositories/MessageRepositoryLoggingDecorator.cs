@@ -13,13 +13,14 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
     {
         _logger.LogInformation("Adding {message}", message);
 
-        if (await _inner.Add(message))
+        var success = await _inner.Add(message);
+
+        if (!success)
         {
-            return true;
+            _logger.LogWarning("No rows were affected when trying to add {message}", message);
         }
 
-        _logger.LogWarning("No rows were affected when trying to add {message}", message);
-        return false;
+        return success;
     }
 
     public async Task<int> Delete(int id)

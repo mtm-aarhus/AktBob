@@ -22,15 +22,8 @@ internal class MessageRepository : IMessageRepository
         parameters.Add("Id", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
         var rowsAffected = await _sqlDataAccess.ExecuteProcedure("dbo.spMessage_Insert", parameters);
-
-        if (rowsAffected == 0)
-        {
-            // TODO
-            return false;
-        }
-
-        message.Id = parameters.Get<int>("Id");
-        return true;
+        message.Id = parameters.Get<int?>("Id") ?? 0;
+        return rowsAffected == 1;
     }
 
     public async Task<int> Delete(int id) => await _sqlDataAccess.Execute("UPDATE Messages SET Deleted = 1 WHERE Id = @Id", new { Id = id });

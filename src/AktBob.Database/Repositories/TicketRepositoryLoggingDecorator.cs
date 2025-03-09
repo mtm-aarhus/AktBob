@@ -14,17 +14,17 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
         _logger = logger;
     }
 
-    public async Task<int> Add(Ticket ticket)
+    public async Task<bool> Add(Ticket ticket)
     {
         _logger.LogInformation("Adding to database {ticket}", ticket);
-        var rowsAffected = await _inner.Add(ticket);
+        var success = await _inner.Add(ticket);
 
-        if (rowsAffected == 0)
+        if (!success)
         {
             _logger.LogWarning("No rows were affected when trying to add {ticket}", ticket);
         }
 
-        return rowsAffected;
+        return success;
     }
 
     public async Task<Ticket?> Get(int id)

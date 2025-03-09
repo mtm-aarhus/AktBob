@@ -9,17 +9,17 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
     private readonly ICaseRepository _inner = inner;
     private readonly ILogger<CaseRepositoryLoggingDecorator> _logger = logger;
 
-    public async Task<int> Add(Case @case)
+    public async Task<bool> Add(Case @case)
     {
         _logger.LogInformation("Adding to database {case}", @case);
 
-        var rowsAffected = await _inner.Add(@case);
-        if (rowsAffected == 0)
+        var success = await _inner.Add(@case);
+        if (!success)
         {
             _logger.LogWarning("No rows were affected when trying to add {case}", @case);
         }
 
-        return rowsAffected;
+        return success;
     }
 
     public async Task<Case?> Get(int id)

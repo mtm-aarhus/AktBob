@@ -9,7 +9,7 @@ internal class CaseRepositoryExceptionDecorator(ICaseRepository inner, ILogger<C
     private readonly ICaseRepository _inner = inner;
     private readonly ILogger<CaseRepositoryExceptionDecorator> _logger = logger;
 
-    public async Task<int> Add(Case @case)
+    public async Task<bool> Add(Case @case)
     {
         try
         {

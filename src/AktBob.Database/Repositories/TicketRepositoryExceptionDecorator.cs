@@ -14,7 +14,7 @@ internal class TicketRepositoryExceptionDecorator : ITicketRepository
         _logger = logger;
     }
 
-    public async Task<int> Add(Ticket ticket)
+    public async Task<bool> Add(Ticket ticket)
     {
         try
         {

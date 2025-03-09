@@ -13,22 +13,15 @@ internal class TicketRepository : ITicketRepository
         _sqlDataAccess = sqlDataAccess;
     }
 
-    public async Task<int> Add(Ticket ticket)
+    public async Task<bool> Add(Ticket ticket)
     {
         var parameters = new DynamicParameters();
         parameters.Add("DeskproId", ticket.DeskproId, dbType: DbType.Int32, direction: ParameterDirection.Input);
         parameters.Add("Id", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
         var rowsAffected = await _sqlDataAccess.ExecuteProcedure("spTicket_Create", parameters);
-
-        if (rowsAffected == 0)
-        {
-            // TODO
-            throw new Exception($"Error inserting ticket {ticket}");
-        }
-
-        var id = parameters.Get<int>("Id");
-        return id;
+        ticket.Id = parameters.Get<int?>("Id") ?? 0;
+        return rowsAffected == 1;
     }
 
     public async Task<Ticket?> Get(int id)

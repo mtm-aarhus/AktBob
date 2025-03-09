@@ -39,22 +39,14 @@ internal class PostTicket(ITicketRepository ticketRepository) : Endpoint<PostTic
             DeskproId = req.DeskproId,
         };
 
-        var ticketId = await _ticketRepository.Add(ticket);
+        var success = await _ticketRepository.Add(ticket);
 
-        if (ticketId == 0)
+        if (!success)
         {
             await SendErrorsAsync(500, ct);
             return;
         }
 
-        var createdTicket = await _ticketRepository.Get(ticketId);
-
-        if (createdTicket == null)
-        {
-            await SendErrorsAsync(500, ct);
-            return;
-        }
-
-        await SendOkAsync(createdTicket.ToDto(), ct);
+        await SendOkAsync(ticket.ToDto(), ct);
     }
 }

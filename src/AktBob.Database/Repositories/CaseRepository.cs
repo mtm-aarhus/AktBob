@@ -13,7 +13,7 @@ internal class CaseRepository : ICaseRepository
         _sqlDataAccess = sqlDataAccess;
     }
 
-    public async Task<int> Add(Case @case)
+    public async Task<bool> Add(Case @case)
     {
         var parameters = new DynamicParameters();
         parameters.Add("TicketId", @case.TicketId);
@@ -23,16 +23,8 @@ internal class CaseRepository : ICaseRepository
         parameters.Add("Id", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
         var rowsAffected = await _sqlDataAccess.ExecuteProcedure("spCase_Create", parameters);
-        var caseId = parameters.Get<int>("Id");
-
-        if (rowsAffected == 0)
-        {
-            // TODO
-            throw new Exception($"Error inserting case {@case}");
-        }
-
-        var id = parameters.Get<int>("Id");
-        return id;
+        @case.Id = parameters.Get<int?>("Id") ?? 0;
+        return rowsAffected == 1;
     }
 
     public async Task<Case?> Get(int id) => await _sqlDataAccess.QuerySingle<Case>("SELECT * FROM v_Cases WHERE Id = @Id", new { Id = id });
