@@ -13,17 +13,15 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
 
     public async Task<Result<Guid>> ConvertHtmlToPdf(IReadOnlyDictionary<Guid, object> tasks, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting {name}. Task count: {taskCount}", nameof(ConvertHtmlToPdf), tasks.Count);
+        _logger.LogInformation("Converting HTML to PDF");
 
         var result = await _inner.ConvertHtmlToPdf(tasks, cancellationToken);
 
         if (!result.IsSuccess)
         {
-            _logger.LogWarning("{name} failed: {error}", nameof(ConvertHtmlToPdf), result.Errors);
+            _logger.LogError("{name} failed: {error}", nameof(ConvertHtmlToPdf), result.Errors);
             return result;
         }
-
-        _logger.LogInformation("{name} finished successfully. Result: jobId {id}", nameof(ConvertHtmlToPdf), result.Value);
         
         return result;
     }
@@ -31,35 +29,31 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
 
     public Result<IReadOnlyDictionary<Guid, object>> GenerateTasks(IEnumerable<byte[]> items)
     {
-        _logger.LogInformation("Starting {name}. Item count: {count}", nameof(GenerateTasks), items.Count());
+        _logger.LogInformation("Generating CloudConvert tasks");
 
         var result = _inner.GenerateTasks(items);
 
         if (!result.IsSuccess)
         {
-            _logger.LogWarning("{name} failed: {error}", nameof(GenerateTasks), result.Errors);
+            _logger.LogError("{name} failed: {error}", nameof(GenerateTasks), result.Errors);
             return result;
         }
 
-        _logger.LogInformation("{name} finished successfully.", nameof(GenerateTasks));
-        
         return result;
     }
 
 
     public async Task<Result<string>> GetDownloadUrl(Guid jobId, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting {name}. JobId: {id}", nameof(GetDownloadUrl), jobId);
+        _logger.LogInformation("Getting download url (CloudConvert jobId {id})", jobId);
 
         var result = await _inner.GetDownloadUrl(jobId, cancellationToken);
 
         if (!result.IsSuccess)
         {
-            _logger.LogWarning("{name} failed: {error}", nameof(GetDownloadUrl), result.Errors);
+            _logger.LogError("{name} failed: {error}", nameof(GetDownloadUrl), result.Errors);
             return result;
         }
-
-        _logger.LogInformation("{name} finished successfully. JobId {id} download url: {url}", nameof(GetDownloadUrl), jobId, result.Value);
         
         return result;
     }
@@ -67,17 +61,15 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
 
     public async Task<Result<byte[]>> GetFile(string url, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting {name}. Download url: {url}", nameof(GetFile), url);
+        _logger.LogInformation("Downloading file {url}", url);
 
         var result = await _inner.GetFile(url, cancellationToken);
 
         if (!result.IsSuccess)
         {
-            _logger.LogWarning("{name} failed: {error}", nameof(GetFile), result.Errors);
+            _logger.LogError("{name} failed: {error}", nameof(GetFile), result.Errors);
             return result;
         }
-
-        _logger.LogInformation("{name} finished successfully. {size} bytes from download url: {url}", nameof(GetFile), result.Value.Count(), url);
         
         return result;
     }
