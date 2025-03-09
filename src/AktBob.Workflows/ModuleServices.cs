@@ -24,7 +24,6 @@ public static class ModuleServices
 
         // AddOrUpdateDeskproTicketToGetOrganized
         services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
-        services.AddSingleton<PendingsTickets>();
 
         // Other workflows
         services.AddScoped<IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>, CreateAfgørelsesskrivelseQueueItem>();

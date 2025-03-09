@@ -13,8 +13,11 @@ internal class PendingTicket
     }
 }
 
-internal class PendingsTickets
+sealed internal class PendingsTickets
 {
+    private static readonly Lazy<PendingsTickets> _instance = new(() => new());
+    public static PendingsTickets Instance => _instance.Value;
+
     private readonly ConcurrentDictionary<Guid, PendingTicket> _tickets = new();
 
     public void AddPendingTicket(PendingTicket pendingTicket)

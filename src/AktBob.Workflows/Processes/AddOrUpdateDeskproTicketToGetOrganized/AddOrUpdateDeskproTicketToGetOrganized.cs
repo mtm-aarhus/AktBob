@@ -23,7 +23,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         Guard.Against.NullOrEmpty(job.GOCaseNumber);
 
         var scope = _serviceScopeFactory.CreateScope();
-        var pendingsTickets = scope.ServiceProvider.GetRequiredService<PendingsTickets>();
+        var pendingsTickets = PendingsTickets.Instance;
 
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         var deskproHelper = scope.ServiceProvider.GetRequiredService<DeskproHelper>();
