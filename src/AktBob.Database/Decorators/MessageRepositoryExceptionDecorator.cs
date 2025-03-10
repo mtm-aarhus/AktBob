@@ -1,13 +1,14 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
+using AktBob.Database.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.Database.Repositories;
+namespace AktBob.Database.Decorators;
 
-internal class MessageRepositoryExceptionDecorator(IMessageRepository inner, ILogger<MessageRepositoryExceptionDecorator> logger) : IMessageRepository
+internal class MessageRepositoryExceptionDecorator(IMessageRepository inner, ILogger<MessageRepository> logger) : IMessageRepository
 {
     private readonly IMessageRepository _inner = inner;
-    private readonly ILogger<MessageRepositoryExceptionDecorator> _logger = logger;
+    private readonly ILogger<v> _logger = logger;
 
     public async Task<bool> Add(Message message)
     {

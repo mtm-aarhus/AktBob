@@ -1,4 +1,5 @@
 ﻿using AktBob.Email.Contracts;
+using AktBob.Email.Decorators;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,7 @@ public static class ModuleServices
 
         services.AddScoped<IEmailModule>(provider =>
         {
-            var inner = new Module(provider.GetRequiredService<IJobDispatcher>());
+            var inner = new EmailModule(provider.GetRequiredService<IJobDispatcher>());
 
             var withLogging = new ModuleLoggingDecorator(
                 inner,

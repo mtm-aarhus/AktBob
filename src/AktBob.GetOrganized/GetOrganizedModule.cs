@@ -6,7 +6,7 @@ using Ardalis.Result;
 
 namespace AktBob.GetOrganized;
 
-internal class Module(
+internal class GetOrganizedModule(
     IJobDispatcher jobDispatcher,
     ICreateCaseHandler createCaseHandler,
     IRelateDocumentsHandler relateDocumentsHandler,

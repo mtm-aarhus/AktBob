@@ -2,9 +2,9 @@
 internal class CloudConvertModuleExceptionDecorator : ICloudConvertModule
 {
     private readonly ICloudConvertModule _inner;
-    private readonly ILogger<CloudConvertModuleExceptionDecorator> _logger;
+    private readonly ILogger<CloudConvertModule> _logger;
 
-    public CloudConvertModuleExceptionDecorator(ICloudConvertModule inner, ILogger<CloudConvertModuleExceptionDecorator> logger)
+    public CloudConvertModuleExceptionDecorator(ICloudConvertModule inner, ILogger<CloudConvertModule> logger)
     {
         _inner = inner;
         _logger = logger;

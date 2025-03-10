@@ -1,12 +1,12 @@
 ﻿using AktBob.Email.Contracts;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.Email;
+namespace AktBob.Email.Decorators;
 
-internal class ModuleLoggingDecorator(IEmailModule inner, ILogger<ModuleLoggingDecorator> logger) : IEmailModule
+internal class ModuleLoggingDecorator(IEmailModule inner, ILogger<EmailModule> logger) : IEmailModule
 {
     private readonly IEmailModule _inner = inner;
-    private readonly ILogger<ModuleLoggingDecorator> _logger = logger;
+    private readonly ILogger<EmailModule> _logger = logger;
 
     public void Send(string to, string subject, string body)
     {

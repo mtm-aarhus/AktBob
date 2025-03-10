@@ -5,7 +5,7 @@ using AktBob.Shared;
 
 namespace AktBob.Podio;
 
-internal class Module(IJobDispatcher jobDispatcher, IGetItemHandler getItemHandler) : IPodioModule
+internal class PodioModule(IJobDispatcher jobDispatcher, IGetItemHandler getItemHandler) : IPodioModule
 {
     public async Task<Result<Item>> GetItem(PodioItemId podioItemId, CancellationToken cancellationToken) => await getItemHandler.Handle(podioItemId, cancellationToken);
 

@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace AktBob.Podio.Decorators;
 
-internal class ModuleExceptionDecorator(IPodioModule inner, ILogger<ModuleExceptionDecorator> logger) : IPodioModule
+internal class ModuleExceptionDecorator(IPodioModule inner, ILogger<PodioModule> logger) : IPodioModule
 {
     private readonly IPodioModule _inner = inner;
-    private readonly ILogger<ModuleExceptionDecorator> _logger = logger;
+    private readonly ILogger<PodioModule> _logger = logger;
 
     public async Task<Result<Item>> GetItem(PodioItemId podioItemId, CancellationToken cancellationToken)
     {

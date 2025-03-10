@@ -1,9 +1,9 @@
-﻿namespace AktBob.Deskpro;
+﻿namespace AktBob.Deskpro.Decorators;
 
-internal class ModuleExceptionDecorator(IDeskproModule inner, ILogger<ModuleExceptionDecorator> logger) : IDeskproModule
+internal class ModuleExceptionDecorator(IDeskproModule inner, ILogger<DeskproModule> logger) : IDeskproModule
 {
     private readonly IDeskproModule _inner = inner;
-    private readonly ILogger<ModuleExceptionDecorator> _logger = logger;
+    private readonly ILogger<DeskproModule> _logger = logger;
 
     public async Task<Result<IEnumerable<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken)
     {

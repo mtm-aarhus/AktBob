@@ -1,9 +1,9 @@
 ﻿using AAK.Deskpro;
+using AktBob.Deskpro.Decorators;
 using AktBob.Deskpro.Handlers;
 using AktBob.Deskpro.Jobs;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -39,7 +39,7 @@ public static class ModuleServices
         // Module service orchestration
         services.AddScoped<IDeskproModule>(provider =>
         {
-            var inner = new Module(
+            var inner = new DeskproModule(
                 provider.GetRequiredService<IJobDispatcher>(),
                 provider.GetRequiredService<IGetCustomFieldSpecificationsHandler>(),
                 provider.GetRequiredService<IGetMessageAttachmentHandler>(),
@@ -50,13 +50,8 @@ public static class ModuleServices
                 provider.GetRequiredService<IGetTicketHandler>(),
                 provider.GetRequiredService<IGetTicketsByFieldSearchHandler>());
 
-            var withCaching = new ModuleCachingDecorator(
-                inner,
-                provider.GetRequiredService<ILogger<ModuleCachingDecorator>>(),
-                provider.GetRequiredService<IMemoryCache>());
-
             var withLogging = new ModuleLoggingDecorator(
-                withCaching,
+                inner,
                 provider.GetRequiredService<ILogger<ModuleLoggingDecorator>>());
 
             var withExceptionHandling = new ModuleExceptionDecorator(

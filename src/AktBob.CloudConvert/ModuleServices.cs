@@ -37,7 +37,7 @@ public static class ModuleServices
         // Module service orchestration
         services.AddScoped<ICloudConvertModule>(provider =>
         {
-            var inner = new Module(
+            var inner = new CloudConvertModule(
                 provider.GetRequiredService<IConvertHtmlToPdfHandler>(),
                 provider.GetRequiredService<IGetCloudConvertDownloadUrlHandler>(),
                 provider.GetRequiredService<IGetCloudConvertFileHandler>(),

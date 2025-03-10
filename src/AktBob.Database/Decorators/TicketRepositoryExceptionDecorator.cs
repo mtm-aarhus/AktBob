@@ -1,14 +1,15 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
+using AktBob.Database.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.Database.Repositories;
+namespace AktBob.Database.Decorators;
 internal class TicketRepositoryExceptionDecorator : ITicketRepository
 {
     private readonly ITicketRepository _inner;
-    private readonly ILogger<TicketRepositoryExceptionDecorator> _logger;
+    private readonly ILogger<TicketRepository> _logger;
 
-    public TicketRepositoryExceptionDecorator(ITicketRepository inner, ILogger<TicketRepositoryExceptionDecorator> logger)
+    public TicketRepositoryExceptionDecorator(ITicketRepository inner, ILogger<TicketRepository> logger)
     {
         _inner = inner;
         _logger = logger;

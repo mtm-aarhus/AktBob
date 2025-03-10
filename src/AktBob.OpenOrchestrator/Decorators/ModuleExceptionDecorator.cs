@@ -1,14 +1,14 @@
 ﻿using AktBob.OpenOrchestrator.Contracts;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.OpenOrchestrator;
+namespace AktBob.OpenOrchestrator.Decorators;
 
 internal class ModuleExceptionDecorator : IOpenOrchestratorModule
 {
     private readonly IOpenOrchestratorModule _inner;
-    private readonly ILogger<ModuleExceptionDecorator> _logger;
+    private readonly ILogger<OpenOrchestratorModule> _logger;
 
-    public ModuleExceptionDecorator(IOpenOrchestratorModule inner, ILogger<ModuleExceptionDecorator> logger)
+    public ModuleExceptionDecorator(IOpenOrchestratorModule inner, ILogger<OpenOrchestratorModule> logger)
     {
         _inner = inner;
         _logger = logger;

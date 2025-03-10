@@ -1,11 +1,11 @@
 ﻿using AktBob.Shared.Extensions;
 
-namespace AktBob.Deskpro;
+namespace AktBob.Deskpro.Decorators;
 
-internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<ModuleLoggingDecorator> logger) : IDeskproModule
+internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModule> logger) : IDeskproModule
 {
     private readonly IDeskproModule _inner = inner;
-    private readonly ILogger<ModuleLoggingDecorator> _logger = logger;
+    private readonly ILogger<DeskproModule> _logger = logger;
 
     public async Task<Result<IEnumerable<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken)
     {

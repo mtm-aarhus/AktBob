@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AktBob.Email;
 
-internal class Module(IJobDispatcher jobDispatcher) : IEmailModule
+internal class EmailModule(IJobDispatcher jobDispatcher) : IEmailModule
 {
     public void Send(string to, string subject, string body)
     {

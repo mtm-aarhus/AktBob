@@ -1,14 +1,14 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 
-namespace AktBob.Deskpro;
+namespace AktBob.Deskpro.Decorators;
 
 internal class ModuleCachingDecorator : IDeskproModule
 {
     private readonly IDeskproModule _inner;
-    private readonly ILogger<ModuleCachingDecorator> _logger;
+    private readonly ILogger<DeskproModule> _logger;
     private readonly IMemoryCache _cache;
 
-    public ModuleCachingDecorator(IDeskproModule inner, ILogger<ModuleCachingDecorator> logger, IMemoryCache cache)
+    public ModuleCachingDecorator(IDeskproModule inner, ILogger<DeskproModule> logger, IMemoryCache cache)
     {
         _inner = inner;
         _logger = logger;

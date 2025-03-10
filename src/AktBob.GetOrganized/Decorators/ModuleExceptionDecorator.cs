@@ -3,14 +3,14 @@ using AktBob.GetOrganized.Contracts.DTOs;
 using Ardalis.Result;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.GetOrganized;
+namespace AktBob.GetOrganized.Decorators;
 
 internal class ModuleExceptionDecorator : IGetOrganizedModule
 {
     private readonly IGetOrganizedModule _inner;
-    private readonly ILogger<ModuleExceptionDecorator> _logger;
+    private readonly ILogger<GetOrganizedModule> _logger;
 
-    public ModuleExceptionDecorator(IGetOrganizedModule inner, ILogger<ModuleExceptionDecorator> logger)
+    public ModuleExceptionDecorator(IGetOrganizedModule inner, ILogger<GetOrganizedModule> logger)
     {
         _inner = inner;
         _logger = logger;

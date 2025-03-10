@@ -1,14 +1,15 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
+using AktBob.Database.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.Database;
+namespace AktBob.Database.Decorators;
 internal class TicketRepositoryLoggingDecorator : ITicketRepository
 {
     private readonly ITicketRepository _inner;
-    private readonly ILogger<TicketRepositoryLoggingDecorator> _logger;
+    private readonly ILogger<TicketRepository> _logger;
 
-    public TicketRepositoryLoggingDecorator(ITicketRepository inner, ILogger<TicketRepositoryLoggingDecorator> logger)
+    public TicketRepositoryLoggingDecorator(ITicketRepository inner, ILogger<TicketRepository> logger)
     {
         _inner = inner;
         _logger = logger;
@@ -51,7 +52,7 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
 
     public async Task<Ticket?> GetByDeskproTicketId(int deskproTicketId)
     {
-        _logger.LogWarning("Getting ticket by Deskpro ticket id {id}", deskproTicketId);
+        _logger.LogInformation("Getting ticket by Deskpro ticket id {id}", deskproTicketId);
 
         var ticket = await _inner.GetByDeskproTicketId(deskproTicketId);
     

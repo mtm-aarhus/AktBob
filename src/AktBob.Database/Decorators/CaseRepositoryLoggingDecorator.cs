@@ -1,13 +1,14 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
+using AktBob.Database.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.Database.Repositories;
+namespace AktBob.Database.Decorators;
 
-internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<CaseRepositoryLoggingDecorator> logger) : ICaseRepository
+internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<CaseRepository> logger) : ICaseRepository
 {
     private readonly ICaseRepository _inner = inner;
-    private readonly ILogger<CaseRepositoryLoggingDecorator> _logger = logger;
+    private readonly ILogger<CaseRepository> _logger = logger;
 
     public async Task<bool> Add(Case @case)
     {

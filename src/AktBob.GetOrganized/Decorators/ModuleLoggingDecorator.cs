@@ -3,12 +3,12 @@ using AktBob.GetOrganized.Contracts.DTOs;
 using Ardalis.Result;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.GetOrganized;
+namespace AktBob.GetOrganized.Decorators;
 
-internal class ModuleLoggingDecorator(IGetOrganizedModule inner, ILogger<ModuleLoggingDecorator> logger) : IGetOrganizedModule
+internal class ModuleLoggingDecorator(IGetOrganizedModule inner, ILogger<GetOrganizedModule> logger) : IGetOrganizedModule
 {
     private readonly IGetOrganizedModule _inner = inner;
-    private readonly ILogger<ModuleLoggingDecorator> _logger = logger;
+    private readonly ILogger<GetOrganizedModule> _logger = logger;
 
     public async Task<Result<CreateCaseResponse>> CreateCase(CreateGetOrganizedCaseCommand command, CancellationToken cancellationToken)
     {

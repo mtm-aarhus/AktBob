@@ -1,5 +1,6 @@
 ﻿using AAK.GetOrganized;
 using AktBob.GetOrganized.Contracts;
+using AktBob.GetOrganized.Decorators;
 using AktBob.GetOrganized.Handlers;
 using AktBob.GetOrganized.Jobs;
 using AktBob.Shared;
@@ -37,7 +38,7 @@ public static class ModuleServices
         // Module Service orchestration
         services.AddScoped<IGetOrganizedModule>(provider =>
         {
-            var inner = new Module(
+            var inner = new GetOrganizedModule(
                 provider.GetRequiredService<IJobDispatcher>(),
                 provider.GetRequiredService<ICreateCaseHandler>(),
                 provider.GetRequiredService<IRelateDocumentsHandler>(),
@@ -48,11 +49,7 @@ public static class ModuleServices
                 inner,
                 provider.GetRequiredService<ILogger<ModuleLoggingDecorator>>());
 
-            var withExceptionHandling = new ModuleExceptionDecorator(
-                withLogging,
-                provider.GetRequiredService<ILogger<ModuleExceptionDecorator>>());
-
-            return withExceptionHandling;
+            return withLogging;
         });
 
         return services;
