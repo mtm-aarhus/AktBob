@@ -207,14 +207,28 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
 
         foreach (var customFieldId in customFieldIds)
         {
-            var title = customFieldSpecificationDtos.FirstOrDefault(c => c.Id == customFieldId)?.Title ?? string.Empty;
+            // Get the custom field specification
+            var customField = customFieldSpecificationDtos.FirstOrDefault(c => c.Id == customFieldId);
+            if (customField is null)
+            {
+                continue;
+            }
+
+            // Get the actual choices from the ticket for this specific custom field
             var values = ticketDto.Fields.FirstOrDefault(f => f.Id == customFieldId)?.Values ?? Enumerable.Empty<string>();
-            var value = string.Join(",", values);
+            var choiceKeys = values.Select(int.Parse);
+
+            // Get the choices title from the custom field specification based on the ticket field choices
+            var choiceTitles = customField.Choices
+                .Where(kv => choiceKeys.Contains(kv.Key))
+                .Select(kv => kv.Value);
+
+            var choiceTitleString = string.Join(",", choiceTitles);
 
             var dictionary = new Dictionary<string, string>
                 {
-                    { "title", title },
-                    { "value", value }
+                    { "title", customField.Title },
+                    { "value", choiceTitleString }
                 };
 
             var html = HtmlHelper.GenerateHtml("custom-field.html", dictionary);

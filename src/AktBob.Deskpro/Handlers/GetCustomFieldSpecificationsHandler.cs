@@ -8,7 +8,7 @@ internal class GetCustomFieldSpecificationsHandler(IDeskproClient deskproClient)
     public async Task<Result<IEnumerable<CustomFieldSpecificationDto>>> Handle(CancellationToken cancellationToken)
     {
         var dto = await _deskproClient.GetCustomFieldSpecifications(cancellationToken);
-        var specifications = dto.Select(x => new CustomFieldSpecificationDto(x.Id, x.Title));
+        var specifications = dto.Select(x => new CustomFieldSpecificationDto(x.Id, x.Title, x.Choices));
 
         if (specifications is null)
         {
