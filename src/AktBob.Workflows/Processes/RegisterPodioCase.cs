@@ -63,7 +63,7 @@ internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfigurati
 
         if (databaseTicket is null)
         {
-            _logger.LogWarning("No tickets found in database for DeskproId '{deskproId}'", deskproId);
+            _logger.LogError("No tickets found in database for DeskproId '{deskproId}'", deskproId);
             return;
         }
 
