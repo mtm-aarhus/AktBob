@@ -2,11 +2,9 @@
 
 namespace AktBob.Shared;
 
-public class HangfireJobDispatcher(IBackgroundJobClient backgroundJobClient, IServiceProvider serviceProvider) : IJobDispatcher
+public class HangfireJobDispatcher(IBackgroundJobClient backgroundJobClient) : IJobDispatcher
 {
     private readonly IBackgroundJobClient _backgroundJobClient = backgroundJobClient;
-
-    public IServiceProvider ServiceProvider { get; } = serviceProvider;
 
     public void Dispatch<TJob>(TJob job) where TJob : class
     {

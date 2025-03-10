@@ -103,7 +103,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             AktSagsURL = getDatabaseTicket.Result.CaseUrl
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {caseNumber}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
     }
 }

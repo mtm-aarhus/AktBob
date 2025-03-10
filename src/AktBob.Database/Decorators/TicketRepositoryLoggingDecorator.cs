@@ -66,7 +66,7 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
 
     public async Task<Ticket?> GetByPodioItemId(long podioItemId)
     {
-        _logger.LogWarning("Getting ticket by Podio item id {id}", podioItemId);
+        _logger.LogInformation("Getting ticket by Podio item id {id}", podioItemId);
 
         var ticket = await _inner.GetByPodioItemId(podioItemId);
 

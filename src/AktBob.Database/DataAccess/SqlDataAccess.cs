@@ -1,19 +1,56 @@
-﻿using System.Data;
+﻿using Ardalis.GuardClauses;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using System.Data;
 
 namespace AktBob.Database.DataAccess;
 
 internal class SqlDataAccess : ISqlDataAccess
 {
-    private readonly IDbConnection _connection;
+    private readonly string _connectionString;
 
-    public SqlDataAccess(IDbConnection connection)
+    public SqlDataAccess(IConfiguration configuration)
     {
-        _connection = connection;
+        _connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("Database"));
     }
 
-    public async Task<T?> QuerySingle<T>(string sql, object? parameters) => await _connection.QuerySingleOrDefaultAsync<T>(sql, parameters, commandType: CommandType.Text);
-    public async Task<IEnumerable<T>> Query<T>(string sql, object? parameters) => await _connection.QueryAsync<T>(sql, parameters, commandType: CommandType.Text);
-    public async Task<IEnumerable<T>> Query<T, U>(string sql, object parameters, string splitOn, Func<T, U, T> map) => await _connection.QueryAsync(sql: sql, map: map, param: parameters, splitOn: splitOn, commandType: CommandType.Text);
-    public async Task<int> Execute<T>(string sql, T? parameters) => await _connection.ExecuteAsync(sql, parameters, commandType: CommandType.Text);
-    public async Task<int> ExecuteProcedure(string procedureName, DynamicParameters? parameters) => await _connection.ExecuteAsync(procedureName, parameters, commandType: CommandType.StoredProcedure);
+    public async Task<T?> QuerySingle<T>(string sql, object? parameters)
+    {
+        using (var connection = new SqlConnection(_connectionString))
+        {
+            return await connection.QuerySingleOrDefaultAsync<T>(sql, parameters, commandType: CommandType.Text);
+        }
+    }
+
+    public async Task<IEnumerable<T>> Query<T>(string sql, object? parameters)
+    {
+        using (var connection = new SqlConnection(_connectionString))
+        {
+            return await connection.QueryAsync<T>(sql, parameters, commandType: CommandType.Text);
+        }
+    }
+
+    public async Task<IEnumerable<T>> Query<T, U>(string sql, object parameters, string splitOn, Func<T, U, T> map)
+    {
+        using (var connection = new SqlConnection(_connectionString))
+        {
+            return await connection.QueryAsync(sql: sql, map: map, param: parameters, splitOn: splitOn, commandType: CommandType.Text);
+        }
+    }
+
+    public async Task<int> Execute<T>(string sql, T? parameters)
+    {
+        using (var connection = new SqlConnection(_connectionString))
+        {
+            return await connection.ExecuteAsync(sql, parameters, commandType: CommandType.Text);
+        }
+    }
+
+    public async Task<int> ExecuteProcedure(string procedureName, DynamicParameters? parameters)
+    {
+        using (var connection = new SqlConnection(_connectionString))
+        {
+            return await connection.ExecuteAsync(procedureName, parameters, commandType: CommandType.StoredProcedure);
+        }
+    }
 }

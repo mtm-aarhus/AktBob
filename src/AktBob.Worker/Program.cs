@@ -60,6 +60,15 @@ var builder = Host.CreateDefaultBuilder(args)
             config.ReadFrom.Configuration(hostContext.Configuration);
         });
 
+        // Hangfire
+        services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
+        services.AddScoped<FailedJobNotificationFilter>();
+        services.AddHangfire(config =>
+        {
+            config.UseSqlServerStorage(hostContext.Configuration.GetConnectionString("Hangfire"));
+        });
+        services.AddHangfireServer();
+
         // Modules
         services.AddUiPathModule(hostContext.Configuration);
         services.AddDeskproModule(hostContext.Configuration);
@@ -72,15 +81,6 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddWorkflowModule(hostContext.Configuration);
         services.AddEmailModuleServices(hostContext.Configuration);
         services.AddSharedModule();
-
-        // Hangfire
-        services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
-        services.AddScoped<FailedJobNotificationFilter>();
-        services.AddHangfire(config =>
-        {
-            config.UseSqlServerStorage(hostContext.Configuration.GetConnectionString("Hangfire"));
-        });
-        services.AddHangfireServer();
     });
 
 

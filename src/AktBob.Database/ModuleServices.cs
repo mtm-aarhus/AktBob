@@ -2,25 +2,18 @@
 using AktBob.Database.DataAccess;
 using AktBob.Database.Decorators;
 using AktBob.Database.Repositories;
-using Ardalis.GuardClauses;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Data;
 
 namespace AktBob.Database;
 public static class ModuleServices
 {
     public static IServiceCollection AddDatabaseModule(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("Database"));
-
-        services.AddScoped<IDbConnection>(x => new SqlConnection(connectionString));
-
         services.AddScoped<ISqlDataAccess>(provider =>
         {
-            var inner = new SqlDataAccess(provider.GetRequiredService<IDbConnection>());
+            var inner = new SqlDataAccess(provider.GetRequiredService<IConfiguration>());
 
             var withLogging = new SqlDataAccessLoggingDecorator(
                 inner,

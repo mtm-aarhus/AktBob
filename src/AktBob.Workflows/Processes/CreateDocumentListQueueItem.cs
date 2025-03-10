@@ -24,7 +24,6 @@ internal class CreateDocumentListQueueItem(
     {
         // Validate job parameters
         Guard.Against.NegativeOrZero(job.PodioItemId.AppId);
-        Guard.Against.NegativeOrZero(job.PodioItemId.Id);
 
         using var scope = _serviceScopeFactory.CreateScope();
 
@@ -84,7 +83,7 @@ internal class CreateDocumentListQueueItem(
                 Titel = deskproTicket.Value.Subject
             };
 
-            var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {getCaseNumber}", payload.ToJson());
+            var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {getCaseNumber.Result.Value}", payload.ToJson());
             openOrchestrator.CreateQueueItem(command);
         }
         else
@@ -99,7 +98,7 @@ internal class CreateDocumentListQueueItem(
                 Titel = deskproTicket.Value.Subject
             };
 
-            uiPath.CreateQueueItem(uiPathQueueName, $"Podio {job.PodioItemId}: {getCaseNumber}", payload.ToJson());
+            uiPath.CreateQueueItem(uiPathQueueName, $"Podio {job.PodioItemId}: {getCaseNumber.Result.Value}", payload.ToJson());
         }
     }
 

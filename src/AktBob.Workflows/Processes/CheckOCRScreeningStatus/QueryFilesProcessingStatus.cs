@@ -17,7 +17,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
         var scope = _serviceProviderFactory.CreateScope();
         var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var filArkivCoreClient = scope.ServiceProvider.GetRequiredService<FilArkivCoreClient>();
-        var cachedData = scope.ServiceProvider.GetRequiredService<CachedData>();
+        var cachedData = CachedData.Instance;
 
         if (!cachedData.Cases.TryGetValue(job.CacheId, out var @case))
         {

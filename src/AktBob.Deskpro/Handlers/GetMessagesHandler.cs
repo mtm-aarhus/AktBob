@@ -1,10 +1,10 @@
 ﻿using AAK.Deskpro;
 
 namespace AktBob.Deskpro.Handlers;
-internal class GetMessagesHandler(IDeskproClient deskproClient, IDeskproModule deskproModule) : IGetMessagesHandler
+internal class GetMessagesHandler(IDeskproClient deskproClient, IGetPersonHandler getPersonHandler) : IGetMessagesHandler
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
-    private readonly IDeskproModule _deskproModule = deskproModule;
+    private readonly IGetPersonHandler _getPersonHandler = getPersonHandler;
 
     public async Task<Result<IEnumerable<MessageDto>>> Handle(int ticketId, CancellationToken cancellationToken)
     {
@@ -48,7 +48,7 @@ internal class GetMessagesHandler(IDeskproClient deskproClient, IDeskproModule d
         // Add people to the messages 
         foreach (var message in messages)
         {
-            var getPersonResult = await _deskproModule.GetPerson(message.Person.Id, cancellationToken);
+            var getPersonResult = await _getPersonHandler.Handle(message.Person.Id, cancellationToken);
 
             var person = getPersonResult.Value;
             if (person != null)
