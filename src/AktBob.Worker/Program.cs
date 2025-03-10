@@ -48,7 +48,8 @@ var builder = Host.CreateDefaultBuilder(args)
                         From = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailLogEvents:From")),
                         Host = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailLogEvents:Host")),
                         Port = Guard.Against.Null(configuration.GetValue<int?>("EmailLogEvents:Port")),
-                        Subject = new MessageTemplateTextFormatter("{Timestamp:HH:mm:ss.fff} AktBob log messages")
+                        Subject = new MessageTemplateTextFormatter("{Timestamp:HH:mm:ss.fff} AktBob log messages"),
+                        ConnectionSecurity = MailKit.Security.SecureSocketOptions.None
                     },
                     batchingOptions: new()
                     {
