@@ -49,7 +49,11 @@ public static class ModuleServices
                 inner,
                 provider.GetRequiredService<ILogger<GetOrganizedModule>>());
 
-            return withLogging;
+            var withExceptionHandling = new ModuleExceptionDecorator(
+                withLogging,
+                provider.GetRequiredService<ILogger<GetOrganizedModule>>());
+
+            return withExceptionHandling;
         });
 
         return services;

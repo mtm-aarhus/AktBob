@@ -1,11 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AktBob.Database.DataAccess;
+using Microsoft.Extensions.Logging;
 
-namespace AktBob.Database.DataAccess;
+namespace AktBob.Database.Decorators;
 
-internal class SqlDataAccessExceptionDecorator(ISqlDataAccess inner, ILogger<SqlDataAccessExceptionDecorator> logger) : ISqlDataAccess
+internal class SqlDataAccessExceptionDecorator(ISqlDataAccess inner, ILogger<SqlDataAccess> logger) : ISqlDataAccess
 {
     private readonly ISqlDataAccess _inner = inner;
-    private readonly ILogger<SqlDataAccessExceptionDecorator> _logger = logger;
+    private readonly ILogger<SqlDataAccess> _logger = logger;
 
     public async Task<int> Execute<T>(string sql, T? parameters)
     {

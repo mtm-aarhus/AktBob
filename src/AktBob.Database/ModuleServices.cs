@@ -17,11 +17,11 @@ public static class ModuleServices
 
             var withLogging = new SqlDataAccessLoggingDecorator(
                 inner,
-                provider.GetRequiredService<ILogger<SqlDataAccessLoggingDecorator>>());
+                provider.GetRequiredService<ILogger<SqlDataAccess>>());
 
             var withException = new SqlDataAccessExceptionDecorator(
                 withLogging,
-                provider.GetRequiredService<ILogger<SqlDataAccessExceptionDecorator>>());
+                provider.GetRequiredService<ILogger<SqlDataAccess>>());
 
             return withException;
         });
