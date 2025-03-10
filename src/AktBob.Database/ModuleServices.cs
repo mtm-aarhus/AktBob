@@ -40,11 +40,11 @@ public static class ModuleServices
 
             var withLogging = new MessageRepositoryLoggingDecorator(
                 inner,
-                provider.GetRequiredService<ILogger<MessageRepositoryLoggingDecorator>>());
+                provider.GetRequiredService<ILogger<MessageRepository>>());
 
             var withExceptionHandling = new MessageRepositoryExceptionDecorator(
                 withLogging,
-                provider.GetRequiredService<ILogger<MessageRepositoryExceptionDecorator>>());
+                provider.GetRequiredService<ILogger<MessageRepository>>());
 
             return withExceptionHandling;
         });
@@ -55,11 +55,11 @@ public static class ModuleServices
             
             var withLogging = new TicketRepositoryLoggingDecorator(
                 inner,
-                provider.GetRequiredService<ILogger<TicketRepositoryLoggingDecorator>>());
+                provider.GetRequiredService<ILogger<TicketRepository>>());
 
             var withExceptionHandling = new TicketRepositoryExceptionDecorator(
                 withLogging,
-                provider.GetRequiredService<ILogger<TicketRepositoryExceptionDecorator>>());
+                provider.GetRequiredService<ILogger<TicketRepository>>());
 
             return withExceptionHandling;
         });
@@ -70,11 +70,11 @@ public static class ModuleServices
 
             var withLogging = new CaseRepositoryLoggingDecorator(
                 inner,
-                provider.GetRequiredService<ILogger<CaseRepositoryLoggingDecorator>>());
+                provider.GetRequiredService<ILogger<CaseRepository>>());
 
             var withExceptionHandling = new CaseRepositoryExceptionDecorator(
                 withLogging,
-                provider.GetRequiredService<ILogger<CaseRepositoryExceptionDecorator>>());
+                provider.GetRequiredService<ILogger<CaseRepository>>());
 
             return withExceptionHandling;
         });

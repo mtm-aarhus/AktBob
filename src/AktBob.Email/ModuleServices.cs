@@ -23,11 +23,11 @@ public static class ModuleServices
 
             var withLogging = new ModuleLoggingDecorator(
                 inner,
-                provider.GetRequiredService<ILogger<ModuleLoggingDecorator>>());
+                provider.GetRequiredService<ILogger<EmailModule>>());
 
             var withExceptionHandling = new ModuleExceptionDecorator(
                 withLogging,
-                provider.GetRequiredService<ILogger<ModuleExceptionDecorator>>());
+                provider.GetRequiredService<ILogger<EmailModule>>());
 
             return withExceptionHandling;
         });

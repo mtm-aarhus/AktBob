@@ -8,7 +8,7 @@ namespace AktBob.Database.Decorators;
 internal class MessageRepositoryExceptionDecorator(IMessageRepository inner, ILogger<MessageRepository> logger) : IMessageRepository
 {
     private readonly IMessageRepository _inner = inner;
-    private readonly ILogger<v> _logger = logger;
+    private readonly ILogger<MessageRepository> _logger = logger;
 
     public async Task<bool> Add(Message message)
     {

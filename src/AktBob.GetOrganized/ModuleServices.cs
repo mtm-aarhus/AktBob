@@ -47,7 +47,7 @@ public static class ModuleServices
 
             var withLogging = new ModuleLoggingDecorator(
                 inner,
-                provider.GetRequiredService<ILogger<ModuleLoggingDecorator>>());
+                provider.GetRequiredService<ILogger<GetOrganizedModule>>());
 
             return withLogging;
         });
