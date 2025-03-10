@@ -67,7 +67,10 @@ var builder = Host.CreateDefaultBuilder(args)
         {
             config.UseSqlServerStorage(hostContext.Configuration.GetConnectionString("Hangfire"));
         });
-        services.AddHangfireServer();
+        services.AddHangfireServer(config =>
+        {
+            config.WorkerCount = configuration.GetValue<int?>("Hangfire:WorkerCounter") ?? 20;
+        });
 
         // Modules
         services.AddUiPathModule(hostContext.Configuration);
