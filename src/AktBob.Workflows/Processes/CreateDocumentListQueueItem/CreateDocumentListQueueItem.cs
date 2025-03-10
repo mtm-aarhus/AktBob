@@ -73,7 +73,7 @@ internal class CreateDocumentListQueueItem(
                 return;
             }
 
-            _logger.LogError("Reached maximum retries for getting ticket data from database");
+            _logger.LogCritical("Failed with {job}. Reached maximum retries for getting ticket data from database.", job);
             return;
         }
         

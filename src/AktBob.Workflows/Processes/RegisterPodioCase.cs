@@ -60,7 +60,6 @@ internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfigurati
 
         // Get ticket from repository
         var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(deskproId);
-
         if (databaseTicket is null)
         {
             _logger.LogError("No tickets found in database for DeskproId '{deskproId}'", deskproId);

@@ -37,7 +37,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         var deskproTicketResult = await deskpro.GetTicket(job.DeskproId, cancellationToken);
         if (!deskproTicketResult.IsSuccess)
         {
-            _logger.LogError("Error getting Deskpro ticket {id}", job.DeskproId);
+            _logger.LogCritical("Failed with {job}", job);
             return;
         }
 
@@ -55,7 +55,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
 
         if (!createCaseResult.IsSuccess)
         {
-            _logger.LogError("Error creating GetOrganized case (DeskproId {deskproId}", job.DeskproId);
+            _logger.LogCritical("Failed with {job}", job);
             return;
         }
 
@@ -102,7 +102,6 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         var ticket = await unitOfWork.Tickets.GetByDeskproTicketId(deskproId);
         if (ticket is null)
         {
-            _logger.LogError("Error getting database ticket for DeskproId {id}", deskproId);
             return;
         }
 

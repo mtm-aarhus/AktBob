@@ -35,8 +35,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "CaseNumber"));
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
-
-
+        // Begin
         var getPodioItem = podio.GetItem(job.PodioItemId, cancellationToken);
         var getDatabaseCase = unitOfWork.Cases.GetByPodioItemId(job.PodioItemId.Id);
         var getDatabaseTicket = unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId.Id);
@@ -46,21 +45,11 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             getDatabaseCase,
             getDatabaseTicket]);
 
-        if (!getPodioItem.Result.IsSuccess)
+        if (!getPodioItem.Result.IsSuccess
+            || getDatabaseCase.Result is null
+            || getDatabaseTicket.Result is null)
         {
-            _logger.LogError("Could not get item {itemId} from Podio", job.PodioItemId);
-            return;
-        }
-        
-        if (getDatabaseCase.Result is null)
-        {
-            _logger.LogError("Case related to PodioItemId {id} not found in database", job.PodioItemId);
-            return;
-        }
-
-        if (getDatabaseTicket.Result is null)
-        {
-            _logger.LogError("Ticket related to PodioItemId {id} not found in database", job.PodioItemId);
+            _logger.LogCritical("Failed with {job}", job);
             return;
         }
 
@@ -79,7 +68,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         var deskproTicketResult = await deskpro.GetTicket(getDatabaseTicket.Result.DeskproId, cancellationToken);
         if (!deskproTicketResult.IsSuccess)
         {
-            _logger.LogError($"Could not get data from Deskpro for ticket ID {getDatabaseTicket.Result.DeskproId}");
+            _logger.LogCritical("Failed with {job}", job);
             return;
         }
 

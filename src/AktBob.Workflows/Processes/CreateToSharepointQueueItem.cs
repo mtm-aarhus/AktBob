@@ -46,49 +46,36 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
             getDatabaseCase,
             getDatabaseTicket]);
 
-        if (!getPodioItem.Result.IsSuccess)
+        if (!getPodioItem.Result.IsSuccess
+            || getDatabaseCase.Result is null
+            || getDatabaseTicket.Result is null)
         {
-            _logger.LogError("Could not get item {itemId} from Podio", job.PodioItemId);
+            _logger.LogCritical("Failed with {job}", job);
             return;
         }
 
         var caseNumber = getPodioItem.Result.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(caseNumber))
         {
-            _logger.LogError("Could not get case number field value from Podio Item {itemId}", job.PodioItemId);
-            return;
-        }
-
-        if (getDatabaseCase.Result is null)
-        {
-            _logger.LogError("No database case found by PodioItemId {podioItemId}", job.PodioItemId);
-            return;
+            _logger.LogWarning("Could not get case number field value from Podio Item {itemId}", job.PodioItemId);
         }
 
         if (string.IsNullOrEmpty(getDatabaseCase.Result.SharepointFolderName))
         {
-            _logger.LogError("Case related to PodioItemId {id}: SharepointFolderName is null or empty", job.PodioItemId);
-            return;
-        }
-
-        if (getDatabaseTicket.Result is null)
-        {
-            _logger.LogError("No database ticket found for PodioItemId {podioItemId}.", job.PodioItemId);
-            return;
+            _logger.LogWarning("Case related to PodioItemId {id}: SharepointFolderName is null or empty", job.PodioItemId);
         }
 
         var filArkivCaseId = getDatabaseTicket.Result.Cases?.FirstOrDefault(c => c.PodioItemId == job.PodioItemId.Id)?.FilArkivCaseId;
         if (filArkivCaseId == null)
         {
-            _logger.LogError("FilArkivCaseId not found for PodioItemId {podioItemId}", job.PodioItemId);
-            return;
+            _logger.LogWarning("FilArkivCaseId not found for PodioItemId {podioItemId}", job.PodioItemId);
         }
 
         // Get ticket from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(getDatabaseTicket.Result.DeskproId, cancellationToken);
         if (!deskproTicketResult.IsSuccess)
         {
-            _logger.LogError("Error getting ticket {id} from Deskpro", getDatabaseTicket.Result.DeskproId);
+            _logger.LogCritical("Failed with {job} failed", job);
             return;
         }
 

@@ -35,46 +35,39 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
         var useOpenOrchestrator = _configuration.GetValue<bool>($"{_configurationObjectName}:UseOpenOrchestrator");
 
 
-        // Get ticket from repository
-        var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproId);
+        // Begin
+        var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproId);
+        var getDeskproTicket = deskpro.GetTicket(job.DeskproId, cancellationToken);
 
-        if (databaseTicket is null)
+        Task.WaitAll([getDatabaseTicket, getDeskproTicket]);
+
+        if (getDatabaseTicket.Result is null
+            || !getDeskproTicket.Result.IsSuccess)
         {
-            _logger.LogError("No Deskpro tickets found for id {id}.", job.DeskproId);
+            _logger.LogCritical("Failed with {job}", job);
             return;
         }
 
-        if (string.IsNullOrEmpty(databaseTicket.CaseNumber))
+        if (string.IsNullOrEmpty(getDatabaseTicket.Result.CaseNumber))
         {
-            _logger.LogError("GO Aktindsigtssagsnummer not registered for Deskpro Id {id}", job.DeskproId);
-            return;
+            _logger.LogWarning("GO Aktindsigtssagsnummer not registered for Deskpro Id {id}", job.DeskproId);
         }
 
-
-        // Get ticket from Deskpro
-        var deskproTicketResult = await deskpro.GetTicket(job.DeskproId, cancellationToken);
-
-        if (!deskproTicketResult.IsSuccess)
-        {
-            _logger.LogError("Error ticket {id} from Deskpro", job.DeskproId);
-            return;
-        }
-
-        var agent = deskproTicketResult.Value.Agent?.Id != null
-            ? await deskpro.GetPerson(deskproTicketResult.Value.Agent.Id, cancellationToken)
+        var agent = getDeskproTicket.Result.Value.Agent?.Id != null
+            ? await deskpro.GetPerson(getDeskproTicket.Result.Value.Agent.Id, cancellationToken)
             : Result<PersonDto>.Error();
 
-        // CREATE QUEUE ITEM
+        // Create queue item
         if (useOpenOrchestrator)
         {
             // Create OpenOrchestrator queue item
             var payload = new
             {
-                Aktindsigtssag = databaseTicket.CaseNumber,
+                Aktindsigtssag = getDatabaseTicket.Result.CaseNumber,
                 Email = agent.Value.Email,
                 Navn = agent.Value.FullName,
                 DeskproID = job.DeskproId,
-                Overmappenavn = databaseTicket.SharepointFolderName
+                Overmappenavn = getDatabaseTicket.Result.SharepointFolderName
             };
 
             var createOpenOrchestratorQueueItemCommand = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload.ToJson());
@@ -85,11 +78,11 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
             // Create UiPath queue item
             var payload = new
             {
-                Aktindsigtssag = databaseTicket.CaseNumber,
+                Aktindsigtssag = getDatabaseTicket.Result.CaseNumber,
                 Email = agent.Value.Email,
                 Navn = agent.Value.FullName,
                 DeskproID = job.DeskproId,
-                Overmappenavn = databaseTicket.SharepointFolderName
+                Overmappenavn = getDatabaseTicket.Result.SharepointFolderName
             };
 
             uiPath.CreateQueueItem(uiPathQueueName, $"Deskpro ID {job.DeskproId.ToString()}", payload.ToJson());

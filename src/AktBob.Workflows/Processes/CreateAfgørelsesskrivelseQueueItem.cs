@@ -31,7 +31,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
 
         if (!getDeskproTicketResult.IsSuccess)
         {
-            _logger.LogError("Error getting Deskpro ticket {id}", job.DeskproTicketId);
+            _logger.LogCritical("{name} with {job} failed", nameof(CreateAfgørelsesskrivelseQueueItem), job);
             return;
         }
 
