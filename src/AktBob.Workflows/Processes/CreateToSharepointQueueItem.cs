@@ -112,7 +112,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
             FilarkivCaseID = getDatabaseCase.Result.FilArkivCaseId
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}: {caseNumber}", payload.ToJson());
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
     }
 }

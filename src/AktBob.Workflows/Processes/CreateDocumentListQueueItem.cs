@@ -83,7 +83,7 @@ internal class CreateDocumentListQueueItem(
                 Titel = deskproTicket.Value.Subject
             };
 
-            var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"PodioItemID {job.PodioItemId}: {getCaseNumber.Result.Value}", payload.ToJson());
+            var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
             openOrchestrator.CreateQueueItem(command);
         }
         else
