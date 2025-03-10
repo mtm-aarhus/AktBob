@@ -1,11 +1,13 @@
 ﻿using AktBob.Podio.Contracts;
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.FileProcess;
+using Hangfire;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
 internal record QueryFilesProcessingStatusJob(Guid CacheId);
 
+[Queue("check-ocr-screening-status")]
 internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob> logger, IServiceScopeFactory serviceProviderFactory, IConfiguration configuration) : IJobHandler<QueryFilesProcessingStatusJob>
 {
     private readonly ILogger<QueryFilesProcessingStatusJob> _logger = logger;

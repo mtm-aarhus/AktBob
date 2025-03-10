@@ -67,9 +67,18 @@ var builder = Host.CreateDefaultBuilder(args)
         {
             config.UseSqlServerStorage(hostContext.Configuration.GetConnectionString("Hangfire"));
         });
+
         services.AddHangfireServer(config =>
         {
-            config.WorkerCount = configuration.GetValue<int?>("Hangfire:WorkerCounter") ?? 20;
+            config.Queues = ["default"];
+            config.WorkerCount = configuration.GetValue<int?>("Hangfire:DefaultWorkerCounter") ?? 5;
+
+        });
+
+        services.AddHangfireServer(config =>
+        {
+            config.Queues = ["check-ocr-screening-status"];
+            config.WorkerCount = configuration.GetValue<int?>("Hangfire:CheckOCRScreeningStatusQueueWorkerCount") ?? 20;
         });
 
         // Modules
