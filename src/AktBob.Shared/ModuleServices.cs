@@ -7,8 +7,6 @@ public static class ModuleServices
     {
         services.AddSingleton<ITimeProvider, TimeProvider>();
         services.AddMemoryCache();
-
-        //services.AddScoped(typeof(IJobHandler<>), typeof(JobHandlerDecoratorFactory<>)); // Must be registered AFTER all actual job handlers are registered in the other projects
         return services;
     }
 }

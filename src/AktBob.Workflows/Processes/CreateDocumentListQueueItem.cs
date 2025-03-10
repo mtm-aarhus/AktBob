@@ -139,19 +139,19 @@ internal class CreateDocumentListQueueItem(
             // We have data: Exit the while loop
             if (ticket != null)
             {
-                _logger.LogInformation("Try {count}/{retries}: Database API ticket data for PodioItemId {id} found", counter, retriesCount, podioItemId);
+                _logger.LogInformation("Try {count}/{retries}: Database ticket data for PodioItemId {id} found", counter, retriesCount, podioItemId);
                 return ticket;
             }
 
             // No data was found: retry
-            _logger.LogWarning("Try {count}/{retries}: Database API did not return any ticket data for PodioItemId {id}. Retry in {time} ...", counter, retriesCount, podioItemId, delay.ToString());
+            _logger.LogWarning("Try {count}/{retries}: Database: ticket data for PodioItemId {id} not found. Retry in {time} ...", counter, retriesCount, podioItemId, delay.ToString());
 
             counter++;
             await timeProvider.Delay(delay, cancellationToken);
         }
 
         
-        _logger.LogError("Final try: Database API did not return any ticket data for PodioItemId {id}", podioItemId);
+        _logger.LogError("Final try: Database: ticket data for PodioItemId {id} not found", podioItemId);
         return Result.Error();
     }
 }

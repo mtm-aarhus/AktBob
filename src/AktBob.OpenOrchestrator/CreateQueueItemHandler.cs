@@ -25,12 +25,12 @@ internal class CreateQueueItemHandler(IConfiguration configuration) : ICreateQue
                 new
                 {
                     Id = id,
-                    QueueName = queueName.Trim().Substring(0, 100),
+                    QueueName = queueName.Trim().Length > 100 ? queueName.Trim().Substring(0, 100) : queueName.Trim(),
                     Status = "NEW",
-                    Data = payload.Trim().Substring(0, 2000),
-                    Reference = reference.Trim().Substring(0, 100),
+                    Data = payload.Trim().Length > 2000 ? payload.Trim().Substring(0, 2000) : payload.Trim(),
+                    Reference = reference.Trim().Length > 100 ? reference.Trim().Substring(0, 100) : reference.Trim(),
                     CreatedAt = DateTime.Now,
-                    CreatedBy = $"{Environment.MachineName} AktBob.Worker".Trim().Substring(0, 100)
+                    CreatedBy = $"{Environment.MachineName} AktBob.Worker"
                 },
                 commandType: System.Data.CommandType.Text);
 

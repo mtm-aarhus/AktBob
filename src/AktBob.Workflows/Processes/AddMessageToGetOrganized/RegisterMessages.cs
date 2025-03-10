@@ -40,13 +40,22 @@ internal class RegisterMessages(ILogger<RegisterMessages> logger, IServiceScopeF
                 return;
             }
 
-            var message = new Message
+            var existingMessage = await unitOfWork.Messages.GetByDeskproMessageId(deskproMessage.Id);
+            if (existingMessage is null)
             {
-                TicketId = databaseTicket.Id,
-                DeskproMessageId = deskproMessage.Id,
-            };
+                var message = new Message
+                {
+                    TicketId = databaseTicket.Id,
+                    DeskproMessageId = deskproMessage.Id,
+                };
 
-            await unitOfWork.Messages.Add(message);
+                await unitOfWork.Messages.Add(message);
+            }
+
+            if (existingMessage is not null && existingMessage.GODocumentId is not null)
+            {
+                continue;
+            }
 
             if (!string.IsNullOrEmpty(databaseTicket.CaseNumber))
             {
