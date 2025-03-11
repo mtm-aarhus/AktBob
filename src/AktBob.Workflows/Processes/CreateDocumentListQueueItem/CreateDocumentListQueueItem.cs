@@ -7,6 +7,7 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using AktBob.UiPath.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.Shared.Exceptions;
 
 namespace AktBob.Workflows.Processes.CreateDocumentListQueueItem;
 
@@ -55,7 +56,9 @@ internal class CreateDocumentListQueueItem(
         var getDatabaseTicket = unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId.Id);
 
         Task.WaitAll([getPodioItem, getDatabaseTicket]);
-        
+
+        if (getPodioItem.Result is null) throw new BusinessException($"Could not get valid data from Podio.");
+
         // RETRY: Trying to get the ticket data from the database might fail initially since Podio triggers both the create event
         // and DocumentListTrigger event almost at the same time. Because of this race condition, the database might not have
         // the ticket data at this point in time yet.
@@ -73,8 +76,7 @@ internal class CreateDocumentListQueueItem(
                 return;
             }
 
-            _logger.LogCritical("Failed with {job}. Reached maximum retries for getting ticket data from database.", job);
-            return;
+            throw new BusinessException($"Reached maximum retries for getting ticket data from database.");
         }
         
         ReschedulingCounter.Instance.Remove(job.PodioItemId);

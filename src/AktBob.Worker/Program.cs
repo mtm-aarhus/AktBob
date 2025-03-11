@@ -13,6 +13,7 @@ using AktBob.Email;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Serilog.Formatting.Display;
+using AktBob.Shared.Exceptions;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -64,17 +65,21 @@ var builder = Host.CreateDefaultBuilder(args)
 
         // Hangfire
         services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
-        services.AddScoped<FailedJobNotificationFilter>();
+        services.AddSingleton<FailedJobLoggingFilter>();
         services.AddHangfire(config =>
         {
             config.UseSqlServerStorage(hostContext.Configuration.GetConnectionString("Hangfire"));
+            config.UseFilter(new AutomaticRetryAttribute
+            {
+                Attempts = 1,
+                OnlyOn = [typeof(BusinessException)]
+            });
         });
 
         services.AddHangfireServer(config =>
         {
             config.Queues = ["default"];
             config.WorkerCount = configuration.GetValue<int?>("Hangfire:DefaultWorkerCounter") ?? 5;
-
         });
 
         services.AddHangfireServer(config =>
@@ -100,9 +105,8 @@ var builder = Host.CreateDefaultBuilder(args)
 
 var host = builder.Build();
 
-// Setup filter for dispatching notifications when a Hangfire job fails
+// Register Hangfire filters
 using var scope = host.Services.CreateScope();
-var failedJobNotificationFilter = scope.ServiceProvider.GetRequiredService<FailedJobNotificationFilter>();
-GlobalJobFilters.Filters.Add(failedJobNotificationFilter);
+GlobalJobFilters.Filters.Add(scope.ServiceProvider.GetRequiredService<FailedJobLoggingFilter>());
 
 host.Run();
