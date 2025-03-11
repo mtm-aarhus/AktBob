@@ -45,16 +45,18 @@ internal class TicketRepository : ITicketRepository
         return tickets.FirstOrDefault();
     }
 
-    public async Task<int> Update(Ticket ticket)
+    public async Task<bool> Update(Ticket ticket)
     {
-        var sql = @"UPDATE Tickets 
+        var sql = """
+            UPDATE Tickets 
             SET
-				CaseNumber = @CaseNumber,
-				SharepointFolderName = @SharepointFolderName,
-				CaseUrl = @CaseUrl
-			WHERE Id = @Id";
+            	CaseNumber = @CaseNumber,
+            	SharepointFolderName = @SharepointFolderName,
+            	CaseUrl = @CaseUrl
+            WHERE Id = @Id
+            """;
 
-        return await _sqlDataAccess.Execute(sql, ticket);
+        return await _sqlDataAccess.Execute(sql, ticket) == 1;
     }
 
     public async Task<IEnumerable<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)

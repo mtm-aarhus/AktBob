@@ -7,6 +7,7 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text;
 using AktBob.Workflows.Helpers;
+using AktBob.Shared.Exceptions;
 
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
@@ -40,12 +41,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         }
 
         var ticketResult = await deskpro.GetTicket(job.TicketId, cancellationToken);
-        if (!ticketResult.IsSuccess || ticketResult.Value is null)
-        {
-            _logger.LogError("Error getting ticket {id} from Deskpro", job.TicketId);
-            return;
-        }
-
+        if (!ticketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
         var ticket = ticketResult.Value;
 
         var getTicketCustomFields = deskpro.GetCustomFieldSpecifications(cancellationToken);
@@ -63,10 +59,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
                 getAgent,
                 getUser]);
 
-        if (!getTicketCustomFields.Result.IsSuccess)
-        {
-            return;
-        }
+        if (!getTicketCustomFields.Result.IsSuccess) throw new BusinessException("Unable to get Deskpro custom field specifications");
 
         // Map ticket fields
         var customFields = GenerateCustomFieldValues(job.CustomFieldIds, getTicketCustomFields.Result.Value, ticket);
@@ -129,11 +122,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         }
 
         var fileResult = await GeneratePDF(cloudConvertModule, contentElements, cancellationToken);
-        if (!fileResult.IsSuccess)
-        {
-            _logger.LogError(fileResult.Errors.AsString());
-            return;
-        }
+        if (!fileResult.IsSuccess) throw new BusinessException($"Unable to generate PDF document using CloudConvert: {fileResult.Errors.AsString()}");
 
         // Check if this submission is the most recent for the specified ticket. Check this as late as possible.
         if (IsMostRecentSubmission(currentPendingTicket, pendingsTickets))
@@ -148,14 +137,9 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
                 UploadDocumentCategory.Internal,
                 true);
 
-            var uploadDocumentResult = await getOrganized.UploadDocument(uploadDocumentCommand, cancellationToken);
-
-            if (!uploadDocumentResult.IsSuccess)
-            {
-                _logger.LogError("Error uploading full ticket document to GetOrganized: Deskpro ticket {ticketId}, GO case '{goCaseNumber}'", job.TicketId, job.GOCaseNumber);
-            }
-
             pendingsTickets.RemovePendingTicket(currentPendingTicket);
+            var uploadDocumentResult = await getOrganized.UploadDocument(uploadDocumentCommand, cancellationToken);
+            if (!uploadDocumentResult.IsSuccess) throw new BusinessException("Unable to uplaod ticket PDF document to GetOrganized");
         }
     }
 

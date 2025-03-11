@@ -58,16 +58,18 @@ internal class CaseRepository : ICaseRepository
 
     public async Task<Case?> GetByTicketId(int ticketId) => await _sqlDataAccess.QuerySingle<Case>("SELECT * FROM v_Cases WHERE TicketId = @TicketId", new { TicketId = ticketId });
 
-    public async Task<int> Update(Case @case)
+    public async Task<bool> Update(Case @case)
     {
-        var sql = @"UPDATE Cases SET
-				TicketId = @TicketId,
-				PodioItemId = @PodioItemId,
-				CaseNumber = @CaseNumber,
-				FilArkivCaseId = @FilArkivCaseId,
-				SharepointFolderName = @SharepointFolderName
-			WHERE Id = @Id";
+        var sql = """
+            UPDATE Cases SET
+                TicketId = @TicketId,
+                PodioItemId = @PodioItemId,
+                CaseNumber = @CaseNumber,
+                FilArkivCaseId = @FilArkivCaseId,
+                SharepointFolderName = @SharepointFolderName
+            WHERE Id = @Id
+            """;
 
-        return await _sqlDataAccess.Execute(sql, @case);
+        return await _sqlDataAccess.Execute(sql, @case) == 1;
     }
 }

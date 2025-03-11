@@ -26,22 +26,24 @@ internal class MessageRepository : IMessageRepository
         return rowsAffected == 1;
     }
 
-    public async Task<int> Delete(int id) => await _sqlDataAccess.Execute("UPDATE Messages SET Deleted = 1 WHERE Id = @Id", new { Id = id });
+    public async Task<bool> Delete(int id) => await _sqlDataAccess.Execute("UPDATE Messages SET Deleted = 1 WHERE Id = @Id", new { Id = id }) == 1;
     
     public async Task<Message?> Get(int id) => await _sqlDataAccess.QuerySingle<Message>("SELECT * FROM v_Messages WHERE Id = @Id", new { Id = id });
     
     public async Task<Message?> GetByDeskproMessageId(int deskproMessageId) => await _sqlDataAccess.QuerySingle<Message>("SELECT * FROM v_Messages WHERE DeskproMessageId = @DeskproMessageId", new { DeskproMessageId = deskproMessageId });
 
-    public async Task<int> Update(Message message)
+    public async Task<bool> Update(Message message)
     {
-        var sql = @"
+        var sql = """
             UPDATE Messages SET
                 TicketId = @TicketId,
                 DeskproMessageId = @DeskproMessageId,
                 GODocumentId = @GODocumentId,
                 MessageNumber = @MessageNumber
-            WHERE Id = @Id";
+            WHERE Id = @Id
+            """;
             
-        return await _sqlDataAccess.Execute(sql, message);
+        var rowsAffected = await _sqlDataAccess.Execute(sql, message);
+        return rowsAffected == 1;
     }
 }

@@ -9,8 +9,8 @@ public interface IMessageRepository
     /// <param name="message"></param>
     /// <returns>True if the message was added</returns>
     Task<bool> Add(Message message);
-    Task<int> Delete(int id);
+    Task<bool> Delete(int id);
     Task<Message?> GetByDeskproMessageId(int deskproMessageId);
     Task<Message?> Get(int id);
-    Task<int> Update(Message message);
+    Task<bool> Update(Message message);
 }

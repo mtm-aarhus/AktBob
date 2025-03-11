@@ -1,6 +1,7 @@
 ﻿using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
+using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
 using System.Collections.ObjectModel;
 
@@ -31,12 +32,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
 
             // Get the individual attachments from Deskpro
             var getAttachmentStreamResult = await deskproModule.GetMessageAttachment(attachment.DownloadUrl, cancellationToken);
-
-            if (!getAttachmentStreamResult.IsSuccess)
-            {
-                _logger.LogError("Error downloading attachment '{filename}' from Deskpro message #{messageId}, ticketId {ticketId}", attachment.FileName, attachment.MessageId, attachment.TicketId);
-                continue;
-            }
+            if (!getAttachmentStreamResult.IsSuccess) throw new BusinessException($"Unable to download message attachment '{attachment.FileName}' from Deskpro message {attachment.MessageId}, ticketId {attachment.TicketId}");
 
             getAttachmentStreamResult.Value.CopyTo(stream);
             var attachmentBytes = stream.ToArray();
@@ -56,12 +52,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
                 true);
 
             var uploadedDocumentIdResult = await getOrganized.UploadDocument(uploadDocumentCommand, cancellationToken);
-
-            if (!uploadedDocumentIdResult.IsSuccess)
-            {
-                _logger.LogError("Error upload Deskpro message attachment to GetOrganized (Filename: '{filename}' Download URL: {url})", attachment.FileName, attachment.DownloadUrl);
-                continue;
-            }
+            if (!uploadedDocumentIdResult.IsSuccess) throw new BusinessException($"Unable to upload message attachment to GetOrganized (Filename: '{attachment.FileName}' Download URL: {attachment.DownloadUrl})");
 
             childrenDocumentIds.Add(uploadedDocumentIdResult.Value);
 

@@ -8,5 +8,5 @@ public interface ICaseRepository
     Task<Case?> GetByTicketId(int ticketId);
     Task<Case?> GetByPodioItemId(long podioItemId);
     Task<IEnumerable<Case>> GetAll(long? podioItemId, Guid? filArkivCaseId);
-    Task<int> Update(Case @case);
+    Task<bool> Update(Case @case);
 }
