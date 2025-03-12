@@ -82,6 +82,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             deskproTicket.Subject,
             databaseMessage.MessageNumber ?? 0,
             attachments,
+            deskproMessage.IsAgentNote,
             cancellationToken);
         if (!generateDocumentResult.IsSuccess) throw new BusinessException($"Unable to generate PDF document using CloudConvert: {generateDocumentResult.Errors.AsString()}");
 
@@ -167,9 +168,11 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
                                                         string caseTitle,
                                                         int messageNumber,
                                                         IEnumerable<AttachmentDto> attachments,
+                                                        bool isAgentNote,
                                                         CancellationToken cancellationToken = default)
     {
         var html = HtmlHelper.GenerateMessageHtml(
+            isAgentNote: isAgentNote,
             createdAt: createdAt,
             personName: personName,
             personEmail: personEmail,

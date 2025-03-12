@@ -121,6 +121,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
                 }
 
                 var messageHtml = HtmlHelper.GenerateMessageHtml(
+                    message.IsAgentNote,
                     message.CreatedAt,
                     message.Person.FullName,
                     message.Person.Email,
