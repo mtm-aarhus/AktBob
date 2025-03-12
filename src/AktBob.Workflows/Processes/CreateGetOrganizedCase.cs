@@ -22,7 +22,6 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-
     public async Task Handle(CreateGetOrganizedCaseJob job, CancellationToken cancellationToken = default)
     {
         Guard.Against.NegativeOrZero(job.DeskproId);
@@ -35,11 +34,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
 
         // Get subject from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(job.DeskproId, cancellationToken);
-        if (!deskproTicketResult.IsSuccess)
-        {
-            _logger.LogCritical("Failed with {job}", job);
-            return;
-        }
+        if (!deskproTicketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
 
         // Create GO-case
         var caseTitle = deskproTicketResult.Value.Subject ?? "Uden titel";
@@ -53,14 +48,12 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         var createCaseCommand = new CreateGetOrganizedCaseCommand(caseTitle, caseProfile, status, access, department, facet, kle);
         var createCaseResult = await getOrganized.CreateCase(createCaseCommand, cancellationToken: cancellationToken);
 
-        if (!createCaseResult.IsSuccess)
-        {
-            _logger.LogCritical("Failed with {job}", job);
-            return;
-        }
+        if (!createCaseResult.IsSuccess) throw new BusinessException("Unable to create GetOrganized case");
 
         var caseId = createCaseResult.Value.CaseId;
         var caseUrl = createCaseResult.Value.CaseUrl.Replace("ad.", "");
+
+        _logger.LogInformation("GetOrganized case {caseId} created", caseId);
 
         UpdateDeskproSetGetOrganizedCaseId(deskpro, job.DeskproId, caseId, caseUrl);
         await UpdateDatabaseSetGetOrganizedCaseId(job.DeskproId, unitOfWork, caseId, caseUrl);

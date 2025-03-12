@@ -53,7 +53,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
                             && x.FinishedAt == null
                             && x.RetryInProgress == false))
                         {
-                            _logger.LogInformation("Case {caseId} File {fileId} Finished ('{fileName}')", @case.FilArkivCaseId, fileId, response.FileName);
+                            _logger.LogInformation("Case {caseId} File {fileId} finished ('{fileName}')", @case.FilArkivCaseId, fileId, response.FileName);
                             break;
                         }
                     }
@@ -65,7 +65,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
 
         Task.WaitAll(tasks, cancellationToken);
 
-        _logger.LogInformation("Finished querying processing statusses for files for FilArkiv Case {id}, PodioItemId {podioItemId}", @case.FilArkivCaseId, @case.PodioItemId);
+        _logger.LogInformation("Finished querying processing statusses for all files, FilArkiv case {id}, PodioItemId {podioItemId}", @case.FilArkivCaseId, @case.PodioItemId);
 
         cachedData.Cases.TryRemove(job.CacheId, out Case? removedCase);
 
@@ -78,8 +78,6 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
 
         var postCommandCommand = new PostCommentCommand(@case.PodioItemId, commentText);
         podio.PostComment(postCommandCommand);
-
-        _logger.LogDebug("Executed {name} with {job}", nameof(QueryFilesProcessingStatus), job);
 
         return Task.CompletedTask;
     }

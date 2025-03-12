@@ -46,13 +46,9 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
             getDatabaseCase,
             getDatabaseTicket]);
 
-        if (!getPodioItem.Result.IsSuccess
-            || getDatabaseCase.Result is null
-            || getDatabaseTicket.Result is null)
-        {
-            _logger.LogCritical("Failed with {job}", job);
-            return;
-        }
+        if (!getPodioItem.Result.IsSuccess) throw new BusinessException("Unable to get item from Podio");
+        if (getDatabaseCase.Result is null) throw new BusinessException("Unable to get case from databaase");
+        if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
 
         var caseNumber = getPodioItem.Result.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(caseNumber))
@@ -73,11 +69,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
 
         // Get ticket from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(getDatabaseTicket.Result.DeskproId, cancellationToken);
-        if (!deskproTicketResult.IsSuccess)
-        {
-            _logger.LogCritical("Failed with {job} failed", job);
-            return;
-        }
+        if (!deskproTicketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
 
         var agent = deskproTicketResult.Value.Agent?.Id != null
             ? await deskpro.GetPerson(deskproTicketResult.Value.Agent.Id, cancellationToken)

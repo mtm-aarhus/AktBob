@@ -32,39 +32,19 @@ internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfigurati
         
         // Get metadata from Podio
         var podioItemResult = await podio.GetItem(job.PodioItemId, cancellationToken);
-        if (!podioItemResult.IsSuccess)
-        {
-            _logger.LogError("Could not get item {itemId} from Podio", job.PodioItemId);
-            return;
-        }
+        if (!podioItemResult.IsSuccess) throw new BusinessException("Unable to get item from Podio");
 
         var caseNumber = podioItemResult.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
-        if (string.IsNullOrEmpty(caseNumber))
-        {
-            _logger.LogError("Could not get case number field value from Podio Item {id}", job.PodioItemId);
-            return;
-        }
+        if (string.IsNullOrEmpty(caseNumber)) throw new BusinessException("Case number field value from Podio Item is null or empty");
 
         var deskproIdString = podioItemResult.Value.GetField(podioFieldDeskproId.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
-        if (string.IsNullOrEmpty(deskproIdString))
-        {
-            _logger.LogError("Could not get Deskpro Id field value from Podio Item {itemId}", job.PodioItemId);
-            return;
-        }
+        if (string.IsNullOrEmpty(deskproIdString)) throw new BusinessException("Deskpro Id field value from Podio Item is null or empty");
 
-        if (!int.TryParse(deskproIdString, out int deskproId))
-        {
-            _logger.LogError("Could not parse Deskpro Id field value as integer from Podio Item {itemId}", job.PodioItemId);
-            return;
-        }
+        if (!int.TryParse(deskproIdString, out int deskproId)) throw new BusinessException("Unable to parse Podio item Deskpro Id field value as integer");
 
         // Get ticket from repository
         var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(deskproId);
-        if (databaseTicket is null)
-        {
-            _logger.LogError("No tickets found in database for DeskproId '{deskproId}'", deskproId);
-            return;
-        }
+        if (databaseTicket is null) throw new BusinessException($"Unable to get Deskpro ticket {deskproId} from database");
 
         // Add case to database
         var @case = new Case

@@ -45,13 +45,9 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             getDatabaseCase,
             getDatabaseTicket]);
 
-        if (!getPodioItem.Result.IsSuccess
-            || getDatabaseCase.Result is null
-            || getDatabaseTicket.Result is null)
-        {
-            _logger.LogCritical("Failed with {job}", job);
-            return;
-        }
+        if (!getPodioItem.Result.IsSuccess) throw new BusinessException("Unable to get item from Podio");
+        if (getDatabaseCase.Result is null) throw new BusinessException("Unable to get case from database");
+        if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
 
         if (string.IsNullOrEmpty(getDatabaseTicket.Result.SharepointFolderName))
         {
@@ -61,16 +57,12 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         var caseNumber = getPodioItem.Result.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(caseNumber))
         {
-            _logger.LogWarning("Could not get case number field value from Podio Item {itemId}", job.PodioItemId);
+            _logger.LogWarning("Unable to get case number field value from Podio Item {itemId}", job.PodioItemId);
         }
 
         // Get data from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(getDatabaseTicket.Result.DeskproId, cancellationToken);
-        if (!deskproTicketResult.IsSuccess)
-        {
-            _logger.LogCritical("Failed with {job}", job);
-            return;
-        }
+        if (!deskproTicketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
 
         // Get Deskpro agent
         var agent = deskproTicketResult.Value.Agent?.Id != null

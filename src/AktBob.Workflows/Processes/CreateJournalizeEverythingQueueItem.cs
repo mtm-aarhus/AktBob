@@ -41,12 +41,8 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
 
         Task.WaitAll([getDatabaseTicket, getDeskproTicket]);
 
-        if (getDatabaseTicket.Result is null
-            || !getDeskproTicket.Result.IsSuccess)
-        {
-            _logger.LogCritical("Failed with {job}", job);
-            return;
-        }
+        if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
+        if (!getDeskproTicket.Result.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
 
         if (string.IsNullOrEmpty(getDatabaseTicket.Result.CaseNumber))
         {

@@ -6,12 +6,9 @@ using AktBob.Shared.Jobs;
 using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Workflows.Processes;
-internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceScopeFactory,
-                                                  ILogger<CreateAfgørelsesskrivelseQueueItem> logger,
-                                                  IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>
+internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-    private readonly ILogger<CreateAfgørelsesskrivelseQueueItem> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
 
     public async Task Handle(CreateAfgørelsesskrivelseQueueItemJob job, CancellationToken cancellationToken = default)
@@ -27,15 +24,10 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         var deskproAfdelingFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:AfdelingFieldId"));
 
         // Get data from Deskpro
-        var getDeskproTicketResult = await deskpro.GetTicket(job.DeskproTicketId, cancellationToken);
+        var deskproTicketResult = await deskpro.GetTicket(job.DeskproTicketId, cancellationToken);
+        if (!deskproTicketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
 
-        if (!getDeskproTicketResult.IsSuccess)
-        {
-            _logger.LogCritical("{name} with {job} failed", nameof(CreateAfgørelsesskrivelseQueueItem), job);
-            return;
-        }
-
-        var deskproTicket = getDeskproTicketResult.Value;
+        var deskproTicket = deskproTicketResult.Value;
 
         var getPerson = deskproTicket.Person != null
             ? deskpro.GetPerson(deskproTicket.Person.Id, cancellationToken)
@@ -51,6 +43,8 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             getPerson,
             getAgent,
             getDatabaseTicket]);
+
+        if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
 
         // Create OpenOrchestrator queue item
         var payload = new

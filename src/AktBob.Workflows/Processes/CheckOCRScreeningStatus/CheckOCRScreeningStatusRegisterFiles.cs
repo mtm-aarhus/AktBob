@@ -1,4 +1,5 @@
 ﻿using AktBob.Podio.Contracts;
+using AktBob.Shared.Exceptions;
 using AktBob.Shared.Jobs;
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.Documents;
@@ -22,11 +23,7 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
         var @case = new Case(job.FilArkivCaseId, job.PodioItemId);
         var cacheId = Guid.NewGuid();
 
-        if (!cachedData.Cases.TryAdd(cacheId, @case))
-        {
-            _logger.LogError("Error adding case to cache");
-            return;
-        }
+        if (!cachedData.Cases.TryAdd(cacheId, @case)) throw new BusinessException("Unable to add case to cache");
 
         bool moveToNextPage = true;
         int pageIndex = 1; // First page = pageIndex = 1
@@ -41,13 +38,7 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
             };
 
             var documentOverview = await filArkivCoreClient.GetCaseDocumentOverviewListAsync(documentOverviewParameters);
-
-            if (documentOverview == null)
-            {
-                _logger.LogWarning("FilArkiv: case {id} not found", @case.FilArkivCaseId);
-                return;
-            }
-
+            if (documentOverview == null) throw new BusinessException("Unable to get case from FilArkiv");
             if (!documentOverview.HasNextPage)
             {
                 moveToNextPage = false;
