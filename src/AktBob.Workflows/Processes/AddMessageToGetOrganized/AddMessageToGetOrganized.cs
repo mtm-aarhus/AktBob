@@ -6,7 +6,6 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Workflows.Helpers;
-using AktBob.Shared.Exceptions;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
@@ -36,7 +35,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         // Get message from database, check if documentId is null
         if (databaseMessage.GODocumentId is not null)
         {
-            // The message is already journalized -> do nothing
+            _logger.LogDebug("Message in database already has a value for {propertyName}. Exiting job.", nameof(databaseMessage.GODocumentId));
             return;
         }
 

@@ -20,6 +20,7 @@ internal class ModuleLoggingDecorator(IGetOrganizedModule inner, ILogger<GetOrga
             _logger.LogWarning("GetOrganized case not created. Parameters: {command}, Errors: {errors}", command, result.Errors);
         }
 
+        _logger.LogInformation("GetOrganized case created: {command}", command);
         return result;
     }
 

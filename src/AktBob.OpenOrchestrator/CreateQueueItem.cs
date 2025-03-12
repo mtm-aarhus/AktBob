@@ -3,6 +3,7 @@ using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace AktBob.OpenOrchestrator;
 
@@ -18,7 +19,10 @@ internal class CreateQueueItem(IServiceScopeFactory serviceScopeFactory, ILogger
         using var scope = _serviceScopeFactory.CreateScope();
         var handler = scope.ServiceProvider.GetRequiredService<ICreateQueueItemHandler>();
 
-        var result = await handler.Handle(job.QueueName, job.Payload, job.Reference, cancellationToken);
+        var bytes = Convert.FromBase64String(job.Payload);
+        var decodedPayload = Encoding.UTF8.GetString(bytes);
+
+        var result = await handler.Handle(job.QueueName, decodedPayload, job.Reference, cancellationToken);
         if (!result.IsSuccess) throw new BusinessException($"Unable to create OpenOrchestrator queue item: {result.Errors.AsString()}");
         
         _logger.LogInformation("OpenOrchestrator queue item {id} created. Job: {job}", result.Value, job);

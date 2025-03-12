@@ -1,7 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Deskpro.Contracts;
-using AktBob.Shared.Exceptions;
 using AktBob.Shared.Jobs;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;

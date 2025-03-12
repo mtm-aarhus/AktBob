@@ -7,7 +7,6 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text;
 using AktBob.Workflows.Helpers;
-using AktBob.Shared.Exceptions;
 
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
@@ -56,8 +55,8 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
 
         Task.WaitAll([
             getTicketCustomFields,
-                getAgent,
-                getUser]);
+            getAgent,
+            getUser]);
 
         if (!getTicketCustomFields.Result.IsSuccess) throw new BusinessException("Unable to get Deskpro custom field specifications");
 

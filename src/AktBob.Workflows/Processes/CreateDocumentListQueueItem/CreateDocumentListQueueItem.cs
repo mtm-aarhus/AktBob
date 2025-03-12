@@ -7,7 +7,6 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using AktBob.UiPath.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Shared.Exceptions;
 
 namespace AktBob.Workflows.Processes.CreateDocumentListQueueItem;
 

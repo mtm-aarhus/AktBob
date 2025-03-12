@@ -23,10 +23,9 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
 
         if (!cachedData.Cases.TryGetValue(job.CacheId, out var @case))
         {
+            _logger.LogDebug("Case not foud in cache. Exiting job.");
             return Task.CompletedTask;
         }
-
-        _logger.LogInformation("Querying processing statusses for files for FilArkiv Case {id}, PodioItemId {podioItemId}", @case.FilArkivCaseId, @case.PodioItemId);
 
         // Query each file with a delay between queries
         // Wait for all files to return a 'finished' state
@@ -75,7 +74,6 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
         }
 
         var commentText = "OCR screening af dokumenterne i FilArkiv er færdig.";
-
         var postCommandCommand = new PostCommentCommand(@case.PodioItemId, commentText);
         podio.PostComment(postCommandCommand);
 

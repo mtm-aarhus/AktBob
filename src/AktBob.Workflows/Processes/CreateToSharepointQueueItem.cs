@@ -53,18 +53,18 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
         var caseNumber = getPodioItem.Result.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(caseNumber))
         {
-            _logger.LogWarning("Could not get case number field value from Podio Item {itemId}", job.PodioItemId);
+            _logger.LogWarning("Could not get case number field value from Podio item {itemId}", job.PodioItemId);
         }
 
         if (string.IsNullOrEmpty(getDatabaseCase.Result.SharepointFolderName))
         {
-            _logger.LogWarning("Case related to PodioItemId {id}: SharepointFolderName is null or empty", job.PodioItemId);
+            _logger.LogWarning("Case related to Podio item {id}: SharepointFolderName is null or empty", job.PodioItemId);
         }
 
         var filArkivCaseId = getDatabaseTicket.Result.Cases?.FirstOrDefault(c => c.PodioItemId == job.PodioItemId.Id)?.FilArkivCaseId;
         if (filArkivCaseId == null)
         {
-            _logger.LogWarning("FilArkivCaseId not found for PodioItemId {podioItemId}", job.PodioItemId);
+            _logger.LogWarning("FilArkivCaseId not found for Podio item {podioItemId}", job.PodioItemId);
         }
 
         // Get ticket from Deskpro

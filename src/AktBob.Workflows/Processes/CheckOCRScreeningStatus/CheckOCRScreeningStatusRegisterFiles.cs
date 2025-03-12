@@ -1,5 +1,4 @@
 ﻿using AktBob.Podio.Contracts;
-using AktBob.Shared.Exceptions;
 using AktBob.Shared.Jobs;
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.Documents;
@@ -54,7 +53,7 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
             pageIndex++;
         }
 
-        _logger.LogInformation("Case {caseId}: {count} files registered", @case.FilArkivCaseId, @case.Files.Count());
+        _logger.LogDebug("Case {caseId}: {count} files registered", @case.FilArkivCaseId, @case.Files.Count());
 
         // Enqueue job: query files processing status
         jobDispatcher.Dispatch(new QueryFilesProcessingStatusJob(cacheId));

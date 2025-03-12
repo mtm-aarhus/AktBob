@@ -1,7 +1,6 @@
 ﻿using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
-using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
 using System.Collections.ObjectModel;
 
