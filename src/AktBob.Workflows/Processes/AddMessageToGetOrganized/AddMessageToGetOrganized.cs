@@ -56,6 +56,11 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var personResult = await deskpro.GetPerson(deskproMessage.Person.Id, cancellationToken);
         var person = personResult.Value;
 
+        // Get recipient
+        var recipient = deskproMessage.Recipients.FirstOrDefault() != null
+            ? await deskpro.GetPerson(deskproMessage.Recipients.First(), cancellationToken)
+            : Result<PersonDto>.Error();
+
         // Get attachments
         var attachments = Enumerable.Empty<AttachmentDto>();
         if (getDeskproMessageResult.Value.AttachmentIds.Any())
@@ -65,7 +70,19 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         }
 
         // Generate PDF document
-        var generateDocumentResult = await GenerateDocument(cloudConvert, deskproMessage.CreatedAt, person.FullName, person.Email, deskproMessage.Content, job.CaseNumber, deskproTicket.Subject, databaseMessage.MessageNumber ?? 0, attachments, cancellationToken);
+        var generateDocumentResult = await GenerateDocument(
+            cloudConvert,
+            deskproMessage.CreatedAt,
+            person.FullName,
+            person.Email,
+            recipient.Value?.FullName ?? string.Empty,
+            recipient.Value?.Email ?? deskproMessage.Recipients.FirstOrDefault() ?? string.Empty,
+            deskproMessage.Content,
+            job.CaseNumber,
+            deskproTicket.Subject,
+            databaseMessage.MessageNumber ?? 0,
+            attachments,
+            cancellationToken);
         if (!generateDocumentResult.IsSuccess) throw new BusinessException($"Unable to generate PDF document using CloudConvert: {generateDocumentResult.Errors.AsString()}");
 
         // Upload parent document
@@ -143,6 +160,8 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
                                                         DateTime createdAt,
                                                         string personName,
                                                         string personEmail,
+                                                        string recipientName,
+                                                        string recipientEmail,
                                                         string content,
                                                         string caseNumber,
                                                         string caseTitle,
@@ -154,6 +173,8 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             createdAt: createdAt,
             personName: personName,
             personEmail: personEmail,
+            recipientName: recipientName,
+            recipientEmail: recipientEmail,
             content: content,
             caseNumber: caseNumber,
             caseTitle: caseTitle,

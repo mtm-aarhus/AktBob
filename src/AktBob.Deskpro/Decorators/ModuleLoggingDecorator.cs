@@ -85,6 +85,19 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         return result;
     }
 
+    public async Task<Result<PersonDto>> GetPerson(string email, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Getting Deskpro person by email {email}", email);
+
+        var result = await _inner.GetPerson(email, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            _logger.LogError(result.Errors.AsString());
+        }
+
+        return result;
+    }
+
     public async Task<Result<TicketDto>> GetTicket(int ticketId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting Deskpro ticket {id}", ticketId);

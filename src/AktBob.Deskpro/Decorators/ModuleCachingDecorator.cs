@@ -112,4 +112,27 @@ internal class ModuleCachingDecorator : IDeskproModule
 
         return result;
     }
+
+    public async Task<Result<PersonDto>> GetPerson(string email, CancellationToken cancellationToken)
+    {
+        var cacheKey = $"Deskpro_Person_{email}";
+
+        if (_cache.TryGetValue(cacheKey, out PersonDto? cachedPerson))
+        {
+            if (cachedPerson != null)
+            {
+                _logger.LogDebug("Got Deskpro person from cache ({email})", email);
+                return Result.Success(cachedPerson);
+            }
+        }
+
+        var result = await _inner.GetPerson(email, cancellationToken);
+        if (result.IsSuccess)
+        {
+            _logger.LogDebug("Setting cached value: Deskpro person {email}.", email);
+            _cache.Set(cacheKey, result.Value, TimeSpan.FromDays(20));
+        }
+
+        return result;
+    }
 }

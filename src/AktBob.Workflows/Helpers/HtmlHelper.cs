@@ -36,7 +36,7 @@ internal static class HtmlHelper
         return items;
     }
 
-    public static string GenerateMessageHtml(DateTime createdAt, string personName, string personEmail, string content, string caseNumber, string caseTitle, int messageNumber, IEnumerable<AttachmentDto> attachments)
+    public static string GenerateMessageHtml(DateTime createdAt, string personName, string personEmail, string recipientName, string recipientEmail, string content, string caseNumber, string caseTitle, int messageNumber, IEnumerable<AttachmentDto> attachments)
     {
         string appRoot = AppDomain.CurrentDomain.BaseDirectory;
         string messageTemplatePath = Path.Combine(appRoot, "HtmlTemplates", "message.html");
@@ -55,6 +55,8 @@ internal static class HtmlHelper
             { "timestamp", createdAt.ToString("dd-MM-yyyy HH:mm:ss") },
             { "fromName", personName },
             { "fromEmail", personEmail },
+            { "toName", recipientName },
+            { "toEmail", recipientEmail },
             { "attachments", string.Join("", attachmentFileNames) },
             { "messageContent", content }
         };

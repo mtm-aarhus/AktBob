@@ -8,5 +8,6 @@ public record MessageDto
     public DateTime CreatedAt { get; init; }
     public bool IsAgentNote { get; init; }
     public string Content { get; init; } = string.Empty;
-    public IEnumerable<int> AttachmentIds { get; set; } = new List<int>();
+    public IEnumerable<int> AttachmentIds { get; set; } = Enumerable.Empty<int>();
+    public IEnumerable<string> Recipients { get; set; } = Enumerable.Empty<string>();
 }

@@ -26,6 +26,7 @@ internal class GetMessagesHandler(IDeskproClient deskproClient, IGetPersonHandle
                     IsAgentNote = x.IsAgentNote,
                     Content = x.Content,
                     Id = x.Id,
+                    Recipients = x.Recipients,
                     Person = new PersonDto
                     {
                         Id = x.Person.Id,

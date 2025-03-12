@@ -11,6 +11,7 @@ public interface IDeskproModule
     Task<Result<MessageDto>> GetMessage(int ticketId, int messageId, CancellationToken cancellationToken);
     Task<Result<IEnumerable<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken);
     Task<Result<PersonDto>> GetPerson(int personId, CancellationToken cancellationToken);
+    Task<Result<PersonDto>> GetPerson(string email, CancellationToken cancellationToken);
     Task<Result<TicketDto>> GetTicket(int ticketId, CancellationToken cancellationToken);
     Task<Result<IEnumerable<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken);
 }

@@ -83,6 +83,19 @@ internal class ModuleExceptionDecorator(IDeskproModule inner, ILogger<DeskproMod
         }
     }
 
+    public async Task<Result<PersonDto>> GetPerson(string email, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _inner.GetPerson(email, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {name}", nameof(GetPerson));
+            throw;
+        }
+    }
+
     public async Task<Result<TicketDto>> GetTicket(int ticketId, CancellationToken cancellationToken)
     {
         try

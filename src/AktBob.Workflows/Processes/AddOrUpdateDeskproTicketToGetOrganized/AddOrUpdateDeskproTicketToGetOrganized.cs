@@ -94,6 +94,11 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
                 var person = await deskpro.GetPerson(message.Person.Id, cancellationToken);
                 message.Person = person.Value;
 
+                // Get recipient
+                var recipient = message.Recipients.FirstOrDefault() != null
+                    ? await deskpro.GetPerson(message.Recipients.First(), cancellationToken)
+                    : Result<PersonDto>.Error();
+
                 var attachments = Enumerable.Empty<AttachmentDto>();
                 if (message.AttachmentIds.Any())
                 {
@@ -115,7 +120,17 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
                     messageNumber = databaseMessage.MessageNumber ?? 0;
                 }
 
-                var messageHtml = HtmlHelper.GenerateMessageHtml(message.CreatedAt, message.Person.FullName, message.Person.Email, message.Content, job.GOCaseNumber, ticket.Subject, messageNumber, attachments);
+                var messageHtml = HtmlHelper.GenerateMessageHtml(
+                    message.CreatedAt,
+                    message.Person.FullName,
+                    message.Person.Email,
+                    recipient.Value?.FullName ?? string.Empty,
+                    recipient.Value?.Email ?? message.Recipients.FirstOrDefault() ?? string.Empty,
+                    message.Content,
+                    job.GOCaseNumber,
+                    ticket.Subject,
+                    messageNumber,
+                    attachments);
                 contentElements.Add(new(message.CreatedAt, Encoding.UTF8.GetBytes(messageHtml)));
             }));
         }
