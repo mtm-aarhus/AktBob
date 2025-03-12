@@ -27,6 +27,9 @@
     <None Update="HTMLTemplates\custom-field.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="HTMLTemplates\message-agent-note.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="HTMLTemplates\message-attachments.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

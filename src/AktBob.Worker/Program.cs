@@ -43,7 +43,7 @@ var builder = Host.CreateDefaultBuilder(args)
             if (hostContext.Configuration.GetValue<bool?>("EmailLogEvents:Enabled") ?? false)
             {
                 config.WriteTo.Email(
-                    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning,
+                    restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error,
                     options: new()
                     {
                         To = Guard.Against.NullOrEmpty(configuration.GetSection("EmailLogEvents:To").Get<IEnumerable<string>>()).ToList(),
