@@ -75,7 +75,7 @@ internal class CaseRepositoryExceptionDecorator(ICaseRepository inner, ILogger<C
         }
     }
 
-    public async Task<int> Update(Case @case)
+    public async Task<bool> Update(Case @case)
     {
         try
         {

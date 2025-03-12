@@ -51,7 +51,7 @@ internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher,
 
         @case.FilArkivCaseId = filArkivCaseId;
 
-        var updated = await _caseRepository.Update(@case) == 1;
+        var updated = await _caseRepository.Update(@case);
 
         if (!updated)
         {

@@ -23,7 +23,7 @@ internal class MessageRepositoryExceptionDecorator(IMessageRepository inner, ILo
         }
     }
 
-    public async Task<int> Delete(int id)
+    public async Task<bool> Delete(int id)
     {
         try
         {
@@ -62,7 +62,7 @@ internal class MessageRepositoryExceptionDecorator(IMessageRepository inner, ILo
         }
     }
 
-    public async Task<int> Update(Message message)
+    public async Task<bool> Update(Message message)
     {
         try
         {

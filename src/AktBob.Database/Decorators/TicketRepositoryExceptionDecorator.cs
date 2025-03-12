@@ -80,7 +80,7 @@ internal class TicketRepositoryExceptionDecorator : ITicketRepository
         }
     }
 
-    public async Task<int> Update(Ticket ticket)
+    public async Task<bool> Update(Ticket ticket)
     {
         try
         {

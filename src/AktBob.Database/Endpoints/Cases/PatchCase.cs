@@ -57,7 +57,7 @@ internal class PatchCase(ICaseRepository caseRepository) : Endpoint<PatchCaseReq
 
 
         // Update entity
-        var updated = await _caseRepository.Update(@case) == 1;
+        var updated = await _caseRepository.Update(@case);
 
 
         // Response

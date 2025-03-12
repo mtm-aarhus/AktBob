@@ -78,17 +78,17 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
         return ticket;
     }
 
-    public async Task<int> Update(Ticket ticket)
+    public async Task<bool> Update(Ticket ticket)
     {
         _logger.LogInformation("Updating {ticket}", ticket);
         
-        var rowsAffected = await _inner.Update(ticket);
+        var success = await _inner.Update(ticket);
 
-        if (rowsAffected == 0)
+        if (!success)
         {
             _logger.LogWarning("No rows were affected when trying to update {ticket}", ticket);
         }
 
-        return rowsAffected;
+        return success;
     }
 }

@@ -58,7 +58,7 @@ internal class PatchTicket(ITicketRepository ticketRepository) : Endpoint<PatchT
 
 
         // Update
-        var updated = await _ticketRepository.Update(ticket) == 1;
+        var updated = await _ticketRepository.Update(ticket);
 
 
         // Response

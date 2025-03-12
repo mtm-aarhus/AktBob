@@ -75,16 +75,16 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
         return @case;
     }
 
-    public async Task<int> Update(Case @case)
+    public async Task<bool> Update(Case @case)
     {
         _logger.LogInformation("Updating {case}", @case);
 
-        var rowsAffected = await _inner.Update(@case);
-        if (rowsAffected == 0)
+        var success = await _inner.Update(@case);
+        if (!success)
         {
             _logger.LogWarning("No rows were affeceted when trying to update {case}", @case);
         }
 
-        return rowsAffected;
+        return success;
     }
 }

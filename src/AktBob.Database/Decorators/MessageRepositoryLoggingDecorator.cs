@@ -24,23 +24,18 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
         return success;
     }
 
-    public async Task<int> Delete(int id)
+    public async Task<bool> Delete(int id)
     {
         _logger.LogInformation("Marking message {id} as deleted", id);
 
-        var rowsAffected = await _inner.Delete(id);
+        var success = await _inner.Delete(id);
 
-        if (rowsAffected == 0)
+        if (!success)
         {
             _logger.LogWarning("No rows affected when trying to marked message {id} as deleted", id);
         }
 
-        if (rowsAffected > 1)
-        {
-            _logger.LogCritical("{count} rows affected when marking message {id} as deleted", rowsAffected, id);
-        }
-
-        return rowsAffected;
+        return success;
     }
 
     public async Task<Message?> GetByDeskproMessageId(int deskproMessageId)
@@ -69,16 +64,16 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
         return message;
     }
 
-    public async Task<int> Update(Message message)
+    public async Task<bool> Update(Message message)
     {
         _logger.LogInformation("Updating {message}", message);
 
-        var rowsAffected = await _inner.Update(message);
-        if (rowsAffected == 0)
+        var success = await _inner.Update(message);
+        if (!success)
         {
             _logger.LogWarning("No rows were affected when trying to update {message}", message);
         }
 
-        return rowsAffected;
+        return success;
     }
 }
