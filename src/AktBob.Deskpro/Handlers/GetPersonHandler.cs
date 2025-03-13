@@ -1,10 +1,12 @@
 ﻿using AAK.Deskpro;
-using AAK.Deskpro.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Deskpro.Handlers;
-internal class GetPersonHandler(IDeskproClient deskpro) : IGetPersonHandler
+internal class GetPersonHandler(IDeskproClient deskpro, IConfiguration configuration, ILogger<GetPersonHandler> logger) : IGetPersonHandler
 {
     private readonly IDeskproClient _deskpro = deskpro;
+    private readonly IConfiguration _configuration = configuration;
+    private readonly ILogger<GetPersonHandler> _logger = logger;
 
     public async Task<Result<PersonDto>> Handle(int personId, CancellationToken cancellationToken)
     {
@@ -31,6 +33,13 @@ internal class GetPersonHandler(IDeskproClient deskpro) : IGetPersonHandler
 
     public async Task<Result<PersonDto>> Handle(string email, CancellationToken cancellationToken)
     {
+        var skip = _configuration.GetSection("Deskpro:GetPersonHandler:IgnoreEmails").Get<IEnumerable<string>>() ?? Enumerable.Empty<string>();
+        if (skip.Contains(email))
+        {
+            _logger.LogDebug("Email address {email} found on ignore list, returning an empty PersonDto result", email);
+            return Result.Success();
+        }
+
         var persons = await _deskpro.GetPersonByEmail(email, cancellationToken);
 
         if (persons is null)

@@ -14,7 +14,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetCustomFieldSpecifications(cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogError(result.Errors.AsString());
+            _logger.LogWarning(result.Errors.AsString());
         }
 
         return result;
@@ -27,7 +27,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetMessage(ticketId, messageId, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogError(result.Errors.AsString());
+            _logger.LogWarning(result.Errors.AsString());
         }
 
         return result;
@@ -40,7 +40,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetMessageAttachment(downloadUrl, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogError(result.Errors.AsString());
+            _logger.LogWarning(result.Errors.AsString());
         }
 
         return result;
@@ -53,7 +53,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetMessageAttachments(ticketId, messageId, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogError(result.Errors.AsString());
+            _logger.LogWarning(result.Errors.AsString());
         }
 
         return result;
@@ -66,7 +66,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetMessages(ticketId, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogError(result.Errors.AsString());
+            _logger.LogWarning(result.Errors.AsString());
         }
 
         return result;
@@ -79,7 +79,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetPerson(personId, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogError(result.Errors.AsString());
+            _logger.LogWarning(result.Errors.AsString());
         }
 
         return result;
@@ -92,7 +92,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetPerson(email, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogError(result.Errors.AsString());
+            _logger.LogWarning(result.Errors.AsString());
         }
 
         return result;
@@ -105,7 +105,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetTicket(ticketId, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogError(result.Errors.AsString());
+            _logger.LogWarning(result.Errors.AsString());
         }
 
         return result;
@@ -116,6 +116,11 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         _logger.LogInformation("Getting Deskpro tickets by searching fields {fields} with search value = {searchValue}", fields, searchValue);
 
         var result = await _inner.GetTicketsByFieldSearch(fields, searchValue, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            _logger.LogWarning(result.Errors.AsString());
+        }
+
         return result;
     }
 

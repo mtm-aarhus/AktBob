@@ -21,7 +21,12 @@ internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTick
                 ticketsList!.AddRange(tickets);
             }
         };
-        
+
+        if (!ticketsList.Any())
+        {
+            return Result.Error($"No Deskpro tickets found by searching fields (fields: {string.Join(", ", fields.Select(x => x.ToString()))}) search value: '{searchValue}'.");
+        }
+
         var dto = ticketsList.Select(t => new TicketDto
         {
             Id = t.Id,
@@ -38,6 +43,8 @@ internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTick
                 Values = f.Values
             })
         });
+
+        
 
         return Result.Success(dto);
     }
