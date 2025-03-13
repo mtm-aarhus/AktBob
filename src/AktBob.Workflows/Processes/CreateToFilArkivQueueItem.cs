@@ -49,10 +49,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         if (getDatabaseCase.Result is null) throw new BusinessException("Unable to get case from database");
         if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
 
-        if (string.IsNullOrEmpty(getDatabaseTicket.Result.SharepointFolderName))
-        {
-            _logger.LogWarning("Database ticket related to PodioItemId {id}: SharepointFolderName is null or empty", job.PodioItemId);
-        }
+        if (string.IsNullOrEmpty(getDatabaseTicket.Result.SharepointFolderName)) throw new BusinessException($"SharepointFolderName is null or empty for case (PodioItem: {job.PodioItemId})");
 
         var caseNumber = getPodioItem.Result.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(caseNumber))
