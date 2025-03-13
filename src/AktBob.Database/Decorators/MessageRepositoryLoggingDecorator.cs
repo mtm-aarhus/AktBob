@@ -18,7 +18,7 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
 
         if (!success)
         {
-            _logger.LogWarning("No rows were affected when trying to add {message}", message);
+            _logger.LogDebug("{name}: No rows were affected when trying to add {message}", nameof(Add), message);
         }
 
         return success;
@@ -32,7 +32,7 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
 
         if (!success)
         {
-            _logger.LogWarning("No rows affected when trying to marked message {id} as deleted", id);
+            _logger.LogDebug("{name}: No rows affected when trying to marked message {id} as deleted", nameof(Delete), id);
         }
 
         return success;
@@ -45,7 +45,7 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
         var message = await _inner.GetByDeskproMessageId(deskproMessageId);
         if (message is null)
         {
-            _logger.LogWarning("Message by DeskproMessageId {id} not found in database", deskproMessageId);
+            _logger.LogDebug("{name}: Message by DeskproMessageId {id} not found in database", nameof(GetByDeskproMessageId), deskproMessageId);
         }
 
         return message;
@@ -58,7 +58,7 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
         var message = await _inner.Get(id);
         if (message is null)
         {
-            _logger.LogWarning("Message {id} not found in database", id);
+            _logger.LogDebug("{name}: Message {id} not found in database", nameof(Get), id);
         }
 
         return message;
@@ -71,7 +71,7 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
         var success = await _inner.Update(message);
         if (!success)
         {
-            _logger.LogWarning("No rows were affected when trying to update {message}", message);
+            _logger.LogDebug("{name}: No rows were affected when trying to update {message}", nameof(Update), message);
         }
 
         return success;

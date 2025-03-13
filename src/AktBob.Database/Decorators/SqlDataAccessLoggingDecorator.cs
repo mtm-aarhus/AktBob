@@ -15,7 +15,7 @@ internal class SqlDataAccessLoggingDecorator(ISqlDataAccess inner, ILogger<SqlDa
         var rowsAffected = await _inner.Execute(sql, parameters);
         if (rowsAffected == 0)
         {
-            _logger.LogDebug("No rows were affected when executing {sql} with {parameters}", sql, parameters);
+            _logger.LogDebug("{name}: No rows were affected when executing {sql} with {parameters}", nameof(Execute), sql, parameters);
         }
 
         return rowsAffected;
@@ -28,7 +28,7 @@ internal class SqlDataAccessLoggingDecorator(ISqlDataAccess inner, ILogger<SqlDa
         var rowsAffected = await _inner.ExecuteProcedure(procedureName, parameters);
         if (rowsAffected == 0)
         {
-            _logger.LogDebug("No rows were affected when executing stored {procedureName} with {parameters}", procedureName, parameters);
+            _logger.LogDebug("{name}: No rows were affected when executing stored {procedureName} with {parameters}", nameof(ExecuteProcedure), procedureName, parameters);
         }
 
         return rowsAffected;
@@ -41,7 +41,7 @@ internal class SqlDataAccessLoggingDecorator(ISqlDataAccess inner, ILogger<SqlDa
         var result = await _inner.Query<T>(sql, parameters);
         if (!result.Any())
         {
-            _logger.LogDebug("Empty result when querying {sql} with {parameters}", sql, parameters);
+            _logger.LogDebug("{name}: Empty result when querying {sql} with {parameters}", nameof(Query), sql, parameters);
         }
 
         return result;
@@ -54,7 +54,7 @@ internal class SqlDataAccessLoggingDecorator(ISqlDataAccess inner, ILogger<SqlDa
         var result = await _inner.Query(sql, parameters, splitOn, map);
         if (!result.Any())
         {
-            _logger.LogDebug("Empty result when querying {sql} with {parameters} splitting on {splitOn}", sql, parameters, splitOn);
+            _logger.LogDebug("{name}: Empty result when querying {sql} with {parameters} splitting on {splitOn}", nameof(Query), sql, parameters, splitOn);
         }
 
         return result;
@@ -67,7 +67,7 @@ internal class SqlDataAccessLoggingDecorator(ISqlDataAccess inner, ILogger<SqlDa
         var result = await _inner.QuerySingle<T>(sql, parameters);
         if (result is null)
         {
-            _logger.LogDebug("Nothing found querying single row by {sql} with {parameters}", sql, parameters);
+            _logger.LogDebug("{name}: Nothing found querying single row by {sql} with {parameters}", nameof(QuerySingle), sql, parameters);
         }
 
         return result;

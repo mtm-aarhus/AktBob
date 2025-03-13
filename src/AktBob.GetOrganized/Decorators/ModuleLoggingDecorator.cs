@@ -17,10 +17,10 @@ internal class ModuleLoggingDecorator(IGetOrganizedModule inner, ILogger<GetOrga
         var result = await _inner.CreateCase(command, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning("GetOrganized case not created. Parameters: {command}, Errors: {errors}", command, result.Errors);
+            _logger.LogDebug("{name}: {errors}", nameof(CreateCase), result.Errors);
         }
 
-        _logger.LogInformation("GetOrganized case created: {command}", command);
+        _logger.LogInformation("GetOrganized case created. Command: {command} Response: {response}", command, result.Value);
         return result;
     }
 
@@ -38,7 +38,7 @@ internal class ModuleLoggingDecorator(IGetOrganizedModule inner, ILogger<GetOrga
         
         if (result is null)
         {
-            _logger.LogWarning("Error getting case numbers from aggregated GetOrganized case {id}", aggregatedCaseId);
+            _logger.LogDebug("{name}: Error getting case numbers from aggregated GetOrganized case {id}", nameof(GetAggregatedCase), aggregatedCaseId);
         }
 
         if (result is not null)
@@ -62,7 +62,7 @@ internal class ModuleLoggingDecorator(IGetOrganizedModule inner, ILogger<GetOrga
         var result = await _inner.UploadDocument(command, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning(string.Join(",", result.Errors));
+            _logger.LogDebug("{name}: {errors}", nameof(UploadDocument), result.Errors));
         }
 
         return result;

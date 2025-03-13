@@ -19,7 +19,7 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
 
         if (!result.IsSuccess)
         {
-            _logger.LogError("{name} failed: {error}", nameof(ConvertHtmlToPdf), result.Errors);
+            _logger.LogWarning("{name}: {error}", nameof(ConvertHtmlToPdf), result.Errors);
             return result;
         }
         
@@ -35,7 +35,7 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
 
         if (!result.IsSuccess)
         {
-            _logger.LogError("{name} failed: {error}", nameof(GenerateTasks), result.Errors);
+            _logger.LogWarning("{name}: {error}", nameof(GenerateTasks), result.Errors);
             return result;
         }
 
@@ -51,7 +51,7 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
 
         if (!result.IsSuccess)
         {
-            _logger.LogError("{name} failed: {error}", nameof(GetDownloadUrl), result.Errors);
+            _logger.LogWarning("{name}: {error}", nameof(GetDownloadUrl), result.Errors);
             return result;
         }
         
@@ -67,7 +67,7 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
 
         if (!result.IsSuccess)
         {
-            _logger.LogError("{name} failed: {error}", nameof(GetFile), result.Errors);
+            _logger.LogWarning("{name}: {error}", nameof(GetFile), result.Errors);
             return result;
         }
         

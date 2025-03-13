@@ -17,7 +17,7 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
         var success = await _inner.Add(@case);
         if (!success)
         {
-            _logger.LogWarning("No rows were affected when trying to add {case}", @case);
+            _logger.LogDebug("{name}: No rows were affected when trying to add {case}", nameof(Add), @case);
         }
 
         return success;
@@ -30,7 +30,7 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
         var @case = await _inner.Get(id);
         if (@case is null)
         {
-            _logger.LogWarning("Case {id} not found in database", @case);
+            _logger.LogDebug("Case {id} not found in database", @case);
         }
 
         return @case;
@@ -43,7 +43,7 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
         var cases = await _inner.GetAll(podioItemId, filArkivCaseId);
         if (!cases.Any())
         {
-            _logger.LogWarning("No cases found in database by PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", podioItemId, filArkivCaseId);
+            _logger.LogDebug("{name}: No cases found in database by PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), podioItemId, filArkivCaseId);
         }
 
         return cases;
@@ -56,7 +56,7 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
         var @case = await _inner.GetByPodioItemId(podioItemId);
         if (@case is null)
         {
-            _logger.LogWarning("Case not found in database by PodioItemId = {id}", podioItemId);
+            _logger.LogDebug("{name}: Case not found in database by PodioItemId = {id}", nameof(GetByPodioItemId), podioItemId);
         }
 
         return @case;
@@ -69,7 +69,7 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
         var @case = await _inner.GetByTicketId(ticketId);
         if (@case is null)
         {
-            _logger.LogWarning("Case not found in database by TicketId = {id}", ticketId);
+            _logger.LogDebug("{name}: Case not found in database by TicketId = {id}", nameof(GetByTicketId), ticketId);
         }
 
         return @case;
@@ -82,7 +82,7 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
         var success = await _inner.Update(@case);
         if (!success)
         {
-            _logger.LogWarning("No rows were affeceted when trying to update {case}", @case);
+            _logger.LogDebug("{name}: No rows were affeceted when trying to update {case}", nameof(Update), @case);
         }
 
         return success;

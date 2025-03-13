@@ -1,6 +1,4 @@
-﻿using AktBob.Shared.Extensions;
-
-namespace AktBob.Deskpro.Decorators;
+﻿namespace AktBob.Deskpro.Decorators;
 
 internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModule> logger) : IDeskproModule
 {
@@ -14,7 +12,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetCustomFieldSpecifications(cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning(result.Errors.AsString());
+            _logger.LogDebug("{name}: {errors}", nameof(GetCustomFieldSpecifications), result.Errors);
         }
 
         return result;
@@ -27,7 +25,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetMessage(ticketId, messageId, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning(result.Errors.AsString());
+            _logger.LogDebug("{name}: {errors}", nameof(GetMessage), result.Errors);
         }
 
         return result;
@@ -40,7 +38,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetMessageAttachment(downloadUrl, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning(result.Errors.AsString());
+            _logger.LogDebug("{name}: {errors}", nameof(GetMessageAttachment), result.Errors);
         }
 
         return result;
@@ -53,7 +51,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetMessageAttachments(ticketId, messageId, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning(result.Errors.AsString());
+            _logger.LogDebug("{name}: {errors}", nameof(GetMessageAttachments), result.Errors);
         }
 
         return result;
@@ -66,7 +64,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetMessages(ticketId, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning(result.Errors.AsString());
+            _logger.LogDebug("{name}: {errors}", nameof(GetMessages), result.Errors);
         }
 
         return result;
@@ -79,7 +77,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetPerson(personId, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning(result.Errors.AsString());
+            _logger.LogDebug("{name}: {errors}", nameof(GetPerson), result.Errors);
         }
 
         return result;
@@ -92,7 +90,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetPerson(email, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning(result.Errors.AsString());
+            _logger.LogDebug("{name}: {errors}", nameof(GetPerson), result.Errors);
         }
 
         return result;
@@ -105,7 +103,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetTicket(ticketId, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning(result.Errors.AsString());
+            _logger.LogDebug("{name}: {errors}", nameof(GetTicket), result.Errors);
         }
 
         return result;
@@ -118,7 +116,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         var result = await _inner.GetTicketsByFieldSearch(fields, searchValue, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogWarning(result.Errors.AsString());
+            _logger.LogDebug("{name}: {errors}", nameof(GetTicketsByFieldSearch), result.Errors);
         }
 
         return result;

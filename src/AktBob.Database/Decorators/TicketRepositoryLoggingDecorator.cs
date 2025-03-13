@@ -22,7 +22,7 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
 
         if (!success)
         {
-            _logger.LogWarning("No rows were affected when trying to add {ticket}", ticket);
+            _logger.LogDebug("{name}: No rows were affected when trying to add {ticket}", nameof(Add), ticket);
         }
 
         return success;
@@ -35,7 +35,7 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
 
         if (ticket is null)
         {
-            _logger.LogWarning("Ticket {id} not found in database", id);
+            _logger.LogDebug("Ticket {id} not found in database", id);
         }
 
         return ticket;
@@ -45,8 +45,7 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
     {
         _logger.LogInformation("Getting all tickets by DeskproId = {deskproId}, PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", DeskproId, PodioItemId, FilArkivCaseId);
         var tickets = await _inner.GetAll(DeskproId, PodioItemId, FilArkivCaseId);
-
-        _logger.LogInformation("{count} tickets found by DeskproId = {deskproId}, PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", tickets.Count(), DeskproId, PodioItemId, FilArkivCaseId);
+        _logger.LogInformation("{name}: {count} tickets found by DeskproId = {deskproId}, PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), tickets.Count(), DeskproId, PodioItemId, FilArkivCaseId);
         return tickets;
     }
 
@@ -58,7 +57,7 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
     
         if (ticket is null)
         {
-            _logger.LogWarning("Ticket with Deskpro ticket id {id} not found in database", deskproTicketId);
+            _logger.LogDebug("{name}: Ticket with Deskpro ticket id {id} not found in database", nameof(GetByDeskproTicketId), deskproTicketId);
         }
 
         return ticket;
@@ -72,7 +71,7 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
 
         if (ticket is null)
         {
-            _logger.LogWarning("Ticket with Podio item id {id} not found in database", podioItemId);
+            _logger.LogDebug("{name}: Ticket with Podio item id {id} not found in database", nameof(GetByPodioItemId), podioItemId);
         }
 
         return ticket;
@@ -86,7 +85,7 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
 
         if (!success)
         {
-            _logger.LogWarning("No rows were affected when trying to update {ticket}", ticket);
+            _logger.LogDebug("{name}: No rows were affected when trying to update {ticket}", nameof(Update), ticket);
         }
 
         return success;
