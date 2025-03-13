@@ -5,7 +5,7 @@ using Hangfire;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
-internal record QueryFilesProcessingStatusJob(Guid CacheId);
+internal record QueryFilesProcessingStatusJob(Guid FilArkivCaseId);
 
 [Queue("check-ocr-screening-status")]
 internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob> logger, IServiceScopeFactory serviceProviderFactory, IConfiguration configuration) : IJobHandler<QueryFilesProcessingStatusJob>
@@ -21,7 +21,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
         var filArkivCoreClient = scope.ServiceProvider.GetRequiredService<FilArkivCoreClient>();
         var cachedData = CachedData.Instance;
 
-        if (!cachedData.Cases.TryGetValue(job.CacheId, out var @case))
+        if (!cachedData.Cases.TryGetValue(job.FilArkivCaseId, out var @case))
         {
             _logger.LogDebug("Case not foud in cache. Exiting job.");
             return Task.CompletedTask;
@@ -66,7 +66,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
 
         _logger.LogInformation("Finished querying processing statusses for all files, FilArkiv case {id}, PodioItemId {podioItemId}", @case.FilArkivCaseId, @case.PodioItemId);
 
-        cachedData.Cases.TryRemove(job.CacheId, out Case? removedCase);
+        cachedData.Cases.TryRemove(job.FilArkivCaseId, out Case? removedCase);
 
         if (!Settings.ShouldUpdatePodioItemImmediately(_configuration))
         {

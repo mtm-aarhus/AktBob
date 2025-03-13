@@ -20,9 +20,8 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
         var cachedData = CachedData.Instance;
 
         var @case = new Case(job.FilArkivCaseId, job.PodioItemId);
-        var cacheId = Guid.NewGuid();
 
-        if (!cachedData.Cases.TryAdd(cacheId, @case)) throw new BusinessException("Unable to add case to cache");
+        if (!cachedData.Cases.TryAdd(job.FilArkivCaseId, @case)) throw new BusinessException("Unable to add case to cache");
 
         bool moveToNextPage = true;
         int pageIndex = 1; // First page = pageIndex = 1
@@ -56,7 +55,7 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
         _logger.LogDebug("Case {caseId}: {count} files registered", @case.FilArkivCaseId, @case.Files.Count());
 
         // Enqueue job: query files processing status
-        jobDispatcher.Dispatch(new QueryFilesProcessingStatusJob(cacheId));
+        jobDispatcher.Dispatch(new QueryFilesProcessingStatusJob(job.FilArkivCaseId));
 
         if (Settings.ShouldUpdatePodioItemImmediately(_configuration))
         {
