@@ -23,6 +23,7 @@ internal class GetMessageHandler(IDeskproClient deskproClient) : IGetMessageHand
             Content = message.Content,
             AttachmentIds = message.AttachmentIds,
             Recipients = message.Recipients,
+            CreationSystem = message.CreationSystem,
             Person = new PersonDto
             {
                 Id = message.Person.Id,

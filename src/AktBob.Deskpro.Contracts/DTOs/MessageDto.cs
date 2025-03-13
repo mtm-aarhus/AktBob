@@ -10,4 +10,5 @@ public record MessageDto
     public string Content { get; init; } = string.Empty;
     public IEnumerable<int> AttachmentIds { get; set; } = Enumerable.Empty<int>();
     public IEnumerable<string> Recipients { get; set; } = Enumerable.Empty<string>();
+    public string CreationSystem { get; set; } = string.Empty;
 }

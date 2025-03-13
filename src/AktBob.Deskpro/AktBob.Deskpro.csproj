@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <Reference Include="AAK.Deskpro">
-      <HintPath>..\..\..\AAK.Deskpro\AAK.Deskpro\bin\Debug\net8.0\AAK.Deskpro.dll</HintPath>
+      <HintPath>..\..\..\AAK.Deskpro\AAK.Deskpro\bin\Release\net8.0\AAK.Deskpro.dll</HintPath>
     </Reference>
   </ItemGroup>
 
