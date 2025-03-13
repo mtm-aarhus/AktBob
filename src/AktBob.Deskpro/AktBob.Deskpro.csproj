@@ -7,12 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AAK.Deskpro" Version="1.13.2" />
+    <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
-    <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
+    <Reference Include="AAK.Deskpro">
+      <HintPath>..\..\..\AAK.Deskpro\AAK.Deskpro\bin\Debug\net8.0\AAK.Deskpro.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
