@@ -62,7 +62,7 @@ internal class ModuleLoggingDecorator(IGetOrganizedModule inner, ILogger<GetOrga
         var result = await _inner.UploadDocument(command, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogDebug("{name}: {errors}", nameof(UploadDocument), result.Errors));
+            _logger.LogDebug("{name}: {errors}", nameof(UploadDocument), result.Errors);
         }
 
         return result;
