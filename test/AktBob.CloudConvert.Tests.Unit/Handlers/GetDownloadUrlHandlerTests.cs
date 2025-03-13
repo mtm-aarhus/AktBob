@@ -8,14 +8,14 @@ using NSubstitute;
 
 namespace AktBob.CloudConvert.Tests.Unit.Handlers;
 
-public class GettDownloadUrlHandlerTests
+public class GetDownloadUrlHandlerTests
 {
     private readonly FakeLogger<GetDownloadUrlHandler> _logger = new FakeLogger<GetDownloadUrlHandler>();
     private readonly ICloudConvertClient _cloudConvertClient = Substitute.For<ICloudConvertClient>();
     private readonly ITimeProvider _timeProvider = Substitute.For<ITimeProvider>();
     private readonly GetDownloadUrlHandler _sut;
 
-    public GettDownloadUrlHandlerTests()
+    public GetDownloadUrlHandlerTests()
     {
         _sut = new GetDownloadUrlHandler(_cloudConvertClient, _logger, _timeProvider);
     }
