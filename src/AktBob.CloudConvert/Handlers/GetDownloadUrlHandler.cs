@@ -1,12 +1,12 @@
 ﻿using AktBob.Shared;
 
 namespace AktBob.CloudConvert.Handlers;
-internal class GetCloudConvertDownloadUrlHandler(ICloudConvertClient cloudConvertClient,
-                                         ILogger<GetCloudConvertDownloadUrlHandler> logger,
-                                         ITimeProvider timeProvider) : IGetCloudConvertDownloadUrlHandler
+internal class GetDownloadUrlHandler(ICloudConvertClient cloudConvertClient,
+                                         ILogger<GetDownloadUrlHandler> logger,
+                                         ITimeProvider timeProvider) : IGettDownloadUrlHandler
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
-    private readonly ILogger<GetCloudConvertDownloadUrlHandler> _logger = logger;
+    private readonly ILogger<GetDownloadUrlHandler> _logger = logger;
     private readonly ITimeProvider _timeProvider = timeProvider;
 
     public async Task<Result<string>> Handle(Guid jobId, CancellationToken cancellationToken = default)

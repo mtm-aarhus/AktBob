@@ -30,24 +30,24 @@ public static class ModuleServices
 
         // Add module handlers
         services.AddScoped<IConvertHtmlToPdfHandler, ConvertHtmlToPdfHandler>();
-        services.AddScoped<IGenerateCloudConvertTasksHandler, GenerateCloudConvertTasksHandler>();
-        services.AddScoped<IGetCloudConvertDownloadUrlHandler, GetCloudConvertDownloadUrlHandler>();
-        services.AddScoped<IGetCloudConvertFileHandler, GetCloudConvertFileHandler>();
+        services.AddScoped<IGenerateTasksHandler, GenerateTasksHandler>();
+        services.AddScoped<IGettDownloadUrlHandler, GetDownloadUrlHandler>();
+        services.AddScoped<IDownloadFileHandler, DownloadFileHandler>();
 
         // Module service orchestration
         services.AddScoped<ICloudConvertModule>(provider =>
         {
             var inner = new CloudConvertModule(
                 provider.GetRequiredService<IConvertHtmlToPdfHandler>(),
-                provider.GetRequiredService<IGetCloudConvertDownloadUrlHandler>(),
-                provider.GetRequiredService<IGetCloudConvertFileHandler>(),
-                provider.GetRequiredService<IGenerateCloudConvertTasksHandler>());
+                provider.GetRequiredService<IGettDownloadUrlHandler>(),
+                provider.GetRequiredService<IDownloadFileHandler>(),
+                provider.GetRequiredService<IGenerateTasksHandler>());
 
-            var withLogging = new CloudConvertModuleLoggingDecorator(
+            var withLogging = new ModuleLoggingDecorator(
                 inner,
                 provider.GetRequiredService<ILogger<CloudConvertModule>>());
 
-            var withExceptionHandling = new CloudConvertModuleExceptionDecorator(
+            var withExceptionHandling = new ModuleExceptionDecorator(
                 withLogging,
                 provider.GetRequiredService<ILogger<CloudConvertModule>>());
 

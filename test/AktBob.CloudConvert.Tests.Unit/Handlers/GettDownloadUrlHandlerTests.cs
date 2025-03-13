@@ -3,22 +3,21 @@ using AktBob.CloudConvert.Models.JobResponse;
 using AktBob.Shared;
 using Ardalis.Result;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 
 namespace AktBob.CloudConvert.Tests.Unit.Handlers;
 
-public class GetCloudConvertDownloadUrlHandlerTests
+public class GettDownloadUrlHandlerTests
 {
-    private readonly FakeLogger<GetCloudConvertDownloadUrlHandler> _logger = new FakeLogger<GetCloudConvertDownloadUrlHandler>();
+    private readonly FakeLogger<GetDownloadUrlHandler> _logger = new FakeLogger<GetDownloadUrlHandler>();
     private readonly ICloudConvertClient _cloudConvertClient = Substitute.For<ICloudConvertClient>();
     private readonly ITimeProvider _timeProvider = Substitute.For<ITimeProvider>();
-    private readonly GetCloudConvertDownloadUrlHandler _sut;
+    private readonly GetDownloadUrlHandler _sut;
 
-    public GetCloudConvertDownloadUrlHandlerTests()
+    public GettDownloadUrlHandlerTests()
     {
-        _sut = new GetCloudConvertDownloadUrlHandler(_cloudConvertClient, _logger, _timeProvider);
+        _sut = new GetDownloadUrlHandler(_cloudConvertClient, _logger, _timeProvider);
     }
 
     [Fact]

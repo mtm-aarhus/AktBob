@@ -180,7 +180,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
             return Result.Error($"Error querying job '{jobIdResult.Value}' from PDF from CloudConvert");
         }
 
-        var fileResult = await cloudConvertModule.GetFile(urlResult.Value, cancellationToken);
+        var fileResult = await cloudConvertModule.DownloadFile(urlResult.Value, cancellationToken);
         if (!fileResult.IsSuccess)
         {
             return Result.Error($"CloudConvert job {jobIdResult.Value}: Error downloading file from url: {urlResult.Value}");

@@ -6,13 +6,13 @@ using System.Text;
 
 namespace AktBob.CloudConvert.Tests.Unit.Handlers;
 
-public class GetCloudConvertFileHandlerTests
+public class DownloadFileHandlerTests
 {
     private readonly ICloudConvertClient _cloudConvertClient = Substitute.For<ICloudConvertClient>();
-    private readonly GetCloudConvertFileHandler _sut;
-    public GetCloudConvertFileHandlerTests()
+    private readonly DownloadFileHandler _sut;
+    public DownloadFileHandlerTests()
     {
-        _sut = new GetCloudConvertFileHandler(_cloudConvertClient);
+        _sut = new DownloadFileHandler(_cloudConvertClient);
     }
 
     [Fact]

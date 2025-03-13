@@ -1,10 +1,10 @@
 ﻿namespace AktBob.CloudConvert;
-internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
+internal class ModuleLoggingDecorator : ICloudConvertModule
 {
     private readonly ICloudConvertModule _inner;
     private readonly ILogger<CloudConvertModule> _logger;
 
-    public CloudConvertModuleLoggingDecorator(ICloudConvertModule inner, ILogger<CloudConvertModule> logger)
+    public ModuleLoggingDecorator(ICloudConvertModule inner, ILogger<CloudConvertModule> logger)
     {
         _inner = inner;
         _logger = logger;
@@ -59,15 +59,15 @@ internal class CloudConvertModuleLoggingDecorator : ICloudConvertModule
     }
 
 
-    public async Task<Result<byte[]>> GetFile(string url, CancellationToken cancellationToken)
+    public async Task<Result<byte[]>> DownloadFile(string url, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Downloading file {url}", url);
 
-        var result = await _inner.GetFile(url, cancellationToken);
+        var result = await _inner.DownloadFile(url, cancellationToken);
 
         if (!result.IsSuccess)
         {
-            _logger.LogWarning("{name}: {error}", nameof(GetFile), result.Errors);
+            _logger.LogWarning("{name}: {error}", nameof(DownloadFile), result.Errors);
             return result;
         }
         

@@ -1,10 +1,10 @@
 ﻿namespace AktBob.CloudConvert;
-internal class CloudConvertModuleExceptionDecorator : ICloudConvertModule
+internal class ModuleExceptionDecorator : ICloudConvertModule
 {
     private readonly ICloudConvertModule _inner;
     private readonly ILogger<CloudConvertModule> _logger;
 
-    public CloudConvertModuleExceptionDecorator(ICloudConvertModule inner, ILogger<CloudConvertModule> logger)
+    public ModuleExceptionDecorator(ICloudConvertModule inner, ILogger<CloudConvertModule> logger)
     {
         _inner = inner;
         _logger = logger;
@@ -50,15 +50,15 @@ internal class CloudConvertModuleExceptionDecorator : ICloudConvertModule
         }
     }
 
-    public async Task<Result<byte[]>> GetFile(string url, CancellationToken cancellationToken)
+    public async Task<Result<byte[]>> DownloadFile(string url, CancellationToken cancellationToken)
     {
         try
         {
-            return await _inner.GetFile(url, cancellationToken);
+            return await _inner.DownloadFile(url, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in {name}", nameof(GetFile));
+            _logger.LogError(ex, "Error in {name}", nameof(DownloadFile));
             throw;
         }
     }

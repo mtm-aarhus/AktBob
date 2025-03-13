@@ -204,7 +204,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             return Result.Error("Failed to get download url.");
         }
 
-        var fileResult = await cloudConvertModule.GetFile(getUrlResult, cancellationToken);
+        var fileResult = await cloudConvertModule.DownloadFile(getUrlResult, cancellationToken);
         if (!fileResult.IsSuccess)
         {
             return Result.Error($"Failed to download file: {getUrlResult.Value}");
