@@ -25,6 +25,6 @@ internal class CreateQueueItem(IServiceScopeFactory serviceScopeFactory, ILogger
         var result = await handler.Handle(job.QueueName, decodedPayload, job.Reference, cancellationToken);
         if (!result.IsSuccess) throw new BusinessException($"Unable to create OpenOrchestrator queue item: {result.Errors.AsString()}");
         
-        _logger.LogInformation("OpenOrchestrator queue item {id} created. Job: {job}", result.Value, job);
+        _logger.LogInformation("OpenOrchestrator queue item {id} created. Queue: {queueName}, Reference:_{reference}, Payload: {payload}", result.Value, job.QueueName, job.Reference, decodedPayload);
     }
 }
