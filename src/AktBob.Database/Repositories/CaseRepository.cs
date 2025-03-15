@@ -1,6 +1,8 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.DataAccess;
 using AktBob.Database.Entities;
+using AktBob.Database.Validators;
+using FluentValidation;
 using System.Data;
 
 namespace AktBob.Database.Repositories;
@@ -15,6 +17,9 @@ internal class CaseRepository : ICaseRepository
 
     public async Task<bool> Add(Case @case)
     {
+        var valiator = new CaseValidator();
+        valiator.ValidateAndThrow(@case);
+
         var parameters = new DynamicParameters();
         parameters.Add("TicketId", @case.TicketId);
         parameters.Add("PodioItemId", @case.PodioItemId);
@@ -60,6 +65,9 @@ internal class CaseRepository : ICaseRepository
 
     public async Task<bool> Update(Case @case)
     {
+        var valiator = new CaseValidator();
+        valiator.ValidateAndThrow(@case);
+
         var sql = """
             UPDATE Cases SET
                 TicketId = @TicketId,
