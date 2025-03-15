@@ -1,6 +1,8 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.DataAccess;
 using AktBob.Database.Entities;
+using AktBob.Database.Validators;
+using FluentValidation;
 using System.Data;
 
 namespace AktBob.Database.Repositories;
@@ -15,6 +17,9 @@ internal class TicketRepository : ITicketRepository
 
     public async Task<bool> Add(Ticket ticket)
     {
+        var validator = new TicketValidator();
+        validator.ValidateAndThrow(ticket);
+
         var parameters = new DynamicParameters();
         parameters.Add("DeskproId", ticket.DeskproId, dbType: DbType.Int32, direction: ParameterDirection.Input);
         parameters.Add("Id", dbType: DbType.Int32, direction: ParameterDirection.Output);
@@ -47,6 +52,9 @@ internal class TicketRepository : ITicketRepository
 
     public async Task<bool> Update(Ticket ticket)
     {
+        var validator = new TicketValidator();
+        validator.ValidateAndThrow(ticket);
+
         var sql = """
             UPDATE Tickets 
             SET
