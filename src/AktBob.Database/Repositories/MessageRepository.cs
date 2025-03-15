@@ -1,6 +1,8 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.DataAccess;
 using AktBob.Database.Entities;
+using AktBob.Database.Validators;
+using FluentValidation;
 using System.Data;
 
 namespace AktBob.Database.Repositories;
@@ -15,6 +17,9 @@ internal class MessageRepository : IMessageRepository
 
     public async Task<bool> Add(Message message)
     {
+        var validator = new MessageValidator();
+        validator.ValidateAndThrow(message);
+
         // The stored procedure prevents from persisting duplicates, so we don't need to check this before called the database
         var parameters = new DynamicParameters();
         parameters.Add("TicketId", message.TicketId);
@@ -34,6 +39,9 @@ internal class MessageRepository : IMessageRepository
 
     public async Task<bool> Update(Message message)
     {
+        var validator = new MessageValidator();
+        validator.ValidateAndThrow(message);
+
         var sql = """
             UPDATE Messages SET
                 TicketId = @TicketId,
