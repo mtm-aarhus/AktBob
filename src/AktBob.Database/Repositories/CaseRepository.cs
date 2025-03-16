@@ -28,7 +28,7 @@ internal class CaseRepository : ICaseRepository
         parameters.Add("Id", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
         var rowsAffected = await _sqlDataAccess.ExecuteProcedure("spCase_Create", parameters);
-        @case.Id = parameters.Get<int?>("Id") ?? 0;
+        @case.Id = parameters.Get<int?>("Id") ?? default;
         return rowsAffected == 1;
     }
 

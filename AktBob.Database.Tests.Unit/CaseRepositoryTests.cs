@@ -4,10 +4,11 @@ using AktBob.Database.Repositories;
 using Dapper;
 using FluentAssertions;
 using FluentValidation;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using NSubstitute;
-using NSubstitute.Core.Arguments;
 using NSubstitute.ReturnsExtensions;
-using System.Reflection;
+using System.Data;
+using System.Text.Json;
 
 namespace AktBob.Database.Tests.Unit;
 
@@ -25,7 +26,7 @@ public class CaseRepositoryTests
     // Add
 
     [Fact]
-    public async Task Add_ShouldReturnTrue_WhenCaseIsAdded()
+    public async Task Add_ShouldSetCaseIdAndReturnTrue_WhenCaseIsAdded()
     {
         // Arrange
         var @case = new Case
@@ -35,9 +36,16 @@ public class CaseRepositoryTests
             CaseNumber = "case number"
         };
 
+        var expectedCaseId = 123;
+
         _dataAccess
             .ExecuteProcedure(Arg.Any<string>(), Arg.Any<DynamicParameters>())
-            .Returns(1);
+            .Returns(1)
+            .AndDoes(call =>
+            {
+                var passedParameters = call.Arg<DynamicParameters>();
+                passedParameters.Add("Id", expectedCaseId, dbType: DbType.Int32, direction: ParameterDirection.Output);
+            });
 
         // Act
         var result = await _sut.Add(@case);
@@ -45,10 +53,11 @@ public class CaseRepositoryTests
         // Assert
         result.Should().BeTrue();
         await _dataAccess.Received(1).ExecuteProcedure("spCase_Create", Arg.Any<DynamicParameters>());
+        @case.Id.Should().Be(expectedCaseId);
     }
 
     [Fact]
-    public async Task Add_ShouldReturnFalse_WhenCaseWasNotAdded()
+    public async Task Add_ShouldNotSetCaseIdAndReturnFalse_WhenCaseWasNotAdded()
     {
         // Arrange
         var @case = new Case
@@ -60,7 +69,12 @@ public class CaseRepositoryTests
 
         _dataAccess
             .ExecuteProcedure(Arg.Any<string>(), Arg.Any<DynamicParameters>())
-            .Returns(0);
+            .Returns(0)
+            .AndDoes(call =>
+            {
+                var passedParameters = call.Arg<DynamicParameters>();
+                passedParameters.Add("Id", null, dbType: DbType.Int32, direction: ParameterDirection.Output);
+            });
 
         // Act
         var result = await _sut.Add(@case);
@@ -68,6 +82,7 @@ public class CaseRepositoryTests
         // Assert
         result.Should().BeFalse();
         await _dataAccess.Received(1).ExecuteProcedure("spCase_Create", Arg.Any<DynamicParameters>());
+        @case.Id.Should().Be(default);
     }
 
     [Fact]
@@ -297,6 +312,9 @@ public class CaseRepositoryTests
             SharepointFolderName = string.Empty
         };
 
+        var expectedCase = JsonSerializer.Serialize(@case);
+        var caseCopy = JsonSerializer.Deserialize<Case>(expectedCase);
+
         _dataAccess
             .Execute(Arg.Any<string>(), @case)
             .Returns(1);
@@ -306,6 +324,7 @@ public class CaseRepositoryTests
 
         // Assert
         result.Should().BeTrue();
+        JsonSerializer.Serialize(@case).Should().Be(JsonSerializer.Serialize(caseCopy));
         await _dataAccess.Received(1).Execute(Arg.Any<string>(), @case);
     }
 
@@ -323,6 +342,9 @@ public class CaseRepositoryTests
             SharepointFolderName = string.Empty
         };
 
+        var expectedCase = JsonSerializer.Serialize(@case);
+        var caseCopy = JsonSerializer.Deserialize<Case>(expectedCase);
+
         _dataAccess
             .Execute(Arg.Any<string>(), @case)
             .Returns(0);
@@ -333,6 +355,8 @@ public class CaseRepositoryTests
         // Assert
         result.Should().BeFalse();
         await _dataAccess.Received(1).Execute(Arg.Any<string>(), @case);
+        JsonSerializer.Serialize(@case).Should().Be(JsonSerializer.Serialize(caseCopy));
+
     }
 
     [Fact]
@@ -349,11 +373,16 @@ public class CaseRepositoryTests
             SharepointFolderName = string.Empty
         };
 
+        var expectedCase = JsonSerializer.Serialize(@case);
+        var caseCopy = JsonSerializer.Deserialize<Case>(expectedCase);
+
         // Act
         var act = () => _sut.Update(@case);
 
         // Assert
         await act.Should().ThrowAsync<ValidationException>();
         await _dataAccess.Received(0).Execute(Arg.Any<string>(), Arg.Any<object>());
+        JsonSerializer.Serialize(@case).Should().Be(JsonSerializer.Serialize(caseCopy));
+
     }
 }
