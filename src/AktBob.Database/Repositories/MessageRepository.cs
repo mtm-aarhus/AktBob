@@ -27,7 +27,7 @@ internal class MessageRepository : IMessageRepository
         parameters.Add("Id", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
         var rowsAffected = await _sqlDataAccess.ExecuteProcedure("dbo.spMessage_Insert", parameters);
-        message.Id = parameters.Get<int?>("Id") ?? 0;
+        message.Id = parameters.Get<int?>("Id") ?? default;
         return rowsAffected == 1;
     }
 
