@@ -37,7 +37,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
 
         // Begin
         var getPodioItem = podio.GetItem(job.PodioItemId, cancellationToken);
-        var getDatabaseCase = unitOfWork.Cases.GetByPodioItemId(job.PodioItemId.Id);
+        var getDatabaseCase = unitOfWork.Cases.GetAll(job.PodioItemId.Id, null);
         var getDatabaseTicket = unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId.Id);
 
         Task.WaitAll([
@@ -46,7 +46,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             getDatabaseTicket]);
 
         if (!getPodioItem.Result.IsSuccess) throw new BusinessException("Unable to get item from Podio");
-        if (getDatabaseCase.Result is null) throw new BusinessException("Unable to get case from database");
+        if (getDatabaseCase.Result.FirstOrDefault() is null) throw new BusinessException("Unable to get case from database");
         if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
 
         if (string.IsNullOrEmpty(getDatabaseTicket.Result.SharepointFolderName)) throw new BusinessException($"SharepointFolderName is null or empty for case (PodioItem: {job.PodioItemId})");
@@ -75,7 +75,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             DeskProTitel = deskproTicketResult.Value.Subject,
             PodioID = job.PodioItemId.Id,
             Overmappe = getDatabaseTicket.Result.SharepointFolderName,
-            Undermappe = getDatabaseCase.Result.SharepointFolderName,
+            Undermappe = getDatabaseCase.Result.First().SharepointFolderName,
             GeoSag = !caseNumber.IsNovaCase(),
             NovaSag = caseNumber.IsNovaCase(),
             AktSagsURL = getDatabaseTicket.Result.CaseUrl

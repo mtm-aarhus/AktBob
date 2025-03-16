@@ -49,32 +49,6 @@ internal class CaseRepositoryExceptionDecorator(ICaseRepository inner, ILogger<C
         }
     }
 
-    public async Task<Case?> GetByPodioItemId(long podioItemId)
-    {
-        try
-        {
-            return await _inner.GetByPodioItemId(podioItemId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error in {name}", nameof(GetByPodioItemId));
-            throw;
-        }
-    }
-
-    public async Task<Case?> GetByTicketId(int ticketId)
-    {
-        try
-        {
-            return await _inner.GetByTicketId(ticketId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error in {name}", nameof(GetByTicketId));
-            throw;
-        }
-    }
-
     public async Task<bool> Update(Case @case)
     {
         try

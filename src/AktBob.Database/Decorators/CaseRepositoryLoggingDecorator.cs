@@ -43,36 +43,23 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
         var cases = await _inner.GetAll(podioItemId, filArkivCaseId);
         if (!cases.Any())
         {
-            _logger.LogDebug("{name}: No cases found in database by PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), podioItemId, filArkivCaseId);
+            if (podioItemId is null && filArkivCaseId is null)
+            {
+                _logger.LogDebug("{name}: No cases found", nameof(GetAll));
+            }
+
+            if (filArkivCaseId is not null)
+            {
+                _logger.LogDebug("{name}: No cases found in database by FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), filArkivCaseId);
+            }
+
+            if (podioItemId is not null)
+            {
+                _logger.LogDebug("{name}: No cases found in database by PodioItemId = {podioItemId}", nameof(GetAll), podioItemId);
+            }
         }
 
         return cases;
-    }
-
-    public async Task<Case?> GetByPodioItemId(long podioItemId)
-    {
-        _logger.LogInformation("Getting case by PodioItemId {id}", podioItemId);
-
-        var @case = await _inner.GetByPodioItemId(podioItemId);
-        if (@case is null)
-        {
-            _logger.LogDebug("{name}: Case not found in database by PodioItemId = {id}", nameof(GetByPodioItemId), podioItemId);
-        }
-
-        return @case;
-    }
-
-    public async Task<Case?> GetByTicketId(int ticketId)
-    {
-        _logger.LogInformation("Getting case by TicketId {id}", ticketId);
-
-        var @case = await _inner.GetByTicketId(ticketId);
-        if (@case is null)
-        {
-            _logger.LogDebug("{name}: Case not found in database by TicketId = {id}", nameof(GetByTicketId), ticketId);
-        }
-
-        return @case;
     }
 
     public async Task<bool> Update(Case @case)

@@ -59,10 +59,6 @@ internal class CaseRepository : ICaseRepository
         return await _sqlDataAccess.Query<Case>(sql, null);
     }
 
-    public async Task<Case?> GetByPodioItemId(long podioItemId) => await _sqlDataAccess.QuerySingle<Case>("SELECT * FROM v_Cases WHERE PodioItemId = @PodioItemId", new { PodioItemId = podioItemId });
-
-    public async Task<Case?> GetByTicketId(int ticketId) => await _sqlDataAccess.QuerySingle<Case>("SELECT * FROM v_Cases WHERE TicketId = @TicketId", new { TicketId = ticketId });
-
     public async Task<bool> Update(Case @case)
     {
         var valiator = new CaseValidator();

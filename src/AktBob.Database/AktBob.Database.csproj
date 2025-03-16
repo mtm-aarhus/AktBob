@@ -1,19 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.66" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Dapper" Version="2.1.66" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
-    <ProjectReference Include="..\AktBob.Email.Contracts\AktBob.Email.Contracts.csproj" />
-    <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="AktBob.Database.Tests.Unit" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
+        <ProjectReference Include="..\AktBob.Email.Contracts\AktBob.Email.Contracts.csproj" />
+        <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
+    </ItemGroup>
 
 </Project>

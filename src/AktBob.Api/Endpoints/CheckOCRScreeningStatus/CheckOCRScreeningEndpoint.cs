@@ -41,13 +41,15 @@ internal class CheckOCRScreeningEndpoint(IJobDispatcher jobDispatcher,
 
     private async Task UpdateDatabaseSetFilArkivCaseId(Guid filArkivCaseId, PodioItemId podioItemId, CancellationToken cancellationToken)
     {
-        var @case = await _caseRepository.GetByPodioItemId(podioItemId.Id);
+        var cases = await _caseRepository.GetAll(podioItemId.Id, null);
 
-        if (@case is null )
+        if (cases.FirstOrDefault() is null)
         {
             _logger.LogWarning("Error updating database with FilArkivCaseId. Database did not return a case for Podio item id {id}", podioItemId);
             return;
         }
+
+        var @case = cases.First();
 
         @case.FilArkivCaseId = filArkivCaseId;
 

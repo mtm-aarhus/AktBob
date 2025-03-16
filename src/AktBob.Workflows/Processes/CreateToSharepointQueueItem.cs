@@ -36,27 +36,29 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
         Guard.Against.Null(podioFieldCaseNumber.Value);
 
 
-        // Get metadata from Podio
+        // Get data
         var getPodioItem = podio.GetItem(job.PodioItemId, cancellationToken);
-        var getDatabaseCase = unitOfWork.Cases.GetByPodioItemId(job.PodioItemId.Id);
+        var getDatabaseCases = unitOfWork.Cases.GetAll(job.PodioItemId.Id, null);
         var getDatabaseTicket = unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId.Id);
 
         Task.WaitAll([
             getPodioItem,
-            getDatabaseCase,
+            getDatabaseCases,
             getDatabaseTicket]);
 
         if (!getPodioItem.Result.IsSuccess) throw new BusinessException("Unable to get item from Podio");
-        if (getDatabaseCase.Result is null) throw new BusinessException("Unable to get case from databaase");
+        if (getDatabaseCases.Result.FirstOrDefault() is null) throw new BusinessException("Unable to get case from databaase");
         if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
 
+        var databaseCase = getDatabaseCases.Result.First();
+        
         var caseNumber = getPodioItem.Result.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(caseNumber))
         {
             _logger.LogWarning("Could not get case number field value from Podio item {itemId}", job.PodioItemId);
         }
 
-        if (string.IsNullOrEmpty(getDatabaseCase.Result.SharepointFolderName))
+        if (string.IsNullOrEmpty(databaseCase.SharepointFolderName))
         {
             _logger.LogWarning("Case related to Podio item {id}: SharepointFolderName is null or empty", job.PodioItemId);
         }
@@ -84,11 +86,11 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
             DeskProTitel = deskproTicketResult.Value.Subject,
             PodioID = job.PodioItemId.Id,
             Overmappe = getDatabaseTicket.Result.SharepointFolderName,
-            Undermappe = getDatabaseCase.Result.SharepointFolderName,
+            Undermappe = databaseCase.SharepointFolderName,
             GeoSag = !caseNumber.IsNovaCase(),
             NovaSag = caseNumber.IsNovaCase(),
             AktSagsURL = getDatabaseTicket.Result.CaseUrl,
-            FilarkivCaseID = getDatabaseCase.Result.FilArkivCaseId
+            FilarkivCaseID = databaseCase.FilArkivCaseId
         };
 
         var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());

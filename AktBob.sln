@@ -76,6 +76,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Tests.Unit.Shared", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Workflows", "src\AktBob.Workflows\AktBob.Workflows.csproj", "{6EEDBA7E-4B3A-7331-C86E-7DD466C268AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Database.Tests.Unit", "AktBob.Database.Tests.Unit\AktBob.Database.Tests.Unit.csproj", "{DCCBB461-8629-42B5-9ACA-21EBE973DA6A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -172,6 +174,10 @@ Global
 		{6EEDBA7E-4B3A-7331-C86E-7DD466C268AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EEDBA7E-4B3A-7331-C86E-7DD466C268AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EEDBA7E-4B3A-7331-C86E-7DD466C268AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCCBB461-8629-42B5-9ACA-21EBE973DA6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCCBB461-8629-42B5-9ACA-21EBE973DA6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCCBB461-8629-42B5-9ACA-21EBE973DA6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCCBB461-8629-42B5-9ACA-21EBE973DA6A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -208,6 +214,7 @@ Global
 		{2000EFA2-664B-48A0-94EF-FF2AAC9EB76E} = {3CCD0659-ACDF-4B5F-9C30-67D990BAE5A0}
 		{81198579-7066-4E08-BFC4-9D168CF510DA} = {3CCD0659-ACDF-4B5F-9C30-67D990BAE5A0}
 		{6EEDBA7E-4B3A-7331-C86E-7DD466C268AB} = {F4C64018-0A98-4F30-8B25-201D834C5C3A}
+		{DCCBB461-8629-42B5-9ACA-21EBE973DA6A} = {3CCD0659-ACDF-4B5F-9C30-67D990BAE5A0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}
