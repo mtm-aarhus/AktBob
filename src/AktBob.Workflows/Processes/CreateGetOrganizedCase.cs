@@ -4,6 +4,7 @@ using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using System.Text.Json;
+using Hangfire;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
@@ -22,6 +23,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         _serviceScopeFactory = serviceScopeFactory;
     }
 
+    [AutomaticRetry(Attempts = 3)]
     public async Task Handle(CreateGetOrganizedCaseJob job, CancellationToken cancellationToken = default)
     {
         Guard.Against.NegativeOrZero(job.DeskproId);
