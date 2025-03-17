@@ -57,7 +57,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var person = personResult.Value;
 
         // Get recipient
-        var recipient = deskproMessage.Recipients.FirstOrDefault() != null && deskproMessage.CreationSystem != "web.api"
+        var recipient = deskproMessage.Recipients.FirstOrDefault() != null && !deskproMessage.CreationSystem.Equals("web.api")
             ? await deskpro.GetPerson(deskproMessage.Recipients.First(), cancellationToken)
             : Result<PersonDto>.Error();
 
