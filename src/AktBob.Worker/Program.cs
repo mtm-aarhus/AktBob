@@ -69,11 +69,11 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddHangfire(config =>
         {
             config.UseSqlServerStorage(hostContext.Configuration.GetConnectionString("Hangfire"));
-            config.UseFilter(new AutomaticRetryAttribute
-            {
-                Attempts = 1,
-                OnlyOn = [typeof(BusinessException)]
-            });
+            //config.UseFilter(new AutomaticRetryAttribute
+            //{
+            //    Attempts = 2,
+            //    OnlyOn = [typeof(BusinessException)]
+            //});
         });
 
         services.AddHangfireServer(config =>
