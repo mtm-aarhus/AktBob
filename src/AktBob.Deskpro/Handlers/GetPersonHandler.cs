@@ -1,5 +1,7 @@
 ﻿using AAK.Deskpro;
+using AAK.Deskpro.Models;
 using Microsoft.Extensions.Configuration;
+using System.Net;
 
 namespace AktBob.Deskpro.Handlers;
 internal class GetPersonHandler(IDeskproClient deskpro, IConfiguration configuration, ILogger<GetPersonHandler> logger) : IGetPersonHandler
@@ -10,63 +12,95 @@ internal class GetPersonHandler(IDeskproClient deskpro, IConfiguration configura
 
     public async Task<Result<PersonDto>> Handle(int personId, CancellationToken cancellationToken)
     {
-        var person = await _deskpro.GetPersonById(personId, cancellationToken);
-        if (person is null)
+        try
         {
-            return Result.Error($"Error getting person {personId} from Deskpro.");
+            var person = await _deskpro.GetPersonById(personId, cancellationToken);
+            if (person is null)
+            {
+                return Result.Error($"Error getting person {personId} from Deskpro.");
+            }
+
+            var dto = new PersonDto
+            {
+                Id = person.Id,
+                IsAgent = person.IsAgent,
+                DisplayName = person.DisplayName,
+                Email = person.Email,
+                FirstName = person.FirstName,
+                LastName = person.LastName,
+                FullName = person.FullName,
+                PhoneNumbers = person.PhoneNumbers
+            };
+
+            return Result.Success(dto);
         }
-
-        var dto = new PersonDto
+        catch (HttpRequestException ex)
         {
-            Id = person.Id,
-            IsAgent = person.IsAgent,
-            DisplayName = person.DisplayName,
-            Email = person.Email,
-            FirstName = person.FirstName,
-            LastName = person.LastName,
-            FullName = person.FullName,
-            PhoneNumbers = person.PhoneNumbers
-        };
+            if (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                return Result.Error($"Deskpro person {personId} not found. {ex}");
+            }
 
-        return Result.Success(dto);
+            throw;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 
     public async Task<Result<PersonDto>> Handle(string email, CancellationToken cancellationToken)
     {
-        var skip = _configuration.GetSection("Deskpro:GetPersonHandler:IgnoreEmails").Get<IEnumerable<string>>() ?? Enumerable.Empty<string>();
-        if (skip.Contains(email))
+        try
         {
-            _logger.LogDebug("Email address {email} found on ignore list, returning an empty PersonDto result", email);
-            return Result.Success();
+            var skip = _configuration.GetSection("Deskpro:GetPersonHandler:IgnoreEmails").Get<IEnumerable<string>>() ?? Enumerable.Empty<string>();
+            if (skip.Contains(email))
+            {
+                _logger.LogDebug("Email address {email} found on ignore list, returning an empty PersonDto result", email);
+                return Result.Success();
+            }
+
+            var persons = await _deskpro.GetPersonByEmail(email, cancellationToken);
+
+            if (persons is null)
+            {
+                return Result.Error($"Error getting person by email {email} from Deskpro.");
+            }
+
+            var person = persons.FirstOrDefault();
+
+            if (person is null)
+            {
+                return Result.Error($"Error getting person by email {email} from Deskpro.");
+
+            }
+
+            var dto = new PersonDto
+            {
+                Id = person.Id,
+                IsAgent = person.IsAgent,
+                DisplayName = person.DisplayName,
+                Email = person.Email,
+                FirstName = person.FirstName,
+                LastName = person.LastName,
+                FullName = person.FullName,
+                PhoneNumbers = person.PhoneNumbers
+            };
+
+            return Result.Success(dto);
         }
-
-        var persons = await _deskpro.GetPersonByEmail(email, cancellationToken);
-
-        if (persons is null)
+        catch (HttpRequestException ex)
         {
-            return Result.Error($"Error getting person by email {email} from Deskpro.");
+            if (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                return Result.Error($"Deskpro person {email} not found. {ex}");
+            }
+
+            throw;
         }
-
-        var person = persons.FirstOrDefault();
-
-        if (person is null)
+        catch (Exception)
         {
-            return Result.Error($"Error getting person by email {email} from Deskpro.");
-
+            throw;
         }
-
-        var dto = new PersonDto
-        {
-            Id = person.Id,
-            IsAgent = person.IsAgent,
-            DisplayName = person.DisplayName,
-            Email = person.Email,
-            FirstName = person.FirstName,
-            LastName = person.LastName,
-            FullName = person.FullName,
-            PhoneNumbers = person.PhoneNumbers
-        };
-
-        return Result.Success(dto);
     }
 }
