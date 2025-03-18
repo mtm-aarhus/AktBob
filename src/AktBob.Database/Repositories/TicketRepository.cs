@@ -88,18 +88,14 @@ internal class TicketRepository : ITicketRepository
         }
 
         var filterString = string.Join(" AND ", filter);
-
-        if (!string.IsNullOrEmpty(filterString))
+        
+        return await GetTicketsWithCases(filterString, new
         {
-            return await GetTicketsWithCases(filterString, new
-            {
-                DeskproId = deskproId,
-                PodioItemId = podioItemId,
-                FilArkivCaseId = filArkivCaseId
-            });
-        }
-
-        return await GetTicketsWithCases(string.Empty, new { });
+            DeskproId = deskproId,
+            PodioItemId = podioItemId,
+            FilArkivCaseId = filArkivCaseId
+        });
+        
     }
 
     private async Task<IEnumerable<Ticket>> GetTicketsWithCases(string where, object parameters)
