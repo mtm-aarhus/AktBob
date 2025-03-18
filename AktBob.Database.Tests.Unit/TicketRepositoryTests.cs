@@ -140,17 +140,17 @@ public class TicketRepositoryTests
 
     // GetByDeskproTicketId
 
-    [Theory]
-    public async Task GetByDeskproTicketId_ShouldReturnTicket_WhenTicketIsFound(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
-    {
+    //[Theory]
+    //public async Task GetByDeskproTicketId_ShouldReturnTicket_WhenTicketIsFound(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
+    //{
 
-    }
+    //}
 
-    [Theory]
-    public async Task GetByDeskproTicketId_ShouldReturnNull_WhenTicketIsNotFound(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
-    {
+    //[Theory]
+    //public async Task GetByDeskproTicketId_ShouldReturnNull_WhenTicketIsNotFound(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
+    //{
 
-    }
+    //}
 
 
     // GetByPodioItemId

@@ -8,67 +8,78 @@ internal class GetMessagesHandler(IDeskproClient deskproClient, IGetPersonHandle
 
     public async Task<Result<IEnumerable<MessageDto>>> Handle(int ticketId, CancellationToken cancellationToken)
     {
-        var count = 10;
-        var page = 1;
-        var totalPages = 1;
-        var messages = new List<MessageDto>();
-
-        do
+        try
         {
-            var deskproMessages = await _deskproClient.GetTicketMessages(ticketId, page, count, cancellationToken);
+            var count = 10;
+            var page = 1;
+            var totalPages = 1;
+            var messages = new List<MessageDto>();
 
-            if (deskproMessages != null)
+            do
             {
-                messages.AddRange(deskproMessages.Data.Select(x => new MessageDto
+                var deskproMessages = await _deskproClient.GetTicketMessages(ticketId, page, count, cancellationToken);
+
+                if (deskproMessages != null)
                 {
-                    AttachmentIds = x.AttachmentIds,
-                    CreatedAt = x.CreatedAt,
-                    IsAgentNote = x.IsAgentNote,
-                    Content = x.Content,
-                    Id = x.Id,
-                    Recipients = x.Recipients,
-                    CreationSystem = x.CreationSystem,
-                    Person = new PersonDto
+                    messages.AddRange(deskproMessages.Data.Select(x => new MessageDto
                     {
-                        Id = x.Person.Id,
-                    },
-                    TicketId = x.TicketId
-                }));
+                        AttachmentIds = x.AttachmentIds,
+                        CreatedAt = x.CreatedAt,
+                        IsAgentNote = x.IsAgentNote,
+                        Content = x.Content,
+                        Id = x.Id,
+                        Recipients = x.Recipients,
+                        CreationSystem = x.CreationSystem,
+                        Person = new PersonDto
+                        {
+                            Id = x.Person.Id,
+                        },
+                        TicketId = x.TicketId
+                    }));
 
-                totalPages = deskproMessages.Pagination.TotalPages;
-            }
+                    totalPages = deskproMessages.Pagination.TotalPages;
+                }
 
-            page++;
+                page++;
 
-        } while (page <= totalPages);
+            } while (page <= totalPages);
 
-        if (messages is null)
-        {
-            return Result.Error($"Error getting ticket {ticketId} messages");
-        }
-
-        // Add people to the messages 
-        foreach (var message in messages)
-        {
-            var getPersonResult = await _getPersonHandler.Handle(message.Person.Id, cancellationToken);
-
-            var person = getPersonResult.Value;
-            if (person != null)
+            if (messages is null)
             {
-                message.Person = new PersonDto
-                {
-                    IsAgent = person.IsAgent,
-                    DisplayName = person.DisplayName,
-                    Email = person.Email,
-                    FirstName = person.FirstName,
-                    FullName = person.FullName,
-                    Id = person.Id,
-                    LastName = person.LastName,
-                    PhoneNumbers = person.PhoneNumbers
-                };
+                return Result.Error($"Error getting ticket {ticketId} messages");
             }
-        }
 
-        return messages;
+            // Add people to the messages 
+            foreach (var message in messages)
+            {
+                var getPersonResult = await _getPersonHandler.Handle(message.Person.Id, cancellationToken);
+
+                var person = getPersonResult.Value;
+                if (person != null)
+                {
+                    message.Person = new PersonDto
+                    {
+                        IsAgent = person.IsAgent,
+                        DisplayName = person.DisplayName,
+                        Email = person.Email,
+                        FirstName = person.FirstName,
+                        FullName = person.FullName,
+                        Id = person.Id,
+                        LastName = person.LastName,
+                        PhoneNumbers = person.PhoneNumbers
+                    };
+                }
+            }
+
+            return messages;
+        }
+        catch (HttpRequestException ex)
+        {
+            return Result.Error($"Error getting messages from ticket {ticketId}: {ex}");
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }

@@ -14,6 +14,11 @@ internal class GetPersonHandler(IDeskproClient deskpro, IConfiguration configura
     {
         try
         {
+            if (personId == 0)
+            {
+                return Result.Error($"Error getting person from Deskpro. Invalid ID #{personId}.");
+            }
+
             var person = await _deskpro.GetPersonById(personId, cancellationToken);
             if (person is null)
             {
@@ -36,12 +41,7 @@ internal class GetPersonHandler(IDeskproClient deskpro, IConfiguration configura
         }
         catch (HttpRequestException ex)
         {
-            if (ex.StatusCode == HttpStatusCode.NotFound)
-            {
-                return Result.Error($"Deskpro person {personId} not found. {ex}");
-            }
-
-            throw;
+            return Result.Error($"Error getting Deskpro person {personId}: {ex}");
         }
         catch (Exception)
         {
@@ -91,12 +91,7 @@ internal class GetPersonHandler(IDeskproClient deskpro, IConfiguration configura
         }
         catch (HttpRequestException ex)
         {
-            if (ex.StatusCode == HttpStatusCode.NotFound)
-            {
-                return Result.Error($"Deskpro person {email} not found. {ex}");
-            }
-
-            throw;
+            return Result.Error($"Error getting Deskpro person {email}: {ex}");
         }
         catch (Exception)
         {

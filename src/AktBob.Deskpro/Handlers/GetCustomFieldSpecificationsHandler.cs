@@ -7,14 +7,26 @@ internal class GetCustomFieldSpecificationsHandler(IDeskproClient deskproClient)
 
     public async Task<Result<IEnumerable<CustomFieldSpecificationDto>>> Handle(CancellationToken cancellationToken)
     {
-        var dto = await _deskproClient.GetCustomFieldSpecifications(cancellationToken);
-        var specifications = dto.Select(x => new CustomFieldSpecificationDto(x.Id, x.Title, x.Choices));
-
-        if (specifications is null)
+        try
         {
-            return Result.Error("Error getting custom field specification from Deskpro. The Deskpro client returned null.");
+            var dto = await _deskproClient.GetCustomFieldSpecifications(cancellationToken);
+            var specifications = dto.Select(x => new CustomFieldSpecificationDto(x.Id, x.Title, x.Choices));
+
+            if (specifications is null)
+            {
+                return Result.Error("Error getting custom field specification from Deskpro. The Deskpro client returned null.");
+            }
+
+            return Result.Success(specifications);
         }
-        
-        return Result.Success(specifications);
+        catch (HttpRequestException ex)
+        {
+            return Result.Error($"Error getting custom field specification from Deskpro. {ex}");
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
     }
 }

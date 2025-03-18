@@ -38,12 +38,7 @@ internal class GetTicketHandler(IDeskproClient deskproClient) : IGetTicketHandle
         }
         catch (HttpRequestException ex)
         {
-            if (ex.StatusCode == HttpStatusCode.NotFound)
-            {
-                return Result.Error($"Deskpro ticket {ticketId} not found. {ex}");
-            }
-
-            throw;
+            return Result.Error($"Error getting Deskpro ticket {ticketId}: {ex}");
         }
         catch(Exception)
         {

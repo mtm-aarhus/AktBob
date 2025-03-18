@@ -10,42 +10,51 @@ internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTick
 
     public async Task<Result<IEnumerable<TicketDto>>> Handle(int[] fields, string searchValue, CancellationToken cancellationToken)
     {
-        ICollection<Ticket> ticketsList = new Collection<Ticket>();
-
-        foreach (var field in fields)
+        try
         {
-            var tickets = await _deskpro.GetTicketsByFieldValue(field, searchValue, cancellationToken);
+            ICollection<Ticket> ticketsList = new Collection<Ticket>();
 
-            if (tickets is not null)
+            foreach (var field in fields)
             {
-                ticketsList!.AddRange(tickets);
+                var tickets = await _deskpro.GetTicketsByFieldValue(field, searchValue, cancellationToken);
+
+                if (tickets is not null)
+                {
+                    ticketsList!.AddRange(tickets);
+                }
             }
-        };
 
-        if (!ticketsList.Any())
-        {
-            return Result.Error($"No Deskpro tickets found by searching fields (fields: {string.Join(", ", fields.Select(x => x.ToString()))}) search value: '{searchValue}'.");
-        }
-
-        var dto = ticketsList.Select(t => new TicketDto
-        {
-            Id = t.Id,
-            Agent = Mappers.MapPerson(t.Agent),
-            Person = Mappers.MapPerson(t.Person),
-            AgentTeamId = t.AgentTeamId,
-            Auth = t.Auth,
-            Department = t.Department,
-            Ref = t.Ref,
-            Subject = t.Subject,
-            Fields = t.Fields.Select(f => new FieldDto
+            if (!ticketsList.Any())
             {
-                Id = f.Id,
-                Values = f.Values
-            })
-        });
+                return Result.Error($"No Deskpro tickets found by searching fields (fields: {string.Join(", ", fields.Select(x => x.ToString()))}) search value: '{searchValue}'.");
+            }
 
-        
+            var dto = ticketsList.Select(t => new TicketDto
+            {
+                Id = t.Id,
+                Agent = Mappers.MapPerson(t.Agent),
+                Person = Mappers.MapPerson(t.Person),
+                AgentTeamId = t.AgentTeamId,
+                Auth = t.Auth,
+                Department = t.Department,
+                Ref = t.Ref,
+                Subject = t.Subject,
+                Fields = t.Fields.Select(f => new FieldDto
+                {
+                    Id = f.Id,
+                    Values = f.Values
+                })
+            });
 
-        return Result.Success(dto);
+            return Result.Success(dto);
+        }
+        catch (HttpRequestException ex)
+        {
+            return Result.Error($"Error getting tickets by field search: {ex}");
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }
