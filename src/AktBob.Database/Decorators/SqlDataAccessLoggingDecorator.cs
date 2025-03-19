@@ -34,7 +34,7 @@ internal class SqlDataAccessLoggingDecorator(ISqlDataAccess inner, ILogger<SqlDa
         return rowsAffected;
     }
 
-    public async Task<IEnumerable<T>> Query<T>(string sql, object? parameters)
+    public async Task<IReadOnlyCollection<T>> Query<T>(string sql, object? parameters)
     {
         _logger.LogDebug("Querying {sql} with {parameters}", sql, parameters);
 
@@ -47,7 +47,7 @@ internal class SqlDataAccessLoggingDecorator(ISqlDataAccess inner, ILogger<SqlDa
         return result;
     }
 
-    public async Task<IEnumerable<T>> Query<T, U>(string sql, object parameters, string splitOn, Func<T, U, T> map)
+    public async Task<IReadOnlyCollection<T>> Query<T, U>(string sql, object parameters, string splitOn, Func<T, U, T> map)
     {
         _logger.LogDebug("Querying {sql} with {parameters} splitting on {splitOn}", sql, parameters, splitOn);
 

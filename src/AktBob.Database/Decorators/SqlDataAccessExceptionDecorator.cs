@@ -34,7 +34,7 @@ internal class SqlDataAccessExceptionDecorator(ISqlDataAccess inner, ILogger<Sql
         }
     }
 
-    public async Task<IEnumerable<T>> Query<T>(string sql, object? parameters)
+    public async Task<IReadOnlyCollection<T>> Query<T>(string sql, object? parameters)
     {
         try
         {
@@ -47,7 +47,7 @@ internal class SqlDataAccessExceptionDecorator(ISqlDataAccess inner, ILogger<Sql
         }
     }
 
-    public async Task<IEnumerable<T>> Query<T, U>(string sql, object parameters, string splitOn, Func<T, U, T> map)
+    public async Task<IReadOnlyCollection<T>> Query<T, U>(string sql, object parameters, string splitOn, Func<T, U, T> map)
     {
         try
         {

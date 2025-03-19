@@ -36,7 +36,7 @@ internal class CaseRepositoryExceptionDecorator(ICaseRepository inner, ILogger<C
         }
     }
 
-    public async Task<IEnumerable<Case>> GetAll(long? podioItemId, Guid? filArkivCaseId)
+    public async Task<IReadOnlyCollection<Case>> GetAll(long? podioItemId, Guid? filArkivCaseId)
     {
         try
         {

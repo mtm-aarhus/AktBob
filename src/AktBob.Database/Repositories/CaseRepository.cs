@@ -34,7 +34,7 @@ internal class CaseRepository : ICaseRepository
 
     public async Task<Case?> Get(int id) => await _sqlDataAccess.QuerySingle<Case>("SELECT * FROM v_Cases WHERE Id = @Id", new { Id = id });
 
-    public async Task<IEnumerable<Case>> GetAll(long? podioItemId, Guid? filArkivCaseId)
+    public async Task<IReadOnlyCollection<Case>> GetAll(long? podioItemId, Guid? filArkivCaseId)
     {
         var filter = new List<string>();
 
@@ -56,7 +56,8 @@ internal class CaseRepository : ICaseRepository
             sql += $" WHERE {filterString}";
         }
 
-        return await _sqlDataAccess.Query<Case>(sql, null);
+        var result = await _sqlDataAccess.Query<Case>(sql, null);
+        return result.ToList();
     }
 
     public async Task<bool> Update(Case @case)

@@ -36,7 +36,7 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
         return @case;
     }
 
-    public async Task<IEnumerable<Case>> GetAll(long? podioItemId, Guid? filArkivCaseId)
+    public async Task<IReadOnlyCollection<Case>> GetAll(long? podioItemId, Guid? filArkivCaseId)
     {
         _logger.LogInformation("Getting all cases by PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", podioItemId, filArkivCaseId);
 

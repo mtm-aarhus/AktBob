@@ -41,7 +41,7 @@ internal class TicketRepositoryExceptionDecorator : ITicketRepository
         }
     }
 
-    public async Task<IEnumerable<Ticket>> GetAll(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId)
+    public async Task<IReadOnlyCollection<Ticket>> GetAll(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId)
     {
         try
         {

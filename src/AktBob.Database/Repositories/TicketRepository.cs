@@ -67,7 +67,7 @@ internal class TicketRepository : ITicketRepository
         return await _sqlDataAccess.Execute(sql, ticket) == 1;
     }
 
-    public async Task<IEnumerable<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
+    public async Task<IReadOnlyCollection<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
     {
         // Prepare filter
         var filter = new List<string>();
@@ -98,7 +98,7 @@ internal class TicketRepository : ITicketRepository
         
     }
 
-    private async Task<IEnumerable<Ticket>> GetTicketsWithCases(string where, object parameters)
+    private async Task<IReadOnlyCollection<Ticket>> GetTicketsWithCases(string where, object parameters)
     {
         var sql = @$"
                 SELECT 

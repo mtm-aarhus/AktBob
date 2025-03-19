@@ -161,7 +161,7 @@ public class CaseRepositoryTests
     public async Task GetAll_ShouldReturnAllCases_WhenArgumentsAreNull()
     {
         // Arrange
-        IEnumerable<Case> expected = new List<Case>
+        IReadOnlyCollection<Case> expected = new List<Case>
         {
             new Case(),
             new Case()
@@ -175,7 +175,7 @@ public class CaseRepositoryTests
         var result = await _sut.GetAll(podioItemId: null, filArkivCaseId: null);
 
         // Assert
-        result.Should().BeSameAs(expected);
+        result.Should().BeEquivalentTo(expected);
         result.Count().Should().Be(expected.Count());
         await _dataAccess.Received(1).Query<Case>(Arg.Any<string>(), Arg.Any<object>());
     }
@@ -184,7 +184,7 @@ public class CaseRepositoryTests
     public async Task GetAll_ShouldReturnCases_WhenPodioItemIdIsNotNull()
     {
         // Arrange
-        IEnumerable<Case> expected = new List<Case>
+        IReadOnlyCollection<Case> expected = new List<Case>
         {
             new Case()           
         };
@@ -197,7 +197,7 @@ public class CaseRepositoryTests
         var result = await _sut.GetAll(podioItemId: 1, filArkivCaseId: null);
 
         // Assert
-        result.Should().BeSameAs(expected);
+        result.Should().BeEquivalentTo(expected);
         result.Count().Should().Be(expected.Count());
         await _dataAccess.Received(1).Query<Case>(Arg.Any<string>(), Arg.Any<object>());
     }
@@ -206,7 +206,7 @@ public class CaseRepositoryTests
     public async Task GetAll_ShouldReturnCases_WhenFilArkivCaseIdIsNotNull()
     {
         // Arrange
-        IEnumerable<Case> expected = new List<Case>
+        IReadOnlyCollection<Case> expected = new List<Case>
         {
             new Case()
         };
@@ -219,7 +219,7 @@ public class CaseRepositoryTests
         var result = await _sut.GetAll(podioItemId: null, filArkivCaseId: Guid.Empty);
 
         // Assert
-        result.Should().BeSameAs(expected);
+        result.Should().BeEquivalentTo(expected);
         result.Count().Should().Be(expected.Count());
         await _dataAccess.Received(1).Query<Case>(Arg.Any<string>(), Arg.Any<object>());
     }
@@ -228,7 +228,7 @@ public class CaseRepositoryTests
     public async Task GetAll_ShouldReturnCases_WhenPodioItemIdAndFilArkivIdAreNotNull()
     {
         // Arrange
-        IEnumerable<Case> expected = new List<Case>
+        IReadOnlyCollection<Case> expected = new List<Case>
         {
             new Case()
         };
@@ -241,7 +241,7 @@ public class CaseRepositoryTests
         var result = await _sut.GetAll(podioItemId: 1, filArkivCaseId: Guid.Empty);
 
         // Assert
-        result.Should().BeSameAs(expected);
+        result.Should().BeEquivalentTo(expected);
         result.Count().Should().Be(expected.Count());
         await _dataAccess.Received(1).Query<Case>(Arg.Any<string>(), Arg.Any<object>());
     }
@@ -252,7 +252,7 @@ public class CaseRepositoryTests
         // Arrange
         _dataAccess
             .Query<Case>(Arg.Any<string>(), Arg.Any<object>())
-            .Returns(Enumerable.Empty<Case>());
+            .Returns(new List<Case>());
 
         // Act
         var result = await _sut.GetAll(podioItemId: 1, filArkivCaseId: null);
@@ -268,7 +268,7 @@ public class CaseRepositoryTests
         // Arrange
         _dataAccess
             .Query<Case>(Arg.Any<string>(), Arg.Any<object>())
-            .Returns(Enumerable.Empty<Case>());
+            .Returns(new List<Case>());
 
         // Act
         var result = await _sut.GetAll(podioItemId: null, filArkivCaseId: Guid.Empty);
@@ -284,7 +284,7 @@ public class CaseRepositoryTests
         // Arrange
         _dataAccess
             .Query<Case>(Arg.Any<string>(), Arg.Any<object>())
-            .Returns(Enumerable.Empty<Case>());
+            .Returns(new List<Case>());
 
         // Act
         var result = await _sut.GetAll(podioItemId: 1, filArkivCaseId: Guid.Empty);
