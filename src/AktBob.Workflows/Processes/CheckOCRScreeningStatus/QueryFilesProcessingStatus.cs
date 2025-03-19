@@ -8,11 +8,12 @@ namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 internal record QueryFilesProcessingStatusJob(Guid FilArkivCaseId);
 
 [Queue("check-ocr-screening-status")]
-internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob> logger, IServiceScopeFactory serviceProviderFactory, IConfiguration configuration) : IJobHandler<QueryFilesProcessingStatusJob>
+internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob> logger, IServiceScopeFactory serviceProviderFactory, IConfiguration configuration, ITimeProvider timeProvider) : IJobHandler<QueryFilesProcessingStatusJob>
 {
     private readonly ILogger<QueryFilesProcessingStatusJob> _logger = logger;
     private readonly IServiceScopeFactory _serviceProviderFactory = serviceProviderFactory;
     private readonly IConfiguration _configuration = configuration;
+    private readonly ITimeProvider _timeProvider = timeProvider;
 
     public async Task Handle(QueryFilesProcessingStatusJob job, CancellationToken cancellationToken = default)
     {
@@ -40,8 +41,8 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
 
                 while (true)
                 {
-                    var delay = 30000 + random.Next(-2000, 2000);
-                    await Task.Delay(delay);
+                    var delay = TimeSpan.FromSeconds(30000 + random.Next(-2000, 2000));
+                    await _timeProvider.Delay(delay);
 
                     var response = await filArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
 
@@ -61,7 +62,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
         ).ToArray();
 
         var timeout = TimeSpan.FromHours(_configuration.GetValue<int?>("CheckOCRScreeningStatus:QueryFilesTimeoutHours") ?? 24);
-        var timeoutTask = Task.Delay(timeout));
+        var timeoutTask = _timeProvider.Delay(timeout);
         var completedTasks = await Task.WhenAny(Task.WhenAll(tasks), timeoutTask);
 
         if (completedTasks == timeoutTask)
