@@ -41,11 +41,42 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
         return ticket;
     }
 
-    public async Task<IReadOnlyCollection<Ticket>> GetAll(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId)
+    public async Task<IReadOnlyCollection<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
     {
-        _logger.LogInformation("Getting all tickets by DeskproId = {deskproId}, PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", DeskproId, PodioItemId, FilArkivCaseId);
-        var tickets = await _inner.GetAll(DeskproId, PodioItemId, FilArkivCaseId);
-        _logger.LogInformation("{name}: {count} tickets found by DeskproId = {deskproId}, PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), tickets.Count(), DeskproId, PodioItemId, FilArkivCaseId);
+        _logger.LogInformation("Getting all tickets by DeskproId = {deskproId}, PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", deskproId, podioItemId, filArkivCaseId);
+        var tickets = await _inner.GetAll(deskproId, podioItemId, filArkivCaseId);
+        
+        if (!tickets.Any())
+        {
+            switch (deskproId)
+            {
+                case null when podioItemId is null && filArkivCaseId is null:
+                    _logger.LogDebug("{name}: No tickets found", nameof(GetAll));
+                    break;
+                case not null when podioItemId is null && filArkivCaseId is null:
+                    _logger.LogDebug("{name}: no tickets found by DeskproId = {deskproId}", nameof(GetAll), deskproId);
+                    break;
+                case null when podioItemId is not null && filArkivCaseId is null:
+                    _logger.LogDebug("{name}: no tickets found by PodioItemId = {podioItemId}", nameof(GetAll), podioItemId);
+                    break;
+                case null when podioItemId is null && filArkivCaseId is not null:
+                    _logger.LogDebug("{name}: no tickets found by FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), filArkivCaseId);
+                    break;
+                case not null when podioItemId is not null && filArkivCaseId is null:
+                    _logger.LogDebug("{name}: no tickets found by DeskproId = {deskproId} AND PodioItemId = {podioItemId}", nameof(GetAll), deskproId, podioItemId);
+                    break;
+                case not null when podioItemId is not null && filArkivCaseId is not null:
+                    _logger.LogDebug("{name}: no tickets found by DeskproId = {deskproId} AND PodioItemId = {podioItemId} AND FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), deskproId, podioItemId, filArkivCaseId);
+                    break;
+                case null when podioItemId is not null && filArkivCaseId is not null:
+                    _logger.LogDebug("{name}: no tickets found by PodioItemId = {podioItemId} AND FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), podioItemId, filArkivCaseId);
+                    break;
+                case not null when podioItemId is null && filArkivCaseId is not null:
+                    _logger.LogDebug("{name}: no tickets found by DeskproId = {deskproId} AND FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), deskproId, filArkivCaseId);
+                    break;
+            }
+        }
+
         return tickets;
     }
 
