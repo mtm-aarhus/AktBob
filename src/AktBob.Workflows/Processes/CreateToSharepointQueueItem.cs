@@ -41,7 +41,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
         var getDatabaseCases = unitOfWork.Cases.GetAll(job.PodioItemId.Id, null);
         var getDatabaseTicket = unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId.Id);
 
-        Task.WaitAll([
+        await Task.WhenAll([
             getPodioItem,
             getDatabaseCases,
             getDatabaseTicket]);

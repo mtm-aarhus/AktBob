@@ -10,11 +10,11 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly IConfiguration _configuration = configuration;
 
-    public Task Handle(UpdateDeskproSetGetOrganizedAggregatedCaseNumbersJob job, CancellationToken cancellationToken = default)
+    public async Task Handle(UpdateDeskproSetGetOrganizedAggregatedCaseNumbersJob job, CancellationToken cancellationToken = default)
     {
         if (job.AggregatedCaseIds.Length == 0)
         {
-            return Task.CompletedTask;
+            return;
         }
 
         Guard.Against.NegativeOrZero(job.DeskproTicketId);
@@ -34,11 +34,11 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
                 caseIds.AddRange(result);
             }).ToArray();
         
-        Task.WaitAll(tasks, cancellationToken);
+        await Task.WhenAll(tasks);
 
         if (!caseIds.Any())
         {
-            return Task.CompletedTask;
+            return;
         }
 
         var payload = new
@@ -49,6 +49,5 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
 
         var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         deskpro.InvokeWebhook(deskproWebhook, json);
-        return Task.CompletedTask;
     }
 }

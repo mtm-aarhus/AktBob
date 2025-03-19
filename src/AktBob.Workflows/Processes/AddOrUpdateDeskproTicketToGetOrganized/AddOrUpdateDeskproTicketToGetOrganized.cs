@@ -53,7 +53,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
             ? deskpro.GetPerson(ticket.Person.Id, cancellationToken)
             : Task.FromResult(Result<PersonDto>.Error());
 
-        Task.WaitAll([
+        await Task.WhenAll([
             getTicketCustomFields,
             getAgent,
             getUser]);
@@ -89,7 +89,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
             var messages = getMessagesResult.Value.OrderByDescending(x => x.CreatedAt);
 
             // Get and handle all messages at the same time
-            Task.WaitAll(messages.Select(async message =>
+            await Task.WhenAll(messages.Select(async message =>
             {
                 var person = await deskpro.GetPerson(message.Person.Id, cancellationToken);
                 message.Person = person.Value;

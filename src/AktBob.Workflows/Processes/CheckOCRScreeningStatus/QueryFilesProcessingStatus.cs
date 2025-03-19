@@ -14,7 +14,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
     private readonly IServiceScopeFactory _serviceProviderFactory = serviceProviderFactory;
     private readonly IConfiguration _configuration = configuration;
 
-    public Task Handle(QueryFilesProcessingStatusJob job, CancellationToken cancellationToken = default)
+    public async Task Handle(QueryFilesProcessingStatusJob job, CancellationToken cancellationToken = default)
     {
         var scope = _serviceProviderFactory.CreateScope();
         var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
@@ -24,7 +24,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
         if (!cachedData.Cases.TryGetValue(job.FilArkivCaseId, out var @case))
         {
             _logger.LogDebug("Case not foud in cache. Exiting job.");
-            return Task.CompletedTask;
+            return;
         }
 
         // Query each file with a delay between queries
@@ -56,13 +56,18 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
                             break;
                         }
                     }
-
-                    // TODO: Maybe break out of while loop after a maximum time period?
                 }
             }
         ).ToArray();
 
-        Task.WaitAll(tasks, cancellationToken);
+        var timeout = TimeSpan.FromHours(_configuration.GetValue<int?>("CheckOCRScreeningStatus:QueryFilesTimeoutHours") ?? 24);
+        var timeoutTask = Task.Delay(timeout));
+        var completedTasks = await Task.WhenAny(Task.WhenAll(tasks), timeoutTask);
+
+        if (completedTasks == timeoutTask)
+        {
+            throw new TimeoutException($"The {timeout.Hours} hour timeout has been reached for querying FilArkiv file statusses (FilArkivCaseId {job.FilArkivCaseId}).");
+        }
 
         _logger.LogInformation("Finished querying processing statusses for all files, FilArkiv case {id}, PodioItemId {podioItemId}", @case.FilArkivCaseId, @case.PodioItemId);
 
@@ -76,7 +81,5 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
         var commentText = "OCR screening af dokumenterne i FilArkiv er færdig.";
         var postCommandCommand = new PostCommentCommand(@case.PodioItemId, commentText);
         podio.PostComment(postCommandCommand);
-
-        return Task.CompletedTask;
     }
 }

@@ -39,7 +39,7 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
         var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproId);
         var getDeskproTicket = deskpro.GetTicket(job.DeskproId, cancellationToken);
 
-        Task.WaitAll([getDatabaseTicket, getDeskproTicket]);
+        await Task.WhenAll([getDatabaseTicket, getDeskproTicket]);
 
         if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
         if (!getDeskproTicket.Result.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");

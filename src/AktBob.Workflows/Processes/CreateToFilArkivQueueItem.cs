@@ -40,7 +40,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         var getDatabaseCase = unitOfWork.Cases.GetAll(job.PodioItemId.Id, null);
         var getDatabaseTicket = unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId.Id);
 
-        Task.WaitAll([
+        await Task.WhenAll([
             getPodioItem,
             getDatabaseCase,
             getDatabaseTicket]);

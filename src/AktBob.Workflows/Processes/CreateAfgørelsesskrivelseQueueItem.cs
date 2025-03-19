@@ -39,7 +39,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
 
         var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproTicketId);
 
-        Task.WaitAll([
+        await Task.WhenAll([
             getPerson,
             getAgent,
             getDatabaseTicket]);

@@ -54,7 +54,7 @@ internal class CreateDocumentListQueueItem(
         var getPodioItem = podio.GetItem(job.PodioItemId, cancellationToken);
         var getDatabaseTicket = unitOfWork.Tickets.GetByPodioItemId(job.PodioItemId.Id);
 
-        Task.WaitAll([getPodioItem, getDatabaseTicket]);
+        await Task.WhenAll([getPodioItem, getDatabaseTicket]);
 
         if (getPodioItem.Result is null) throw new BusinessException($"Could not get valid data from Podio.");
 

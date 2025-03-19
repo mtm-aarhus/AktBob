@@ -49,6 +49,6 @@ internal class RegisterMessages(ILogger<RegisterMessages> logger, IServiceScopeF
             return Task.CompletedTask;
         });
 
-        Task.WaitAll(tasks, cancellationToken);
+        await Task.WhenAll(tasks);
     }
 }
