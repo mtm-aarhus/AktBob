@@ -41,11 +41,11 @@ internal class TicketRepositoryExceptionDecorator : ITicketRepository
         }
     }
 
-    public async Task<IReadOnlyCollection<Ticket>> GetAll(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId)
+    public async Task<IReadOnlyCollection<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
     {
         try
         {
-            return await _inner.GetAll(DeskproId, PodioItemId, FilArkivCaseId);
+            return await _inner.GetAll(deskproId, podioItemId, filArkivCaseId);
         }
         catch (Exception ex)
         {
