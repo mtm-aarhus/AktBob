@@ -8,7 +8,7 @@ using NSubstitute;
 using System.Data;
 using System.Text.Json;
 
-namespace AktBob.Database.Tests.Unit;
+namespace AktBob.Database.Tests.Unit.Repositories;
 
 public class TicketRepositoryTests
 {
