@@ -1,18 +1,12 @@
 ﻿using AktBob.Database.DataAccess;
 using AktBob.Database.Entities;
 using AktBob.Database.Repositories;
-using AktBob.Shared;
 using Dapper;
 using FluentAssertions;
 using FluentValidation;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace AktBob.Database.Tests.Unit;
 

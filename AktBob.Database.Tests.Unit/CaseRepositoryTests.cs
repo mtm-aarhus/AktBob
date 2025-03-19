@@ -4,7 +4,6 @@ using AktBob.Database.Repositories;
 using Dapper;
 using FluentAssertions;
 using FluentValidation;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using System.Data;
