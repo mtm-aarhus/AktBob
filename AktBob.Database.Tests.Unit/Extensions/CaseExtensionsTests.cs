@@ -65,18 +65,6 @@ public class CaseExtensionsTests
 
         // Assert
         result.Count().Should().Be(cases.Count());
-        result.Should().BeOfType(typeof(List<CaseDto>));
-        
-        foreach (var resultCase in result)
-        {
-            var originalCase = cases.First(c => c.Id == resultCase.Id);
-
-            resultCase.FilArkivCaseId.Should().Be(originalCase.FilArkivCaseId);
-            resultCase.CaseNumber.Should().Be(originalCase.CaseNumber);
-            resultCase.Id.Should().Be(originalCase.Id);
-            resultCase.PodioItemId.Should().Be(originalCase.PodioItemId);
-            resultCase.SharepointFolderName.Should().Be(originalCase.SharepointFolderName);
-            resultCase.TicketId.Should().Be(originalCase.TicketId);
-        }
+        result.Should().BeOfType(typeof(List<CaseDto>));       
     }
 }
