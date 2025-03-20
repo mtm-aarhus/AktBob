@@ -23,10 +23,10 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
         using var scope = _serviceScopeFactory.CreateScope();
 
         // Services
-        var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
-        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var openOrchestrator = scope.ServiceProvider.GetRequiredServiceOrThrow<IOpenOrchestratorModule>();
+        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
 
         // Variables
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateToSharepointQueueItemJobHandler:OpenOrchestratorQueueName"));

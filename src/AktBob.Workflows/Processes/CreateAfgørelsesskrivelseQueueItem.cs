@@ -16,9 +16,9 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         Guard.Against.NegativeOrZero(job.DeskproTicketId);
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
+        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
+        var openOrchestrator = scope.ServiceProvider.GetRequiredServiceOrThrow<IOpenOrchestratorModule>();
 
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateAfgørelsesskrivelseQueueItemJobHandler:OpenOrchestratorQueueName"));
         var deskproAfdelingFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:AfdelingFieldId"));

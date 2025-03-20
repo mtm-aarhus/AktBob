@@ -1,5 +1,6 @@
 ﻿using AktBob.Deskpro.Contracts;
 using AktBob.GetOrganized.Contracts;
+using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text.Json;
 
@@ -20,8 +21,8 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
         Guard.Against.NegativeOrZero(job.DeskproTicketId);
 
         var scope = _serviceScopeFactory.CreateScope();
-        var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
-        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
+        var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
+        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
 
         var deskproWebhook = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("Deskpro:Webhooks:SetGetOrganizedAggregatedCaseIds"));
         

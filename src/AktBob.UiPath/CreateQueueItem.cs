@@ -1,4 +1,5 @@
 ﻿using AktBob.Shared;
+using AktBob.Shared.Extensions;
 using AktBob.UiPath.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,7 +14,7 @@ internal class CreateQueueItem(IServiceScopeFactory serviceScopeFactory) : IJobH
     public async Task Handle(CreateQueueItemJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var handler = scope.ServiceProvider.GetRequiredService<ICreateQueueItemHandler>();
+        var handler = scope.ServiceProvider.GetRequiredServiceOrThrow<ICreateQueueItemHandler>();
         await handler.Handle(job.QueueName, job.Reference, job.Payload, cancellationToken);
     }
 }

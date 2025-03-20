@@ -5,6 +5,7 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using System.Text.Json;
 using Hangfire;
+using AktBob.Shared.Extensions;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
@@ -29,10 +30,10 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         Guard.Against.NegativeOrZero(job.DeskproId);
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
-        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
+        var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
+        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
+        var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
 
         // Get subject from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(job.DeskproId, cancellationToken);

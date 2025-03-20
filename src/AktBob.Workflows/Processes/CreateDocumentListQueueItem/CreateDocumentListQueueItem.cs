@@ -28,13 +28,13 @@ internal class CreateDocumentListQueueItem(
         using var scope = _serviceScopeFactory.CreateScope();
 
         // Services
-        var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
-        var uiPath = scope.ServiceProvider.GetRequiredService<IUiPathModule>();
-        var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
-        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var timeProvider = scope.ServiceProvider.GetRequiredService<ITimeProvider>();
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
+        var openOrchestrator = scope.ServiceProvider.GetRequiredServiceOrThrow<IOpenOrchestratorModule>();
+        var uiPath = scope.ServiceProvider.GetRequiredServiceOrThrow<IUiPathModule>();
+        var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
+        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
+        var timeProvider = scope.ServiceProvider.GetRequiredServiceOrThrow<ITimeProvider>();
+        var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
 
         // UiPath variables
         var tenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));

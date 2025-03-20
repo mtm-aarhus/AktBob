@@ -23,11 +23,11 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         Guard.Against.Zero(job.DeskproMessageId);
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var cloudConvert = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
-        var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var cloudConvert = scope.ServiceProvider.GetRequiredServiceOrThrow<ICloudConvertModule>();
+        var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
+        var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
 
         var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(job.DeskproMessageId);
         if (databaseMessage is null) throw new BusinessException("Unable to get message from database.");

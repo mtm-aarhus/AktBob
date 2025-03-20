@@ -19,8 +19,8 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
         Guard.Against.NullOrEmpty(job.CaseNumber);
 
         using var scope = serviceScopeFactory.CreateScope();
-        var deskproModule = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
+        var deskproModule = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
 
         DateTime createdAtDanishTime = job.Timestamp.UtcToDanish();
         var childrenDocumentIds = new Collection<int>();

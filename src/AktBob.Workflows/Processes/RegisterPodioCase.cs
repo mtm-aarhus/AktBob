@@ -2,6 +2,7 @@
 using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Podio.Contracts;
+using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 
 namespace AktBob.Workflows.Processes;
@@ -19,8 +20,8 @@ internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfigurati
         using var scope = _serviceScopeFactory.CreateScope();
 
         // Services
-        var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
 
         // Variables
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));

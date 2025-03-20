@@ -25,10 +25,10 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         var scope = _serviceScopeFactory.CreateScope();
         var pendingsTickets = PendingsTickets.Instance;
 
-        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var messageRepository = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
-        var cloudConvertModule = scope.ServiceProvider.GetRequiredService<ICloudConvertModule>();
-        var getOrganized = scope.ServiceProvider.GetRequiredService<IGetOrganizedModule>();
+        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var messageRepository = scope.ServiceProvider.GetRequiredServiceOrThrow<IMessageRepository>();
+        var cloudConvertModule = scope.ServiceProvider.GetRequiredServiceOrThrow<ICloudConvertModule>();
+        var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
         var currentPendingTicket = new PendingTicket(job.TicketId, job.SubmittedAt);
 
         pendingsTickets.AddPendingTicket(currentPendingTicket);

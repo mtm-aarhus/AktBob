@@ -21,10 +21,10 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
         var scope = _serviceScopeFactory.CreateScope();
 
         // Services
-        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
-        var uiPath = scope.ServiceProvider.GetRequiredService<IUiPathModule>();
+        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
+        var openOrchestrator = scope.ServiceProvider.GetRequiredServiceOrThrow<IOpenOrchestratorModule>();
+        var uiPath = scope.ServiceProvider.GetRequiredServiceOrThrow<IUiPathModule>();
 
         // UiPath variables
         var uiPathTenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));

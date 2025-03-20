@@ -1,4 +1,5 @@
 ﻿using AktBob.Podio.Contracts;
+using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.Documents;
@@ -14,9 +15,9 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
     public async Task Handle(CheckOCRScreeningStatusRegisterFilesJob job, CancellationToken cancellationToken = default)
     {
         var scope = _serviceScopeFactory.CreateScope();
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
-        var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
-        var filArkivCoreClient = scope.ServiceProvider.GetRequiredService<FilArkivCoreClient>();
+        var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
+        var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
+        var filArkivCoreClient = scope.ServiceProvider.GetRequiredServiceOrThrow<FilArkivCoreClient>();
         var cachedData = CachedData.Instance;
 
         var @case = new Case(job.FilArkivCaseId, job.PodioItemId);

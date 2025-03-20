@@ -1,5 +1,6 @@
 ﻿using AktBob.Podio.Contracts;
 using AktBob.Shared;
+using AktBob.Shared.Extensions;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,7 +20,7 @@ internal class UpdateTextField(IServiceScopeFactory serviceScopeFactory) : IJobH
         Guard.Against.NullOrEmpty(job.TextValue);
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var handler = scope.ServiceProvider.GetRequiredService<IUpdateTextFieldHandler>();
+        var handler = scope.ServiceProvider.GetRequiredServiceOrThrow<IUpdateTextFieldHandler>();
 
         var command = new UpdateTextFieldCommand(job.PodioItemId, job.FieldId, job.TextValue);
         await handler.Handle(command, cancellationToken);

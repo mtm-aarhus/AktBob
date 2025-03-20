@@ -1,4 +1,5 @@
 ﻿using AktBob.Shared;
+using AktBob.Shared.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 
@@ -13,7 +14,7 @@ internal class InvokeWebhook(IServiceScopeFactory serviceScopeFactory) : IJobHan
     public async Task Handle(InvokeWebhookJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var handler = scope.ServiceProvider.GetRequiredService<IInvokeWebhookHandler>();
+        var handler = scope.ServiceProvider.GetRequiredServiceOrThrow<IInvokeWebhookHandler>();
 
         var bytes = Convert.FromBase64String(job.Payload);
         var decodedPayload = Encoding.UTF8.GetString(bytes);

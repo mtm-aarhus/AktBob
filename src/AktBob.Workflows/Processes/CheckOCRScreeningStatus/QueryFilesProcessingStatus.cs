@@ -1,4 +1,5 @@
 ﻿using AktBob.Podio.Contracts;
+using AktBob.Shared.Extensions;
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.FileProcess;
 using Hangfire;
@@ -18,8 +19,8 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
     public async Task Handle(QueryFilesProcessingStatusJob job, CancellationToken cancellationToken = default)
     {
         var scope = _serviceProviderFactory.CreateScope();
-        var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
-        var filArkivCoreClient = scope.ServiceProvider.GetRequiredService<FilArkivCoreClient>();
+        var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
+        var filArkivCoreClient = scope.ServiceProvider.GetRequiredServiceOrThrow<FilArkivCoreClient>();
         var cachedData = CachedData.Instance;
 
         if (!cachedData.Cases.TryGetValue(job.FilArkivCaseId, out var @case))

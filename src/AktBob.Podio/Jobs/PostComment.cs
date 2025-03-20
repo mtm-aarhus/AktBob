@@ -1,5 +1,6 @@
 ﻿using AktBob.Podio.Contracts;
 using AktBob.Shared;
+using AktBob.Shared.Extensions;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,7 +19,7 @@ internal class PostComment(IServiceScopeFactory serviceScopeFactory) : IJobHandl
         Guard.Against.NullOrEmpty(job.TextValue);
 
         using var scope = _serviceScopeFactory.CreateScope();
-        var postPodioCommentHandler = scope.ServiceProvider.GetRequiredService<IPostCommentHandler>();
+        var postPodioCommentHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IPostCommentHandler>();
 
         var command = new PostCommentCommand(job.PodioItemId, job.TextValue);
         await postPodioCommentHandler.Handle(command, cancellationToken);

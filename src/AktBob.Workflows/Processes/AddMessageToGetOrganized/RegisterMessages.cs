@@ -1,6 +1,7 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Deskpro.Contracts;
+using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
@@ -15,9 +16,9 @@ internal class RegisterMessages(ILogger<RegisterMessages> logger, IServiceScopeF
         Guard.Against.NegativeOrZero(job.DeskproTicketId);
 
         var scope = _serviceScopeFactory.CreateScope();
-        var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
-        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
+        var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
+        var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
+        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
 
         // Get message from Deskpro
         var getDeskproMessagesResult = await deskpro.GetMessages(job.DeskproTicketId, cancellationToken);
