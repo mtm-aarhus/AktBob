@@ -31,7 +31,7 @@ public static class ModuleServices
         // Add module handlers
         services.AddScoped<IConvertHtmlToPdfHandler, ConvertHtmlToPdfHandler>();
         services.AddScoped<IGenerateTasksHandler, GenerateTasksHandler>();
-        services.AddScoped<IGettDownloadUrlHandler, GetDownloadUrlHandler>();
+        services.AddScoped<IGetDownloadUrlHandler, GetDownloadUrlHandler>();
         services.AddScoped<IDownloadFileHandler, DownloadFileHandler>();
 
         // Module service orchestration
@@ -39,7 +39,7 @@ public static class ModuleServices
         {
             var inner = new CloudConvertModule(
                 provider.GetRequiredService<IConvertHtmlToPdfHandler>(),
-                provider.GetRequiredService<IGettDownloadUrlHandler>(),
+                provider.GetRequiredService<IGetDownloadUrlHandler>(),
                 provider.GetRequiredService<IDownloadFileHandler>(),
                 provider.GetRequiredService<IGenerateTasksHandler>());
 

@@ -3,7 +3,7 @@
 namespace AktBob.CloudConvert.Handlers;
 internal class GetDownloadUrlHandler(ICloudConvertClient cloudConvertClient,
                                          ILogger<GetDownloadUrlHandler> logger,
-                                         ITimeProvider timeProvider) : IGettDownloadUrlHandler
+                                         ITimeProvider timeProvider) : IGetDownloadUrlHandler
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;
     private readonly ILogger<GetDownloadUrlHandler> _logger = logger;
