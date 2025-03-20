@@ -2,6 +2,7 @@
 using AktBob.Database.DataAccess;
 using AktBob.Database.Decorators;
 using AktBob.Database.Repositories;
+using AktBob.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,9 +12,11 @@ public static class ModuleServices
 {
     public static IServiceCollection AddDatabaseModule(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton<ISqlConnectionFactory, DatabaseSqlConnectionFactory>();
+
         services.AddScoped<ISqlDataAccess>(provider =>
         {
-            var inner = new SqlDataAccess(provider.GetRequiredService<IConfiguration>());
+            var inner = new SqlDataAccess(provider.GetRequiredService<ISqlConnectionFactory>());
 
             var withLogging = new SqlDataAccessLoggingDecorator(
                 inner,

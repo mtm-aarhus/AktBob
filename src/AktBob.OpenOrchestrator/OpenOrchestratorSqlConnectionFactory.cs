@@ -5,17 +5,8 @@ using System.Data;
 
 namespace AktBob.OpenOrchestrator;
 
-internal class OpenOrchestratorSqlConnectionFactory : ISqlConnectionFactory
+internal class OpenOrchestratorSqlConnectionFactory(IConfiguration configuration) : ISqlConnectionFactory
 {
-    private readonly string _connectionString;
-
-    public OpenOrchestratorSqlConnectionFactory(IConfiguration configuration)
-    {
-        _connectionString = configuration.GetConnectionString("OpenOrchestratorDb")!;
-    }
-
-    public IDbConnection CreateConnection()
-    {
-        return new SqlConnection(_connectionString);
-    }
+    private readonly string _connectionString = configuration.GetConnectionString("OpenOrchestratorDb")!;
+    public IDbConnection CreateConnection() => new SqlConnection(_connectionString);
 }
