@@ -17,8 +17,8 @@ internal class CreateQueueItem(IServiceScopeFactory serviceScopeFactory, ILogger
     public async Task Handle(CreateQueueItemJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var handler = scope.ServiceProvider.GetRequiredService<ICreateQueueItemHandler>();
-
+        var handler = scope.ServiceProvider.GetRequiredServiceOrThrow<ICreateQueueItemHandler>();
+                
         var bytes = Convert.FromBase64String(job.Payload);
         var decodedPayload = Encoding.UTF8.GetString(bytes);
 
