@@ -12,11 +12,11 @@ public static class ModuleServices
 {
     public static IServiceCollection AddDatabaseModule(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<ISqlConnectionFactory, DatabaseSqlConnectionFactory>();
+        services.AddSingleton<IDatabaseSqlConnectionFactory, DatabaseSqlConnectionFactory>();
 
         services.AddScoped<ISqlDataAccess>(provider =>
         {
-            var inner = new SqlDataAccess(provider.GetRequiredService<ISqlConnectionFactory>());
+            var inner = new SqlDataAccess(provider.GetRequiredService<IDatabaseSqlConnectionFactory>());
 
             var withLogging = new SqlDataAccessLoggingDecorator(
                 inner,

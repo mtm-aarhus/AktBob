@@ -5,7 +5,7 @@ using Dapper;
 
 namespace AktBob.OpenOrchestrator;
 
-internal class CreateQueueItemHandler(ISqlConnectionFactory sqlConnectionFactory) : ICreateQueueItemHandler
+internal class CreateQueueItemHandler(IOpenOrchestratorSqlConnectionFactory sqlConnectionFactory) : ICreateQueueItemHandler
 {
     private readonly ISqlConnectionFactory _sqlConnectionFactory = sqlConnectionFactory;
 

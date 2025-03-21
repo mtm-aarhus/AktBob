@@ -1,11 +1,10 @@
-﻿using AktBob.Shared;
-using System.Data;
+﻿using System.Data;
 
 namespace AktBob.Database.DataAccess;
 
-internal class SqlDataAccess(ISqlConnectionFactory sqlConnectionFactory) : ISqlDataAccess
+internal class SqlDataAccess(IDatabaseSqlConnectionFactory sqlConnectionFactory) : ISqlDataAccess
 {
-    private readonly ISqlConnectionFactory _sqlConnectionFactory = sqlConnectionFactory;
+    private readonly IDatabaseSqlConnectionFactory _sqlConnectionFactory = sqlConnectionFactory;
 
     public async Task<T?> QuerySingle<T>(string sql, object? parameters)
     {
