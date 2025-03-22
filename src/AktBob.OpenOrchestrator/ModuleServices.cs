@@ -13,7 +13,8 @@ public static class ModuleServices
     {
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("OpenOrchestratorDb"));
 
-        services.AddSingleton<IOpenOrchestratorSqlConnectionFactory, OpenOrchestratorSqlConnectionFactory>();
+        services.AddScoped<IOpenOrchestratorSqlConnection, OpenOrchestratorSqlConnection>();
+        services.AddScoped<ISqlExecutor<IOpenOrchestratorSqlConnection>, DapperSqlExecutor<IOpenOrchestratorSqlConnection>>();
         services.AddScoped<ICreateQueueItemHandler, CreateQueueItemHandler>();
         services.AddScoped<IJobHandler<CreateQueueItemJob>, CreateQueueItem>();
 

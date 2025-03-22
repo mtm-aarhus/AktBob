@@ -6,10 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.66" />
-  </ItemGroup>
-
 	<ItemGroup>
 		<InternalsVisibleTo Include="AktBob.OpenOrchestrator.Tests.Unit" />
 		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />

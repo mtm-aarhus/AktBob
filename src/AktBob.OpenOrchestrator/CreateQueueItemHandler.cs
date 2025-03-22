@@ -1,23 +1,21 @@
 ﻿using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Ardalis.Result;
-using Dapper;
 
 namespace AktBob.OpenOrchestrator;
 
-internal class CreateQueueItemHandler(IOpenOrchestratorSqlConnectionFactory sqlConnectionFactory) : ICreateQueueItemHandler
+internal class CreateQueueItemHandler(ISqlExecutor<IOpenOrchestratorSqlConnection> sqlExecutor) : ICreateQueueItemHandler
 {
-    private readonly ISqlConnectionFactory _sqlConnectionFactory = sqlConnectionFactory;
+    private readonly ISqlExecutor<IOpenOrchestratorSqlConnection> _sqlExecutor = sqlExecutor;
 
     public async Task<Result<Guid>> Handle(string queueName, string payload, string reference, CancellationToken cancellationToken)
     {
         Guard.Against.NullOrEmpty(queueName);
 
-        using var connection = _sqlConnectionFactory.CreateConnection();
         var sql = "INSERT INTO Queues (id, queue_name, status, data, reference, created_date, created_by) VALUES (@Id, @QueueName, @Status, @Data, @Reference, @CreatedAt, @CreatedBy)";
         var id = Guid.NewGuid();
 
-        var rowsAffected = await connection.ExecuteAsync(
+        var rowsAffected = await _sqlExecutor.ExecuteAsync(
             sql,
             new
             {

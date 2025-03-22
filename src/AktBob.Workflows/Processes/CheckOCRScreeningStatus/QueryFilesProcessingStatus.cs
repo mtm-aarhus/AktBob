@@ -8,7 +8,6 @@ namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
 internal record QueryFilesProcessingStatusJob(Guid FilArkivCaseId);
 
-[Queue("check-ocr-screening-status")]
 internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob> logger, IServiceScopeFactory serviceProviderFactory, IConfiguration configuration, ITimeProvider timeProvider) : IJobHandler<QueryFilesProcessingStatusJob>
 {
     private readonly ILogger<QueryFilesProcessingStatusJob> _logger = logger;
