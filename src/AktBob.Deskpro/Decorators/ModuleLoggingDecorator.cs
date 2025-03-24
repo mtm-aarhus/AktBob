@@ -5,7 +5,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
     private readonly IDeskproModule _inner = inner;
     private readonly ILogger<DeskproModule> _logger = logger;
 
-    public async Task<Result<IEnumerable<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting Deskpro custom field specifications ...");
 

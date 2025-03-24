@@ -21,11 +21,11 @@ internal class ModuleCachingDecorator : IDeskproModule
     public async Task<Result<IEnumerable<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken) => await _inner.GetTicketsByFieldSearch(fields, searchValue, cancellationToken);
     public void InvokeWebhook(string webhookId, string payload) => _inner.InvokeWebhook(webhookId, payload);
 
-    public async Task<Result<IEnumerable<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken)
     {
         var cacheKey = "Deskpro_CustomFieldSpecifications";
     
-        if (_cache.TryGetValue(cacheKey, out IEnumerable<CustomFieldSpecificationDto>? cachedSpecifications))
+        if (_cache.TryGetValue(cacheKey, out IReadOnlyCollection<CustomFieldSpecificationDto>? cachedSpecifications))
         {
             if (cachedSpecifications != null && cachedSpecifications.Any())
             {

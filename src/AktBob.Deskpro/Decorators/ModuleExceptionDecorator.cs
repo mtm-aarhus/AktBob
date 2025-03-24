@@ -5,7 +5,7 @@ internal class ModuleExceptionDecorator(IDeskproModule inner, ILogger<DeskproMod
     private readonly IDeskproModule _inner = inner;
     private readonly ILogger<DeskproModule> _logger = logger;
 
-    public async Task<Result<IEnumerable<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken)
     {
         try
         {

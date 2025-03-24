@@ -21,7 +21,7 @@ internal class DeskproModule(
         jobDispatcher.Dispatch(new InvokeWebhookJob(webhookId, base64Payload));
     }
     
-    public async Task<Result<IEnumerable<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken) => await getCustomFieldSpecificationsHandler.Handle(cancellationToken);
+    public async Task<Result<IReadOnlyCollection<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken) => await getCustomFieldSpecificationsHandler.Handle(cancellationToken);
 
     public async Task<Result<IEnumerable<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken) => await getMessageAttachmentsHandler.Handle(ticketId, messageId, cancellationToken);
 
