@@ -1,16 +1,7 @@
-﻿using AktBob.Shared;
-using AktBob.Shared.DataAccess;
-using Dapper;
+﻿using AktBob.Shared.DataAccess;
 using FluentAssertions;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AktBob.OpenOrchestrator.Tests.Unit;
 public class CreateQueueItemHandlerTests
@@ -52,16 +43,25 @@ public class CreateQueueItemHandlerTests
                 && arg.GetType().GetProperty("Data")!.GetValue(arg)!.Equals(payload)));
     }
 
+    [Fact]
     public async Task Handle_ShouldReturnError_WhenRowIsNotInserted()
     {
         // Arrange
+        var queueName = "queue name";
+        var payload = "payload";
+        var reference = "reference";
 
+        _sqlDataAccess
+            .Execute(
+                Arg.Any<string>(),
+                Arg.Any<object?>())
+            .Returns(0);
 
         // Act
+        var result = await _sut.Handle(queueName, payload, reference, CancellationToken.None);
 
 
         // Assert
+        result.IsSuccess.Should().BeFalse();
     }
-
-
 }
