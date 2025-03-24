@@ -1,5 +1,4 @@
-﻿using AktBob.Database.DataAccess;
-using AktBob.Database.Decorators;
+﻿using AktBob.Shared.DataAccess;
 using Dapper;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -11,13 +10,13 @@ namespace AktBob.Database.Tests.Unit.Decorators;
 
 public class SqlDataAccessExceptionDecoratorTests
 {
-    private readonly SqlDataAccessExceptionDecorator _sut;
-    private readonly ISqlDataAccess _inner = Substitute.For<ISqlDataAccess>();
-    private readonly FakeLogger<SqlDataAccess> _logger = new FakeLogger<SqlDataAccess>();
+    private readonly SqlDataAccessExceptionDecorator<IDatabaseSqlConnectionFactory> _sut;
+    private readonly ISqlDataAccess<IDatabaseSqlConnectionFactory> _inner = Substitute.For<ISqlDataAccess<IDatabaseSqlConnectionFactory>>();
+    private readonly FakeLogger<SqlDataAccess<IDatabaseSqlConnectionFactory>> _logger = new FakeLogger<SqlDataAccess<IDatabaseSqlConnectionFactory>>();
 
     public SqlDataAccessExceptionDecoratorTests()
     {
-        _sut = new SqlDataAccessExceptionDecorator(_inner, _logger);
+        _sut = new SqlDataAccessExceptionDecorator<IDatabaseSqlConnectionFactory>(_inner, _logger);
     }
 
     [Fact]

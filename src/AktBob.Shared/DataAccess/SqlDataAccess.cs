@@ -1,11 +1,16 @@
-﻿using System.Data;
+﻿using Dapper;
+using System.Data;
 
-namespace AktBob.Database.DataAccess;
+namespace AktBob.Shared.DataAccess;
 
-internal class SqlDataAccess(IDatabaseSqlConnectionFactory sqlConnectionFactory) : ISqlDataAccess
+public class SqlDataAccess<TConnection> : ISqlDataAccess<TConnection> where TConnection : ISqlConnectionFactory
 {
-    private readonly IDatabaseSqlConnectionFactory _sqlConnectionFactory = sqlConnectionFactory;
+    private readonly ISqlConnectionFactory _sqlConnectionFactory;
 
+    public SqlDataAccess(ISqlConnectionFactory sqlConnectionFactory)
+    {
+        _sqlConnectionFactory = sqlConnectionFactory;
+    }
     public async Task<T?> QuerySingle<T>(string sql, object? parameters)
     {
         using var connection = _sqlConnectionFactory.CreateConnection();

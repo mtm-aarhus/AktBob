@@ -1,16 +1,16 @@
 ﻿using AktBob.Database.Contracts;
-using AktBob.Database.DataAccess;
 using AktBob.Database.Entities;
 using AktBob.Database.Validators;
+using AktBob.Shared.DataAccess;
 using FluentValidation;
 using System.Data;
 
 namespace AktBob.Database.Repositories;
 internal class TicketRepository : ITicketRepository
 {
-    private readonly ISqlDataAccess _sqlDataAccess;
+    private readonly ISqlDataAccess<IDatabaseSqlConnectionFactory> _sqlDataAccess;
 
-    public TicketRepository(ISqlDataAccess sqlDataAccess)
+    public TicketRepository(ISqlDataAccess<IDatabaseSqlConnectionFactory> sqlDataAccess)
     {
         _sqlDataAccess = sqlDataAccess;
     }

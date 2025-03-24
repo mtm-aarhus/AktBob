@@ -1,13 +1,19 @@
-﻿using AktBob.Database.DataAccess;
+﻿using AktBob.Shared.DataAccess;
+using Dapper;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Database.Decorators;
 
-internal class SqlDataAccessLoggingDecorator(ISqlDataAccess inner, ILogger<SqlDataAccess> logger) : ISqlDataAccess
+public class SqlDataAccessLoggingDecorator<TConnection> : ISqlDataAccess<TConnection> where TConnection : ISqlConnectionFactory
 {
-    private readonly ISqlDataAccess _inner = inner;
-    private readonly ILogger<SqlDataAccess> _logger = logger;
+    private readonly ISqlDataAccess<TConnection> _inner;
+    private readonly ILogger<SqlDataAccess<TConnection>> _logger;
 
+    public SqlDataAccessLoggingDecorator(ISqlDataAccess<TConnection> inner, ILogger<SqlDataAccess<TConnection>> logger)
+    {
+        _inner = inner;
+        _logger = logger;
+    }
     public async Task<int> Execute<T>(string sql, T? parameters)
     {
         _logger.LogDebug("Executing {sql} with {parameters}", sql, parameters);

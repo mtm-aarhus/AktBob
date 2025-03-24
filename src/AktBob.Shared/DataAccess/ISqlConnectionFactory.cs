@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace AktBob.Shared;
+namespace AktBob.Shared.DataAccess;
 
 public interface ISqlConnectionFactory
 {

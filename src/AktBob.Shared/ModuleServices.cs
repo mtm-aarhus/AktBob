@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AktBob.Shared.DataAccess;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AktBob.Shared;
 public static class ModuleServices
@@ -7,6 +9,7 @@ public static class ModuleServices
     {
         services.AddSingleton<ITimeProvider, TimeProvider>();
         services.AddMemoryCache();
+
         return services;
     }
 }

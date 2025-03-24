@@ -1,6 +1,6 @@
-﻿using AktBob.Database.DataAccess;
-using AktBob.Database.Entities;
+﻿using AktBob.Database.Entities;
 using AktBob.Database.Repositories;
+using AktBob.Shared.DataAccess;
 using Dapper;
 using FluentAssertions;
 using FluentValidation;
@@ -14,7 +14,7 @@ namespace AktBob.Database.Tests.Unit.Repositories;
 public class CaseRepositoryTests
 {
     private readonly CaseRepository _sut;
-    private readonly ISqlDataAccess _dataAccess = Substitute.For<ISqlDataAccess>();
+    private readonly ISqlDataAccess<IDatabaseSqlConnectionFactory> _dataAccess = Substitute.For<ISqlDataAccess<IDatabaseSqlConnectionFactory>>();
 
     public CaseRepositoryTests()
     {

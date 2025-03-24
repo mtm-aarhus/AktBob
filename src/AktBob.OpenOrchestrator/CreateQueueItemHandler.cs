@@ -1,12 +1,12 @@
-﻿using AktBob.Shared;
+﻿using AktBob.Shared.DataAccess;
 using Ardalis.GuardClauses;
 using Ardalis.Result;
 
 namespace AktBob.OpenOrchestrator;
 
-internal class CreateQueueItemHandler(ISqlExecutor<IOpenOrchestratorSqlConnection> sqlExecutor) : ICreateQueueItemHandler
+internal class CreateQueueItemHandler(ISqlDataAccess<IOpenOrchestratorSqlConnection> sqlExecutor) : ICreateQueueItemHandler
 {
-    private readonly ISqlExecutor<IOpenOrchestratorSqlConnection> _sqlExecutor = sqlExecutor;
+    private readonly ISqlDataAccess<IOpenOrchestratorSqlConnection> _sqlDataAccess = sqlExecutor;
 
     public async Task<Result<Guid>> Handle(string queueName, string payload, string reference, CancellationToken cancellationToken)
     {
@@ -15,7 +15,7 @@ internal class CreateQueueItemHandler(ISqlExecutor<IOpenOrchestratorSqlConnectio
         var sql = "INSERT INTO Queues (id, queue_name, status, data, reference, created_date, created_by) VALUES (@Id, @QueueName, @Status, @Data, @Reference, @CreatedAt, @CreatedBy)";
         var id = Guid.NewGuid();
 
-        var rowsAffected = await _sqlExecutor.ExecuteAsync(
+        var rowsAffected = await _sqlDataAccess.Execute(
             sql,
             new
             {
@@ -26,8 +26,7 @@ internal class CreateQueueItemHandler(ISqlExecutor<IOpenOrchestratorSqlConnectio
                 Reference = reference.Trim().Length > 100 ? reference.Trim().Substring(0, 100) : reference.Trim(),
                 CreatedAt = DateTime.Now,
                 CreatedBy = $"{Environment.MachineName} AktBob.Worker"
-            },
-            commandType: System.Data.CommandType.Text);
+            });
 
         if (rowsAffected == 0)
         {

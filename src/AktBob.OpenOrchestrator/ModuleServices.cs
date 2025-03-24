@@ -1,6 +1,8 @@
-﻿using AktBob.OpenOrchestrator.Contracts;
+﻿using AktBob.Database.Decorators;
+using AktBob.OpenOrchestrator.Contracts;
 using AktBob.OpenOrchestrator.Decorators;
 using AktBob.Shared;
+using AktBob.Shared.DataAccess;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +16,22 @@ public static class ModuleServices
         Guard.Against.NullOrEmpty(configuration.GetConnectionString("OpenOrchestratorDb"));
 
         services.AddScoped<IOpenOrchestratorSqlConnection, OpenOrchestratorSqlConnection>();
-        services.AddScoped<ISqlExecutor<IOpenOrchestratorSqlConnection>, DapperSqlExecutor<IOpenOrchestratorSqlConnection>>();
+        services.AddScoped<ISqlDataAccess<IOpenOrchestratorSqlConnection>>(provider =>
+        {
+            var inner = new SqlDataAccess<IOpenOrchestratorSqlConnection>(provider.GetRequiredService<IOpenOrchestratorSqlConnection>());
+
+            var withLogging = new SqlDataAccessLoggingDecorator<IOpenOrchestratorSqlConnection>(
+                inner,
+                provider.GetRequiredService<ILogger<SqlDataAccess<IOpenOrchestratorSqlConnection>>>());
+
+            var withException = new SqlDataAccessExceptionDecorator<IOpenOrchestratorSqlConnection>(
+                withLogging,
+                provider.GetRequiredService<ILogger<SqlDataAccess<IOpenOrchestratorSqlConnection>>>());
+
+            return withException;
+        });
+
+
         services.AddScoped<ICreateQueueItemHandler, CreateQueueItemHandler>();
         services.AddScoped<IJobHandler<CreateQueueItemJob>, CreateQueueItem>();
 

@@ -1,4 +1,5 @@
 ﻿using AktBob.Shared;
+using AktBob.Shared.DataAccess;
 using Dapper;
 using FluentAssertions;
 using Microsoft.Data.SqlClient;
@@ -16,13 +17,13 @@ public class CreateQueueItemHandlerTests
 {
     private readonly CreateQueueItemHandler _sut;
     private readonly IOpenOrchestratorSqlConnection _sqlConnection = Substitute.For<IOpenOrchestratorSqlConnection>();
-    private readonly ISqlExecutor<IOpenOrchestratorSqlConnection> _sqlExecutor = Substitute.For<ISqlExecutor<IOpenOrchestratorSqlConnection>>();
+    private readonly ISqlDataAccess<IOpenOrchestratorSqlConnection> _sqlDataAccess = Substitute.For<ISqlDataAccess<IOpenOrchestratorSqlConnection>>();
     private readonly IDbConnection _connection = Substitute.For<IDbConnection>();
 
     public CreateQueueItemHandlerTests()
     {
         _sqlConnection.CreateConnection().Returns(_connection);
-        _sut = new CreateQueueItemHandler(_sqlExecutor);
+        _sut = new CreateQueueItemHandler(_sqlDataAccess);
     }
 
     [Fact]
@@ -33,13 +34,10 @@ public class CreateQueueItemHandlerTests
         var payload = "payload";
         var reference = "reference";
 
-        _sqlExecutor
-            .ExecuteAsync(
+        _sqlDataAccess
+            .Execute(
                 Arg.Any<string>(),
-                Arg.Any<object?>(),
-                Arg.Any<IDbTransaction?>(),
-                Arg.Any<int?>(),
-                Arg.Any<CommandType?>())
+                Arg.Any<object?>())
             .Returns(1);
 
         // Act
@@ -47,12 +45,11 @@ public class CreateQueueItemHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        await _sqlExecutor.Received(1).ExecuteAsync(
+        await _sqlDataAccess.Received(1).Execute(
             Arg.Is("INSERT INTO Queues (id, queue_name, status, data, reference, created_date, created_by) VALUES (@Id, @QueueName, @Status, @Data, @Reference, @CreatedAt, @CreatedBy)"),
             Arg.Is<object>(arg =>
                 arg.GetType().GetProperty("QueueName")!.GetValue(arg)!.Equals(queueName)
-                && arg.GetType().GetProperty("Data")!.GetValue(arg)!.Equals(payload)),
-            commandType: Arg.Any<CommandType>());
+                && arg.GetType().GetProperty("Data")!.GetValue(arg)!.Equals(payload)));
     }
 
     public async Task Handle_ShouldReturnError_WhenRowIsNotInserted()

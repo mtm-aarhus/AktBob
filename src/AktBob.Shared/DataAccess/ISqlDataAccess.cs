@@ -1,5 +1,7 @@
-﻿namespace AktBob.Database.DataAccess;
-public interface ISqlDataAccess
+﻿using Dapper;
+
+namespace AktBob.Shared.DataAccess;
+public interface ISqlDataAccess<TConnection> where TConnection : ISqlConnectionFactory
 {
     /// <summary>
     /// Query database returning a single entity
