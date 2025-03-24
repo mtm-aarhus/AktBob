@@ -80,6 +80,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Database.Tests.Unit"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.OpenOrchestrator.Tests.Unit", "AktBob.OpenOrchestrator.Tests.Unit\AktBob.OpenOrchestrator.Tests.Unit.csproj", "{30A91E7A-2F9E-4F9C-858D-2DE16ED0FC7F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Shared.Tests.Unit", "AktBob.Shared.Tests.Unit\AktBob.Shared.Tests.Unit.csproj", "{C9767A97-334D-4E15-A6EC-914C97B1EA61}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -184,6 +186,10 @@ Global
 		{30A91E7A-2F9E-4F9C-858D-2DE16ED0FC7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30A91E7A-2F9E-4F9C-858D-2DE16ED0FC7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30A91E7A-2F9E-4F9C-858D-2DE16ED0FC7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9767A97-334D-4E15-A6EC-914C97B1EA61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9767A97-334D-4E15-A6EC-914C97B1EA61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9767A97-334D-4E15-A6EC-914C97B1EA61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9767A97-334D-4E15-A6EC-914C97B1EA61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -222,6 +228,7 @@ Global
 		{6EEDBA7E-4B3A-7331-C86E-7DD466C268AB} = {F4C64018-0A98-4F30-8B25-201D834C5C3A}
 		{DCCBB461-8629-42B5-9ACA-21EBE973DA6A} = {3CCD0659-ACDF-4B5F-9C30-67D990BAE5A0}
 		{30A91E7A-2F9E-4F9C-858D-2DE16ED0FC7F} = {3CCD0659-ACDF-4B5F-9C30-67D990BAE5A0}
+		{C9767A97-334D-4E15-A6EC-914C97B1EA61} = {3CCD0659-ACDF-4B5F-9C30-67D990BAE5A0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}
