@@ -31,6 +31,7 @@ public class DownloadMessageAttachmentHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeSameAs(stream);
+        await _deskproClient.Received(1).DownloadAttachment(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -45,6 +46,7 @@ public class DownloadMessageAttachmentHandlerTests
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeEmpty();
+        await _deskproClient.Received(1).DownloadAttachment(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -60,6 +62,7 @@ public class DownloadMessageAttachmentHandlerTests
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeEmpty();
+        await _deskproClient.Received(1).DownloadAttachment(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -73,5 +76,6 @@ public class DownloadMessageAttachmentHandlerTests
 
         // Assert
         await act.Should().ThrowAsync<Exception>();
+        await _deskproClient.Received(1).DownloadAttachment(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 }

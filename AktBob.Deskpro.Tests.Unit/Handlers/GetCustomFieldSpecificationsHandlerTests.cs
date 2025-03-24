@@ -31,6 +31,7 @@ public class GetCustomFieldSpecificationsHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeEquivalentTo(expected);
+        await _deskproClient.Received(1).GetCustomFieldSpecifications(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -46,6 +47,7 @@ public class GetCustomFieldSpecificationsHandlerTests
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().NotBeEmpty();
+        await _deskproClient.Received(1).GetCustomFieldSpecifications(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -59,5 +61,6 @@ public class GetCustomFieldSpecificationsHandlerTests
 
         // Assert
         await act.Should().ThrowAsync<Exception>();
+        await _deskproClient.Received(1).GetCustomFieldSpecifications(Arg.Any<CancellationToken>());
     }
 }

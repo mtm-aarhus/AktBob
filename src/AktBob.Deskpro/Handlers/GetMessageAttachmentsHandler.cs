@@ -19,7 +19,7 @@ public class GetMessageAttachmentsHandler(IDeskproClient deskpro) : IGetMessageA
             do
             {
                 var pageAttachments = await _deskpro.GetMessageAttachments(ticketId, messageId, pageNumber, attachmentsPerPage, cancellationToken);
-                attachments.AddRange(pageAttachments.Attachments.Select(x => new AttachmentDto
+                var dtos = pageAttachments.Attachments.Select(x => new AttachmentDto
                 {
                     IsAgentNote = x.IsAgentNote,
                     BlobId = x.BlobId,
@@ -30,18 +30,15 @@ public class GetMessageAttachmentsHandler(IDeskproClient deskpro) : IGetMessageA
                     MessageId = x.MessageId,
                     PersonId = x.PersonId,
                     TicketId = x.TicketId
-                }));
+                });
+
+                attachments.AddRange(dtos);
 
                 totalPageCount = pageAttachments.Pagination.TotalPages;
                 pageNumber++;
             }
             while (pageNumber <= totalPageCount);
-
-            if (attachments is null)
-            {
-                return Result.Error($"Error getting message attachments list from Deskpro (ticket {ticketId} message {messageId})");
-            }
-
+            
             return attachments;
         }
         catch (HttpRequestException ex)
