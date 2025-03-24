@@ -8,7 +8,7 @@ internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTick
 {
     private readonly IDeskproClient _deskpro = deskpro;
 
-    public async Task<Result<IEnumerable<TicketDto>>> Handle(int[] fields, string searchValue, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<TicketDto>>> Handle(int[] fields, string searchValue, CancellationToken cancellationToken)
     {
         try
         {
@@ -44,9 +44,9 @@ internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTick
                     Id = f.Id,
                     Values = f.Values
                 })
-            });
+            }).ToList();
 
-            return Result.Success(dto);
+            return Result.Success<IReadOnlyCollection<TicketDto>>(dto);
         }
         catch (HttpRequestException ex)
         {

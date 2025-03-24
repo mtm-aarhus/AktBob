@@ -57,7 +57,7 @@ internal class ModuleExceptionDecorator(IDeskproModule inner, ILogger<DeskproMod
         }
     }
 
-    public async Task<Result<IEnumerable<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken)
     {
         try
         {
@@ -109,7 +109,7 @@ internal class ModuleExceptionDecorator(IDeskproModule inner, ILogger<DeskproMod
         }
     }
 
-    public async Task<Result<IEnumerable<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken)
     {
         try
         {

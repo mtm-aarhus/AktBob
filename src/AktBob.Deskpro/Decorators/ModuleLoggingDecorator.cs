@@ -57,7 +57,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         return result;
     }
 
-    public async Task<Result<IEnumerable<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting Deskpro ticket {id} messages", ticketId);
 
@@ -109,7 +109,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         return result;
     }
 
-    public async Task<Result<IEnumerable<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting Deskpro tickets by searching fields {fields} with search value = {searchValue}", fields, searchValue);
 

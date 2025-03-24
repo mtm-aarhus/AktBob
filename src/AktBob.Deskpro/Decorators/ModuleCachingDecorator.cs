@@ -16,9 +16,9 @@ internal class ModuleCachingDecorator : IDeskproModule
     }
 
     public async Task<Result<Stream>> DownloadMessageAttachment(string downloadUrl, CancellationToken cancellationToken) => await _inner.DownloadMessageAttachment(downloadUrl, cancellationToken);
-    public async Task<Result<IEnumerable<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken) => await _inner.GetMessages(ticketId, cancellationToken);
+    public async Task<Result<IReadOnlyCollection<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken) => await _inner.GetMessages(ticketId, cancellationToken);
     public async Task<Result<TicketDto>> GetTicket(int ticketId, CancellationToken cancellationToken) => await _inner.GetTicket(ticketId, cancellationToken);
-    public async Task<Result<IEnumerable<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken) => await _inner.GetTicketsByFieldSearch(fields, searchValue, cancellationToken);
+    public async Task<Result<IReadOnlyCollection<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken) => await _inner.GetTicketsByFieldSearch(fields, searchValue, cancellationToken);
     public void InvokeWebhook(string webhookId, string payload) => _inner.InvokeWebhook(webhookId, payload);
 
     public async Task<Result<IReadOnlyCollection<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken)

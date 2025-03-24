@@ -27,7 +27,7 @@ internal class DeskproModule(
 
     public async Task<Result<MessageDto>> GetMessage(int ticketId, int messageId, CancellationToken cancellationToken) => await getMessageHandler.Handle(ticketId, messageId, cancellationToken);
 
-    public async Task<Result<IEnumerable<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken) => await getMessagesHandler.Handle(ticketId, cancellationToken);
+    public async Task<Result<IReadOnlyCollection<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken) => await getMessagesHandler.Handle(ticketId, cancellationToken);
 
     public async Task<Result<Stream>> DownloadMessageAttachment(string downloadUrl, CancellationToken cancellationToken) => await getMessageAttachmentHandler.Handle(downloadUrl, cancellationToken);
 
@@ -36,5 +36,5 @@ internal class DeskproModule(
 
     public async Task<Result<TicketDto>> GetTicket(int ticketId, CancellationToken cancellationToken) => await getTicketHandler.Handle(ticketId, cancellationToken);
 
-    public async Task<Result<IEnumerable<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken) => await getTicketsByFieldSearchHandler.Handle(fields, searchValue, cancellationToken);
+    public async Task<Result<IReadOnlyCollection<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken) => await getTicketsByFieldSearchHandler.Handle(fields, searchValue, cancellationToken);
 }

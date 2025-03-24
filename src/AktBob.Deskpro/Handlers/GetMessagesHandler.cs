@@ -6,7 +6,7 @@ internal class GetMessagesHandler(IDeskproClient deskproClient, IGetPersonHandle
     private readonly IDeskproClient _deskproClient = deskproClient;
     private readonly IGetPersonHandler _getPersonHandler = getPersonHandler;
 
-    public async Task<Result<IEnumerable<MessageDto>>> Handle(int ticketId, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<MessageDto>>> Handle(int ticketId, CancellationToken cancellationToken)
     {
         try
         {
