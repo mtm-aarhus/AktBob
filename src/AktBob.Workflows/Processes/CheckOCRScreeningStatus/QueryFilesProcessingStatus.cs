@@ -2,7 +2,6 @@
 using AktBob.Shared.Extensions;
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.FileProcess;
-using Hangfire;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
@@ -20,6 +19,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
         var scope = _serviceProviderFactory.CreateScope();
         var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
         var filArkivCoreClient = scope.ServiceProvider.GetRequiredServiceOrThrow<FilArkivCoreClient>();
+        var pollingInterval = TimeSpan.FromSeconds(_configuration.GetValue<int?>("CheckOCRScreeningStatus:PollingIntervalMinutes") ?? 30);
         var cachedData = CachedData.Instance;
 
         if (!cachedData.Cases.TryGetValue(job.FilArkivCaseId, out var @case))
@@ -41,11 +41,9 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
 
                 while (true)
                 {
-                    var delay = TimeSpan.FromSeconds(30000 + random.Next(-2000, 2000));
-                    await _timeProvider.Delay(delay);
+                    await _timeProvider.Delay(pollingInterval);
 
                     var response = await filArkivCoreClient.GetFileProcessStatusFileAsync(parameters);
-
                     if (!response.IsInQueue)
                     {
                         if (!response.FileProcessStatusResponses.Any(x =>
