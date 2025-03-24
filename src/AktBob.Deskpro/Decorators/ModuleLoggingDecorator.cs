@@ -31,14 +31,14 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         return result;
     }
 
-    public async Task<Result<Stream>> GetMessageAttachment(string downloadUrl, CancellationToken cancellationToken)
+    public async Task<Result<Stream>> DownloadMessageAttachment(string downloadUrl, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Downloading Deskpro message attachment. Url = {url}", downloadUrl);
 
-        var result = await _inner.GetMessageAttachment(downloadUrl, cancellationToken);
+        var result = await _inner.DownloadMessageAttachment(downloadUrl, cancellationToken);
         if (!result.IsSuccess)
         {
-            _logger.LogDebug("{name}: {errors}", nameof(GetMessageAttachment), result.Errors);
+            _logger.LogDebug("{name}: {errors}", nameof(DownloadMessageAttachment), result.Errors);
         }
 
         return result;

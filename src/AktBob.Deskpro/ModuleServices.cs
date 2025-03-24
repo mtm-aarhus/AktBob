@@ -27,7 +27,7 @@ public static class ModuleServices
 
         // Add module handlers
         services.AddScoped<IGetCustomFieldSpecificationsHandler, GetCustomFieldSpecificationsHandler>();
-        services.AddScoped<IGetMessageAttachmentHandler, GetMessageAttachmentHandler>();
+        services.AddScoped<IDownloadMessageAttachmentHandler, DownloadMessageAttachmentHandler>();
         services.AddScoped<IGetMessageAttachmentsHandler, GetMessageAttachmentsHandler>();
         services.AddScoped<IGetMessageHandler, GetMessageHandler>();
         services.AddScoped<IGetMessagesHandler, GetMessagesHandler>();
@@ -45,7 +45,7 @@ public static class ModuleServices
             var inner = new DeskproModule(
                 provider.GetRequiredService<IJobDispatcher>(),
                 provider.GetRequiredService<IGetCustomFieldSpecificationsHandler>(),
-                provider.GetRequiredService<IGetMessageAttachmentHandler>(),
+                provider.GetRequiredService<IDownloadMessageAttachmentHandler>(),
                 provider.GetRequiredService<IGetMessageAttachmentsHandler>(),
                 provider.GetRequiredService<IGetMessageHandler>(),
                 provider.GetRequiredService<IGetMessagesHandler>(),

@@ -31,15 +31,15 @@ internal class ModuleExceptionDecorator(IDeskproModule inner, ILogger<DeskproMod
         }
     }
 
-    public async Task<Result<Stream>> GetMessageAttachment(string downloadUrl, CancellationToken cancellationToken)
+    public async Task<Result<Stream>> DownloadMessageAttachment(string downloadUrl, CancellationToken cancellationToken)
     {
         try
         {
-            return await _inner.GetMessageAttachment(downloadUrl, cancellationToken);
+            return await _inner.DownloadMessageAttachment(downloadUrl, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in {name}", nameof(GetMessageAttachment));
+            _logger.LogError(ex, "Error in {name}", nameof(DownloadMessageAttachment));
             throw;
         }
     }

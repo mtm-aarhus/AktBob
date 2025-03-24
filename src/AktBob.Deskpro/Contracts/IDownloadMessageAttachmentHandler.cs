@@ -1,5 +1,5 @@
 ﻿namespace AktBob.Deskpro.Contracts;
-internal interface IGetMessageAttachmentHandler
+internal interface IDownloadMessageAttachmentHandler
 {
     Task<Result<Stream>> Handle(string downloadUrl, CancellationToken cancellationToken);
 }

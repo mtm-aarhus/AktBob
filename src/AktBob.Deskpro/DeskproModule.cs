@@ -6,7 +6,7 @@ namespace AktBob.Deskpro;
 internal class DeskproModule(
     IJobDispatcher jobDispatcher,
     IGetCustomFieldSpecificationsHandler getCustomFieldSpecificationsHandler,
-    IGetMessageAttachmentHandler getMessageAttachmentHandler,
+    IDownloadMessageAttachmentHandler getMessageAttachmentHandler,
     IGetMessageAttachmentsHandler getMessageAttachmentsHandler,
     IGetMessageHandler getMessageHandler,
     IGetMessagesHandler getMessagesHandler,
@@ -29,7 +29,7 @@ internal class DeskproModule(
 
     public async Task<Result<IEnumerable<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken) => await getMessagesHandler.Handle(ticketId, cancellationToken);
 
-    public async Task<Result<Stream>> GetMessageAttachment(string downloadUrl, CancellationToken cancellationToken) => await getMessageAttachmentHandler.Handle(downloadUrl, cancellationToken);
+    public async Task<Result<Stream>> DownloadMessageAttachment(string downloadUrl, CancellationToken cancellationToken) => await getMessageAttachmentHandler.Handle(downloadUrl, cancellationToken);
 
     public async Task<Result<PersonDto>> GetPerson(int personId, CancellationToken cancellationToken) => await getPersonHandler.Handle(personId, cancellationToken);
     public async Task<Result<PersonDto>> GetPerson(string email, CancellationToken cancellationToken) => await getPersonHandler.Handle(email, cancellationToken);
