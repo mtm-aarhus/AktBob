@@ -44,7 +44,7 @@ internal class ModuleExceptionDecorator(IDeskproModule inner, ILogger<DeskproMod
         }
     }
 
-    public async Task<Result<IEnumerable<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken)
     {
         try
         {

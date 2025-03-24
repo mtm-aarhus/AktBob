@@ -23,7 +23,7 @@ internal class DeskproModule(
     
     public async Task<Result<IReadOnlyCollection<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken) => await getCustomFieldSpecificationsHandler.Handle(cancellationToken);
 
-    public async Task<Result<IEnumerable<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken) => await getMessageAttachmentsHandler.Handle(ticketId, messageId, cancellationToken);
+    public async Task<Result<IReadOnlyCollection<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken) => await getMessageAttachmentsHandler.Handle(ticketId, messageId, cancellationToken);
 
     public async Task<Result<MessageDto>> GetMessage(int ticketId, int messageId, CancellationToken cancellationToken) => await getMessageHandler.Handle(ticketId, messageId, cancellationToken);
 

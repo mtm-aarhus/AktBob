@@ -44,7 +44,7 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
         return result;
     }
 
-    public async Task<Result<IEnumerable<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting Deskpro ticket {ticketId} message {messageId} attachments", ticketId, messageId);
 

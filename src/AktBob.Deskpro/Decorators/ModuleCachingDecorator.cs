@@ -67,11 +67,11 @@ internal class ModuleCachingDecorator : IDeskproModule
         return result;
     }
 
-    public async Task<Result<IEnumerable<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken)
     {
         var cacheKey = $"Deskpro_MessageAttachments_{ticketId}_{messageId}";
 
-        if (_cache.TryGetValue(cacheKey, out IEnumerable<AttachmentDto>? cachedAttachmentDtos))
+        if (_cache.TryGetValue(cacheKey, out IReadOnlyCollection<AttachmentDto>? cachedAttachmentDtos))
         {
             if (cachedAttachmentDtos != null)
             {

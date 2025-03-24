@@ -5,7 +5,7 @@ public class GetMessageAttachmentsHandler(IDeskproClient deskpro) : IGetMessageA
 {
     private readonly IDeskproClient _deskpro = deskpro;
 
-    public async Task<Result<IEnumerable<AttachmentDto>>> Handle(int ticketId, int messageId, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyCollection<AttachmentDto>>> Handle(int ticketId, int messageId, CancellationToken cancellationToken)
     {
         try
         {
