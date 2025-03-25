@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\AktBob.Database\AktBob.Database.csproj" />
-    <ProjectReference Include="..\test\AktBob.Tests.Unit.Shared\AktBob.Tests.Unit.Shared.csproj" />
+    <ProjectReference Include="..\..\src\AktBob.Shared\AktBob.Shared.csproj" />
+    <ProjectReference Include="..\AktBob.Tests.Shared\AktBob.Tests.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
