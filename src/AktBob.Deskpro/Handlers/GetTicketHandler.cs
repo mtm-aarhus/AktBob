@@ -20,6 +20,7 @@ internal class GetTicketHandler(IDeskproClient deskproClient) : IGetTicketHandle
             var dto = new TicketDto
             {
                 Id = ticket.Id,
+                CreatedAt = (DateTime)ticket.CreatedAt!,
                 Agent = Mappers.MapPerson(ticket.Agent),
                 Person = Mappers.MapPerson(ticket.Person),
                 AgentTeamId = ticket.AgentTeamId,

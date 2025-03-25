@@ -32,6 +32,7 @@ internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTick
             var dto = ticketsList.Select(t => new TicketDto
             {
                 Id = t.Id,
+                CreatedAt = (DateTime)t.CreatedAt!,
                 Agent = Mappers.MapPerson(t.Agent),
                 Person = Mappers.MapPerson(t.Person),
                 AgentTeamId = t.AgentTeamId,

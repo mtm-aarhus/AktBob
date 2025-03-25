@@ -2,6 +2,7 @@
 public class TicketDto
 {
     public int Id { get; set; }
+    public DateTime CreatedAt { get; set; }
     public string Ref { get; set; } = string.Empty;
     public string Auth { get; set; } = string.Empty;
     public int Department { get; set; }

@@ -66,6 +66,11 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             ? await deskpro.GetPerson(deskproTicketResult.Value.Agent.Id, cancellationToken)
             : Result<PersonDto>.Error();
 
+        // Get Deskpro person
+        var person = deskproTicketResult.Value.Person?.Id != null
+            ? await deskpro.GetPerson(deskproTicketResult.Value.Person.Id, cancellationToken)
+            : Result<PersonDto>.Error();
+
         // Create queue item
         var payload = new
         {
@@ -78,7 +83,10 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             Undermappe = getDatabaseCase.Result.First().SharepointFolderName,
             GeoSag = !caseNumber.IsNovaCase(),
             NovaSag = caseNumber.IsNovaCase(),
-            AktSagsURL = getDatabaseTicket.Result.CaseUrl
+            AktSagsURL = getDatabaseTicket.Result.CaseUrl,
+            IndsenderNavn = person.Value.FullName,
+            IndsenderMail = person.Value.Email,
+            AktindsigtsDato = deskproTicketResult.Value.CreatedAt
         };
 
         var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
