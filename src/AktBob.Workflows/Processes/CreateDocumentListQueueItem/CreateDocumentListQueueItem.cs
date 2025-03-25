@@ -5,7 +5,6 @@ using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
-using AktBob.UiPath.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Workflows.Processes.CreateDocumentListQueueItem;
@@ -29,20 +28,14 @@ internal class CreateDocumentListQueueItem(
 
         // Services
         var openOrchestrator = scope.ServiceProvider.GetRequiredServiceOrThrow<IOpenOrchestratorModule>();
-        var uiPath = scope.ServiceProvider.GetRequiredServiceOrThrow<IUiPathModule>();
         var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
         var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
         var timeProvider = scope.ServiceProvider.GetRequiredServiceOrThrow<ITimeProvider>();
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
 
-        // UiPath variables
-        var tenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
-        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:UiPathQueueName:{tenancyName}"));
-
         // OpenOrchestrator variables
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:OpenOrchestratorQueueName"));
-        var useOpenOrchestrator = _configuration.GetValue<bool>($"{_configurationObjectName}:UseOpenOrchestrator");
 
         // Podio variables
         var podioAppId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AppId"));
@@ -88,34 +81,17 @@ internal class CreateDocumentListQueueItem(
 
         var caseNumber = getPodioItem.Result.Value?.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value;
 
-        if (useOpenOrchestrator)
+        var payload = new
         {
-            var payload = new
-            {
-                SagsNummer = caseNumber,
-                agent.Value.Email,
-                Navn = agent.Value.FullName,
-                PodioID = job.PodioItemId.Id,
-                DeskproID = deskproTicket.Value?.Id,
-                Titel = deskproTicket.Value?.Subject
-            };
+            SagsNummer = caseNumber,
+            agent.Value.Email,
+            Navn = agent.Value.FullName,
+            PodioID = job.PodioItemId.Id,
+            DeskproID = deskproTicket.Value?.Id,
+            Titel = deskproTicket.Value?.Subject
+        };
 
-            var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
-            openOrchestrator.CreateQueueItem(command);
-        }
-        else
-        {
-            var payload = new
-            {
-                SagsNummer = caseNumber,
-                agent.Value.FullName,
-                Navn = agent.Value.FullName,
-                PodioID = job.PodioItemId.Id,
-                DeskproID = deskproTicket.Value?.Id,
-                Titel = deskproTicket.Value?.Subject
-            };
-
-            uiPath.CreateQueueItem(uiPathQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
-        }
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
+        openOrchestrator.CreateQueueItem(command);
     }
 }

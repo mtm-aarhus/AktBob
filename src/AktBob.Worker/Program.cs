@@ -1,5 +1,4 @@
 using Serilog;
-using AktBob.UiPath;
 using AktBob.Deskpro;
 using AktBob.Podio;
 using AktBob.OpenOrchestrator;
@@ -13,7 +12,6 @@ using AktBob.Email;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Serilog.Formatting.Display;
-using AktBob.Shared.Exceptions;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -82,7 +80,6 @@ var builder = Host.CreateDefaultBuilder(args)
         });
 
         // Modules
-        services.AddUiPathModule(hostContext.Configuration);
         services.AddDeskproModule(hostContext.Configuration);
         services.AddPodioModule(hostContext.Configuration);
         services.AddOpenOrchestratorModule(hostContext.Configuration);

@@ -4,7 +4,6 @@ using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
-using AktBob.UiPath.Contracts;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration, ILogger<CreateJournalizeEverythingQueueItem> logger) : IJobHandler<CreateJournalizeEverythingQueueItemJob>
@@ -24,16 +23,9 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
         var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
         var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
         var openOrchestrator = scope.ServiceProvider.GetRequiredServiceOrThrow<IOpenOrchestratorModule>();
-        var uiPath = scope.ServiceProvider.GetRequiredServiceOrThrow<IUiPathModule>();
-
-        // UiPath variables
-        var uiPathTenancyName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UiPath:TenancyName"));
-        var uiPathQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:UiPathQueueName:{uiPathTenancyName}"));
 
         // OpenOrchestrator variables
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:OpenOrchestratorQueueName"));
-        var useOpenOrchestrator = _configuration.GetValue<bool>($"{_configurationObjectName}:UseOpenOrchestrator");
-
 
         // Begin
         var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproId);
@@ -53,35 +45,16 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
             ? await deskpro.GetPerson(getDeskproTicket.Result.Value.Agent.Id, cancellationToken)
             : Result<PersonDto>.Error();
 
-        // Create queue item
-        if (useOpenOrchestrator)
+        var payload = new
         {
-            // Create OpenOrchestrator queue item
-            var payload = new
-            {
-                Aktindsigtssag = getDatabaseTicket.Result.CaseNumber,
-                Email = agent.Value.Email,
-                Navn = agent.Value.FullName,
-                DeskproID = job.DeskproId,
-                Overmappenavn = getDatabaseTicket.Result.SharepointFolderName
-            };
+            Aktindsigtssag = getDatabaseTicket.Result.CaseNumber,
+            Email = agent.Value.Email,
+            Navn = agent.Value.FullName,
+            DeskproID = job.DeskproId,
+            Overmappenavn = getDatabaseTicket.Result.SharepointFolderName
+        };
 
-            var createOpenOrchestratorQueueItemCommand = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload.ToJson());
-            openOrchestrator.CreateQueueItem(createOpenOrchestratorQueueItemCommand);
-        }
-        else
-        {
-            // Create UiPath queue item
-            var payload = new
-            {
-                Aktindsigtssag = getDatabaseTicket.Result.CaseNumber,
-                Email = agent.Value.Email,
-                Navn = agent.Value.FullName,
-                DeskproID = job.DeskproId,
-                Overmappenavn = getDatabaseTicket.Result.SharepointFolderName
-            };
-
-            uiPath.CreateQueueItem(uiPathQueueName, $"Deskpro ID {job.DeskproId.ToString()}", payload.ToJson());
-        }
+        var createOpenOrchestratorQueueItemCommand = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload.ToJson());
+        openOrchestrator.CreateQueueItem(createOpenOrchestratorQueueItemCommand);
     }
 }
