@@ -75,8 +75,17 @@ internal class CreateDocumentListQueueItem(
 
         var deskproTicket = await deskpro.GetTicket(getDatabaseTicket.Result.DeskproId, cancellationToken);
 
+        if (!deskproTicket.IsSuccess)
+        {
+            throw new BusinessException($"Error getting Deskpro ticket {getDatabaseTicket.Result.DeskproId}.");
+        }
+
         var agent = deskproTicket.Value?.Agent?.Id != null
             ? await deskpro.GetPerson(deskproTicket.Value.Agent.Id, cancellationToken) 
+            : Result<PersonDto>.Error();
+
+        var person = deskproTicket.Value?.Person?.Id != null
+            ? await deskpro.GetPerson(deskproTicket.Value.Person.Id, cancellationToken)
             : Result<PersonDto>.Error();
 
         var caseNumber = getPodioItem.Result.Value?.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value;
@@ -88,7 +97,10 @@ internal class CreateDocumentListQueueItem(
             Navn = agent.Value.FullName,
             PodioID = job.PodioItemId.Id,
             DeskproID = deskproTicket.Value?.Id,
-            Titel = deskproTicket.Value?.Subject
+            Titel = deskproTicket.Value?.Subject,
+            IndsenderNavn = person.Value.FullName,
+            IndsenderMail = person.Value.Email,
+            AktindsigtsDato = deskproTicket.Value?.CreatedAt
         };
 
         var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
