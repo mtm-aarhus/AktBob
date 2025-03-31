@@ -31,8 +31,8 @@ internal class DeskproModule(
 
     public async Task<Result<Stream>> DownloadMessageAttachment(string downloadUrl, CancellationToken cancellationToken) => await getMessageAttachmentHandler.Handle(downloadUrl, cancellationToken);
 
-    public async Task<Result<PersonDto>> GetPerson(int personId, CancellationToken cancellationToken) => await getPersonHandler.Handle(personId, cancellationToken);
-    public async Task<Result<PersonDto>> GetPerson(string email, CancellationToken cancellationToken) => await getPersonHandler.Handle(email, cancellationToken);
+    public async Task<Result<PersonDto>> GetPerson(int personId, CancellationToken cancellationToken) => await getPersonHandler.GetById(personId, cancellationToken);
+    public async Task<Result<PersonDto>> GetPerson(string email, CancellationToken cancellationToken) => await getPersonHandler.GetByEmail(email, cancellationToken);
 
     public async Task<Result<TicketDto>> GetTicket(int ticketId, CancellationToken cancellationToken) => await getTicketHandler.Handle(ticketId, cancellationToken);
 

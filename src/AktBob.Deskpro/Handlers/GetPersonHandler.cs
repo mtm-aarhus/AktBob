@@ -1,7 +1,5 @@
 ﻿using AAK.Deskpro;
-using AAK.Deskpro.Models;
 using Microsoft.Extensions.Configuration;
-using System.Net;
 
 namespace AktBob.Deskpro.Handlers;
 internal class GetPersonHandler(IDeskproClient deskpro, IConfiguration configuration, ILogger<GetPersonHandler> logger) : IGetPersonHandler
@@ -10,7 +8,7 @@ internal class GetPersonHandler(IDeskproClient deskpro, IConfiguration configura
     private readonly IConfiguration _configuration = configuration;
     private readonly ILogger<GetPersonHandler> _logger = logger;
 
-    public async Task<Result<PersonDto>> Handle(int personId, CancellationToken cancellationToken)
+    public async Task<Result<PersonDto>> GetById(int personId, CancellationToken cancellationToken)
     {
         try
         {
@@ -40,6 +38,7 @@ internal class GetPersonHandler(IDeskproClient deskpro, IConfiguration configura
             return Result.Success(dto);
         }
         catch (HttpRequestException ex)
+        when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             return Result.Error($"Error getting Deskpro person {personId}: {ex}");
         }
@@ -49,12 +48,13 @@ internal class GetPersonHandler(IDeskproClient deskpro, IConfiguration configura
         }
     }
 
-    public async Task<Result<PersonDto>> Handle(string email, CancellationToken cancellationToken)
+    public async Task<Result<PersonDto>> GetByEmail(string email, CancellationToken cancellationToken)
     {
         try
         {
-            var skip = _configuration.GetSection("Deskpro:GetPersonHandler:IgnoreEmails").Get<IEnumerable<string>>() ?? Enumerable.Empty<string>();
-            if (skip.Contains(email))
+            var section = _configuration.GetSection("Deskpro:GetPersonHandler:IgnoreEmails");
+            var ignoreList = section.Value?.Split(',') ?? Enumerable.Empty<string>();
+            if (ignoreList.Contains(email))
             {
                 _logger.LogDebug("Email address {email} found on ignore list, returning an empty PersonDto result", email);
                 return Result.Success();
@@ -90,6 +90,7 @@ internal class GetPersonHandler(IDeskproClient deskpro, IConfiguration configura
             return Result.Success(dto);
         }
         catch (HttpRequestException ex)
+        when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             return Result.Error($"Error getting Deskpro person {email}: {ex}");
         }

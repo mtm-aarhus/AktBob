@@ -77,7 +77,7 @@ public class GetMessagesHandlerTests
                 deskproMessages1,
                 deskproMessages2);
 
-        _getPersonHandler.Handle(1, Arg.Any<CancellationToken>()).Returns(person);
+        _getPersonHandler.GetById(1, Arg.Any<CancellationToken>()).Returns(person);
 
         // Act
         var result = await _sut.Handle(1, CancellationToken.None);
@@ -92,7 +92,7 @@ public class GetMessagesHandlerTests
                 Arg.Any<int>(),
                 Arg.Any<int>(),
                 Arg.Any<CancellationToken>());
-        await _getPersonHandler.Received(5).Handle(1, Arg.Any<CancellationToken>());
+        await _getPersonHandler.Received(5).GetById(1, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -139,7 +139,7 @@ public class GetMessagesHandlerTests
                 Arg.Any<int>(),
                 Arg.Any<int>(),
                 Arg.Any<CancellationToken>());
-        await _getPersonHandler.Received(0).Handle(1, Arg.Any<CancellationToken>());
+        await _getPersonHandler.Received(0).GetById(1, Arg.Any<CancellationToken>());
     }
 
     [Fact]

@@ -52,7 +52,7 @@ internal class GetMessagesHandler(IDeskproClient deskproClient, IGetPersonHandle
             // Add people to the messages 
             foreach (var message in messages)
             {
-                var getPersonResult = await _getPersonHandler.Handle(message.Person.Id, cancellationToken);
+                var getPersonResult = await _getPersonHandler.GetById(message.Person.Id, cancellationToken);
 
                 var person = getPersonResult.Value;
                 if (person != null)
