@@ -74,6 +74,7 @@ internal class GetMessagesHandler(IDeskproClient deskproClient, IGetPersonHandle
             return messages;
         }
         catch (HttpRequestException ex)
+        when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             return Result.Error($"Error getting messages from ticket {ticketId}: {ex}");
         }
