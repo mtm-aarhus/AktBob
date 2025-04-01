@@ -44,17 +44,17 @@ public class InvokeWebhookTests
     }
 
     [Fact]
-    public async Task Handle_ShouldThrowBusinessException_WhenPayloadIsNotValidUTF8()
+    public async Task Handle_ShouldRethrowException_WhenPayloadIsNotValidUTF8()
     {
         // Arrange
-        var invalidBase64 = "!!invalid!!";
+        var invalidBase64 = "cGF5bG9hZA=";
         var job = new InvokeWebhookJob("webhookId", invalidBase64);
 
         // Act
         var act = () => _sut.Handle(job, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<BusinessException>();
+        await act.Should().ThrowAsync<Exception>();
         await _invokeWebhookHandler.Received(0).Handle(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
 
     }

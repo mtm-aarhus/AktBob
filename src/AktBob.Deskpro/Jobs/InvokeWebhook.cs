@@ -16,18 +16,11 @@ internal class InvokeWebhook(IServiceScopeFactory serviceScopeFactory) : IJobHan
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var handler = scope.ServiceProvider.GetRequiredServiceOrThrow<IInvokeWebhookHandler>();
+        
+        var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+        var bytes = Convert.FromBase64String(job.Payload);
+        var decodedPayload = encoding.GetString(bytes);
 
-        try
-        {
-            var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
-            var bytes = Convert.FromBase64String(job.Payload);
-            var decodedPayload = encoding.GetString(bytes);
-
-            await handler.Handle(job.WebhookId, decodedPayload, cancellationToken);
-        }
-        catch (DecoderFallbackException ex)
-        {
-            throw new BusinessException($"Encoded payload not valid: {ex}");
-        }
+        await handler.Handle(job.WebhookId, decodedPayload, cancellationToken);
     }
 }
