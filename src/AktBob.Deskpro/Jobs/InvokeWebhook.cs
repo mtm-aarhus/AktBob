@@ -1,4 +1,5 @@
 ﻿using AktBob.Shared;
+using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text;
@@ -16,9 +17,17 @@ internal class InvokeWebhook(IServiceScopeFactory serviceScopeFactory) : IJobHan
         using var scope = _serviceScopeFactory.CreateScope();
         var handler = scope.ServiceProvider.GetRequiredServiceOrThrow<IInvokeWebhookHandler>();
 
-        var bytes = Convert.FromBase64String(job.Payload);
-        var decodedPayload = Encoding.UTF8.GetString(bytes);
+        try
+        {
+            var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+            var bytes = Convert.FromBase64String(job.Payload);
+            var decodedPayload = encoding.GetString(bytes);
 
-        await handler.Handle(job.WebhookId, decodedPayload, cancellationToken);
+            await handler.Handle(job.WebhookId, decodedPayload, cancellationToken);
+        }
+        catch (DecoderFallbackException ex)
+        {
+            throw new BusinessException($"Encoded payload not valid: {ex}");
+        }
     }
 }
