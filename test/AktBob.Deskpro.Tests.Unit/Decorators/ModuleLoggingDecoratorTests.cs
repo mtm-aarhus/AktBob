@@ -404,7 +404,7 @@ public class ModuleLoggingDecoratorTests
         var payload = "payload";
 
         // Act
-        _inner.InvokeWebhook(webhookId, payload);
+        _sut.InvokeWebhook(webhookId, payload);
 
         // Assert
         _inner.Received(1).InvokeWebhook(webhookId, payload);
