@@ -4,6 +4,7 @@ using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.Workflows.Extensions;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>
@@ -22,6 +23,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
 
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateAfgørelsesskrivelseQueueItemJobHandler:OpenOrchestratorQueueName"));
         var deskproAfdelingFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:AfdelingFieldId"));
+        var deskproModtagelsesdatoFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:ModtagelsesdatoFieldId"));
 
         // Get data from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(job.DeskproTicketId, cancellationToken);
@@ -29,11 +31,28 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
 
         var deskproTicket = deskproTicketResult.Value;
 
-        var getPerson = deskproTicket.Person != null
+        // Field: afdeling
+        var afdelingChoiceId = Convert.ToInt32(deskproTicket.Fields.FirstOrDefault(x => x.Id == deskproAfdelingFieldId)?.Values.FirstOrDefault());
+        string afdeling = string.Empty;
+        var afdelingChoices = deskproTicket.Fields.FirstOrDefault(x => x.Id == deskproAfdelingFieldId)?.Choices;
+        if (afdelingChoices != null && afdelingChoices.TryGetValue(afdelingChoiceId, out string? value))
+        {
+            afdeling = value;
+        }
+
+        // Field: modtagelsesdato
+        DateTime? modtagelsesdato = deskproTicket?.CreatedAt;
+        var modtagelsesdatoFieldValue = deskproTicket?.Fields.FirstOrDefault(x => x.Id == deskproModtagelsesdatoFieldId)?.Values.FirstOrDefault();
+        if (modtagelsesdatoFieldValue.TryParseDeskproDateTime(out DateTime? date))
+        {
+            modtagelsesdato = date;
+        }
+
+        var getPerson = deskproTicket?.Person != null
             ? deskpro.GetPerson(deskproTicket.Person.Id, cancellationToken)
             : Task.FromResult(Result<PersonDto>.Error());
 
-        var getAgent = deskproTicket.Agent != null
+        var getAgent = deskproTicket?.Agent != null
             ? deskpro.GetPerson(deskproTicket.Agent.Id, cancellationToken)
             : Task.FromResult(Result<PersonDto>.Error());
 
@@ -51,12 +70,15 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         {
             AnsøgerNavn = getPerson.Result.Value?.FullName,
             AnsøgerEmail = getPerson.Result.Value?.Email,
-            Afdeling = deskproTicket.Fields.FirstOrDefault(x => x.Id == deskproAfdelingFieldId)?.Values.FirstOrDefault(),
+            Afdeling = afdeling,
             Aktindsigtsovermappe = getDatabaseTicket.Result?.SharepointFolderName,
-            SagsbehandlerEmail = getAgent.Result.Value?.Email
+            SagsbehandlerEmail = getAgent.Result.Value?.Email,
+            DeskProID = job.DeskproTicketId,
+            AktindsigtsDato = modtagelsesdato
         };
 
         var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"DeskproID {job.DeskproTicketId}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
     }
+
 }
