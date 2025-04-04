@@ -31,8 +31,9 @@ internal class GetTicketHandler(IDeskproClient deskproClient) : IGetTicketHandle
                 Fields = ticket.Fields.Select(f => new FieldDto
                 {
                     Id = f.Id,
-                    Values = f.Values
-                })
+                    Values = f.Values,
+                    Choices = f.Choices
+                })                
             };
 
             return dto;

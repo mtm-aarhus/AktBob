@@ -7,12 +7,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AAK.Deskpro" Version="1.13.6" />
+		<InternalsVisibleTo Include="AktBob.Deskpro.Tests.Unit" />
+		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<InternalsVisibleTo Include="AktBob.Deskpro.Tests.Unit" />
-		<InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+	  <PackageReference Include="AAK.Deskpro" Version="1.13.7" />
 	</ItemGroup>
 
 	<ItemGroup>
