@@ -100,7 +100,8 @@ internal class CreateDocumentListQueueItem(
             Titel = deskproTicket.Value?.Subject,
             IndsenderNavn = person.Value.FullName,
             IndsenderMail = person.Value.Email,
-            AktindsigtsDato = deskproTicket.Value?.CreatedAt
+            AktindsigtsDato = deskproTicket.Value?.CreatedAt,
+            AktSagsURL = getDatabaseTicket.Result.CaseUrl
         };
 
         var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
