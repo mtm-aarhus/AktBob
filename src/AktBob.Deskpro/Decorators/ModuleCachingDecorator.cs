@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using AktBob.Shared;
 
 namespace AktBob.Deskpro.Decorators;
 
@@ -6,9 +6,9 @@ internal class ModuleCachingDecorator : IDeskproModule
 {
     private readonly IDeskproModule _inner;
     private readonly ILogger<DeskproModule> _logger;
-    private readonly IMemoryCache _cache;
+    private readonly ICacheService _cache;
 
-    public ModuleCachingDecorator(IDeskproModule inner, ILogger<DeskproModule> logger, IMemoryCache cache)
+    public ModuleCachingDecorator(IDeskproModule inner, ILogger<DeskproModule> logger, ICacheService cache)
     {
         _inner = inner;
         _logger = logger;
@@ -24,14 +24,11 @@ internal class ModuleCachingDecorator : IDeskproModule
     public async Task<Result<IReadOnlyCollection<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken)
     {
         var cacheKey = "Deskpro_CustomFieldSpecifications";
-    
-        if (_cache.TryGetValue(cacheKey, out IReadOnlyCollection<CustomFieldSpecificationDto>? cachedSpecifications))
+        var cachedCustomSpecifications = _cache.Get<IReadOnlyCollection<CustomFieldSpecificationDto>?>(cacheKey);
+        if (cachedCustomSpecifications != null && cachedCustomSpecifications.Any())
         {
-            if (cachedSpecifications != null && cachedSpecifications.Any())
-            {
-                _logger.LogDebug("Got Deskpro custom field specifications from cache");
-                return Result.Success(cachedSpecifications);
-            }
+            _logger.LogDebug("Got Deskpro custom field specifications from cache");
+            return Result.Success(cachedCustomSpecifications);
         }
 
         var result = await _inner.GetCustomFieldSpecifications(cancellationToken);
@@ -47,14 +44,12 @@ internal class ModuleCachingDecorator : IDeskproModule
     public async Task<Result<MessageDto>> GetMessage(int ticketId, int messageId, CancellationToken cancellationToken)
     {
         var cacheKey = $"Deskpro_Message_{ticketId}_{messageId}";
-
-        if (_cache.TryGetValue(cacheKey, out MessageDto? cachedMessage))
+        var cachedMessage = _cache.Get<MessageDto>(cacheKey);
+        
+        if (cachedMessage != null)
         {
-            if (cachedMessage != null)
-            {
-                _logger.LogDebug("Got Deskpro message from cache (ticket {ticketId} message {messageId})", ticketId, messageId);
-                return cachedMessage;
-            }
+            _logger.LogDebug("Got Deskpro message from cache (ticket {ticketId} message {messageId})", ticketId, messageId);
+            return cachedMessage;
         }
 
         var result = await _inner.GetMessage(ticketId, messageId, cancellationToken);
@@ -70,14 +65,11 @@ internal class ModuleCachingDecorator : IDeskproModule
     public async Task<Result<IReadOnlyCollection<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken)
     {
         var cacheKey = $"Deskpro_MessageAttachments_{ticketId}_{messageId}";
-
-        if (_cache.TryGetValue(cacheKey, out IReadOnlyCollection<AttachmentDto>? cachedAttachmentDtos))
+        var cachedMessageAttachments = _cache.Get<IReadOnlyCollection<AttachmentDto>>(cacheKey);
+        if (cachedMessageAttachments != null)
         {
-            if (cachedAttachmentDtos != null)
-            {
-                _logger.LogDebug("Got Deskpro message attachment from cache (ticket {ticketId} message {messageId}", ticketId, messageId);
-                return Result.Success(cachedAttachmentDtos);
-            }
+            _logger.LogDebug("Got Deskpro message attachment from cache (ticket {ticketId} message {messageId}", ticketId, messageId);
+            return Result.Success(cachedMessageAttachments);
         }
 
         var result = await _inner.GetMessageAttachments(ticketId, messageId, cancellationToken);
@@ -94,20 +86,16 @@ internal class ModuleCachingDecorator : IDeskproModule
     {
         var cacheKey = $"Deskpro_Person_{personId}";
 
-        if (_cache.TryGetValue(cacheKey, out PersonDto? cachedPerson))
+        var cachedPerson = _cache.Get<PersonDto>(cacheKey);
+        if (cachedPerson != null)
         {
-            if (cachedPerson != null)
-            {
-                _logger.LogDebug("Got Deskpro person from cache (person {id})", personId);
-                return Result.Success(cachedPerson);
-            }
+            return Result.Success(cachedPerson);
         }
 
         var result = await _inner.GetPerson(personId, cancellationToken);
         if (result.IsSuccess)
         {
-            _logger.LogDebug("Setting cached value: Deskpro person {personId}.", personId);
-            _cache.Set(cacheKey, result.Value, TimeSpan.FromDays(20));
+            SetCachedPerson(cacheKey, result.Value);
         }
 
         return result;
@@ -117,22 +105,24 @@ internal class ModuleCachingDecorator : IDeskproModule
     {
         var cacheKey = $"Deskpro_Person_{email}";
 
-        if (_cache.TryGetValue(cacheKey, out PersonDto? cachedPerson))
+        var cachedPerson = _cache.Get<PersonDto>(cacheKey);
+        if (cachedPerson != null)
         {
-            if (cachedPerson != null)
-            {
-                _logger.LogDebug("Got Deskpro person from cache ({email})", email);
-                return Result.Success(cachedPerson);
-            }
+            return Result.Success(cachedPerson);
         }
 
         var result = await _inner.GetPerson(email, cancellationToken);
         if (result.IsSuccess)
         {
-            _logger.LogDebug("Setting cached value: Deskpro person {email}.", email);
-            _cache.Set(cacheKey, result.Value, TimeSpan.FromDays(20));
+            SetCachedPerson(cacheKey, result.Value);
         }
 
         return result;
+    }
+
+    private void SetCachedPerson(string cacheKey, PersonDto? person)
+    {
+        _logger.LogDebug("Setting cached value: Deskpro person {cacheKey}.", cacheKey);
+        _cache.Set(cacheKey, person, TimeSpan.FromDays(20));
     }
 }
