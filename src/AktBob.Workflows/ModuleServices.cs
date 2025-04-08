@@ -44,8 +44,6 @@ public static class ModuleServices
         var filArkivClientSecret = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientSecret"));
         services.AddFilArkivApiClient(filArkivUrl, filArkivClientId, filArkivClientSecret);
 
-       
-
         return services;
     }
 

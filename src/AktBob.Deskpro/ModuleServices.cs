@@ -52,7 +52,6 @@ public static class ModuleServices
 
             var withCaching = new ModuleCachingDecorator(
                 inner,
-                provider.GetRequiredService<ILogger<DeskproModule>>(),
                 provider.GetRequiredService<ICacheService>());
 
             var withLogging = new ModuleLoggingDecorator(
