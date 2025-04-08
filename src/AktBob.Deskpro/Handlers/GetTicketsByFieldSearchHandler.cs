@@ -44,14 +44,15 @@ internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTick
                 {
                     Id = f.Id,
                     Values = f.Values
-                })
+                }) ?? Enumerable.Empty<FieldDto>()
             }).ToList();
 
             return Result.Success<IReadOnlyCollection<TicketDto>>(dto);
         }
         catch (HttpRequestException ex)
+        when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            return Result.Error($"Error getting tickets by field search: {ex}");
+            return Result.Error($"No tickets found by field search: {ex}");
         }
         catch (Exception)
         {
