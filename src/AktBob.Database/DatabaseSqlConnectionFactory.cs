@@ -1,11 +1,11 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
+﻿using AktBob.Shared;
+using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace AktBob.Database;
 
-internal class DatabaseSqlConnectionFactory(IConfiguration configuration) : IDatabaseSqlConnectionFactory
+internal class DatabaseSqlConnectionFactory(IAppConfig appConfig) : IDatabaseSqlConnectionFactory
 {
-    private readonly string _connectionString = configuration.GetConnectionString("Database")!;
+    private readonly string _connectionString = appConfig.GetConnectionString("Database")!;
     public IDbConnection CreateConnection() => new SqlConnection(_connectionString);
 }

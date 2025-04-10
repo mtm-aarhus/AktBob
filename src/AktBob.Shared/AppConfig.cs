@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Ardalis.GuardClauses;
+using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Shared;
 public class AppConfig : IAppConfig
@@ -11,4 +12,6 @@ public class AppConfig : IAppConfig
     }
 
     public T? GetValue<T>(string key) => _configuration.GetValue<T>(key);
+
+    public string GetConnectionString(string key) => Guard.Against.NullOrEmpty(_configuration.GetConnectionString(key));
 }
