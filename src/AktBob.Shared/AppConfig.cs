@@ -13,5 +13,7 @@ public class AppConfig : IAppConfig
 
     public T? GetValue<T>(string key) => _configuration.GetValue<T>(key);
 
+    public string? GetSection(string key) => _configuration.GetSection(key)?.Value;
+
     public string GetConnectionString(string key) => Guard.Against.NullOrEmpty(_configuration.GetConnectionString(key));
 }
