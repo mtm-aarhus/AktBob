@@ -1,4 +1,5 @@
-﻿using AktBob.Email.Contracts;
+﻿using AAK.Podio.Models;
+using AktBob.Email.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using FilArkivCore.Web.Client;
@@ -6,14 +7,21 @@ using FilArkivCore.Web.Shared.FileProcess;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
+
 internal record QueryFilesProcessingStatusJob(Guid FilArkivCaseId);
 
-internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob> logger, IServiceScopeFactory serviceProviderFactory, IConfiguration configuration, ITimeProvider timeProvider) : IJobHandler<QueryFilesProcessingStatusJob>
+internal class QueryFilesProcessingStatus(
+    ILogger<QueryFilesProcessingStatusJob> logger,
+    IServiceScopeFactory serviceProviderFactory,
+    IConfiguration configuration,
+    ITimeProvider timeProvider,
+    IAppConfig appConfig) : IJobHandler<QueryFilesProcessingStatusJob>
 {
     private readonly ILogger<QueryFilesProcessingStatusJob> _logger = logger;
     private readonly IServiceScopeFactory _serviceProviderFactory = serviceProviderFactory;
     private readonly IConfiguration _configuration = configuration;
     private readonly ITimeProvider _timeProvider = timeProvider;
+    private readonly IAppConfig _appConfig = appConfig;
 
     public async Task Handle(QueryFilesProcessingStatusJob job, CancellationToken cancellationToken = default)
     {
@@ -85,11 +93,6 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
         podio.PostComment(postCommandCommand);
 
         // Send email
-        var to = "jojan@aarhus.dk";
-        var caseNumber = "GEO-1234";
-        var subject = $"OCR screening af dokumenterne på sag {caseNumber} er færdig";
-        var filArkivLink = $"https://aarhus.filarkiv.dk/archives/case/{job.FilArkivCaseId}";
-        var body = $"<h1> screening af dokumenterne på sag {caseNumber} er færdig</h1><p>Link: <a href=\"{filArkivLink}\">{filArkivLink}</a></p>";
-        email.Send(to, subject, body, true);
+        await Notify.ScreeningIsFinished(podio, email, _appConfig, @case.PodioItemId, job.FilArkivCaseId, cancellationToken);
     }
 }
