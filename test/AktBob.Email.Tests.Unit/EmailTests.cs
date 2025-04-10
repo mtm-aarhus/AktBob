@@ -2,8 +2,6 @@
 using FluentAssertions;
 using MimeKit;
 using NSubstitute;
-using NSubstitute.Core;
-using NSubstitute.ExceptionExtensions;
 
 namespace AktBob.Email.Tests.Unit;
 
@@ -28,7 +26,7 @@ public class EmailTests
     }
 
     [Fact]
-    public async Task Send_ShouldConnectToSmtpClient_WhenCalled()
+    public void Send_ShouldConnectToSmtpClient_WhenCalled()
     {
         // Arrange
         var to = "to";
@@ -36,14 +34,14 @@ public class EmailTests
         var body = "body";
 
         // Act
-        await _sut.Send(to, subject, body);
+        _sut.Send(to, subject, body);
 
         // Assert
         _smtpClient.Received(1).Connect(Arg.Is(_smtpUrl), Arg.Is(_smtpPort), Arg.Is(_smtpUseSsl));
     }
 
     [Fact]
-    public async Task Send_ShouldRethrowException_WhenSmtpClientThrowsException()
+    public void Send_ShouldRethrowException_WhenSmtpClientThrowsException()
     {
         // Arrange
         var to = "to";
@@ -57,11 +55,11 @@ public class EmailTests
         var act = () => _sut.Send(to, subject, body);
 
         // Assert
-        await act.Should().ThrowAsync<Exception>();
+        act.Should().Throw<Exception>();
     }
 
     [Fact]
-    public async Task Send_ShouldSendEmailViaSmtpClient_WhenCalled()
+    public void Send_ShouldSendEmailViaSmtpClient_WhenCalled()
     {
         // Arrange
         var to = "to";
@@ -69,14 +67,14 @@ public class EmailTests
         var body = "body";
         
         // Act
-        await _sut.Send(to, subject, body);
+        _sut.Send(to, subject, body);
 
         // Assert
-        await _smtpClient.Received(1).Send(Arg.Any<MimeMessage>());
+         _smtpClient.Received(1).Send(Arg.Any<MimeMessage>());
     }
 
     [Fact]
-    public async Task Send_ShouldDisconnectFromSmtpClient_WhenSendIsComplete()
+    public void Send_ShouldDisconnectFromSmtpClient_WhenSendIsComplete()
     {
         // Arrange
         var to = "to";
@@ -84,30 +82,32 @@ public class EmailTests
         var body = "body";
 
         // Act
-        await _sut.Send(to, subject, body);
+        _sut.Send(to, subject, body);
 
         // Assert
         _smtpClient.Received(1).Disconnect(Arg.Any<bool>());
     }
 
     [Fact]
-    public async Task Send_ShouldRethrowException_WhenSmtpClientFailsToSend()
+    public void Send_ShouldRethrowException_WhenSmtpClientFailsToSend()
     {
         // Arrange
         var to = "to";
         var subject = "subject";
         var body = "body";
-        _smtpClient.Send(Arg.Any<MimeMessage>()).ThrowsAsync<Exception>();
+        _smtpClient
+            .When(x => x.Send(Arg.Any<MimeMessage>()))
+            .Do(call => throw new Exception());
 
         // Act
         var act = () => _sut.Send(to, subject, body);
 
         // Assert
-        await act.Should().ThrowAsync<Exception>();
+        act.Should().Throw<Exception>();
     }
 
     [Fact]
-    public async Task Send_ShouldThrowBusinessException_WhenRecipientIsEmpty()
+    public void Send_ShouldThrowBusinessException_WhenRecipientIsEmpty()
     {
         // Arrange
         var to = string.Empty;
@@ -118,7 +118,7 @@ public class EmailTests
         var act = () => _sut.Send(to, subject, body);
 
         // Assert
-        await act.Should().ThrowAsync<Exception>();
+        act.Should().Throw<Exception>();
     }
 
 

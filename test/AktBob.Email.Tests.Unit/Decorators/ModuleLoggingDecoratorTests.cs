@@ -25,7 +25,7 @@ public class ModuleLoggingDecoratorTests
         var body = "body";
 
         // Act
-        _sut.Send(to, subject, body);
+        _sut.Send(to, subject, body, false);
 
         // Assert
         _inner.Received(1).Send(Arg.Is(to), Arg.Is(subject), Arg.Is(body));

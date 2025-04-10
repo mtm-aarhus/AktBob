@@ -8,11 +8,11 @@ internal class ModuleExceptionDecorator(IEmailModule inner, ILogger<EmailModule>
     private readonly IEmailModule _inner = inner;
     private readonly ILogger<EmailModule> _logger = logger;
 
-    public void Send(string to, string subject, string body)
+    public void Send(string to, string subject, string body, bool bodyIsHtml = false)
     {
 		try
 		{
-			_inner.Send(to, subject, body);
+			_inner.Send(to, subject, body, bodyIsHtml);
 		}
 		catch (Exception ex)
 		{

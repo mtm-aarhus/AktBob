@@ -23,7 +23,7 @@ internal class Email : IEmail
         _from = Guard.Against.NullOrEmpty(_appConfig.GetValue<string>("EmailModule:From"));
     }
 
-    public async Task Send(string to, string subject, string body)
+    public void Send(string to, string subject, string body, bool bodyIsHtml = false)
     {
         if (string.IsNullOrWhiteSpace(to))
         {
@@ -36,12 +36,12 @@ internal class Email : IEmail
         message.From.Add(new MailboxAddress(_from, _from));
         message.To.Add(new MailboxAddress(to, to));
         message.Subject = subject;
-        message.Body = new TextPart("plain")
+        message.Body = new TextPart(bodyIsHtml ? "html" : "plain")
         {
             Text = body
         };
 
-        await _smtpClient.Send(message);
+        _smtpClient.Send(message);
         _smtpClient.Disconnect(true);
     }
 }

@@ -1,4 +1,5 @@
-﻿using AktBob.Podio.Contracts;
+﻿using AktBob.Email.Contracts;
+using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using FilArkivCore.Web.Client;
 using FilArkivCore.Web.Shared.FileProcess;
@@ -18,6 +19,7 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
     {
         var scope = _serviceProviderFactory.CreateScope();
         var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
+        var email = scope.ServiceProvider.GetRequiredServiceOrThrow<IEmailModule>();
         var filArkivCoreClient = scope.ServiceProvider.GetRequiredServiceOrThrow<FilArkivCoreClient>();
         var pollingInterval = TimeSpan.FromSeconds(_configuration.GetValue<int?>("CheckOCRScreeningStatus:PollingIntervalMinutes") ?? 30);
         var cachedData = CachedData.Instance;
@@ -77,8 +79,17 @@ internal class QueryFilesProcessingStatus(ILogger<QueryFilesProcessingStatusJob>
             UpdatePodioField.SetFilArkivCaseId(podio, _configuration, @case.FilArkivCaseId, @case.PodioItemId);
         }
 
+        // Post comment on Podio Item
         var commentText = "OCR screening af dokumenterne i FilArkiv er færdig.";
         var postCommandCommand = new PostCommentCommand(@case.PodioItemId, commentText);
         podio.PostComment(postCommandCommand);
+
+        // Send email
+        var to = "jojan@aarhus.dk";
+        var caseNumber = "GEO-1234";
+        var subject = $"OCR screening af dokumenterne på sag {caseNumber} er færdig";
+        var filArkivLink = $"https://aarhus.filarkiv.dk/archives/case/{job.FilArkivCaseId}";
+        var body = $"<h1> screening af dokumenterne på sag {caseNumber} er færdig</h1><p>Link: <a href=\"{filArkivLink}\">{filArkivLink}</a></p>";
+        email.Send(to, subject, body, true);
     }
 }

@@ -8,9 +8,9 @@ internal class ModuleLoggingDecorator(IEmailModule inner, ILogger<EmailModule> l
     private readonly IEmailModule _inner = inner;
     private readonly ILogger<EmailModule> _logger = logger;
 
-    public void Send(string to, string subject, string body)
+    public void Send(string to, string subject, string body, bool bodyIsHtml)
     {
         _logger.LogInformation("Enqueueing job: Send email. To = {to}, Subject = {subject}, Body = {body}", to, subject, body);
-        _inner.Send(to, subject, body);
+        _inner.Send(to, subject, body, bodyIsHtml);
     }
 }

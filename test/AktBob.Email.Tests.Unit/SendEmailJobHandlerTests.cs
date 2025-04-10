@@ -13,7 +13,7 @@ public class SendEmailJobHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ShouldCallEmailSendWithDecodedValues_WhenJobIsHandled()
+    public void Handle_ShouldCallEmailSendWithDecodedValues_WhenJobIsHandled()
     {
         // Arrange
         var to = "to";
@@ -24,9 +24,9 @@ public class SendEmailJobHandlerTests
         var job = new SendEmailJob(to, base64Subject, base64Body);
 
         // Act
-        await _sut.Handle(job, CancellationToken.None);
+        _sut.Handle(job, CancellationToken.None);
 
         // Assert
-        await _email.Received(1).Send(Arg.Is(to), Arg.Is(subject), Arg.Is(body));
+        _email.Received(1).Send(Arg.Is(to), Arg.Is(subject), Arg.Is(body));
     }
 }

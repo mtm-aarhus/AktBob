@@ -21,8 +21,8 @@ internal class SmtpClientWrapper : ISmtpClient
         _smtpClient.Dispose();
     }
 
-    public async Task Send(MimeMessage message)
+    public void Send(MimeMessage message)
     {
-        await _smtpClient.SendAsync(message);
+        _smtpClient.Send(message);
     }
 }

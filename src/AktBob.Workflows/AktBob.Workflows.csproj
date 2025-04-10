@@ -16,6 +16,7 @@
     <ProjectReference Include="..\AktBob.CloudConvert.Contracts\AktBob.CloudConvert.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Database\AktBob.Database.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.Email.Contracts\AktBob.Email.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.GetOrganized.Contracts\AktBob.GetOrganized.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.OpenOrchestrator.Contracts\AktBob.OpenOrchestrator.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Podio.Contracts\AktBob.Podio.Contracts.csproj" />
