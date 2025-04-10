@@ -15,5 +15,7 @@ public class AppConfig : IAppConfig
 
     public string? GetSection(string key) => _configuration.GetSection(key)?.Value;
 
+    public IEnumerable<IConfigurationSection> GetSectionChildren(string key) => _configuration.GetSection(key).GetChildren();
+
     public string GetConnectionString(string key) => Guard.Against.NullOrEmpty(_configuration.GetConnectionString(key));
 }
