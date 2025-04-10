@@ -76,6 +76,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Shared.Tests.Unit", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Tests.Shared", "test\AktBob.Tests.Shared\AktBob.Tests.Shared.csproj", "{3E1280FD-45C8-C87C-7A8C-A7CBE9499CE8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Email.Tests.Unit", "test\AktBob.Email.Tests.Unit\AktBob.Email.Tests.Unit.csproj", "{1D3AC921-BA6E-4620-BFE7-48062FF9AD70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -180,6 +182,10 @@ Global
 		{3E1280FD-45C8-C87C-7A8C-A7CBE9499CE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E1280FD-45C8-C87C-7A8C-A7CBE9499CE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E1280FD-45C8-C87C-7A8C-A7CBE9499CE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D3AC921-BA6E-4620-BFE7-48062FF9AD70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D3AC921-BA6E-4620-BFE7-48062FF9AD70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D3AC921-BA6E-4620-BFE7-48062FF9AD70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D3AC921-BA6E-4620-BFE7-48062FF9AD70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -217,6 +223,7 @@ Global
 		{E1F3963A-825C-E59A-D9CD-A652CAB9D915} = {3CCD0659-ACDF-4B5F-9C30-67D990BAE5A0}
 		{F81B7549-7828-1B5E-D482-D1600D8BAD2C} = {3CCD0659-ACDF-4B5F-9C30-67D990BAE5A0}
 		{3E1280FD-45C8-C87C-7A8C-A7CBE9499CE8} = {3CCD0659-ACDF-4B5F-9C30-67D990BAE5A0}
+		{1D3AC921-BA6E-4620-BFE7-48062FF9AD70} = {3CCD0659-ACDF-4B5F-9C30-67D990BAE5A0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}
