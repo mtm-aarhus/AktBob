@@ -1,12 +1,19 @@
-﻿{
-  "$schema": "http://json.schemastore.org/launchsettings.json",
+{
   "profiles": {
-    "AktBob.Worker": {
+    "AktBob.Worker TEST": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Test"
+      },
+      "dotnetRunMessages": true
+    },
+    "AktBob.Worker DEV": {
+      "commandName": "Project",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
-      }
+      },
+      "dotnetRunMessages": true
     }
-  }
+  },
+  "$schema": "http://json.schemastore.org/launchsettings.json"
 }
