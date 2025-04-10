@@ -2,6 +2,7 @@
 using AAK.Deskpro.Models;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Deskpro.Handlers;
+using AktBob.Shared;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Testing;
@@ -14,13 +15,12 @@ public class GetPersonHandlerTests
 {
     private readonly GetPersonHandler _sut;
     private readonly IDeskproClient _deskproClient = Substitute.For<IDeskproClient>();
-    private readonly IConfiguration _configuration = Substitute.For<IConfiguration>();
-    private readonly IConfigurationSection _configurationSection = Substitute.For<IConfigurationSection>();
+    private readonly IAppConfig _appConfig = Substitute.For<IAppConfig>();
     private readonly FakeLogger<GetPersonHandler> _logger = new FakeLogger<GetPersonHandler>();
 
     public GetPersonHandlerTests()
     {
-        _sut = new GetPersonHandler(_deskproClient, _configuration, _logger);
+        _sut = new GetPersonHandler(_deskproClient, _appConfig, _logger);
     }
 
     [Fact]
@@ -127,8 +127,7 @@ public class GetPersonHandlerTests
         var email = "somebody@somewhere.com";
         var ignoreList =  $"{email}";
 
-        _configurationSection.Value.Returns(ignoreList);
-        _configuration.GetSection("Deskpro:GetPersonHandler:IgnoreEmails").Returns(_configurationSection);
+        _appConfig.GetSection("Deskpro:GetPersonHandler:IgnoreEmails").Returns(ignoreList);
 
         // Act
         var result = await _sut.GetByEmail(email, CancellationToken.None);
@@ -145,7 +144,7 @@ public class GetPersonHandlerTests
         // Arrange
         var email = "somebody@somewhere.com";
         _deskproClient.GetPersonByEmail(Arg.Any<string>(), Arg.Any<CancellationToken>()).ReturnsNull();
-        _configurationSection.Value.ReturnsNull();
+        _appConfig.GetSection(Arg.Any<string>()).ReturnsNull();
 
         // Act
         var result = await _sut.GetByEmail(email, CancellationToken.None);
@@ -162,7 +161,7 @@ public class GetPersonHandlerTests
         // Arrange
         var email = "somebody@somewhere.com";
         _deskproClient.GetPersonByEmail(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(new List<Person>());
-        _configurationSection.Value.ReturnsNull();
+        _appConfig.GetSection(Arg.Any<string>()).ReturnsNull();
 
         // Act
         var result = await _sut.GetByEmail(email, CancellationToken.None);
@@ -180,7 +179,7 @@ public class GetPersonHandlerTests
         var email = "somebody@somewhere.com";
         var expectedDto = new PersonDto { Email = email };
         _deskproClient.GetPersonByEmail(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(new List<Person> { new Person { Email = email} });
-        _configurationSection.Value.ReturnsNull();
+        _appConfig.GetSection(Arg.Any<string>()).ReturnsNull();
 
         // Act
         var result = await _sut.GetByEmail(email, CancellationToken.None);
