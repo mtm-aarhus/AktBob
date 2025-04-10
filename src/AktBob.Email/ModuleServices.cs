@@ -15,6 +15,8 @@ public static class ModuleServices
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:From"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:SmtpUrl"));
 
+        services.AddTransient<IEmail, Email>();
+        services.AddTransient<ISmtpClient, SmtpClientWrapper>();
         services.AddScoped<IJobHandler<SendEmailJob>, SendEmailJobHandler>();
 
         services.AddScoped<IEmailModule>(provider =>
