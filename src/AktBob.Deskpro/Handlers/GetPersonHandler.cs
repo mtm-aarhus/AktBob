@@ -1,6 +1,5 @@
 ﻿using AAK.Deskpro;
 using AktBob.Shared;
-using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Deskpro.Handlers;
 internal class GetPersonHandler(IDeskproClient deskpro, IAppConfig appConfig, ILogger<GetPersonHandler> logger) : IGetPersonHandler

@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace AktBob.Shared;
+﻿namespace AktBob.Shared;
 
 public interface IAppConfig
 {
