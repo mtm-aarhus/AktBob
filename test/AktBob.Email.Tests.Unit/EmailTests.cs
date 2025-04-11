@@ -1,5 +1,6 @@
 ﻿using AktBob.Shared;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Testing;
 using MimeKit;
 using NSubstitute;
 
@@ -10,19 +11,18 @@ public class EmailTests
     private readonly Email _sut;
     private readonly string _smtpUrl = "smtpUrl";
     private readonly int _smtpPort = 123;
-    private readonly bool _smtpUseSsl = false;
     private readonly string _from = "from";
     private readonly IAppConfig _appConfig = Substitute.For<IAppConfig>();
     private readonly ISmtpClient _smtpClient = Substitute.For<ISmtpClient>();
+    private readonly FakeLogger<Email> _logger = new FakeLogger<Email>();
     
 
     public EmailTests()
     {
         _appConfig.GetValue<string>("EmailModule:SmtpUrl").Returns(_smtpUrl);
         _appConfig.GetValue<int>("EmailModule:SmtpPort").Returns(_smtpPort);
-        _appConfig.GetValue<bool?>("EmailModule:SmtpUseSsl").Returns(_smtpUseSsl);
         _appConfig.GetValue<string>("EmailModule:From").Returns(_from);
-        _sut = new Email(_appConfig, _smtpClient);
+        _sut = new Email(_appConfig, _smtpClient, _logger);
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class EmailTests
         _sut.Send(to, subject, body);
 
         // Assert
-        _smtpClient.Received(1).Connect(Arg.Is(_smtpUrl), Arg.Is(_smtpPort), Arg.Is(_smtpUseSsl));
+        _smtpClient.Received(1).Connect(Arg.Is(_smtpUrl), Arg.Is(_smtpPort));
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class EmailTests
         var subject = "subject";
         var body = "body";
         _smtpClient
-            .When(x => x.Connect(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<bool>()))
+            .When(x => x.Connect(Arg.Any<string>(), Arg.Any<int>()))
             .Do(call => throw new Exception());
 
         // Act
