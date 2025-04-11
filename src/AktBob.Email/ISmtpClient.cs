@@ -3,7 +3,7 @@
 namespace AktBob.Email;
 internal interface ISmtpClient : IDisposable
 {
-    void Connect(string host, int port, bool useSsl);
+    void Connect(string host, int port);
     void Send(MimeMessage message);
     void Disconnect(bool quit);
 }

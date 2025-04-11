@@ -6,9 +6,10 @@ internal class SmtpClientWrapper : ISmtpClient
 {
     private readonly SmtpClient _smtpClient = new SmtpClient();
 
-    public void Connect(string host, int port, bool useSsl)
+    public void Connect(string host, int port)
     {
-        _smtpClient.Connect(host, port, useSsl);
+        _smtpClient.Connect(host, port, MailKit.Security.SecureSocketOptions.None);
+        _smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
     }
 
     public void Disconnect(bool quit)
