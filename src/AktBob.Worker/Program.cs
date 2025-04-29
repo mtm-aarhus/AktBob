@@ -12,6 +12,7 @@ using AktBob.Email;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Serilog.Formatting.Display;
+using AktBob.OS2Forms;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -89,6 +90,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddWorkflowJobs(hostContext.Configuration);
         services.AddWorkflowModule(hostContext.Configuration);
         services.AddEmailModuleServices(hostContext.Configuration);
+        services.AddOS2FormsModule(hostContext.Configuration);
         services.AddSharedModule();
     });
 

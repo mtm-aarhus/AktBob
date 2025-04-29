@@ -73,6 +73,11 @@ public static class ModuleServices
             return withExceptionHandling;
         });
 
+        services.AddScoped<IOS2FormsSubmissionRepository>(provider =>
+        {
+            return new OS2FormsSubmissionRepository(provider.GetRequiredService<ISqlDataAccess<IDatabaseSqlConnectionFactory>>());
+        });
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         
         return services;

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AAK.OS2Forms" Version="1.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AktBob.OS2Forms.Contracts\AktBob.OS2Forms.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
