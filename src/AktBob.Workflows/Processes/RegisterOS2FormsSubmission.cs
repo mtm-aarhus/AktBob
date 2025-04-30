@@ -12,6 +12,8 @@ internal class RegisterOS2FormsSubmission(ILogger<RegisterOS2FormsSubmission> lo
 
     public async Task Handle(RegisterOS2FormsSubmissionJob job, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Registering OS2Forms submission {submissionId} for DeskproTicketId {deskproTicketId}", job.SubmissionId, job.DeskproId);
+
         Guard.Against.Null(job.SubmissionId);
         Guard.Against.Null(job.DeskproId);
         
@@ -28,8 +30,11 @@ internal class RegisterOS2FormsSubmission(ILogger<RegisterOS2FormsSubmission> lo
         if (existingSubmission != null)
         {
             // All done
+            _logger.LogInformation("Submission {submissionId} already registered.", job.SubmissionId);
             return;
         }
+
+        _logger.LogInformation("Getting submission {id} from OS2Forms", job.SubmissionId);
 
         var submission = await os2Forms.GetSubmission(job.SubmissionId, webformId, cancellationToken);
         if (submission is null)
@@ -44,6 +49,8 @@ internal class RegisterOS2FormsSubmission(ILogger<RegisterOS2FormsSubmission> lo
             DeskproTicketId = job.DeskproId,
             DescriptionFieldValue = submission.Value.Data.FirstOrDefault(x => x.Key == descriptionFieldId).Value ?? string.Empty
         };
+
+        _logger.LogInformation("Persisting OS2Forms submission {id} DeskproTicketId {deskproTicketId}", job.SubmissionId, job.DeskproId);
 
         var success = await unitOfWork.OS2FormsSubmissions.Add(entity);
         if (!success)
