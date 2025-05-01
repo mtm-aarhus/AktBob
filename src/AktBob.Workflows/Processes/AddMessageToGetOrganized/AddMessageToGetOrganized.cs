@@ -87,8 +87,8 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         if (!generateDocumentResult.IsSuccess) throw new BusinessException($"Unable to generate PDF document using CloudConvert: {generateDocumentResult.Errors.AsString()}");
 
         // Upload parent document
-        DateTime createdAtDanishTime = getDeskproMessageResult!.Value.CreatedAt.UtcToDanish();
-        var documentCategory = getDeskproMessageResult.Value.IsAgentNote ? UploadDocumentCategory.Internal : MapDocumentCategoryFromPerson(personResult.Value);
+        DateTime createdAtDanishTime = deskproMessage.CreatedAt.UtcToDanish();
+        var documentCategory = deskproMessage.IsAgentNote ? UploadDocumentCategory.Internal : MapDocumentCategoryFromPerson(personResult.Value);
         var fileName = GenerateFileName(databaseMessage.MessageNumber ?? 0, person.FullName, createdAtDanishTime);
 
         var upoadDocumentCommand = new UploadDocumentCommand(
@@ -173,7 +173,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
     {
         var html = HtmlHelper.GenerateMessageHtml(
             isAgentNote: isAgentNote,
-            createdAt: createdAt,
+            createdAt: createdAt.UtcToDanish(),
             personName: personName,
             personEmail: personEmail,
             recipientName: recipientName,
