@@ -7,6 +7,12 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text;
 using AktBob.Workflows.Helpers;
+using Org.BouncyCastle.Asn1;
+using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Bcpg.OpenPgp;
+using AktBob.Workflows.Extensions;
+using System.Globalization;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
@@ -213,21 +219,16 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
                 continue;
             }
 
-            // Get the actual choices from the ticket for this specific custom field
             var values = ticketDto.Fields.FirstOrDefault(f => f.Id == customFieldId)?.Values ?? Enumerable.Empty<string>();
-            var choiceKeys = values.Select(int.Parse);
+            var value = customField.Choices.Any()
+                ? GetChoiceValue(values, customField)
+                : values.FirstOrDefault() ?? string.Empty;
 
-            // Get the choices title from the custom field specification based on the ticket field choices
-            var choiceTitles = customField.Choices
-                .Where(kv => choiceKeys.Contains(kv.Key))
-                .Select(kv => kv.Value);
-
-            var choiceTitleString = string.Join(",", choiceTitles);
 
             var dictionary = new Dictionary<string, string>
                 {
                     { "title", customField.Title },
-                    { "value", choiceTitleString }
+                    { "value", TryParseAndFormatDateTime(value) }
                 };
 
             var html = HtmlHelper.GenerateHtml("custom-field.html", dictionary);
@@ -235,5 +236,34 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         }
 
         return items;
+    }
+
+    private string GetChoiceValue(IEnumerable<string> values, CustomFieldSpecificationDto customField)
+    {
+        var choiceKeys = values.Select(int.Parse);
+
+        // Get the choices title from the custom field specification based on the ticket field choices
+        var choiceTitles = customField.Choices
+            .Where(kv => choiceKeys.Contains(kv.Key))
+            .Select(kv => kv.Value);
+
+        return string.Join(",", choiceTitles);
+    }
+
+    private string TryParseAndFormatDateTime(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return string.Empty;
+        }
+
+        if (DateTime.TryParse(input, CultureInfo.InvariantCulture, out var dateTime))
+        {
+            return dateTime.Date.TimeOfDay == TimeSpan.Zero
+                ? dateTime.Date.ToString("dd-MM-yyyy")
+                : dateTime.Date.ToString("dd-MM-yyyy HH:mm:ss");
+        }
+
+        return input;
     }
 }
