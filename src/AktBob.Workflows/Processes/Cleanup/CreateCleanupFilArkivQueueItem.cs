@@ -41,7 +41,7 @@ internal class CreateCleanupFilArkivQueueItem : IJobHandler<CreateCleanupFilArki
                 continue;
             }
 
-            foreach (var @case in  ticket.Cases)
+            foreach (var @case in ticket.Cases)
             {
                 if (@case.FilArkivCaseId is null)
                 {

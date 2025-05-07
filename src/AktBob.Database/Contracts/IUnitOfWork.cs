@@ -5,4 +5,5 @@ public interface IUnitOfWork
     ITicketRepository Tickets { get; }
     ICaseRepository Cases { get; }
     IOS2FormsSubmissionRepository OS2FormsSubmissions { get; }
+    IFilArkivFilesCleanUpQueueRepository FilArkivFilesCleanUpQueue { get; }
 }

@@ -78,6 +78,21 @@ public static class ModuleServices
             return new OS2FormsSubmissionRepository(provider.GetRequiredService<ISqlDataAccess<IDatabaseSqlConnectionFactory>>());
         });
 
+        services.AddScoped<IFilArkivFilesCleanUpQueueRepository>(provider =>
+        {
+            var inner = new FilArkivCleanUpQueueRepository(provider.GetRequiredService<ISqlDataAccess<IDatabaseSqlConnectionFactory>>());
+
+            var withLogging = new FilArkivFilesCleanUpQueueRepositoryLoggingDecorator(
+                inner,
+                provider.GetRequiredService<ILogger<FilArkivFilesCleanUpQueueRepositoryLoggingDecorator>>());
+
+            var withExceptionHandling = new FilArkivFilesCleanUpQueueRepositoryExceptionDecorator(
+                withLogging,
+                provider.GetRequiredService<ILogger<FilArkivFilesCleanUpQueueRepositoryExceptionDecorator>>());
+                
+            return withExceptionHandling;
+        });
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         
         return services;
