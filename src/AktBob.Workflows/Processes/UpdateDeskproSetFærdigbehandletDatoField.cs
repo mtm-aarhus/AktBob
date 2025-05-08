@@ -17,7 +17,7 @@ internal class UpdateDeskproSetFærdigbehandletDatoField : IJobHandler<UpdateDes
     public Task Handle(UpdateDeskproSetFærdigbehandletDatoFieldJob job, CancellationToken cancellationToken = default)
     {
         var deskproWebhookId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("Deskpro:Webhooks:UpdateDeskproSetFærdigbehandletDatoField"));
-        var scope = _serviceScopeFactory.CreateScope();
+        using var scope = _serviceScopeFactory.CreateScope();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
 
         var payload = new

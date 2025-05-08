@@ -25,6 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="EmailTemplates\ocr-screening-finished.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="HTMLTemplates\custom-field.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -2,6 +2,8 @@
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Email.Contracts;
 using AktBob.Shared.Jobs;
+using AktBob.Workflows.Helpers;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AktBob.Workflows.Processes.Cleanup;
 internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingCleanupJob>
@@ -77,9 +79,15 @@ internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingClea
 
         // Send notification
         var recipient = person.Value.Email;
-        var subject = "Midlertidige arbejdsfiler m.m. vedr. afsluttet aktindsigtssag slettes snart";
-        var body = "<p>Test</p>";
-        email.Send(recipient, subject, body, true);
+        var subject = $"{job.DeskproTicketId}: Midlertidige dokumenter i screenings- og udleveringsmapperne bliver snart slettet";
+        var fields = new Dictionary<string, string>
+        {
+            { "ticketId", job.DeskproTicketId.ToString() },
+            { "ticketSubject", deskproTicket.Subject }
+        };
+
+        var emailBody = HtmlHelper.GenerateHtml(fields, "EmailTemplates/upcoming-clean-up-notification.html");
+        email.Send(recipient, subject, emailBody, true);
     }
 
     private bool JobHasToBeRescheduled(int deskproTicketId, IJobDispatcher jobDispatcher, DateTime afslutningsdato)

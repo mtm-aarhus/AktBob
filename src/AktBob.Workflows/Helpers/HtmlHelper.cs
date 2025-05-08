@@ -5,16 +5,15 @@ using AktBob.Shared.Extensions;
 namespace AktBob.Workflows.Helpers;
 internal static class HtmlHelper
 {
-    public static string GenerateHtml(string templateFileName, Dictionary<string, string> dictionary)
+    public static string GenerateHtml(Dictionary<string, string> fields, string templatePath)
     {
         string appRoot = AppDomain.CurrentDomain.BaseDirectory;
-        string templatePath = Path.Combine(appRoot, "HtmlTemplates", templateFileName);
-        var template = File.ReadAllText(templatePath); // TODO: cache
-        var html = template.ReplacePlaceholders(dictionary);
+        var template = File.ReadAllText(Path.Combine(appRoot, templatePath)); // TODO: cache
+        var html = template.ReplacePlaceholders(fields);
         return html;
     }
 
-    public static IEnumerable<string> GenerateListOfFieldValues(int[] fieldIds, TicketDto ticketDto, string templateFileName)
+    public static IEnumerable<string> GenerateListOfFieldValues(int[] fieldIds, TicketDto ticketDto, string templatePath)
     {
         List<string> items = new();
 
@@ -29,7 +28,7 @@ internal static class HtmlHelper
 
             var value = string.Join(", ", values);
             var kvp = new KeyValuePair<string, string>("value", value);
-            var html = GenerateHtml(templateFileName, kvp.ToDictionary());
+            var html = GenerateHtml(kvp.ToDictionary(), templatePath);
             items.Add(html);
         }
 
@@ -40,13 +39,13 @@ internal static class HtmlHelper
     {
         string appRoot = AppDomain.CurrentDomain.BaseDirectory;
         var template = isAgentNote ? "message-agent-note.html" : "message.html";
-        string messageTemplatePath = Path.Combine(appRoot, "HtmlTemplates", template);
+        string messageTemplatePath = "HtmlTemplates/" + template;
         var messageTemplate = File.ReadAllText(messageTemplatePath);
 
         var attachmentFileNames = attachments.Select(a =>
             GenerateHtml(
-                "message-attachments.html",
-                new KeyValuePair<string, string>("value", a.FileName).ToDictionary()));
+                new KeyValuePair<string, string>("value", a.FileName).ToDictionary(),
+                "HtmlTemplates/message-attachments.html"));
 
         var dictionary = new Dictionary<string, string>
         {

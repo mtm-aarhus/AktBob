@@ -20,7 +20,7 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
 
         Guard.Against.NegativeOrZero(job.DeskproTicketId);
 
-        var scope = _serviceScopeFactory.CreateScope();
+        using var scope = _serviceScopeFactory.CreateScope();
         var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
         var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
 

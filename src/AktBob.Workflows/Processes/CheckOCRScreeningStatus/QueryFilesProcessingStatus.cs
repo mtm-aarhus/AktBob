@@ -1,5 +1,4 @@
-﻿using AAK.Podio.Models;
-using AktBob.Email.Contracts;
+﻿using AktBob.Email.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using FilArkivCore.Web.Client;
@@ -7,27 +6,23 @@ using FilArkivCore.Web.Shared.FileProcess;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
-
-internal record QueryFilesProcessingStatusJob(Guid FilArkivCaseId);
-
 internal class QueryFilesProcessingStatus(
     ILogger<QueryFilesProcessingStatusJob> logger,
     IServiceScopeFactory serviceProviderFactory,
     IConfiguration configuration,
     ITimeProvider timeProvider,
-    IAppConfig appConfig) : IJobHandler<QueryFilesProcessingStatusJob>
+    IJobDispatcher jobDispatcher) : IJobHandler<QueryFilesProcessingStatusJob>
 {
     private readonly ILogger<QueryFilesProcessingStatusJob> _logger = logger;
     private readonly IServiceScopeFactory _serviceProviderFactory = serviceProviderFactory;
     private readonly IConfiguration _configuration = configuration;
     private readonly ITimeProvider _timeProvider = timeProvider;
-    private readonly IAppConfig _appConfig = appConfig;
+    private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public async Task Handle(QueryFilesProcessingStatusJob job, CancellationToken cancellationToken = default)
     {
-        var scope = _serviceProviderFactory.CreateScope();
+        using var scope = _serviceProviderFactory.CreateScope();
         var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
-        var email = scope.ServiceProvider.GetRequiredServiceOrThrow<IEmailModule>();
         var filArkivCoreClient = scope.ServiceProvider.GetRequiredServiceOrThrow<FilArkivCoreClient>();
         var pollingInterval = TimeSpan.FromSeconds(_configuration.GetValue<int?>("CheckOCRScreeningStatus:PollingIntervalMinutes") ?? 30);
         var cachedData = CachedData.Instance;
@@ -88,11 +83,11 @@ internal class QueryFilesProcessingStatus(
         }
 
         // Post comment on Podio Item
-        var commentText = "OCR screening af dokumenterne i FilArkiv er færdig.";
+        var commentText = "Screening af dokumenterne er færdig.";
         var postCommandCommand = new PostCommentCommand(@case.PodioItemId, commentText);
         podio.PostComment(postCommandCommand);
 
         // Send email
-        await Notify.ScreeningIsFinished(podio, email, _appConfig, @case.PodioItemId, job.FilArkivCaseId, cancellationToken);
+        _jobDispatcher.Dispatch(new ScreeningIsFinishedNotificationJob(@case.PodioItemId, job.FilArkivCaseId));
     }
 }

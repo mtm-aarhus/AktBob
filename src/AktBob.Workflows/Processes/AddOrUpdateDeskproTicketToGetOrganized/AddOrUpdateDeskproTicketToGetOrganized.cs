@@ -68,7 +68,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
 
         // Map ticket fields
         var customFields = GenerateCustomFieldValues(job.CustomFieldIds, getTicketCustomFields.Result.Value, ticket);
-        var caseNumbers = HtmlHelper.GenerateListOfFieldValues(job.CaseNumberFieldIds, ticket, "ticket-case-numbers.html");
+        var caseNumbers = HtmlHelper.GenerateListOfFieldValues(job.CaseNumberFieldIds, ticket, "HtmlTemplates/ticket-case-numbers.html");
 
         var ticketDictionary = new Dictionary<string, string>
         {
@@ -85,7 +85,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
 
         List<ContentElement> contentElements = new();
 
-        var ticketHtml = HtmlHelper.GenerateHtml("ticket.html", ticketDictionary);
+        var ticketHtml = HtmlHelper.GenerateHtml(ticketDictionary, "HtmlTemplates/ticket.html");
         contentElements.Add(new(DateTime.MaxValue, Encoding.UTF8.GetBytes(ticketHtml)));
 
         // Messages
@@ -231,7 +231,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
                     { "value", TryParseAndFormatDateTime(value) }
                 };
 
-            var html = HtmlHelper.GenerateHtml("custom-field.html", dictionary);
+            var html = HtmlHelper.GenerateHtml(dictionary, "HtmlTemplates/custom-field.html");
             items.Add(html);
         }
 
