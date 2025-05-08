@@ -32,7 +32,14 @@ internal class CreateCleanUpQueueItemsEndpoint : Endpoint<CreateCleanUpQueueItem
     {
         DispatchCleanUpJobs(req.DeskproTicketId);
         DispatchCleanUpNotificationJobs(req.DeskproTicketId);
+        SetDeskproFieldFinishedAt(req.DeskproTicketId);
         await SendNoContentAsync(ct);
+    }
+
+    private void SetDeskproFieldFinishedAt(int deskproTicketId)
+    {
+        var job = new UpdateDeskproSetFærdigbehandletDatoFieldJob(deskproTicketId);
+        _jobDispatcher.Dispatch(job);
     }
 
     private void DispatchCleanUpJobs(int deskproTicketId)
