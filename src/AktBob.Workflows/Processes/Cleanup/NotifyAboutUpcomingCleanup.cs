@@ -65,20 +65,19 @@ internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingClea
         }
 
         // Get notification recipient
-        var personId = deskproTicket.Agent?.Id;
-        if (personId == null)
+        var agentId = deskproTicket.Agent?.Id;
+        if (agentId == null)
         {
             throw new BusinessException($"Cannot notify about upcoming cleanup. Deskpro ticket {job.DeskproTicketId} has no agent.");
         }
 
-        var person = await deskpro.GetPerson((int)personId, cancellationToken);
-        if (!person.IsSuccess)
+        var agent = await deskpro.GetPerson((int)agentId, cancellationToken);
+        if (!agent.IsSuccess)
         {
-            throw new BusinessException($"Agent {personId} not found in Deskpro");
+            throw new BusinessException($"Agent {agentId} not found in Deskpro");
         }
 
         // Send notification
-        var recipient = person.Value.Email;
         var subject = $"{job.DeskproTicketId}: Midlertidige dokumenter i screenings- og udleveringsmapperne bliver snart slettet";
         var fields = new Dictionary<string, string>
         {
@@ -87,7 +86,7 @@ internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingClea
         };
 
         var emailBody = HtmlHelper.GenerateHtml(fields, "EmailTemplates/upcoming-clean-up-notification.html");
-        email.Send(recipient, subject, emailBody, true);
+        email.Send(agent.Value.Email, subject, emailBody, true);
     }
 
     private bool JobHasToBeRescheduled(int deskproTicketId, IJobDispatcher jobDispatcher, DateTime afslutningsdato)
