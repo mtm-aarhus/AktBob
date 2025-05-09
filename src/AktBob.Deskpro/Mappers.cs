@@ -19,7 +19,8 @@ internal static class Mappers
             FullName = person.FullName,
             Id = person.Id,
             LastName = person.LastName,
-            PhoneNumbers = person.PhoneNumbers
+            PhoneNumbers = person.PhoneNumbers,
+            TeamId = person.TeamId
         };
     }
 }

@@ -111,4 +111,23 @@ internal class ModuleCachingDecorator : IDeskproModule
 
         return result;
     }
+
+    public async Task<Result<TeamDto>> GetTeam(int teamId, CancellationToken cancellationToken)
+    {
+        var cacheKey = $"Deskpro_Team_{teamId}";
+
+        var cachedTeam = _cache.Get<TeamDto>(cacheKey);
+        if (cachedTeam != null)
+        {
+            return Result.Success(cachedTeam);
+        }
+
+        var result = await _inner.GetTeam(teamId, cancellationToken);
+        if (result.IsSuccess)
+        {
+            _cache.Set(cacheKey, result.Value, TimeSpan.FromDays(20));
+        }
+
+        return result;
+    }
 }

@@ -12,8 +12,11 @@ internal class DeskproModule(
     IGetMessagesHandler getMessagesHandler,
     IGetPersonHandler getPersonHandler,
     IGetTicketHandler getTicketHandler,
-    IGetTicketsByFieldSearchHandler getTicketsByFieldSearchHandler) : IDeskproModule
+    IGetTicketsByFieldSearchHandler getTicketsByFieldSearchHandler,
+    IGetTeamHandler getTeamHandler) : IDeskproModule
 {
+    private readonly IGetTeamHandler _getTeamHandler = getTeamHandler;
+
     public void InvokeWebhook(string webhookId, string payload)
     {
         var bytes = Encoding.UTF8.GetBytes(payload);
@@ -37,4 +40,6 @@ internal class DeskproModule(
     public async Task<Result<TicketDto>> GetTicket(int ticketId, CancellationToken cancellationToken) => await getTicketHandler.Handle(ticketId, cancellationToken);
 
     public async Task<Result<IReadOnlyCollection<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken) => await getTicketsByFieldSearchHandler.Handle(fields, searchValue, cancellationToken);
+
+    public async Task<Result<TeamDto>> GetTeam(int teamId, CancellationToken cancellationToken) => await _getTeamHandler.Handle(teamId, cancellationToken);
 }

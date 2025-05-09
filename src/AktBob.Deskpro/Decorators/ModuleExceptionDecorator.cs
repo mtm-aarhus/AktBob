@@ -134,4 +134,17 @@ internal class ModuleExceptionDecorator(IDeskproModule inner, ILogger<DeskproMod
             throw;
         }
     }
+
+    public async Task<Result<TeamDto>> GetTeam(int teamId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _inner.GetTeam(teamId, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {name}", nameof(GetTicket));
+            throw;
+        }
+    }
 }

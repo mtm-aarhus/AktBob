@@ -32,6 +32,7 @@ public static class ModuleServices
         services.AddScoped<IGetTicketHandler, GetTicketHandler>();
         services.AddScoped<IGetTicketsByFieldSearchHandler, GetTicketsByFieldSearchHandler>();
         services.AddScoped<IInvokeWebhookHandler, InvokeWebhookHandler>();
+        services.AddScoped<IGetTeamHandler, GetTeamHandler>();
 
         // Jobs
         services.AddScoped<IJobHandler<InvokeWebhookJob>, InvokeWebhook>();
@@ -48,7 +49,8 @@ public static class ModuleServices
                 provider.GetRequiredService<IGetMessagesHandler>(),
                 provider.GetRequiredService<IGetPersonHandler>(),
                 provider.GetRequiredService<IGetTicketHandler>(),
-                provider.GetRequiredService<IGetTicketsByFieldSearchHandler>());
+                provider.GetRequiredService<IGetTicketsByFieldSearchHandler>(),
+                provider.GetRequiredService<IGetTeamHandler>());
 
             var withCaching = new ModuleCachingDecorator(
                 inner,

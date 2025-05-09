@@ -44,10 +44,10 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<ScreeningIsFinishedNotificationJob>, ScreeningIsFinishedNotification>();
 
         // Hangfire.Sagas
-        var connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("Hangfire"));
-        services.AddHangfireSagas(connectionString, [
+        //var connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("Hangfire"));
+        //services.AddHangfireSagas(connectionString, [
 
-            ]);
+        //    ]);
 
         return services;
     }

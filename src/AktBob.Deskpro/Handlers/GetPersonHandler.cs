@@ -32,7 +32,8 @@ internal class GetPersonHandler(IDeskproClient deskpro, IAppConfig appConfig, IL
                 FirstName = person.FirstName,
                 LastName = person.LastName,
                 FullName = person.FullName,
-                PhoneNumbers = person.PhoneNumbers
+                PhoneNumbers = person.PhoneNumbers,
+                TeamId = person.TeamId
             };
 
             return Result.Success(dto);
@@ -84,7 +85,8 @@ internal class GetPersonHandler(IDeskproClient deskpro, IAppConfig appConfig, IL
                 FirstName = person.FirstName,
                 LastName = person.LastName,
                 FullName = person.FullName,
-                PhoneNumbers = person.PhoneNumbers
+                PhoneNumbers = person.PhoneNumbers,
+                TeamId = person.TeamId
             };
 
             return Result.Success(dto);

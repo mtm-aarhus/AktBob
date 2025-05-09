@@ -24,63 +24,81 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateAfgørelsesskrivelseQueueItemJobHandler:OpenOrchestratorQueueName"));
         var deskproAfdelingFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:AfdelingFieldId"));
         var deskproModtagelsesdatoFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:ModtagelsesdatoFieldId"));
+        var deskproLovgivningFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:LovgivningFieldId"));
 
         // Get data from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(job.DeskproTicketId, cancellationToken);
-        if (!deskproTicketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
+        if (!deskproTicketResult.IsSuccess || deskproTicketResult.Value is null) throw new BusinessException("Unable to get ticket from Deskpro");
 
-        var deskproTicket = deskproTicketResult.Value;
+        // Deskpro ticket fields
+        string lovgivning = GetChoiceFieldValue(deskproTicketResult.Value, deskproLovgivningFieldId);
+        DateTime? modtagelsesdato = GetDateTimeFieldValue(deskproTicketResult.Value, deskproModtagelsesdatoFieldId);
 
-        // Field: afdeling
-        var afdelingChoiceId = Convert.ToInt32(deskproTicket.Fields.FirstOrDefault(x => x.Id == deskproAfdelingFieldId)?.Values.FirstOrDefault());
-        string afdeling = string.Empty;
-        var afdelingChoices = deskproTicket.Fields.FirstOrDefault(x => x.Id == deskproAfdelingFieldId)?.Choices;
-        if (afdelingChoices != null && afdelingChoices.TryGetValue(afdelingChoiceId, out string? value))
-        {
-            afdeling = value;
-        }
-
-        // Field: modtagelsesdato
-        DateTime? modtagelsesdato = deskproTicket?.CreatedAt;
-        var modtagelsesdatoFieldValue = deskproTicket?.Fields.FirstOrDefault(x => x.Id == deskproModtagelsesdatoFieldId)?.Values.FirstOrDefault();
-        if (modtagelsesdatoFieldValue.TryParseDeskproDateTime(out DateTime? date))
-        {
-            modtagelsesdato = date;
-        }
-
-        var getPerson = deskproTicket?.Person != null
-            ? deskpro.GetPerson(deskproTicket.Person.Id, cancellationToken)
+        
+        // Person
+        var getPerson = deskproTicketResult.Value.Person != null
+            ? deskpro.GetPerson(deskproTicketResult.Value.Person.Id, cancellationToken)
             : Task.FromResult(Result<PersonDto>.Error());
 
-        var getAgent = deskproTicket?.Agent != null
-            ? deskpro.GetPerson(deskproTicket.Agent.Id, cancellationToken)
+        // Agent
+        var getAgent = deskproTicketResult.Value.Agent != null
+            ? deskpro.GetPerson(deskproTicketResult.Value.Agent.Id, cancellationToken)
             : Task.FromResult(Result<PersonDto>.Error());
 
+        // Team
+        var getTeam = deskproTicketResult.Value.AgentTeamId != null
+            ? deskpro.GetTeam((int)deskproTicketResult.Value.AgentTeamId, cancellationToken)
+            : Task.FromResult(Result<TeamDto>.Error());
+
+        // Database ticket
         var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproTicketId);
-        //var getOS2Submission = unitOfWork.OS2FormsSubmissions.GetByDeskproTicketId(job.DeskproTicketId);
 
         await Task.WhenAll([
             getPerson,
             getAgent,
-            getDatabaseTicket]);
+            getDatabaseTicket,
+            getTeam]);
 
         if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
+
 
         // Create OpenOrchestrator queue item
         var payload = new
         {
             AnsøgerNavn = getPerson.Result.Value?.FullName,
             AnsøgerEmail = getPerson.Result.Value?.Email,
-            Afdeling = afdeling,
+            Afdeling = getTeam.Result.Value?.Name,
             Aktindsigtsovermappe = getDatabaseTicket.Result?.SharepointFolderName,
             SagsbehandlerEmail = getAgent.Result.Value?.Email,
             DeskProID = job.DeskproTicketId,
-            AktindsigtsDato = modtagelsesdato
-            //AnmodningBeskrivelse = getOS2Submission.Result?.DescriptionFieldValue
+            AktindsigtsDato = modtagelsesdato,
+            Lovgivning = lovgivning
         };
 
         var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"DeskproID {job.DeskproTicketId}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
     }
 
+    private static DateTime? GetDateTimeFieldValue(TicketDto deskproTicket, int fieldId)
+    {
+        var fieldValue = deskproTicket.Fields.FirstOrDefault(x => x.Id == fieldId)?.Values.FirstOrDefault();
+        if (fieldValue.TryParseDeskproDateTime(out DateTime? datetime))
+        {
+            return datetime;
+        }
+
+        return null;
+    }
+
+    private static string GetChoiceFieldValue(TicketDto deskproTicket, int fieldId)
+    {
+        var choiceId = Convert.ToInt32(deskproTicket.Fields.FirstOrDefault(x => x.Id == fieldId)?.Values.FirstOrDefault());
+        var choices = deskproTicket.Fields.FirstOrDefault(x => x.Id == fieldId)?.Choices;
+        if (choices != null && choices.TryGetValue(choiceId, out string? value))
+        {
+            return value ?? string.Empty;
+        }
+
+        return string.Empty;
+    }
 }

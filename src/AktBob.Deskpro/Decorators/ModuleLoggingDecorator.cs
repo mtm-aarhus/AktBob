@@ -1,4 +1,6 @@
-﻿namespace AktBob.Deskpro.Decorators;
+﻿using Microsoft.AspNetCore.Razor.TagHelpers;
+
+namespace AktBob.Deskpro.Decorators;
 
 internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModule> logger) : IDeskproModule
 {
@@ -126,5 +128,18 @@ internal class ModuleLoggingDecorator(IDeskproModule inner, ILogger<DeskproModul
     {
         _logger.LogInformation("Enqueuing job: Invoke Deskpro inbound webhook {id} with payload {payload}", webhookId, payload);
         _inner.InvokeWebhook(webhookId, payload);
+    }
+
+    public async Task<Result<TeamDto>> GetTeam(int teamId, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Getting Deskpro team {id}", teamId);
+
+        var result = await _inner.GetTeam(teamId, cancellationToken);
+        if (!result.IsSuccess)
+        {
+            _logger.LogDebug("{name}: {errors}", nameof(GetTeam), result.Errors);
+        }
+
+        return result;
     }
 }
