@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Tickets;
 
-internal record GetTicketRequest(int Id);
+internal record GetTicketRequest(int Id, string? CaseNumber, string? CaseUrl, string? SharepointFolderName);
 
 internal class GetTicket(ITicketRepository ticketRepository) : Endpoint<GetTicketRequest, TicketDto>
 {

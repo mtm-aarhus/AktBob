@@ -57,13 +57,12 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             : Task.FromResult(Result<PersonDto>.Error());
 
         var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproTicketId);
-        var getOS2Submission = unitOfWork.OS2FormsSubmissions.GetByDeskproTicketId(job.DeskproTicketId);
+        //var getOS2Submission = unitOfWork.OS2FormsSubmissions.GetByDeskproTicketId(job.DeskproTicketId);
 
         await Task.WhenAll([
             getPerson,
             getAgent,
-            getDatabaseTicket,
-            getOS2Submission]);
+            getDatabaseTicket]);
 
         if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
 
@@ -76,8 +75,8 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             Aktindsigtsovermappe = getDatabaseTicket.Result?.SharepointFolderName,
             SagsbehandlerEmail = getAgent.Result.Value?.Email,
             DeskProID = job.DeskproTicketId,
-            AktindsigtsDato = modtagelsesdato,
-            AnmodningBeskrivelse = getOS2Submission.Result?.DescriptionFieldValue
+            AktindsigtsDato = modtagelsesdato
+            //AnmodningBeskrivelse = getOS2Submission.Result?.DescriptionFieldValue
         };
 
         var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"DeskproID {job.DeskproTicketId}", payload.ToJson());
