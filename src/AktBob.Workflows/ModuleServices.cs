@@ -6,6 +6,7 @@ using AktBob.Workflows.Processes;
 using AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 using AktBob.Workflows.Processes.CreateDocumentListQueueItem;
 using AktBob.Workflows.Processes.Cleanup;
+using Hangfire.Sagas;
 
 namespace AktBob.Workflows;
 public static class ModuleServices
@@ -41,6 +42,12 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<RegisterCleanedUpFilArkivFileJob>, RegisterCleanedUpFilArkivFile>();
         services.AddScoped<IJobHandler<UpdateDeskproSetFærdigbehandletDatoFieldJob>, UpdateDeskproSetFærdigbehandletDatoField>();
         services.AddScoped<IJobHandler<ScreeningIsFinishedNotificationJob>, ScreeningIsFinishedNotification>();
+
+        // Hangfire.Sagas
+        var connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("Hangfire"));
+        services.AddHangfireSagas(connectionString, [
+
+            ]);
 
         return services;
     }
