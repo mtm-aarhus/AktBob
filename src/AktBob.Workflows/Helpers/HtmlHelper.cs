@@ -40,7 +40,6 @@ internal static class HtmlHelper
         string appRoot = AppDomain.CurrentDomain.BaseDirectory;
         var template = isAgentNote ? "message-agent-note.html" : "message.html";
         string messageTemplatePath = "HtmlTemplates/" + template;
-        var messageTemplate = File.ReadAllText(messageTemplatePath);
 
         var attachmentFileNames = attachments.Select(a =>
             GenerateHtml(
@@ -61,7 +60,7 @@ internal static class HtmlHelper
             { "messageContent", content }
         };
 
-        var html = messageTemplate.ReplacePlaceholders(dictionary);
+        var html = GenerateHtml(dictionary, messageTemplatePath);
         return html;
     }
 }
