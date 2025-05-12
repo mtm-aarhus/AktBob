@@ -1,2 +1,0 @@
-﻿namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
-internal record ScreeningIsFinishedNotificationJob(PodioItemId PodioItemId, Guid FilArkivCaseId);

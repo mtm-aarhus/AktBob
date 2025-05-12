@@ -6,7 +6,7 @@ using AktBob.Workflows.Helpers;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
-internal class ScreeningIsFinishedNotification : IJobHandler<ScreeningIsFinishedNotificationJob>
+internal class ScreeningIsFinishedEmailNotification : IJobHandler<ScreeningIsFinishedEmailNotificationJob>
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IAppConfig _appConfig;
@@ -14,13 +14,13 @@ internal class ScreeningIsFinishedNotification : IJobHandler<ScreeningIsFinished
     private record FieldSection(int AppId, string Label);
 
 
-    public ScreeningIsFinishedNotification(IServiceScopeFactory serviceScopeFactory, IAppConfig appConfig)
+    public ScreeningIsFinishedEmailNotification(IServiceScopeFactory serviceScopeFactory, IAppConfig appConfig)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _appConfig = appConfig;
     }
 
-    public async Task Handle(ScreeningIsFinishedNotificationJob job, CancellationToken cancellationToken = default)
+    public async Task Handle(ScreeningIsFinishedEmailNotificationJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();

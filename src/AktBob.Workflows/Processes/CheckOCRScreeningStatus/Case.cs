@@ -1,13 +1,25 @@
 ﻿namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
-public class Case
+internal class Case
 {
     public Guid FilArkivCaseId { get; }
     public PodioItemId PodioItemId { get; }
-    public Dictionary<Guid, bool> Files { get; set; } = new();
+    public Dictionary<Guid, File> Files { get; set; } = new();
 
     public Case(Guid filArkivCaseId, PodioItemId podioItemId)
     {
         FilArkivCaseId = filArkivCaseId;
         PodioItemId = podioItemId;
     }
+
+    public File? GetFile(Guid id)
+    {
+        if (Files.TryGetValue(id, out var file))
+        {
+            return file;
+        }
+
+        return null;
+    }
+
+    public bool AnyFilesNotFinished => Files.Values.Any(f => !f.IsFinished);
 }

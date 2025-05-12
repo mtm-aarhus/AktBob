@@ -57,7 +57,7 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
             foreach (var document in documentOverview.Items)
             {
                 var documentFileIds = document.Files.Select(f => f.Id);
-                @case.Files.AddRange(documentFileIds.Select(f => new KeyValuePair<Guid, bool>(f, false)));
+                @case.Files.AddRange(documentFileIds.Select(f => new KeyValuePair<Guid, File>(f, new File())));
             }
 
             pageIndex++;
@@ -65,15 +65,15 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
 
         _logger.LogDebug("Case {caseId}: {count} files registered", @case.FilArkivCaseId, @case.Files.Count());
 
+        if (Settings.ShouldUpdatePodioItemImmediately(_configuration))
+        {
+            jobDispatcher.Dispatch(new UpdatePodioFilArkivFieldsJob(job.PodioItemId, @case.FilArkivCaseId));
+        }
+
         // Enqueue job: query files processing status
         foreach (var file in @case.Files)
         {
             jobDispatcher.Dispatch(new QueryFileProcessingStatusJob(job.PodioItemId, job.FilArkivCaseId, file.Key, 0));
-        }
-
-        if (Settings.ShouldUpdatePodioItemImmediately(_configuration))
-        {
-            UpdatePodioField.SetFilArkivCaseId(podio, _configuration, @case.FilArkivCaseId, @case.PodioItemId);
         }
     }
 }

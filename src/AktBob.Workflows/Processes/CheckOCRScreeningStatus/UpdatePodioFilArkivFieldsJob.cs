@@ -1,0 +1,2 @@
+﻿namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
+internal record UpdatePodioFilArkivFieldsJob(PodioItemId PodioItemId, Guid FilArkivCaseId);

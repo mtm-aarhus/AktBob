@@ -31,6 +31,7 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
         var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
         var filArkivCoreClient = scope.ServiceProvider.GetRequiredServiceOrThrow<FilArkivCoreClient>();
 
+        // Get cached data
         if (!CachedData.Instance.Cases.TryGetValue(job.FilArkivCaseId, out var @case))
         {
             _logger.LogDebug("FilArkivCase not found in cache. Reinitializing CheckOCRScreeningStatus job for Podio {itemId} FilArkivCase {caseId}.", job.PodioItemId, job.FilArkivCaseId);
@@ -38,48 +39,66 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
             return;
         }
 
-        var file = @case.Files[job.FilArkivFileId];
-        var rand = new Random();
-        var next = rand.Next(50);
-        var response = await Task.FromResult(new FileProcessResponse { IsBeingProcessed = next >= 35, IsInQueue = next >= 35 }); // await filArkivCoreClient.GetFileProcessStatusFileAsync(new FileProcessStatusFileParameters { FileId = job.FilArkivFileId });
+        // Ensure file is in the cache
+        var file = @case.GetFile(job.FilArkivFileId);
+        if (file == null)
+        {
+            _logger.LogDebug("FilArkivFile {id} not found in cache. Reinitializing CheckOCRScreeningStatus job for Podio {itemId} FilArkivCase {caseId}.", job.FilArkivFileId, job.PodioItemId, job.FilArkivCaseId);
+            _jobDispatcher.Dispatch(new CheckOCRScreeningStatusRegisterFilesJob(job.FilArkivCaseId, job.PodioItemId));
+            return;
+        }
 
+        // If the file has already been checked, try if notifying can be done and then exit early
+        if (file.IsFinished)
+        {
+            NotifyWhenAllFilesAreFinished(job.PodioItemId, @case);
+            return;
+        }
+
+        // Get current status from FilArkiv
+        var response = await filArkivCoreClient.GetFileProcessStatusFileAsync(new FileProcessStatusFileParameters { FileId = job.FilArkivFileId });
         if (response.IsInQueue || response.IsBeingProcessed)
         {
             // File not finished yet - reschedule
-            var delay = TimeSpan.FromSeconds(Math.Clamp(10 + Math.Pow(job.Count, 2), 0, 600));
-            _logger.LogDebug("OCR-screening not finished yet, FilArkivCase {caseId} FilArkivFile {fileId}. Retry in {delay}", job.FilArkivCaseId, job.FilArkivFileId, delay);
-            _jobDispatcher.Dispatch(job with { Count = job.Count + 1 }, delay);
+            RescheduleFileStatusQuery(job);
+            return;
         }
-        else
-        {
-            _logger.LogInformation("Case {caseId} File {fileId} finished ('{fileName}')", @case.FilArkivCaseId, job.FilArkivFileId, response.FileName);
-            @case.Files[job.FilArkivFileId] = true;
 
-            if (!@case.Files.Any(f => f.Value == false))
-            {
-                NotifyAllFilesAreDone(podio, @case);
-            }
-        }
+        // Finished - update cache
+        _logger.LogInformation("Case {caseId} File {fileId} finished ('{fileName}')", @case.FilArkivCaseId, job.FilArkivFileId, response.FileName);
+        file.SetStatus(true);
+
+        // Notify if all files are finished
+        NotifyWhenAllFilesAreFinished(job.PodioItemId, @case);
     }
 
-    private void NotifyAllFilesAreDone(IPodioModule podio, Case @case)
+    private void RescheduleFileStatusQuery(QueryFileProcessingStatusJob job)
     {
+        var delay = TimeSpan.FromSeconds(Math.Clamp(10 + Math.Pow(job.Count, 2), 0, 600));
+        _logger.LogDebug("OCR-screening not finished yet, FilArkivCase {caseId} FilArkivFile {fileId}. Retry in {delay}", job.FilArkivCaseId, job.FilArkivFileId, delay);
+        _jobDispatcher.Dispatch(job with { Count = job.Count + 1 }, delay);
+    }
+
+    private void NotifyWhenAllFilesAreFinished(PodioItemId podioItemId, Case @case)
+    {
+        // Not all files are finished - exit
+        if (@case.AnyFilesNotFinished)
+        {
+            return;
+        }
+
+        // All files are finished
         _logger.LogInformation("FilArkiv case {id}, PodioItemId {podioItemId}: all files finished OCR screening", @case.FilArkivCaseId, @case.PodioItemId);
+
+        // Remove case from cache
         CachedData.Instance.Cases.TryRemove(@case.FilArkivCaseId, out Case? removedCase);
 
+        // Dispatch notification jobs
         if (!Settings.ShouldUpdatePodioItemImmediately(_configuration))
         {
-            UpdatePodioField.SetFilArkivCaseId(podio, _configuration, @case.FilArkivCaseId, @case.PodioItemId);
+            _jobDispatcher.Dispatch(new UpdatePodioFilArkivFieldsJob(podioItemId, @case.FilArkivCaseId));
         }
-
-        PostCommentOnPodioItem(podio, @case);
-        _jobDispatcher.Dispatch(new ScreeningIsFinishedNotificationJob(@case.PodioItemId, @case.FilArkivCaseId));
-    }
-
-    private static void PostCommentOnPodioItem(IPodioModule podio, Case @case)
-    {
-        var commentText = "Screening af dokumenterne er færdig.";
-        var postCommandCommand = new PostCommentCommand(@case.PodioItemId, commentText);
-        podio.PostComment(postCommandCommand);
+        _jobDispatcher.Dispatch(new ScreeningIsFinishedEmailNotificationJob(@case.PodioItemId, @case.FilArkivCaseId));
+        _jobDispatcher.Dispatch(new ScreeningIsFinishedPodioNotificationJob(@case.PodioItemId));
     }
 }

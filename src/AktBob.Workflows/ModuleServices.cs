@@ -20,6 +20,9 @@ public static class ModuleServices
         // CheckOCRScreeningStatus
         services.AddScoped<IJobHandler<CheckOCRScreeningStatusRegisterFilesJob>, CheckOCRScreeningStatusRegisterFiles>();
         services.AddScoped<IJobHandler<QueryFileProcessingStatusJob>, QueryFileProcessingStatus>();
+        services.AddScoped<IJobHandler<ScreeningIsFinishedEmailNotificationJob>, ScreeningIsFinishedEmailNotification>();
+        services.AddScoped<IJobHandler<ScreeningIsFinishedPodioNotificationJob>, ScreeningIsFinishedPodioNotification>();
+        services.AddScoped<IJobHandler<UpdatePodioFilArkivFieldsJob>, UpdatePodioFilArkivFields>();
 
         // AddOrUpdateDeskproTicketToGetOrganized
         services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
@@ -40,7 +43,6 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<CreateCleanupSharepointQueueItemJob>, CreateCleanupSharepointQueueItem>();
         services.AddScoped<IJobHandler<RegisterCleanedUpFilArkivFileJob>, RegisterCleanedUpFilArkivFile>();
         services.AddScoped<IJobHandler<UpdateDeskproSetFærdigbehandletDatoFieldJob>, UpdateDeskproSetFærdigbehandletDatoField>();
-        services.AddScoped<IJobHandler<ScreeningIsFinishedNotificationJob>, ScreeningIsFinishedNotification>();
 
         return services;
     }
