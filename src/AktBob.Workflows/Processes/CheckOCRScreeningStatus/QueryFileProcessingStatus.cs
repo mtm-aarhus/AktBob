@@ -30,7 +30,7 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
         using var scope = _serviceProviderFactory.CreateScope();
         var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
         var filArkivCoreClient = scope.ServiceProvider.GetRequiredServiceOrThrow<FilArkivCoreClient>();
-        
+
         if (!CachedData.Instance.Cases.TryGetValue(job.FilArkivCaseId, out var @case))
         {
             _logger.LogDebug("FilArkivCase not found in cache. Reinitializing CheckOCRScreeningStatus job for Podio {itemId} FilArkivCase {caseId}.", job.PodioItemId, job.FilArkivCaseId);
@@ -43,7 +43,14 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
         var next = rand.Next(50);
         var response = await Task.FromResult(new FileProcessResponse { IsBeingProcessed = next >= 35, IsInQueue = next >= 35 }); // await filArkivCoreClient.GetFileProcessStatusFileAsync(new FileProcessStatusFileParameters { FileId = job.FilArkivFileId });
 
-        if (!response.IsInQueue && !response.IsBeingProcessed)
+        if (response.IsInQueue || response.IsBeingProcessed)
+        {
+            // File not finished yet - reschedule
+            var delay = TimeSpan.FromSeconds(Math.Clamp(10 + Math.Pow(job.Count, 2), 0, 600));
+            _logger.LogDebug("OCR-screening not finished yet, FilArkivCase {caseId} FilArkivFile {fileId}. Retry in {delay}", job.FilArkivCaseId, job.FilArkivFileId, delay);
+            _jobDispatcher.Dispatch(job with { Count = job.Count + 1 }, delay);
+        }
+        else
         {
             _logger.LogInformation("Case {caseId} File {fileId} finished ('{fileName}')", @case.FilArkivCaseId, job.FilArkivFileId, response.FileName);
             @case.Files[job.FilArkivFileId] = true;
@@ -52,14 +59,7 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
             {
                 NotifyAllFilesAreDone(podio, @case);
             }
-            
-            return;
         }
-
-        // File not finished yet - reschedule
-        var delay = TimeSpan.FromSeconds(Math.Clamp(10 + Math.Pow(job.Count, 2), 0, 600));
-        _logger.LogDebug("OCR-screening not finished yet, FilArkivCase {caseId} FilArkivFile {fileId}. Retry in {delay}", job.FilArkivCaseId, job.FilArkivFileId, delay);
-        _jobDispatcher.Dispatch(job with { Count = job.Count + 1 }, delay);
     }
 
     private void NotifyAllFilesAreDone(IPodioModule podio, Case @case)
