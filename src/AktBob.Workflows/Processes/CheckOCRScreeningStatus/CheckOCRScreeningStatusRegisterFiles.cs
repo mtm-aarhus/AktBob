@@ -22,7 +22,17 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
 
         var @case = new Case(job.FilArkivCaseId, job.PodioItemId);
 
-        if (!cachedData.Cases.TryAdd(job.FilArkivCaseId, @case)) throw new BusinessException("Unable to add case to cache");
+        if (!cachedData.Cases.TryAdd(job.FilArkivCaseId, @case))
+        {
+            if (cachedData.Cases.ContainsKey(job.FilArkivCaseId))
+            {
+                _logger.LogWarning("Case {caseId} already added to cache", job.FilArkivCaseId);
+                return;
+            }
+
+            throw new BusinessException("Unable to add case to cache");
+        }
+
 
         bool moveToNextPage = true;
         int pageIndex = 1; // First page = pageIndex = 1
@@ -47,7 +57,7 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
             foreach (var document in documentOverview.Items)
             {
                 var documentFileIds = document.Files.Select(f => f.Id);
-                @case.Files.AddRange(documentFileIds);
+                @case.Files.AddRange(documentFileIds.Select(f => new KeyValuePair<Guid, bool>(f, false)));
             }
 
             pageIndex++;
@@ -56,7 +66,10 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
         _logger.LogDebug("Case {caseId}: {count} files registered", @case.FilArkivCaseId, @case.Files.Count());
 
         // Enqueue job: query files processing status
-        jobDispatcher.Dispatch(new QueryFilesProcessingStatusJob(job.FilArkivCaseId));
+        foreach (var file in @case.Files)
+        {
+            jobDispatcher.Dispatch(new QueryFileProcessingStatusJob(job.PodioItemId, job.FilArkivCaseId, file.Key, 0));
+        }
 
         if (Settings.ShouldUpdatePodioItemImmediately(_configuration))
         {

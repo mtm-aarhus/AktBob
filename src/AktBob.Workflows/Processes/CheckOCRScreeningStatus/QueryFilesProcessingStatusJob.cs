@@ -1,3 +1,3 @@
-﻿namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
+﻿//namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
-internal record QueryFilesProcessingStatusJob(Guid FilArkivCaseId);
+//internal record QueryFilesProcessingStatusJob(Guid FilArkivCaseId);
