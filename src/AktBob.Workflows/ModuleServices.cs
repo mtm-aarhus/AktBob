@@ -1,5 +1,4 @@
-﻿using FilArkivCore.Web.Client;
-using AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
+﻿using AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 using AktBob.Shared.Jobs;
 using AktBob.Workflows.Processes.AddMessageToGetOrganized;
 using AktBob.Workflows.Processes;
@@ -46,16 +45,4 @@ public static class ModuleServices
 
         return services;
     }
-
-    public static IServiceCollection AddWorkflowModule(this IServiceCollection services, IConfiguration configuration)
-    {
-        // FilArkiv client
-        var filArkivUrl = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:BaseAddress"));
-        var filArkivClientId = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientId"));
-        var filArkivClientSecret = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientSecret"));
-        services.AddFilArkivApiClient(filArkivUrl, filArkivClientId, filArkivClientSecret);
-
-        return services;
-    }
-
 }

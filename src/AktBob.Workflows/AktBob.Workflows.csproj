@@ -7,8 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FilArkivCore.Web.Client" Version="1.0.217" />
-    <PackageReference Include="FilArkivCore.Web.Shared" Version="1.0.251" />
     <PackageReference Include="System.Text.Json" Version="9.0.2" />
   </ItemGroup>
 
@@ -17,6 +15,7 @@
     <ProjectReference Include="..\AktBob.Database\AktBob.Database.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Email.Contracts\AktBob.Email.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.FilArkiv.Contracts\AktBob.FilArkiv.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.GetOrganized.Contracts\AktBob.GetOrganized.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.OpenOrchestrator.Contracts\AktBob.OpenOrchestrator.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.OS2Forms.Contracts\AktBob.OS2Forms.Contracts.csproj" />

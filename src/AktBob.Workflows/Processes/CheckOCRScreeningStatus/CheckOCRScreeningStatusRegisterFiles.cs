@@ -1,8 +1,7 @@
-﻿using AktBob.Podio.Contracts;
+﻿using AktBob.FilArkiv.Contracts;
+using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
-using FilArkivCore.Web.Client;
-using FilArkivCore.Web.Shared.Documents;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
@@ -17,7 +16,7 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
         var scope = _serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
         var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
-        var filArkivCoreClient = scope.ServiceProvider.GetRequiredServiceOrThrow<FilArkivCoreClient>();
+        var filArkiv = scope.ServiceProvider.GetRequiredServiceOrThrow<IFilArkivModule>();
         var cachedData = CachedData.Instance;
 
         var @case = new Case(job.FilArkivCaseId, job.PodioItemId);
@@ -33,34 +32,13 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
             throw new BusinessException("Unable to add case to cache");
         }
 
-
-        bool moveToNextPage = true;
-        int pageIndex = 1; // First page = pageIndex = 1
-
-        while (moveToNextPage)
+        var documents = await filArkiv.GetDocumentsByCaseId(@case.FilArkivCaseId, cancellationToken);
+        if (!documents.IsSuccess) throw new BusinessException($"Unable to get document for case {@case.FilArkivCaseId} from FilArkiv");
+        
+        foreach (var document in documents.Value)
         {
-            var documentOverviewParameters = new DocumentOverviewParameters
-            {
-                CaseId = @case.FilArkivCaseId.ToString(),
-                PageIndex = pageIndex,
-                PageSize = 100
-            };
-
-            var documentOverview = await filArkivCoreClient.GetCaseDocumentOverviewListAsync(documentOverviewParameters);
-            if (documentOverview == null) throw new BusinessException("Unable to get case from FilArkiv");
-            if (!documentOverview.HasNextPage)
-            {
-                moveToNextPage = false;
-            }
-
-            // Add files to cached case object
-            foreach (var document in documentOverview.Items)
-            {
-                var documentFileIds = document.Files.Select(f => f.Id);
-                @case.Files.AddRange(documentFileIds.Select(f => new KeyValuePair<Guid, File>(f, new File())));
-            }
-
-            pageIndex++;
+            var documentFileIds = document.Files.Select(f => f.Id);
+            @case.Files.AddRange(documentFileIds.Select(f => new KeyValuePair<Guid, File>(f, new File())));
         }
 
         _logger.LogDebug("Case {caseId}: {count} files registered", @case.FilArkivCaseId, @case.Files.Count());

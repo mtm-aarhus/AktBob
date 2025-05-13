@@ -1,8 +1,7 @@
-﻿using AktBob.Podio.Contracts;
+﻿using AktBob.FilArkiv.Contracts;
+using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
-using FilArkivCore.Web.Client;
-using FilArkivCore.Web.Shared.FileProcess;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
@@ -29,7 +28,7 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
     {
         using var scope = _serviceProviderFactory.CreateScope();
         var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
-        var filArkivCoreClient = scope.ServiceProvider.GetRequiredServiceOrThrow<FilArkivCoreClient>();
+        var filArkiv = scope.ServiceProvider.GetRequiredServiceOrThrow<IFilArkivModule>();
 
         // Get cached data
         if (!CachedData.Instance.Cases.TryGetValue(job.FilArkivCaseId, out var @case))
@@ -56,8 +55,22 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
         }
 
         // Get current status from FilArkiv
-        var response = await filArkivCoreClient.GetFileProcessStatusFileAsync(new FileProcessStatusFileParameters { FileId = job.FilArkivFileId });
-        if (response.IsInQueue || response.IsBeingProcessed)
+        var response = await filArkiv.GetFileProcessStatus(job.FilArkivFileId, cancellationToken);
+        if (!response.IsSuccess)
+        {
+            file.SetStatus(true);
+            NotifyWhenAllFilesAreFinished(job.PodioItemId, @case);
+
+            if (response.Status == ResultStatus.NotFound)
+            {
+                _logger.LogError("FilArkiv file {fileId} not found.", job.FilArkivFileId);
+                return;
+            }
+
+            throw new BusinessException($"Unable to get file process status for FilArkiv file {job.FilArkivFileId}");
+        }
+
+        if (response.Value.IsInQueue || response.Value.IsBeingProcessed)
         {
             // File not finished yet - reschedule
             RescheduleFileStatusQuery(job);
@@ -65,7 +78,7 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
         }
 
         // Finished - update cache
-        _logger.LogInformation("Case {caseId} File {fileId} finished ('{fileName}')", @case.FilArkivCaseId, job.FilArkivFileId, response.FileName);
+        _logger.LogInformation("Case {caseId} File {fileId} finished", @case.FilArkivCaseId, job.FilArkivFileId);
         file.SetStatus(true);
 
         // Notify if all files are finished
