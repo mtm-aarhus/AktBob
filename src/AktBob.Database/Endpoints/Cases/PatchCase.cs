@@ -1,6 +1,6 @@
-﻿using AktBob.Database.Contracts;
-using AktBob.Database.Dtos;
-using AktBob.Database.Extensions;
+﻿using AktBob.Database.Dtos;
+using AktBob.Shared;
+using AktBob.Shared.Jobs;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
@@ -16,65 +16,28 @@ internal record PatchCaseRequest
 
 }
 
-internal class PatchCase(ICaseRepository caseRepository) : Endpoint<PatchCaseRequest, CaseDto>
+internal class PatchCase(IJobDispatcher jobDispatcher) : Endpoint<PatchCaseRequest, CaseDto>
 {
-    private readonly ICaseRepository _caseRepository = caseRepository;
+    private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public override void Configure()
     {
         Patch("/Database/Cases/{Id}");
         Options(x => x.WithTags("Database/Cases"));
 
-        Description(x => x
-            .Produces<CaseDto>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status404NotFound));
+        Description(x => x.Produces<CaseDto>(StatusCodes.Status204NoContent));
     }
 
     public override async Task HandleAsync(PatchCaseRequest req, CancellationToken ct)
     {
-        // Get existing case from repository
-        var @case = await _caseRepository.Get(req.Id);
+        var job = new UpdateDatabaseCaseJob(
+            Id: req.Id, 
+            PodioItemId: req.PodioItemId,
+            CaseNumber: req.CaseNumber, 
+            FilArkivCaseId: req.FilArkivCaseId, 
+            SharepointFolderName: req.SharepointFolderName);
 
-        if (@case == null)
-        {
-            await SendNotFoundAsync(ct);
-            return;
-        }
-
-        // Update case properties
-        if (!string.IsNullOrEmpty(req.CaseNumber))
-        {
-            @case.CaseNumber = req.CaseNumber;
-        }
-
-        if (!string.IsNullOrEmpty(req.SharepointFolderName))
-        {
-            @case.SharepointFolderName = req.SharepointFolderName;
-        }
-
-        @case.PodioItemId = req.PodioItemId ?? @case.PodioItemId;
-        @case.FilArkivCaseId = req.FilArkivCaseId ?? @case.FilArkivCaseId;
-
-
-        // Update entity
-        var updated = await _caseRepository.Update(@case);
-
-
-        // Response
-        if (updated)
-        {
-            var updatedCase = await _caseRepository.Get(req.Id);
-
-            if (updatedCase == null)
-            {
-                await SendErrorsAsync(500, ct);
-                return;
-            }
-
-            await SendOkAsync(updatedCase.ToDto(), ct);
-            return;
-        }
-
-        await SendErrorsAsync(500, ct);
+        _jobDispatcher.Dispatch(job);
+        await SendNoContentAsync(ct);
     }
 }

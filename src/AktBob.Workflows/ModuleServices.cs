@@ -23,10 +23,8 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<ScreeningIsFinishedPodioNotificationJob>, ScreeningIsFinishedPodioNotification>();
         services.AddScoped<IJobHandler<UpdatePodioFilArkivFieldsJob>, UpdatePodioFilArkivFields>();
 
-        // AddOrUpdateDeskproTicketToGetOrganized
-        services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
-
         // Other workflows
+        services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
         services.AddScoped<IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>, CreateAfgørelsesskrivelseQueueItem>();
         services.AddScoped<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItem>();
         services.AddScoped<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCase>();
@@ -43,6 +41,9 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<RegisterCleanedUpFilArkivFileJob>, RegisterCleanedUpFilArkivFile>();
         services.AddScoped<IJobHandler<UpdateDeskproSetFærdigbehandletDatoFieldJob>, UpdateDeskproSetFærdigbehandletDatoField>();
         services.AddScoped<IJobHandler<CreateCloseNovaCaseQueueItemJob>, CreateCloseNovaCaseQueueItem>();
+        services.AddScoped<IJobHandler<RegisterDeskproTicketJob>, RegisterDeskproTicket>();
+        services.AddScoped<IJobHandler<UpdateDatabaseTicketJob>, UpdateDatabaseTicket>();
+        services.AddScoped<IJobHandler<UpdateDatabaseCaseJob>, UpdateDatabaseCase>();
 
         return services;
     }

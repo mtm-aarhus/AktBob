@@ -1,6 +1,6 @@
-﻿using AktBob.Database.Contracts;
-using AktBob.Database.Dtos;
-using AktBob.Database.Extensions;
+﻿using AktBob.Database.Dtos;
+using AktBob.Shared;
+using AktBob.Shared.Jobs;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
@@ -14,68 +14,22 @@ internal record PatchTicketRequest
     public string? SharepointFolderName { get; set; }
 }
 
-internal class PatchTicket(ITicketRepository ticketRepository) : Endpoint<PatchTicketRequest, TicketDto>
+internal class PatchTicket(IJobDispatcher jobDispatcher) : Endpoint<PatchTicketRequest, TicketDto>
 {
-    private readonly ITicketRepository _ticketRepository = ticketRepository;
+    private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public override void Configure()
     {
         Patch("/Database/Tickets/{Id}");
         Options(x => x.WithTags("Database/Tickets"));
 
-        Description(x => x
-           .Produces<TicketDto>(StatusCodes.Status200OK)
-           .ProducesProblem(StatusCodes.Status404NotFound));
+        Description(x => x.Produces<TicketDto>(StatusCodes.Status204NoContent));
     }
 
     public override async Task HandleAsync(PatchTicketRequest req, CancellationToken ct)
     {
-        // Get existing entity from repository
-        var ticket = await _ticketRepository.Get(req.Id);
-
-        if (ticket == null)
-        {
-            await SendNotFoundAsync();
-            return;
-        }
-
-
-        // Update entity properties
-        if (!string.IsNullOrEmpty(req.CaseNumber))
-        {
-            ticket.CaseNumber = req.CaseNumber;
-        }
-
-        if (!string.IsNullOrEmpty(req.CaseUrl))
-        {
-            ticket.CaseUrl = req.CaseUrl;
-        }
-
-        if (!string.IsNullOrEmpty(req.SharepointFolderName))
-        {
-            ticket.SharepointFolderName = req.SharepointFolderName;
-        }
-
-
-        // Update
-        var updated = await _ticketRepository.Update(ticket);
-
-
-        // Response
-        if (updated)
-        {
-            var updatedTicket = await _ticketRepository.Get(req.Id);
-
-            if (updatedTicket is null)
-            {
-                await SendErrorsAsync();
-                return;
-            }
-
-            await SendOkAsync(updatedTicket.ToDto());
-            return;
-        }
-
-        await SendErrorsAsync();
+        var job = new UpdateDatabaseTicketJob(req.Id, req.CaseNumber, req.CaseUrl, req.SharepointFolderName);
+        _jobDispatcher.Dispatch(job);
+        await SendNoContentAsync(ct);
     }
 }

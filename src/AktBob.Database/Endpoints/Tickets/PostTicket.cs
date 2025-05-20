@@ -1,7 +1,6 @@
-﻿using AktBob.Database.Contracts;
-using AktBob.Database.Dtos;
-using AktBob.Database.Entities;
-using AktBob.Database.Extensions;
+﻿using AktBob.Database.Dtos;
+using AktBob.Shared;
+using AktBob.Shared.Jobs;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -18,35 +17,22 @@ internal class PostTicketRequestValidator : Validator<PostTicketRequest>
     }
 }
 
-internal class PostTicket(ITicketRepository ticketRepository) : Endpoint<PostTicketRequest, TicketDto>
+internal class PostTicket(IJobDispatcher jobDispatcher) : Endpoint<PostTicketRequest, TicketDto>
 {
-    private readonly ITicketRepository _ticketRepository = ticketRepository;
+    private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
 
     public override void Configure()
     {
         Post("/Database/Tickets");
         Options(x => x.WithTags("Database/Tickets"));
 
-        Description(x => x
-          .Produces<TicketDto>(StatusCodes.Status201Created)
-          .ProducesProblem(StatusCodes.Status400BadRequest));
+        Description(x => x.Produces<TicketDto>(StatusCodes.Status204NoContent));
     }
 
     public override async Task HandleAsync(PostTicketRequest req, CancellationToken ct)
     {
-        var ticket = new Ticket
-        {
-            DeskproId = req.DeskproId,
-        };
-
-        var success = await _ticketRepository.Add(ticket);
-
-        if (!success)
-        {
-            await SendErrorsAsync(500, ct);
-            return;
-        }
-
-        await SendOkAsync(ticket.ToDto(), ct);
+        var job = new RegisterDeskproTicketJob(req.DeskproId);
+        _jobDispatcher.Dispatch(job);
+        await SendNoContentAsync(ct);
     }
 }
