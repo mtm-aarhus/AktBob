@@ -1,12 +1,12 @@
 ﻿using AktBob.Deskpro.Contracts.DTOs;
 using System.Text;
-using AktBob.CloudConvert.Contracts;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Workflows.Helpers;
 using ErrorOr;
+using AktBob.Shared.Contracts;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 

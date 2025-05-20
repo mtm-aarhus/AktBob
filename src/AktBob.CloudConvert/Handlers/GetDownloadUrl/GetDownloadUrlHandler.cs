@@ -1,6 +1,7 @@
 ﻿using AktBob.Shared;
 
-namespace AktBob.CloudConvert.Handlers;
+namespace AktBob.CloudConvert.Handlers.GetDownloadUrl;
+
 internal class GetDownloadUrlHandler(ICloudConvertClient cloudConvertClient, ITimeProvider timeProvider) : IGetDownloadUrlHandler
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;

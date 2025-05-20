@@ -1,10 +1,10 @@
-﻿using AktBob.CloudConvert.Handlers;
+﻿using AktBob.CloudConvert.Handlers.DownloadFile;
 using ErrorOr;
 using FluentAssertions;
 using NSubstitute;
 using System.Text;
 
-namespace AktBob.CloudConvert.Tests.Unit.Handlers;
+namespace AktBob.CloudConvert.Tests.Unit.Handlers.DownloadFile;
 
 public class DownloadFileHandlerTests
 {

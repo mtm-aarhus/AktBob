@@ -1,6 +1,7 @@
 ﻿using AktBob.CloudConvert.Models;
 
-namespace AktBob.CloudConvert.Handlers;
+namespace AktBob.CloudConvert.Handlers.ConvertHtmlToPdf;
+
 internal class ConvertHtmlToPdfHandler(ICloudConvertClient cloudConvertClient) : IConvertHtmlToPdfHandler
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;

@@ -1,4 +1,4 @@
-﻿namespace AktBob.CloudConvert.Contracts;
+﻿namespace AktBob.CloudConvert.Handlers.GenerateTasks;
 
 internal interface IGenerateTasksHandler
 {

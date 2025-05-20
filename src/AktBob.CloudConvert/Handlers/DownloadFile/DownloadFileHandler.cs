@@ -1,4 +1,5 @@
-﻿namespace AktBob.CloudConvert.Handlers;
+﻿namespace AktBob.CloudConvert.Handlers.DownloadFile;
+
 internal class DownloadFileHandler(ICloudConvertClient cloudConvertClient) : IDownloadFileHandler
 {
     private readonly ICloudConvertClient _cloudConvertClient = cloudConvertClient;

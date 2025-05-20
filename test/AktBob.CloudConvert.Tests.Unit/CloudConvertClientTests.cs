@@ -1,17 +1,14 @@
 using AktBob.CloudConvert.Models.JobResponse;
 using AktBob.Tests.Unit.Shared;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Testing;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 namespace AktBob.CloudConvert.Tests.Unit;
 
 public class CloudConvertClientTests
 {
-    private readonly FakeLogger<CloudConvertClient> _logger;
-
     [Fact]
     public async Task CreateJob_Should_ReturnJobId_WhenResponseIsSuccessful()
     {
@@ -40,7 +37,7 @@ public class CloudConvertClientTests
     [InlineData(HttpStatusCode.BadRequest)]
     [InlineData(HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.Unauthorized)]
-    public async Task CreateJob_Should_ReturnError_WhenResponseIsNotSuccessful(HttpStatusCode statusCode)
+    public async Task CreateJob_ShouldThrowException_WhenResponseIsNotSuccessful(HttpStatusCode statusCode)
     {
         // Arrange
         var response = new {};
@@ -49,18 +46,16 @@ public class CloudConvertClientTests
         var sut = new CloudConvertClient(httpClient);
 
         // Act
-        var result = await sut.CreateJob(new { }, CancellationToken.None);
+        var act = () => sut.CreateJob(new { }, CancellationToken.None);
 
         // Assert
-        result.IsError.Should().BeTrue();
-        _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
-        _logger.Collector.LatestRecord.Exception.Should().BeOfType(typeof(HttpRequestException));
+        await act.Should().ThrowAsync<HttpRequestException>();
     }
 
 
 
     [Fact]
-    public async Task CreateJob_Should_ReturnError_WhenResponseIsNull()
+    public async Task CreateJob_ShouldThrowException_WhenResponseIsNull()
     {
         // Arrange
         var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -71,15 +66,15 @@ public class CloudConvertClientTests
         var sut = new CloudConvertClient(httpClient);
 
         // Act
-        var result = await sut.CreateJob(new { }, CancellationToken.None);
+        var act = () => sut.CreateJob(new { }, CancellationToken.None);
 
         // Assert
-        result.IsError.Should().BeTrue();
+        await act.Should().ThrowAsync<JsonException>();
     }
 
 
     [Fact]
-    public async Task CreateJob_Should_ReturnError_WhenExceptionIsThrown()
+    public async Task CreateJob_Should_RethrowException_WhenExceptionIsThrown()
     {
         // Arrange
         var httpException = new HttpRequestException();
@@ -87,12 +82,10 @@ public class CloudConvertClientTests
         var sut = new CloudConvertClient(httpClient);
 
         // Act
-        var result = await sut.CreateJob(new { }, CancellationToken.None);
+        var act = () => sut.CreateJob(new { }, CancellationToken.None);
 
         // Assert
-        result.IsError.Should().BeTrue();
-        _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
-        _logger.Collector.LatestRecord.Exception.Should().Be(httpException);
+        await act.Should().ThrowAsync<HttpRequestException>();
     }
 
 
@@ -117,7 +110,7 @@ public class CloudConvertClientTests
 
 
     [Fact]
-    public async Task GetJob_ShouldReturnError_WhenJobIsNotFound()
+    public async Task GetJob_ShouldThrowException_WhenJobIsNotFound()
     {
         // Arrange
         var responseMessage = new HttpResponseMessage(HttpStatusCode.NotFound);
@@ -125,17 +118,15 @@ public class CloudConvertClientTests
         var sut = new CloudConvertClient(httpClient);
 
         // Act
-        var result = await sut.GetJob(Guid.NewGuid(), CancellationToken.None);
+        var act = () => sut.GetJob(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
-        result.IsError.Should().BeTrue();
-        _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
-        _logger.Collector.LatestRecord.Exception.Should().BeOfType(typeof(HttpRequestException));
+        await act.Should().ThrowAsync<HttpRequestException>();
     }
 
 
     [Fact]
-    public async Task GetJob_ShouldReturnError_WhenExceptionIsThrown()
+    public async Task GetJob_ShouldRethrowException_WhenExceptionIsThrown()
     {
         // Arrange
         var httpException = new HttpRequestException();
@@ -143,12 +134,10 @@ public class CloudConvertClientTests
         var sut = new CloudConvertClient(httpClient);
 
         // Act
-        var result = await sut.GetJob(Guid.NewGuid(), CancellationToken.None);
+        var act = () => sut.GetJob(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
-        result.IsError.Should().BeTrue();
-        _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
-        _logger.Collector.LatestRecord.Exception.Should().Be(httpException);
+        await act.Should().ThrowAsync<HttpRequestException>();
     }
 
 
@@ -178,7 +167,7 @@ public class CloudConvertClientTests
 
 
     [Fact]
-    public async Task GetFile_ShouldReturnError_WhenFileIsNotFound()
+    public async Task GetFile_ShouldThrowException_WhenFileIsNotFound()
     {
         // Arrange
         var responseMessage = new HttpResponseMessage(HttpStatusCode.NotFound);
@@ -186,17 +175,15 @@ public class CloudConvertClientTests
         var sut = new CloudConvertClient(httpClient);
 
         // Act
-        var result = await sut.GetFile("http://localhost", CancellationToken.None);
+        var act = () => sut.GetFile("http://localhost", CancellationToken.None);
 
         // Assert
-        result.IsError.Should().BeTrue();
-        _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
-        _logger.Collector.LatestRecord.Exception.Should().BeOfType(typeof(HttpRequestException));
+        await act.Should().ThrowAsync<HttpRequestException>();
     }
 
 
     [Fact]
-    public async Task GetFile_ShouldReturnError_WhenExceptionIsThrown()
+    public async Task GetFile_ShouldRethrowException_WhenExceptionIsThrown()
     {
         // Arrange
         var httpException = new HttpRequestException();
@@ -204,11 +191,9 @@ public class CloudConvertClientTests
         var sut = new CloudConvertClient(httpClient);
 
         // Act
-        var result = await sut.GetFile("http://localhost", CancellationToken.None);
+        var act = () => sut.GetFile("http://localhost", CancellationToken.None);
 
         // Assert
-        result.IsError.Should().BeTrue();
-        _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
-        _logger.Collector.LatestRecord.Exception.Should().Be(httpException);
+        await act.Should().ThrowAsync<HttpRequestException>();
     }
 }

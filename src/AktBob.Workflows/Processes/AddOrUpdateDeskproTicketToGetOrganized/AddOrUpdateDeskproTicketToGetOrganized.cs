@@ -1,5 +1,4 @@
-﻿using AktBob.CloudConvert.Contracts;
-using AktBob.Database.Contracts;
+﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
@@ -14,6 +13,7 @@ using AktBob.Workflows.Extensions;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using ErrorOr;
+using AktBob.Shared.Contracts;
 
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>

@@ -1,6 +1,7 @@
 ﻿using AktBob.CloudConvert.Models;
 
-namespace AktBob.CloudConvert.Handlers;
+namespace AktBob.CloudConvert.Handlers.GenerateTasks;
+
 internal class GenerateTasksHandler() : IGenerateTasksHandler
 {
     public ErrorOr<IReadOnlyDictionary<Guid, object>> Handle(IEnumerable<byte[]> items)

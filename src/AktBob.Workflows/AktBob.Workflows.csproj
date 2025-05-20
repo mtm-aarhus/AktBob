@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AktBob.CloudConvert.Contracts\AktBob.CloudConvert.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Database\AktBob.Database.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro.Contracts\AktBob.Deskpro.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Email.Contracts\AktBob.Email.Contracts.csproj" />

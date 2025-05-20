@@ -1,8 +1,8 @@
-﻿using AktBob.CloudConvert.Handlers;
+﻿using AktBob.CloudConvert.Handlers.GenerateTasks;
 using AktBob.CloudConvert.Models;
 using FluentAssertions;
 
-namespace AktBob.CloudConvert.Tests.Unit.Handlers;
+namespace AktBob.CloudConvert.Tests.Unit.Handlers.GenerateTasks;
 
 public class GenerateTasksHandlerTests
 {

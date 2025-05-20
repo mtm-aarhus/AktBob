@@ -1,11 +1,11 @@
-﻿using AktBob.CloudConvert.Handlers;
+﻿using AktBob.CloudConvert.Handlers.GetDownloadUrl;
 using AktBob.CloudConvert.Models.JobResponse;
 using AktBob.Shared;
 using ErrorOr;
 using FluentAssertions;
 using NSubstitute;
 
-namespace AktBob.CloudConvert.Tests.Unit.Handlers;
+namespace AktBob.CloudConvert.Tests.Unit.Handlers.GetDownloadUrl;
 
 public class GetDownloadUrlHandlerTests
 {

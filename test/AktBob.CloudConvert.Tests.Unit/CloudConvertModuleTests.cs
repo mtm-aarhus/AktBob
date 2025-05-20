@@ -1,4 +1,7 @@
-﻿using AktBob.CloudConvert.Contracts;
+﻿using AktBob.CloudConvert.Handlers.ConvertHtmlToPdf;
+using AktBob.CloudConvert.Handlers.DownloadFile;
+using AktBob.CloudConvert.Handlers.GenerateTasks;
+using AktBob.CloudConvert.Handlers.GetDownloadUrl;
 using ErrorOr;
 using FluentAssertions;
 using NSubstitute;
