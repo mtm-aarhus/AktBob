@@ -1,8 +1,8 @@
 ﻿using AktBob.CloudConvert.Handlers;
 using AktBob.CloudConvert.Models;
-using Ardalis.Result;
 using FluentAssertions;
 using NSubstitute;
+using ErrorOr;
 
 namespace AktBob.CloudConvert.Tests.Unit.Handlers;
 
@@ -29,14 +29,14 @@ public class ConvertHtmlToPdfHandlerTests
         var expectedId = Guid.NewGuid();
         _cloudConvertClient
             .CreateJob(Arg.Any<object>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success(expectedId));
+            .Returns(ErrorOrFactory.From(expectedId));
 
         // Act
         var result = await _sut.Handle(tasks, CancellationToken.None);
 
         // Assert
         result.Value.Should().Be(expectedId);
-        result.Status.Should().Be(ResultStatus.Ok);
+        result.IsError.Should().BeFalse();
         await _cloudConvertClient.Received(1).CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
     }
 
@@ -55,7 +55,7 @@ public class ConvertHtmlToPdfHandlerTests
         var result = await _sut.Handle(tasks, CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(ResultStatus.Error);
+        result.IsError.Should().BeTrue();
         result.Errors.Should().NotBeEmpty();
         await _cloudConvertClient.DidNotReceive().CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
     }
@@ -71,7 +71,7 @@ public class ConvertHtmlToPdfHandlerTests
         var result = await _sut.Handle(tasks, CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(ResultStatus.Error);
+        result.IsError.Should().BeTrue();
         result.Errors.Should().NotBeEmpty();
         await _cloudConvertClient.DidNotReceive().CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
     }
@@ -86,13 +86,13 @@ public class ConvertHtmlToPdfHandlerTests
             { Guid.NewGuid(), new { SomeProperty = "Some value 2" } },
             { Guid.NewGuid(), new { SomeProperty = "Some value 3" } }
         };
-        _cloudConvertClient.CreateJob(Arg.Any<object>(), Arg.Any<CancellationToken>()).Returns(Result.Error());
+        _cloudConvertClient.CreateJob(Arg.Any<object>(), Arg.Any<CancellationToken>()).Returns(Error.Failure());
 
         // Act
         var result = await _sut.Handle(tasks, CancellationToken.None);
 
         // Assert
-        result.Status.Should().Be(ResultStatus.Error);
+        result.IsError.Should().BeTrue();
         result.Errors.Should().NotBeEmpty();
         await _cloudConvertClient.Received(1).CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
     }

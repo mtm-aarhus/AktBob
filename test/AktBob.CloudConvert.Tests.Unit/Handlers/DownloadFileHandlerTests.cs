@@ -1,5 +1,5 @@
 ﻿using AktBob.CloudConvert.Handlers;
-using Ardalis.Result;
+using ErrorOr;
 using FluentAssertions;
 using NSubstitute;
 using System.Text;
@@ -20,13 +20,13 @@ public class DownloadFileHandlerTests
     {
         // Arrange
         var expected = Encoding.UTF8.GetBytes("some content");
-        _cloudConvertClient.GetFile(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Result.Success(expected));
+        _cloudConvertClient.GetFile(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(ErrorOrFactory.From(expected));
 
         // Act
         var result = await _sut.Handle("http://localhost", CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsError.Should().BeFalse();
         result.Value.Should().BeSameAs(expected);
     }
 
@@ -35,14 +35,13 @@ public class DownloadFileHandlerTests
     public async Task Handle_ShouldReturnError_WhenDownloadFails()
     {
         // Arrange
-        _cloudConvertClient.GetFile(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Result.Error());
+        _cloudConvertClient.GetFile(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Error.Failure());
 
         // Act
         var result = await _sut.Handle("http://localhost", CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Status.Should().Be(ResultStatus.Error);
+        result.IsError.Should().BeTrue();
     }
 
 }

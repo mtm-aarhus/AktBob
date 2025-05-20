@@ -2,5 +2,5 @@
 
 internal interface IGenerateTasksHandler
 {
-    Result<IReadOnlyDictionary<Guid, object>> Handle(IEnumerable<byte[]> items);
+    ErrorOr<IReadOnlyDictionary<Guid, object>> Handle(IEnumerable<byte[]> items);
 }

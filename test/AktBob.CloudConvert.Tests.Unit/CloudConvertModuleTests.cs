@@ -1,12 +1,7 @@
 ﻿using AktBob.CloudConvert.Contracts;
-using Ardalis.Result;
+using ErrorOr;
 using FluentAssertions;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AktBob.CloudConvert.Tests.Unit;
 
@@ -31,7 +26,7 @@ public class CloudConvertModuleTests
     public async Task ConvertHtmlToPdf_ShouldInvokeHandlerAndReturnResult_WhenInvoked()
     {
         // Arrange
-        var expected = Result.Success(Guid.Parse("0C482CE0-24C6-4967-A4E1-3DF54B1E40B5"));
+        var expected = ErrorOrFactory.From(Guid.Parse("0C482CE0-24C6-4967-A4E1-3DF54B1E40B5"));
         var tasks = new Dictionary<Guid, object>();
 
         _convertHtmlToPdfHandler
@@ -53,7 +48,7 @@ public class CloudConvertModuleTests
     {
         // Arrange
         IReadOnlyDictionary<Guid, object> dict = new Dictionary<Guid, object>();
-        var expected = Result.Success(dict);
+        var expected = ErrorOrFactory.From(dict);
 
         var items = new List<byte[]>();
         _generateTasksHandler.Handle(items).Returns(expected);
@@ -70,7 +65,7 @@ public class CloudConvertModuleTests
     public async Task GetDownloadUrl_ShouldInvokeHandlerAndReturnResult_WhenInvoked()
     {
         // Arrange
-        var expected = Result.Success("some value");
+        var expected = ErrorOrFactory.From("some value");
         _getDownloadUrlHandler.Handle(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(expected);
 
         // Act
@@ -85,7 +80,7 @@ public class CloudConvertModuleTests
     public async Task DownloadFile_ShouldInvokeHanlderAndReturnResult_WhenInvoked()
     {
         // Arrange
-        var expected = Result.Success(new byte[] { 0x20 });
+        var expected = ErrorOrFactory.From(new byte[] { 0x20 });
         _downloadFileHandler.Handle(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(expected);
 
         // Act

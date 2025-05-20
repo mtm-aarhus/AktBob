@@ -6,6 +6,7 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Workflows.Helpers;
+using ErrorOr;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
@@ -84,7 +85,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             attachments,
             deskproMessage.IsAgentNote,
             cancellationToken);
-        if (!generateDocumentResult.IsSuccess) throw new BusinessException($"Unable to generate PDF document using CloudConvert: {generateDocumentResult.Errors.AsString()}");
+        if (generateDocumentResult.IsError) throw new BusinessException($"Unable to generate PDF document using CloudConvert: {generateDocumentResult.Errors.ToCommaDelimitedString()}");
 
         // Upload parent document
         DateTime createdAtDanishTime = deskproMessage.CreatedAt.UtcToDanish();
@@ -157,7 +158,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
     }
 
 
-    private async Task<Result<byte[]>> GenerateDocument(ICloudConvertModule cloudConvertModule,
+    private async Task<ErrorOr<byte[]>> GenerateDocument(ICloudConvertModule cloudConvertModule,
                                                         DateTime createdAt,
                                                         string personName,
                                                         string personEmail,
@@ -187,27 +188,27 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var bytes = Encoding.UTF8.GetBytes(html);
 
         var generateTasksResult = cloudConvertModule.GenerateTasks([bytes]);
-        if (!generateTasksResult.IsSuccess)
+        if (generateTasksResult.IsError)
         {
-            return Result.Error("Failed generating tasks.");
+            return generateTasksResult.Errors;
         }
 
         var jobIdResult = await cloudConvertModule.ConvertHtmlToPdf(generateTasksResult.Value, cancellationToken);
-        if (!jobIdResult.IsSuccess)
+        if (jobIdResult.IsError)
         {
-            return Result.Error("Failed converting HTML to PDF.");
+            return jobIdResult.Errors;
         }
 
         var getUrlResult = await cloudConvertModule.GetDownloadUrl(jobIdResult.Value, cancellationToken);
-        if (!getUrlResult.IsSuccess || string.IsNullOrEmpty(getUrlResult))
+        if (getUrlResult.IsError|| string.IsNullOrEmpty(getUrlResult.Value))
         {
-            return Result.Error("Failed to get download url.");
+            return getUrlResult.Errors;
         }
 
-        var fileResult = await cloudConvertModule.DownloadFile(getUrlResult, cancellationToken);
-        if (!fileResult.IsSuccess)
+        var fileResult = await cloudConvertModule.DownloadFile(getUrlResult.Value, cancellationToken);
+        if (fileResult.IsError)
         {
-            return Result.Error($"Failed to download file: {getUrlResult.Value}");
+            return fileResult.Errors;
         }
 
         return fileResult.Value;

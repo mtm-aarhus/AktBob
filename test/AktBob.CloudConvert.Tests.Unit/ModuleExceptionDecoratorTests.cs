@@ -1,5 +1,5 @@
 ﻿using AktBob.CloudConvert.Contracts;
-using Ardalis.Result;
+using ErrorOr;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
@@ -25,7 +25,7 @@ public class ModuleExceptionDecoratorTests
         // Arrange
         var jobId = Guid.NewGuid();
         var tasks = new Dictionary<Guid, object>();
-        var innerResult = Result.Success(jobId);
+        var innerResult = ErrorOrFactory.From(jobId);
 
         _inner
             .ConvertHtmlToPdf(tasks, Arg.Any<CancellationToken>())
@@ -67,13 +67,13 @@ public class ModuleExceptionDecoratorTests
 
         _inner
             .GenerateTasks(items)
-            .Returns(Result.Success(innerResult));
+            .Returns(ErrorOrFactory.From(innerResult));
 
         // Act
         var result = _sut.GenerateTasks(items);
 
         // Assert
-        result.Should().BeEquivalentTo(Result.Success(innerResult));
+        result.Should().BeEquivalentTo(ErrorOrFactory.From(innerResult));
     }
 
     
@@ -98,7 +98,7 @@ public class ModuleExceptionDecoratorTests
     public async Task GetDowloadUrl_ShouldReturnResult_WhenInnerModuleSucceeds()
     {
         // Arrange
-        var innerResult = Result.Success("locahost");
+        var innerResult = ErrorOrFactory.From("locahost");
 
         _inner
             .GetDownloadUrl(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
@@ -132,7 +132,7 @@ public class ModuleExceptionDecoratorTests
     public async Task DownloadFile_ShouldReturnResult_WhenInnerModuleSucceeds()
     {
         // Arrange
-        var innerResult = Result.Success(new byte[] {});
+        var innerResult = ErrorOrFactory.From(new byte[] {});
         _inner
             .DownloadFile(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(innerResult));

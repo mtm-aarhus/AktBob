@@ -1,5 +1,5 @@
 ﻿using AktBob.CloudConvert.Contracts;
-using Ardalis.Result;
+using ErrorOr;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
@@ -22,7 +22,7 @@ public class ModuleLoggingDecoratorTests
     public async Task ConvertHtmlToPdf_ShouldReturnResult_WhenInvoked()
     {
         // Arrange
-        var innerResult = Result.Success(Guid.Empty);
+        var innerResult = ErrorOrFactory.From(Guid.Empty);
         var tasks = new Dictionary<Guid, object>();
 
         _inner
@@ -33,7 +33,7 @@ public class ModuleLoggingDecoratorTests
         var result = await _sut.ConvertHtmlToPdf(tasks, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsError.Should().BeFalse();
         result.Should().Be(innerResult);
     }
 
@@ -41,7 +41,7 @@ public class ModuleLoggingDecoratorTests
     public async Task ConvertHtmlToPdf_ShouldLogInformation_WhenInvoked()
     {
         // Arrange
-        var innerResult = Result.Success(Guid.Empty);
+        var innerResult = ErrorOrFactory.From(Guid.Empty);
         var tasks = new Dictionary<Guid, object>();
 
         _inner
@@ -63,13 +63,13 @@ public class ModuleLoggingDecoratorTests
 
         _inner
             .ConvertHtmlToPdf(Arg.Any<IReadOnlyDictionary<Guid, object>>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(Result<Guid>.Error()));
+            .Returns(Task.FromResult(Error.Failure().ToErrorOr<Guid>()));
 
         // Act
         var result = await _sut.ConvertHtmlToPdf(tasks, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
+        result.IsError.Should().BeTrue();
         _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Warning);
     }
 
@@ -89,7 +89,7 @@ public class ModuleLoggingDecoratorTests
         var result = _sut.GenerateTasks(items);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsError.Should().BeFalse();
         result.Value.Should().BeEquivalentTo(innerResult);
     }
 
@@ -119,13 +119,13 @@ public class ModuleLoggingDecoratorTests
 
         _inner
             .GenerateTasks(Arg.Any<IEnumerable<byte[]>>())
-            .Returns(Result<IReadOnlyDictionary<Guid, object>>.Error());
+            .Returns(Error.Failure().ToErrorOr<IReadOnlyDictionary<Guid, object>>());
 
         // Act
         var result = _sut.GenerateTasks(items);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
+        result.IsError.Should().BeTrue();
         _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Warning);
     }
 
@@ -134,7 +134,7 @@ public class ModuleLoggingDecoratorTests
     public async Task GetDownloadUrl_ShouldReturnResult_WhenInvoked()
     {
         // Arrange
-        var innerResult = Result.Success(string.Empty);
+        var innerResult = ErrorOrFactory.From(string.Empty);
 
         _inner
             .GetDownloadUrl(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
@@ -144,7 +144,7 @@ public class ModuleLoggingDecoratorTests
         var result = await _sut.GetDownloadUrl(Guid.Empty, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsError.Should().BeFalse();
         result.Should().Be(innerResult);
     }
 
@@ -152,7 +152,7 @@ public class ModuleLoggingDecoratorTests
     public async Task GetDownloadUrl_ShouldLogInformation_WhenInvoked()
     {
         // Arrange
-        var innerResult = Result.Success(string.Empty);
+        var innerResult = ErrorOrFactory.From(string.Empty);
         
         _inner
             .GetDownloadUrl(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
@@ -171,13 +171,13 @@ public class ModuleLoggingDecoratorTests
         // Arrange
         _inner
             .GetDownloadUrl(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(Result<string>.Error());
+            .Returns(Error.Failure().ToErrorOr<string>());
 
         // Act
         var result = await _sut.GetDownloadUrl(Guid.Empty, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
+        result.IsError.Should().BeTrue();
         _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Warning);
     }
 
@@ -186,7 +186,7 @@ public class ModuleLoggingDecoratorTests
     public async Task DownloadFile_ShouldReturnResult_WhenInvoked()
     {
         // Arrange
-        var innerResult = Result.Success(new byte[] {});
+        var innerResult = ErrorOrFactory.From(new byte[] {});
 
         _inner
             .DownloadFile(Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -196,7 +196,7 @@ public class ModuleLoggingDecoratorTests
         var result = await _sut.DownloadFile(string.Empty, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsError.Should().BeFalse();
         result.Should().Be(innerResult);
     }
 
@@ -204,7 +204,7 @@ public class ModuleLoggingDecoratorTests
     public async Task DownloadFile_ShouldLogInformation_WhenInvoked()
     {
         // Arrange
-        var innerResult = Result.Success(new byte[] { });
+        var innerResult = ErrorOrFactory.From(new byte[] { });
 
         _inner
             .DownloadFile(Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -223,13 +223,13 @@ public class ModuleLoggingDecoratorTests
         // Arrange
         _inner
             .DownloadFile(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(Result<byte[]>.Error());
+            .Returns(Error.Failure().ToErrorOr<byte[]>());
 
         // Act
         var result = await _sut.DownloadFile(string.Empty, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
+        result.IsError.Should().BeTrue();
         _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Warning);
     }
 }

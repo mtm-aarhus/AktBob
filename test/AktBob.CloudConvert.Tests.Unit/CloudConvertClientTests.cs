@@ -1,6 +1,5 @@
 using AktBob.CloudConvert.Models.JobResponse;
 using AktBob.Tests.Unit.Shared;
-using Ardalis.Result;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
@@ -12,11 +11,6 @@ namespace AktBob.CloudConvert.Tests.Unit;
 public class CloudConvertClientTests
 {
     private readonly FakeLogger<CloudConvertClient> _logger;
-
-    public CloudConvertClientTests()
-    {
-        _logger = new FakeLogger<CloudConvertClient>();
-    }
 
     [Fact]
     public async Task CreateJob_Should_ReturnJobId_WhenResponseIsSuccessful()
@@ -31,13 +25,13 @@ public class CloudConvertClientTests
         };
         var responseMessage = HttpClientHelper.CreateResponseMessageWithStringContent(HttpStatusCode.OK, expectedResponse);
         var httpClient = HttpClientHelper.CreateClientThatReturns(responseMessage);
-        var sut = new CloudConvertClient(httpClient, _logger);
+        var sut = new CloudConvertClient(httpClient);
 
         // Act
         var result = await sut.CreateJob(new { }, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsError.Should().BeFalse();
         result.Value.Should().Be(expectedResponse.Data.Id);
     }
 
@@ -52,13 +46,13 @@ public class CloudConvertClientTests
         var response = new {};
         var responseMessage = HttpClientHelper.CreateResponseMessageWithStringContent(statusCode, response);
         var httpClient = HttpClientHelper.CreateClientThatReturns(responseMessage);
-        var sut = new CloudConvertClient(httpClient, _logger);
+        var sut = new CloudConvertClient(httpClient);
 
         // Act
         var result = await sut.CreateJob(new { }, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
+        result.IsError.Should().BeTrue();
         _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
         _logger.Collector.LatestRecord.Exception.Should().BeOfType(typeof(HttpRequestException));
     }
@@ -74,14 +68,13 @@ public class CloudConvertClientTests
             Content = null
         };
         var httpClient = HttpClientHelper.CreateClientThatReturns(responseMessage);
-        var sut = new CloudConvertClient(httpClient, _logger);
+        var sut = new CloudConvertClient(httpClient);
 
         // Act
         var result = await sut.CreateJob(new { }, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Status.Should().Be(ResultStatus.Error);
+        result.IsError.Should().BeTrue();
     }
 
 
@@ -91,13 +84,13 @@ public class CloudConvertClientTests
         // Arrange
         var httpException = new HttpRequestException();
         var httpClient = HttpClientHelper.CreateClientThatThrows(httpException);
-        var sut = new CloudConvertClient(httpClient, _logger);
+        var sut = new CloudConvertClient(httpClient);
 
         // Act
         var result = await sut.CreateJob(new { }, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
+        result.IsError.Should().BeTrue();
         _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
         _logger.Collector.LatestRecord.Exception.Should().Be(httpException);
     }
@@ -111,13 +104,13 @@ public class CloudConvertClientTests
         var response = new JobResponseRoot { Data = new JobResponseData { Id = jobId } };
         var responseMessage = HttpClientHelper.CreateResponseMessageWithStringContent(HttpStatusCode.OK, response);
         var httpClient = HttpClientHelper.CreateClientThatReturns(responseMessage);
-        var sut = new CloudConvertClient(httpClient, _logger);
+        var sut = new CloudConvertClient(httpClient);
 
         // Act
         var result = await sut.GetJob(jobId, CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsError.Should().BeFalse();
         result.Value.Should().NotBeNull();
         result.Value.Data.Id.Should().Be(jobId);
     }
@@ -129,14 +122,13 @@ public class CloudConvertClientTests
         // Arrange
         var responseMessage = new HttpResponseMessage(HttpStatusCode.NotFound);
         var httpClient = HttpClientHelper.CreateClientThatReturns(responseMessage);
-        var sut = new CloudConvertClient(httpClient, _logger);
+        var sut = new CloudConvertClient(httpClient);
 
         // Act
         var result = await sut.GetJob(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Status.Should().Be(ResultStatus.Error);
+        result.IsError.Should().BeTrue();
         _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
         _logger.Collector.LatestRecord.Exception.Should().BeOfType(typeof(HttpRequestException));
     }
@@ -148,13 +140,13 @@ public class CloudConvertClientTests
         // Arrange
         var httpException = new HttpRequestException();
         var httpClient = HttpClientHelper.CreateClientThatThrows(httpException);
-        var sut = new CloudConvertClient(httpClient, _logger);
+        var sut = new CloudConvertClient(httpClient);
 
         // Act
         var result = await sut.GetJob(Guid.NewGuid(), CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
+        result.IsError.Should().BeTrue();
         _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
         _logger.Collector.LatestRecord.Exception.Should().Be(httpException);
     }
@@ -172,13 +164,13 @@ public class CloudConvertClientTests
         };
         
         var httpClient = HttpClientHelper.CreateClientThatReturns(responseMessage);
-        var sut = new CloudConvertClient(httpClient, _logger);
+        var sut = new CloudConvertClient(httpClient);
 
         // Act
         var result = await sut.GetFile("https://localhost", CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsError.Should().BeFalse();
         result.Value.Should().NotBeNull();
         result.Value.Should().BeOfType(typeof(byte[]));
         result.Value.Should().BeEquivalentTo(expectedBytes);
@@ -191,13 +183,13 @@ public class CloudConvertClientTests
         // Arrange
         var responseMessage = new HttpResponseMessage(HttpStatusCode.NotFound);
         var httpClient = HttpClientHelper.CreateClientThatReturns(responseMessage);
-        var sut = new CloudConvertClient(httpClient, _logger);
+        var sut = new CloudConvertClient(httpClient);
 
         // Act
         var result = await sut.GetFile("http://localhost", CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
+        result.IsError.Should().BeTrue();
         _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
         _logger.Collector.LatestRecord.Exception.Should().BeOfType(typeof(HttpRequestException));
     }
@@ -209,13 +201,13 @@ public class CloudConvertClientTests
         // Arrange
         var httpException = new HttpRequestException();
         var httpClient = HttpClientHelper.CreateClientThatThrows(httpException);
-        var sut = new CloudConvertClient(httpClient, _logger);
+        var sut = new CloudConvertClient(httpClient);
 
         // Act
         var result = await sut.GetFile("http://localhost", CancellationToken.None);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
+        result.IsError.Should().BeTrue();
         _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
         _logger.Collector.LatestRecord.Exception.Should().Be(httpException);
     }

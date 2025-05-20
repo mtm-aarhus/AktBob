@@ -23,7 +23,7 @@ public class GenerateTasksHandlerTests
         var result = _sut.Handle(items);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
+        result.IsError.Should().BeFalse();
         result.Value.Should().BeOfType<Dictionary<Guid, object>>();
     }
 
@@ -65,6 +65,6 @@ public class GenerateTasksHandlerTests
         var result = _sut.Handle(items);
 
         // Assert
-        result.Status.Should().Be(Ardalis.Result.ResultStatus.Error);
+        result.IsError.Should().BeTrue();
     }
 }

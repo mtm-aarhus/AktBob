@@ -1,23 +1,21 @@
 ﻿using AktBob.CloudConvert.Handlers;
 using AktBob.CloudConvert.Models.JobResponse;
 using AktBob.Shared;
-using Ardalis.Result;
+using ErrorOr;
 using FluentAssertions;
-using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 
 namespace AktBob.CloudConvert.Tests.Unit.Handlers;
 
 public class GetDownloadUrlHandlerTests
 {
-    private readonly FakeLogger<GetDownloadUrlHandler> _logger = new FakeLogger<GetDownloadUrlHandler>();
     private readonly ICloudConvertClient _cloudConvertClient = Substitute.For<ICloudConvertClient>();
     private readonly ITimeProvider _timeProvider = Substitute.For<ITimeProvider>();
     private readonly GetDownloadUrlHandler _sut;
 
     public GetDownloadUrlHandlerTests()
     {
-        _sut = new GetDownloadUrlHandler(_cloudConvertClient, _logger, _timeProvider);
+        _sut = new GetDownloadUrlHandler(_cloudConvertClient, _timeProvider);
     }
 
     [Fact]
@@ -30,8 +28,8 @@ public class GetDownloadUrlHandlerTests
         _cloudConvertClient
             .GetJob(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(
-                Task.FromResult(Result.Success(new JobResponseRoot { Data = new JobResponseData { Id = jobId, Status = "processing" } })),
-                Task.FromResult(Result.Success(
+                Task.FromResult(ErrorOrFactory.From(new JobResponseRoot { Data = new JobResponseData { Id = jobId, Status = "processing" } })),
+                Task.FromResult(ErrorOrFactory.From(
                     new JobResponseRoot
                     {
                         Data = new JobResponseData
@@ -75,15 +73,15 @@ public class GetDownloadUrlHandlerTests
         var jobId = Guid.NewGuid();
         _cloudConvertClient
             .GetJob(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success(new JobResponseRoot { Data = new JobResponseData { Id = jobId, Status = "error" } }));
+            .Returns(ErrorOrFactory.From(new JobResponseRoot { Data = new JobResponseData { Id = jobId, Status = "error" } }));
 
         // Act
         var result = await _sut.Handle(jobId, CancellationToken.None);
 
         // Assert
         result.Value.Should().BeNull();
-        result.Status.Should().Be(ResultStatus.Error);
         result.Errors.Should().NotBeEmpty();
+        result.IsError.Should().BeTrue();
     }
 
     [Fact]
@@ -93,14 +91,14 @@ public class GetDownloadUrlHandlerTests
         var jobId = Guid.NewGuid();
         _cloudConvertClient
             .GetJob(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Error());
+            .Returns(Error.Failure());
 
         // Act
         var result = await _sut.Handle(jobId, CancellationToken.None);
 
         // Assert
         result.Value.Should().BeNull();
-        result.Status.Should().Be(ResultStatus.Error);
         result.Errors.Should().NotBeEmpty();
+        result.IsError.Should().BeTrue();
     }
 }

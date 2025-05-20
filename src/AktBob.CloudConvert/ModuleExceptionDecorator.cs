@@ -11,7 +11,7 @@ internal class ModuleExceptionDecorator : ICloudConvertModule
     }
 
 
-    public async Task<Result<Guid>> ConvertHtmlToPdf(IReadOnlyDictionary<Guid, object> tasks, CancellationToken cancellationToken)
+    public async Task<ErrorOr<Guid>> ConvertHtmlToPdf(IReadOnlyDictionary<Guid, object> tasks, CancellationToken cancellationToken)
     {
         try
         {
@@ -24,7 +24,7 @@ internal class ModuleExceptionDecorator : ICloudConvertModule
         }
     }
 
-    public Result<IReadOnlyDictionary<Guid, object>> GenerateTasks(IEnumerable<byte[]> items)
+    public ErrorOr<IReadOnlyDictionary<Guid, object>> GenerateTasks(IEnumerable<byte[]> items)
     {
         try
         {
@@ -37,7 +37,7 @@ internal class ModuleExceptionDecorator : ICloudConvertModule
         }
     }
 
-    public async Task<Result<string>> GetDownloadUrl(Guid jobId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<string>> GetDownloadUrl(Guid jobId, CancellationToken cancellationToken)
     {
         try
         {
@@ -50,7 +50,7 @@ internal class ModuleExceptionDecorator : ICloudConvertModule
         }
     }
 
-    public async Task<Result<byte[]>> DownloadFile(string url, CancellationToken cancellationToken)
+    public async Task<ErrorOr<byte[]>> DownloadFile(string url, CancellationToken cancellationToken)
     {
         try
         {

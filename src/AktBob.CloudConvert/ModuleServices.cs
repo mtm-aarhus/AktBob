@@ -1,5 +1,4 @@
 ﻿using AktBob.CloudConvert.Handlers;
-using AktBob.Email.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,13 +18,12 @@ public static class ModuleServices
 
         services.AddScoped<ICloudConvertClient>(serviceProvider =>
         {
-            var logger = serviceProvider.GetRequiredService<ILogger<CloudConvertClient>>();
             var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
             var client = httpClientFactory.CreateClient(Constants.CLOUDCONVERT_HTTPCLIENT_NAME);
 
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + cloudConvertToken);
 
-            return new CloudConvertClient(client, logger);
+            return new CloudConvertClient(client);
         });
 
         // Add module handlers

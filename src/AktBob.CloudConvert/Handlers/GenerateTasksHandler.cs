@@ -3,7 +3,7 @@
 namespace AktBob.CloudConvert.Handlers;
 internal class GenerateTasksHandler() : IGenerateTasksHandler
 {
-    public Result<IReadOnlyDictionary<Guid, object>> Handle(IEnumerable<byte[]> items)
+    public ErrorOr<IReadOnlyDictionary<Guid, object>> Handle(IEnumerable<byte[]> items)
     {
         var importTasks = new Dictionary<Guid, ImportTask>();
         var convertTasks = new Dictionary<Guid, ConvertTask>();
@@ -11,7 +11,7 @@ internal class GenerateTasksHandler() : IGenerateTasksHandler
 
         if (!items.Any())
         {
-            return Result.Error("No items was provided. Cannot generate CloudConvert tasks");
+            return Error.Failure("CloudConvertGenerateTasksHandler.NoItems", "No items was provided. Cannot generate CloudConvert tasks");
         }
 
         // Import tasks
