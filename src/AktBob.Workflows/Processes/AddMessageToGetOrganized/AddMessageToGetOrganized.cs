@@ -6,7 +6,7 @@ using AktBob.Database.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Workflows.Helpers;
 using ErrorOr;
-using AktBob.Shared.Contracts;
+using AktBob.Shared.Contracts.CloudConvert;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
