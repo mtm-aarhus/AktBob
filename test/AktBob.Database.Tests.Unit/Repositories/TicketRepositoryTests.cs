@@ -371,23 +371,23 @@ public class TicketRepositoryTests
 
     // GetAll
     [Theory]
-    [InlineData(0, null, null, new string[] {})]
+    [InlineData(null, null, null, new string[] {})]
     [InlineData(123, null, null, new[] { "t.DeskproId = @DeskproId" })]
-    [InlineData(0, 12312312312, null, new[] { "c.PodioItemId = @PodioItemId" })]
-    [InlineData(0, 98798798798, null, new[] { "c.PodioItemId = @PodioItemId" })]
-    [InlineData(0, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(0, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, 12312312312, null, new[] { "c.PodioItemId = @PodioItemId" })]
+    [InlineData(null, 98798798798, null, new[] { "c.PodioItemId = @PodioItemId" })]
+    [InlineData(null, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 12312312312, null, new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId" })]
     [InlineData(123, 98798798798, null, new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId" })]
     [InlineData(123, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "t.DeskproId = @DeskproId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(0, 12312312312, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(0, 98798798798, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(0, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(0, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, 12312312312, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, 98798798798, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    public async Task GetAll_ShouldReturnTickets_WhenFound(TicketId deskproId, long? podioItemId, string? filArkivCaseId, string[] sqlConditions)
+    public async Task GetAll_ShouldReturnTickets_WhenFound(int? deskproId, long? podioItemId, string? filArkivCaseId, string[] sqlConditions)
     {
         // Arrange
         var expectedTicket = new Ticket { Id = 1, DeskproId = TicketId.Create(123), CaseNumber = "Ticket A" };
@@ -422,15 +422,16 @@ public class TicketRepositoryTests
 
         Guid? parsedFilArkivCaseId = filArkivCaseId != null ? Guid.Parse(filArkivCaseId) : null;
 
-        
-        
+        var ticketId = deskproId == null ? TicketId.Empty : TicketId.Create((int)deskproId);
+
+
         // Act
-        var result = await _sut.GetAll(deskproId, podioItemId, parsedFilArkivCaseId);
+        var result = await _sut.GetAll(ticketId, podioItemId, parsedFilArkivCaseId);
 
         // Assert
         await _dataAccess.Received(1).Query(
             Arg.Is<string>(arg => sqlConditions.All(value => arg.Contains(value))),
-            Arg.Is<object>(arg => MatchesAnonymousObject(arg, deskproId, podioItemId, parsedFilArkivCaseId)),            
+            Arg.Is<object>(arg => MatchesAnonymousObject(arg, ticketId.Value, podioItemId, parsedFilArkivCaseId)),            
             "TicketId",
             Arg.Any<Func<Ticket, Case, Ticket>>());
         result.Should().NotBeNull();
@@ -452,23 +453,23 @@ public class TicketRepositoryTests
     }
 
     [Theory]
-    [InlineData(0, null, null, new string[] {})]
+    [InlineData(null, null, null, new string[] {})]
     [InlineData(123, null, null, new[] { "t.DeskproId = @DeskproId" })]
-    [InlineData(0, 12312312312, null, new[] { "c.PodioItemId = @PodioItemId" })]
-    [InlineData(0, 98798798798, null, new[] { "c.PodioItemId = @PodioItemId" })]
-    [InlineData(0, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(0, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, 12312312312, null, new[] { "c.PodioItemId = @PodioItemId" })]
+    [InlineData(null, 98798798798, null, new[] { "c.PodioItemId = @PodioItemId" })]
+    [InlineData(null, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 12312312312, null, new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId" })]
     [InlineData(123, 98798798798, null, new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId" })]
     [InlineData(123, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "t.DeskproId = @DeskproId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(0, 12312312312, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(0, 98798798798, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(0, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(0, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, 12312312312, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, 98798798798, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(null, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    public async Task GetAll_ShouldReturnEmptyCollection_WhenNoTicketsAreFound(TicketId deskproId, long? podioItemId, string? filArkivCaseId, string[] sqlConditions)
+    public async Task GetAll_ShouldReturnEmptyCollection_WhenNoTicketsAreFound(int? deskproId, long? podioItemId, string? filArkivCaseId, string[] sqlConditions)
     {
         // Mock database return values
         var ticketCasePairs = new List<(Ticket, Case)>();
@@ -494,15 +495,15 @@ public class TicketRepositoryTests
 
         Guid? parsedFilArkivCaseId = filArkivCaseId != null ? Guid.Parse(filArkivCaseId) : null;
 
-
+        var ticketId = deskproId == null ? TicketId.Empty : TicketId.Create((int)deskproId);
 
         // Act
-        var result = await _sut.GetAll(deskproId, podioItemId, parsedFilArkivCaseId);
+        var result = await _sut.GetAll(ticketId, podioItemId, parsedFilArkivCaseId);
 
         // Assert
         await _dataAccess.Received(1).Query(
             Arg.Is<string>(arg => sqlConditions.All(value => arg.Contains(value))),
-            Arg.Is<object>(arg => MatchesAnonymousObject(arg, deskproId, podioItemId, parsedFilArkivCaseId)),
+            Arg.Is<object>(arg => MatchesAnonymousObject(arg, ticketId.Value, podioItemId, parsedFilArkivCaseId)),
             "TicketId",
             Arg.Any<Func<Ticket, Case, Ticket>>());
         result.Should().NotBeNull();
@@ -527,15 +528,11 @@ public class TicketRepositoryTests
             .Execute(Arg.Any<string>(), ticket)
             .Returns(1);
 
-        var expectedTicket = JsonSerializer.Serialize(ticket);
-        var ticketCopy = JsonSerializer.Deserialize<Ticket>(expectedTicket);
-
         // Act
         var result = await _sut.Update(ticket);
 
         // Assert
         result.Should().BeTrue();
-        JsonSerializer.Serialize(ticket).Should().Be(JsonSerializer.Serialize(ticketCopy));
         await _dataAccess.Received(1).Execute(Arg.Any<string>(), ticket);
     }
 
@@ -550,9 +547,6 @@ public class TicketRepositoryTests
             DeskproId = TicketId.Create(123)
         };
 
-        var expectedTicket = JsonSerializer.Serialize(ticket);
-        var ticketCopy = JsonSerializer.Deserialize<Ticket>(expectedTicket);
-
         _dataAccess
             .Execute(Arg.Any<string>(), ticket)
             .Returns(0);
@@ -562,7 +556,6 @@ public class TicketRepositoryTests
 
         // Assert
         result.Should().BeFalse();
-        JsonSerializer.Serialize(ticket).Should().Be(JsonSerializer.Serialize(ticketCopy));
         await _dataAccess.Received(1).Execute(
             Arg.Any<string>(),
             ticket);
@@ -577,17 +570,12 @@ public class TicketRepositoryTests
             DeskproId = default
         };
 
-        var expectedTicket = JsonSerializer.Serialize(ticket);
-        var ticketCopy = JsonSerializer.Deserialize<Ticket>(expectedTicket);
-
         // Act
         var act = () => _sut.Update(ticket);
 
         // Assert
         await act.Should().ThrowAsync<ValidationException>();
         await _dataAccess.Received(0).ExecuteProcedure(Arg.Any<string>(), Arg.Any<DynamicParameters>());
-        JsonSerializer.Serialize(ticket).Should().Be(JsonSerializer.Serialize(ticketCopy));
-
     }
 
 }

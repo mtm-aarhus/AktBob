@@ -33,9 +33,9 @@ public class GetMessagesHandlerTests
         {
             Data = new List<Message>
             {
-                new Message { Person = new Person { Id = 1 } },
-                new Message { Person = new Person { Id = 1 } },
-                new Message { Person = new Person { Id = 1 } }
+                new Message { Id = 1, TicketId = 1, Person = new Person { Id = 1 } },
+                new Message { Id = 2, TicketId = 1, Person = new Person { Id = 1 } },
+                new Message { Id = 3, TicketId = 1, Person = new Person { Id = 1 } }
             },
             Pagination = new Pagination
             {
@@ -51,8 +51,8 @@ public class GetMessagesHandlerTests
         {
             Data = new List<Message>
             {
-                new Message { Person = new Person { Id = 1 } },
-                new Message { Person = new Person { Id = 1 } }
+                new Message { Id = 4, TicketId = 1, Person = new Person { Id = 1 } },
+                new Message { Id = 5, TicketId = 1, Person = new Person { Id = 1 } }
             },
             Pagination = new Pagination
             {
