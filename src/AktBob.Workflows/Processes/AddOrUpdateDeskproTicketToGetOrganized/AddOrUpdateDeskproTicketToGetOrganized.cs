@@ -1,19 +1,13 @@
 ﻿using AktBob.Database.Contracts;
-using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text;
 using AktBob.Workflows.Helpers;
-using Org.BouncyCastle.Asn1;
-using Newtonsoft.Json.Linq;
-using Org.BouncyCastle.Bcpg.OpenPgp;
-using AktBob.Workflows.Extensions;
 using System.Globalization;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-using ErrorOr;
 using AktBob.Shared.Contracts.CloudConvert;
+using AktBob.Deskpro.Contracts;
 
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
@@ -47,25 +41,25 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         }
 
         var ticketResult = await deskpro.GetTicket(job.TicketId, cancellationToken);
-        if (!ticketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
+        if (ticketResult.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
         var ticket = ticketResult.Value;
 
         var getTicketCustomFields = deskpro.GetCustomFieldSpecifications(cancellationToken);
 
         var getAgent = ticket.Agent != null
-            ? deskpro.GetPerson(ticket.Agent.Id, cancellationToken)
-            : Task.FromResult(Result<PersonDto>.Error());
+            ? deskpro.GetPersonById(ticket.Agent.Id, cancellationToken)
+            : Task.FromResult(Error.NotFound().ToErrorOr<PersonDto>());
 
         var getUser = ticket.Person != null
-            ? deskpro.GetPerson(ticket.Person.Id, cancellationToken)
-            : Task.FromResult(Result<PersonDto>.Error());
+            ? deskpro.GetPersonById(ticket.Person.Id, cancellationToken)
+            : Task.FromResult(Error.NotFound().ToErrorOr<PersonDto>());
 
         await Task.WhenAll([
             getTicketCustomFields,
             getAgent,
             getUser]);
 
-        if (!getTicketCustomFields.Result.IsSuccess) throw new BusinessException("Unable to get Deskpro custom field specifications");
+        if (getTicketCustomFields.Result.IsError) throw new BusinessException("Unable to get Deskpro custom field specifications");
 
         // Map ticket fields
         var customFields = GenerateCustomFieldValues(job.CustomFieldIds, getTicketCustomFields.Result.Value, ticket);
@@ -91,20 +85,20 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
 
         // Messages
         var getMessagesResult = await deskpro.GetMessages(ticket.Id, cancellationToken);
-        if (getMessagesResult.IsSuccess)
+        if (getMessagesResult.IsError)
         {
             var messages = getMessagesResult.Value.OrderByDescending(x => x.CreatedAt);
 
             // Get and handle all messages at the same time
             await Task.WhenAll(messages.Select(async message =>
             {
-                var person = await deskpro.GetPerson(message.Person.Id, cancellationToken);
+                var person = await deskpro.GetPersonById(message.Person.Id, cancellationToken);
                 message.Person = person.Value;
 
                 // Get recipient
                 var recipient = message.Recipients.FirstOrDefault() != null
-                    ? await deskpro.GetPerson(message.Recipients.First(), cancellationToken)
-                    : Result<PersonDto>.Error();
+                    ? await deskpro.GetPersonByEmail(message.Recipients.First(), cancellationToken)
+                    : Error.NotFound().ToErrorOr<PersonDto>();
 
                 var attachments = Enumerable.Empty<AttachmentDto>();
                 if (message.AttachmentIds.Any())

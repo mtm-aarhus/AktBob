@@ -1,6 +1,6 @@
-﻿using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Workflows.Extensions;
+﻿using AktBob.Workflows.Extensions;
 using AktBob.Shared.Extensions;
+using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Workflows.Helpers;
 internal static class HtmlHelper

@@ -32,8 +32,10 @@ internal class DispatchCleanupJobs : IJobHandler<DispatchCleanupJobsJob>
 
         // Check Deskpro to ensure a) it's time to execute, b) the ticket is still closed
         var deskproTicket = await CleanUpShared.GetDeskproTicket(job.DeskproTicketId, deskpro, cancellationToken);
-        var workflowFieldValue =  CleanUpShared.ParseWorkflowValue(deskproTicket, workflowFieldId);
-        var afslutningsdatoFieldValue = CleanUpShared.ParseAfslutningsdatoValue(deskproTicket, afslutningsdatoFieldId);
+        if (deskproTicket.IsError) throw new BusinessException($"Error getting Deskpro ticket {job.DeskproTicketId}");
+
+        var workflowFieldValue =  CleanUpShared.ParseWorkflowValue(deskproTicket.Value, workflowFieldId);
+        var afslutningsdatoFieldValue = CleanUpShared.ParseAfslutningsdatoValue(deskproTicket.Value, afslutningsdatoFieldId);
 
 
         // If there is no timestamp in Deskpro or the ticket is not closed, exit the job

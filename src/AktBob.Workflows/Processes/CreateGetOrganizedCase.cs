@@ -1,11 +1,11 @@
 ﻿using AktBob.Shared.Jobs;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Database.Contracts;
-using AktBob.Deskpro.Contracts;
-using AktBob.Deskpro.Contracts.DTOs;
 using System.Text.Json;
 using Hangfire;
 using AktBob.Shared.Extensions;
+using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
@@ -37,7 +37,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
 
         // Get subject from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(job.DeskproId, cancellationToken);
-        if (!deskproTicketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
+        if (deskproTicketResult.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
 
         // Create GO-case
         var caseTitle = deskproTicketResult.Value.Subject ?? "Uden titel";

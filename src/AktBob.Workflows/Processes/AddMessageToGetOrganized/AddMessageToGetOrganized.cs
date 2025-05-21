@@ -1,12 +1,11 @@
-﻿using AktBob.Deskpro.Contracts.DTOs;
-using System.Text;
+﻿using System.Text;
 using AktBob.GetOrganized.Contracts;
-using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Workflows.Helpers;
-using ErrorOr;
 using AktBob.Shared.Contracts.CloudConvert;
+using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
@@ -45,22 +44,22 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
 
         // Get Deskpro ticket (we need the deskpro ticket id to query the message ifself)
         var deskproTicketResult = await deskpro.GetTicket(databaseTicket.DeskproId, cancellationToken);
-        if (!deskproTicketResult.IsSuccess) throw new BusinessException("Unable to get ticket {id} from Deskpro.");
+        if (deskproTicketResult.IsError) throw new BusinessException("Unable to get ticket {id} from Deskpro.");
         var deskproTicket = deskproTicketResult.Value;
 
         // Get Deskpro message
         var getDeskproMessageResult = await deskpro.GetMessage(databaseTicket.DeskproId, databaseMessage.DeskproMessageId, cancellationToken);
-        if (!getDeskproMessageResult.IsSuccess) throw new BusinessException("Unable to get message from Deskpro. Please mark message as deleted to avoid future processing failure.");
+        if (getDeskproMessageResult.IsError) throw new BusinessException("Unable to get message from Deskpro. Please mark message as deleted to avoid future processing failure.");
         var deskproMessage = getDeskproMessageResult.Value;
 
         // Get Deskpro person
-        var personResult = await deskpro.GetPerson(deskproMessage.Person.Id, cancellationToken);
+        var personResult = await deskpro.GetPersonById(deskproMessage.Person.Id, cancellationToken);
         var person = personResult.Value;
 
         // Get recipient
         var recipient = deskproMessage.Recipients.FirstOrDefault() != null && !deskproMessage.CreationSystem.Equals("web.api")
-            ? await deskpro.GetPerson(deskproMessage.Recipients.First(), cancellationToken)
-            : Result<PersonDto>.Error();
+            ? await deskpro.GetPersonByEmail(deskproMessage.Recipients.First(), cancellationToken)
+            : Error.NotFound().ToErrorOr<PersonDto>();
 
         // Get attachments
         var attachments = Enumerable.Empty<AttachmentDto>();

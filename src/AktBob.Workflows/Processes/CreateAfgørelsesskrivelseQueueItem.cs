@@ -1,10 +1,10 @@
 ﻿using AktBob.Database.Contracts;
-using AktBob.Deskpro.Contracts;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Workflows.Extensions;
+using AktBob.Deskpro.Contracts;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>
@@ -28,7 +28,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
 
         // Get data from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(job.DeskproTicketId, cancellationToken);
-        if (!deskproTicketResult.IsSuccess || deskproTicketResult.Value is null) throw new BusinessException("Unable to get ticket from Deskpro");
+        if (deskproTicketResult.IsError || deskproTicketResult.Value is null) throw new BusinessException("Unable to get ticket from Deskpro");
 
         // Deskpro ticket fields
         string lovgivning = GetChoiceFieldValue(deskproTicketResult.Value, deskproLovgivningFieldId);
@@ -37,18 +37,18 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         
         // Person
         var getPerson = deskproTicketResult.Value.Person != null
-            ? deskpro.GetPerson(deskproTicketResult.Value.Person.Id, cancellationToken)
-            : Task.FromResult(Result<PersonDto>.Error());
+            ? deskpro.GetPersonById(deskproTicketResult.Value.Person.Id, cancellationToken)
+            : Task.FromResult(Error.NotFound().ToErrorOr<PersonDto>());
 
         // Agent
         var getAgent = deskproTicketResult.Value.Agent != null
-            ? deskpro.GetPerson(deskproTicketResult.Value.Agent.Id, cancellationToken)
-            : Task.FromResult(Result<PersonDto>.Error());
+            ? deskpro.GetPersonById(deskproTicketResult.Value.Agent.Id, cancellationToken)
+            : Task.FromResult(Error.NotFound().ToErrorOr<PersonDto>());
 
         // Team
         var getTeam = deskproTicketResult.Value.AgentTeamId != null
             ? deskpro.GetTeam((int)deskproTicketResult.Value.AgentTeamId, cancellationToken)
-            : Task.FromResult(Result<TeamDto>.Error());
+            : Task.FromResult(Error.NotFound().ToErrorOr<TeamDto>());
 
         // Database ticket
         var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproTicketId);

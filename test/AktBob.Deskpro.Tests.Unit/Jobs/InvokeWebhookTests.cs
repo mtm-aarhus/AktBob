@@ -1,14 +1,9 @@
-﻿using AktBob.Deskpro.Contracts;
+﻿using AktBob.Deskpro.Handlers.InvokeWebhook;
 using AktBob.Deskpro.Jobs;
-using AktBob.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace AktBob.Deskpro.Tests.Unit.Jobs;
 public class InvokeWebhookTests

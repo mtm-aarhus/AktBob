@@ -7,10 +7,10 @@ using System.Collections.ObjectModel;
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
 internal record ProcessMessageAttachmentsJob(int ParentDocumentId, string CaseNumber, DateTime Timestamp, UploadDocumentCategory DocumentCategory, IEnumerable<AttachmentDto> Attachments);
-internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactory, ILogger<ProcessMessageAttachments> logger) : IJobHandler<ProcessMessageAttachmentsJob>
+
+internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactory) : IJobHandler<ProcessMessageAttachmentsJob>
 {
     private readonly IServiceScopeFactory serviceScopeFactory = serviceScopeFactory;
-    private readonly ILogger<ProcessMessageAttachments> _logger = logger;
 
     public async Task Handle(ProcessMessageAttachmentsJob job, CancellationToken cancellationToken = default)
     {
@@ -31,7 +31,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
 
             // Get the individual attachments from Deskpro
             var getAttachmentStreamResult = await deskproModule.DownloadMessageAttachment(attachment.DownloadUrl, cancellationToken);
-            if (!getAttachmentStreamResult.IsSuccess) throw new BusinessException($"Unable to download message attachment '{attachment.FileName}' from Deskpro message {attachment.MessageId}, ticketId {attachment.TicketId}");
+            if (getAttachmentStreamResult.IsError) throw new BusinessException($"Unable to download message attachment '{attachment.FileName}' from Deskpro message {attachment.MessageId}, ticketId {attachment.TicketId}");
 
             getAttachmentStreamResult.Value.CopyTo(stream);
             var attachmentBytes = stream.ToArray();

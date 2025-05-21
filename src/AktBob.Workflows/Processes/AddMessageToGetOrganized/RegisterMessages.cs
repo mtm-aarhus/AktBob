@@ -22,7 +22,7 @@ internal class RegisterMessages(ILogger<RegisterMessages> logger, IServiceScopeF
 
         // Get message from Deskpro
         var getDeskproMessagesResult = await deskpro.GetMessages(job.DeskproTicketId, cancellationToken);
-        if (!getDeskproMessagesResult.IsSuccess) throw new BusinessException("Unable to get messages from Deskpro.");
+        if (getDeskproMessagesResult.IsError) throw new BusinessException("Unable to get messages from Deskpro.");
 
         // Persist the Deskpro ticket ID and message ID in the database
         var tasks = getDeskproMessagesResult.Value.Select(async deskproMessage =>

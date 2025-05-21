@@ -1,12 +1,12 @@
 ﻿using AAK.Podio.Models;
 using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using AktBob.Workflows.Extensions;
-using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<CreateToSharepointQueueItemJob>
@@ -71,11 +71,11 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
 
         // Get ticket from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(getDatabaseTicket.Result.DeskproId, cancellationToken);
-        if (!deskproTicketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
+        if (deskproTicketResult.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
 
         var agent = deskproTicketResult.Value.Agent?.Id != null
-            ? await deskpro.GetPerson(deskproTicketResult.Value.Agent.Id, cancellationToken)
-            : Result<PersonDto>.Error();
+            ? await deskpro.GetPersonById(deskproTicketResult.Value.Agent.Id, cancellationToken)
+            : Error.NotFound().ToErrorOr<PersonDto>();
 
         // Create queue item
         var payload = new

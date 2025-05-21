@@ -34,7 +34,7 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
         await Task.WhenAll([getDatabaseTicket, getDeskproTicket]);
 
         if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
-        if (!getDeskproTicket.Result.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
+        if (getDeskproTicket.Result.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
 
         if (string.IsNullOrEmpty(getDatabaseTicket.Result.CaseNumber))
         {
@@ -42,8 +42,8 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
         }
 
         var agent = getDeskproTicket.Result.Value.Agent?.Id != null
-            ? await deskpro.GetPerson(getDeskproTicket.Result.Value.Agent.Id, cancellationToken)
-            : Result<PersonDto>.Error();
+            ? await deskpro.GetPersonById(getDeskproTicket.Result.Value.Agent.Id, cancellationToken)
+            : Error.NotFound().ToErrorOr<PersonDto>();
 
         var payload = new
         {

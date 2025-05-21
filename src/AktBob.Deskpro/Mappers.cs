@@ -1,4 +1,5 @@
 ﻿using AAK.Deskpro.Models;
+using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Deskpro;
 internal static class Mappers

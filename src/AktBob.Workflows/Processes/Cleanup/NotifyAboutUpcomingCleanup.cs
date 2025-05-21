@@ -1,9 +1,7 @@
 ﻿using AktBob.Deskpro.Contracts;
-using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Email.Contracts;
 using AktBob.Shared.Jobs;
 using AktBob.Workflows.Helpers;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AktBob.Workflows.Processes.Cleanup;
 internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingCleanupJob>
@@ -36,9 +34,11 @@ internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingClea
 
 
         // Check Deskpro to ensure a) it's time to execute, b) the ticket is still closed
-        TicketDto deskproTicket = await CleanUpShared.GetDeskproTicket(job.DeskproTicketId, deskpro, cancellationToken);
-        var workflowFieldValue = CleanUpShared.ParseWorkflowValue(deskproTicket, workflowFieldId);
-        var afslutningsdatoFieldValue = CleanUpShared.ParseAfslutningsdatoValue(deskproTicket, afslutningsdatoFieldId);
+        var deskproTicket = await CleanUpShared.GetDeskproTicket(job.DeskproTicketId, deskpro, cancellationToken);
+        if (deskproTicket.IsError) throw new BusinessException($"Error getting Deskpro ticket {job.DeskproTicketId}");
+
+        var workflowFieldValue = CleanUpShared.ParseWorkflowValue(deskproTicket.Value, workflowFieldId);
+        var afslutningsdatoFieldValue = CleanUpShared.ParseAfslutningsdatoValue(deskproTicket.Value, afslutningsdatoFieldId);
 
 
         // If there is no timestamp in Deskpro or the ticket is not closed, exit the job
@@ -65,24 +65,21 @@ internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingClea
         }
 
         // Get notification recipient
-        var agentId = deskproTicket.Agent?.Id;
+        var agentId = deskproTicket.Value.Agent?.Id;
         if (agentId == null)
         {
             throw new BusinessException($"Cannot notify about upcoming cleanup. Deskpro ticket {job.DeskproTicketId} has no agent.");
         }
 
-        var agent = await deskpro.GetPerson((int)agentId, cancellationToken);
-        if (!agent.IsSuccess)
-        {
-            throw new BusinessException($"Agent {agentId} not found in Deskpro");
-        }
+        var agent = await deskpro.GetPersonById((int)agentId, cancellationToken);
+        if (agent.IsError) throw new BusinessException($"Agent {agentId} not found in Deskpro");
 
         // Send notification
         var subject = $"{job.DeskproTicketId}: Midlertidige dokumenter i screenings- og udleveringsmapperne bliver snart slettet";
         var fields = new Dictionary<string, string>
         {
             { "ticketId", job.DeskproTicketId.ToString() },
-            { "ticketSubject", deskproTicket.Subject }
+            { "ticketSubject", deskproTicket.Value.Subject }
         };
 
         var emailBody = HtmlHelper.GenerateHtml(fields, "EmailTemplates/upcoming-clean-up-notification.html");
