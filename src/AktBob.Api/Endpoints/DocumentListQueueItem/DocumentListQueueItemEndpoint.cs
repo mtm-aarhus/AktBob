@@ -25,7 +25,7 @@ internal class DocumentListQueueItemEndpoint(IJobDispatcher jobDispatcher, IConf
     public override async Task HandleAsync(DocumentListQueueItemRequest req, CancellationToken ct)
     {
         var appId = Guard.Against.Null(_configuration.GetValue<int?>("Podio:AktindsigtApp:Id"));
-        var podioItemId = new ItemId(appId, req.PodioItemId);
+        var podioItemId = ItemId.Create(appId, req.PodioItemId);
 
         var job = new CreateDocumentListQueueItemJob(podioItemId);
         _jobDispatcher.Dispatch(job);

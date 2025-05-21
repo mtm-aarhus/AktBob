@@ -16,7 +16,6 @@ COPY nuget.config ./
 COPY ["AktBob.Api/AktBob.Api.csproj", "AktBob.Api/"]
 COPY ["AktBob.Database/AktBob.Database.csproj", "AktBob.Database/"]
 COPY ["AktBob.Shared/AktBob.Shared.csproj", "AktBob.Shared/"]
-COPY ["AktBob.Deskpro.Contracts/AktBob.Deskpro.Contracts.csproj", "AktBob.Deskpro.Contracts/"]
 COPY ["AktBob.Podio/AktBob.Podio.csproj", "AktBob.Podio/"]
 COPY ["AktBob.Podio.Contracts/AktBob.Podio.Contracts.csproj", "AktBob.Podio.Contracts/"]
 

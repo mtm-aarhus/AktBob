@@ -22,7 +22,7 @@ internal class TicketRepository : ITicketRepository
         validator.ValidateAndThrow(ticket);
 
         var parameters = new DynamicParameters();
-        parameters.Add("DeskproId", ticket.DeskproId, dbType: DbType.Int32, direction: ParameterDirection.Input);
+        parameters.Add("DeskproId", ticket.DeskproId.Value, dbType: DbType.Int32, direction: ParameterDirection.Input);
         parameters.Add("Id", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
         var rowsAffected = await _sqlDataAccess.ExecuteProcedure("spTicket_Create", parameters);
@@ -40,7 +40,7 @@ internal class TicketRepository : ITicketRepository
     public async Task<Ticket?> GetByDeskproTicketId(TicketId deskproTicketId)
     {
         var where = "t.DeskproId = @DeskproId";
-        var tickets = await GetTicketsWithCases(where, new { DeskproId = deskproTicketId });
+        var tickets = await GetTicketsWithCases(where, new { DeskproId = deskproTicketId.Value });
         return tickets.FirstOrDefault();
     }
 
@@ -68,12 +68,12 @@ internal class TicketRepository : ITicketRepository
         return await _sqlDataAccess.Execute(sql, ticket) == 1;
     }
 
-    public async Task<IReadOnlyCollection<Ticket>> GetAll(TicketId? deskproId, long? podioItemId, Guid? filArkivCaseId)
+    public async Task<IReadOnlyCollection<Ticket>> GetAll(TicketId deskproId, long? podioItemId, Guid? filArkivCaseId)
     {
         // Prepare filter
         var filter = new List<string>();
 
-        if (deskproId != null)
+        if (!deskproId.IsEmpty)
         {
             filter.Add("t.DeskproId = @DeskproId");
         }
@@ -92,7 +92,7 @@ internal class TicketRepository : ITicketRepository
         
         return await GetTicketsWithCases(filterString, new
         {
-            DeskproId = deskproId,
+            DeskproId = deskproId.Value,
             PodioItemId = podioItemId,
             FilArkivCaseId = filArkivCaseId
         });
@@ -103,7 +103,6 @@ internal class TicketRepository : ITicketRepository
     {
         var sql = @$"
                 SELECT 
-
                     t.Id
 	                ,t.DeskproId
 	                ,t.CaseNumber

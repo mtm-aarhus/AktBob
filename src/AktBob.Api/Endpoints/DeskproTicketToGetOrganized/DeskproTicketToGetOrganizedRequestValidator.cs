@@ -7,7 +7,7 @@ internal class DeskproTicketToGetOrganizedRequestValidator : Validator<DeskproTi
 {
     public DeskproTicketToGetOrganizedRequestValidator()
     {
-        RuleFor(x => x.TicketId.Value).GreaterThan(0);
+        RuleFor(x => x.TicketId).GreaterThan(0);
         RuleFor(x => x.GOCaseNumber).NotEmpty();
         RuleFor(x => x.CustomFieldIds).NotNull();
         RuleFor(x => x.CaseNumberFieldIds).NotNull();

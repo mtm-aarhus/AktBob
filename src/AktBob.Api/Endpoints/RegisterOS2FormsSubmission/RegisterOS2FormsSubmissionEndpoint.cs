@@ -1,5 +1,6 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.RegisterOS2FormsSubmission;
@@ -25,7 +26,8 @@ internal class RegisterOS2FormsSubmissionEndpoint : Endpoint<RegisterOS2FormsSub
 
     public override async Task HandleAsync(RegisterOS2FormsSubmissionRequest req, CancellationToken ct)
     {
-        var job = new RegisterOS2FormsSubmissionJob(req.OS2FormsSubmissionId, req.DeskproTicketId);
+        var ticketId = TicketId.Create(req.DeskproTicketId);
+        var job = new RegisterOS2FormsSubmissionJob(req.OS2FormsSubmissionId, ticketId);
         _jobDispatcher.Dispatch(job);
 
         await SendNoContentAsync(ct);

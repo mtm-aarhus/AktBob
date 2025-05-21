@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.OS2FormsSubmissions;
 
-internal record GetCaseRequest(TicketId DeskproId);
+internal record GetCaseRequest(int DeskproId);
 
 internal class GetCase : Endpoint<GetCaseRequest, IEnumerable<RequestCaseDto>>
 {
@@ -26,7 +26,8 @@ internal class GetCase : Endpoint<GetCaseRequest, IEnumerable<RequestCaseDto>>
 
     public async override Task HandleAsync(GetCaseRequest req, CancellationToken ct)
     {
-        var tickets = await _unitOfWork.Tickets.GetAll(req.DeskproId, null, null);
+        var ticketId = TicketId.Create(req.DeskproId);
+        var tickets = await _unitOfWork.Tickets.GetAll(ticketId, null, null);
         var dtos = new List<RequestCaseDto>();
 
         foreach (var ticket in tickets)

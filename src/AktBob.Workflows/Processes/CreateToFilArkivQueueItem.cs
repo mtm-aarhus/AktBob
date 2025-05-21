@@ -76,7 +76,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         {
             Sagsnummer = caseNumber,
             MailModtager = agent.Value.Email,
-            DeskProID = getDatabaseTicket.Result.DeskproId,
+            DeskProID = getDatabaseTicket.Result.DeskproId.Value,
             DeskProTitel = deskproTicketResult.Value.Subject,
             PodioID = job.PodioItemId.Id,
             Overmappe = getDatabaseTicket.Result.SharepointFolderName,
@@ -89,7 +89,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             AktindsigtsDato = deskproTicketResult.Value.CreatedAt
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId.ToString()}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
     }
 }

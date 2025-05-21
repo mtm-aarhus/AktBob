@@ -371,23 +371,23 @@ public class TicketRepositoryTests
 
     // GetAll
     [Theory]
-    [InlineData(null, null, null, new string[] {})]
+    [InlineData(0, null, null, new string[] {})]
     [InlineData(123, null, null, new[] { "t.DeskproId = @DeskproId" })]
-    [InlineData(null, 12312312312, null, new[] { "c.PodioItemId = @PodioItemId" })]
-    [InlineData(null, 98798798798, null, new[] { "c.PodioItemId = @PodioItemId" })]
-    [InlineData(null, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(null, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, 12312312312, null, new[] { "c.PodioItemId = @PodioItemId" })]
+    [InlineData(0, 98798798798, null, new[] { "c.PodioItemId = @PodioItemId" })]
+    [InlineData(0, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 12312312312, null, new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId" })]
     [InlineData(123, 98798798798, null, new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId" })]
     [InlineData(123, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "t.DeskproId = @DeskproId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(null, 12312312312, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(null, 98798798798, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(null, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(null, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, 12312312312, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, 98798798798, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    public async Task GetAll_ShouldReturnTickets_WhenFound(TicketId? deskproId, long? podioItemId, string? filArkivCaseId, string[] sqlConditions)
+    public async Task GetAll_ShouldReturnTickets_WhenFound(TicketId deskproId, long? podioItemId, string? filArkivCaseId, string[] sqlConditions)
     {
         // Arrange
         var expectedTicket = new Ticket { Id = 1, DeskproId = TicketId.Create(123), CaseNumber = "Ticket A" };
@@ -452,23 +452,23 @@ public class TicketRepositoryTests
     }
 
     [Theory]
-    [InlineData(null, null, null, new string[] {})]
+    [InlineData(0, null, null, new string[] {})]
     [InlineData(123, null, null, new[] { "t.DeskproId = @DeskproId" })]
-    [InlineData(null, 12312312312, null, new[] { "c.PodioItemId = @PodioItemId" })]
-    [InlineData(null, 98798798798, null, new[] { "c.PodioItemId = @PodioItemId" })]
-    [InlineData(null, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(null, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, 12312312312, null, new[] { "c.PodioItemId = @PodioItemId" })]
+    [InlineData(0, 98798798798, null, new[] { "c.PodioItemId = @PodioItemId" })]
+    [InlineData(0, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 12312312312, null, new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId" })]
     [InlineData(123, 98798798798, null, new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId" })]
     [InlineData(123, null, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "t.DeskproId = @DeskproId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, null, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(null, 12312312312, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(null, 98798798798, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(null, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    [InlineData(null, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, 12312312312, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, 98798798798, "1866CBE9-5B44-4A5B-9F92-A906C3345D6C", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
+    [InlineData(0, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 12312312312, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
     [InlineData(123, 98798798798, "D06FD2B7-D109-4E36-846C-FB1B1F5C1211", new[] { "t.DeskproId = @DeskproId", "c.PodioItemId = @PodioItemId", "c.FilArkivCaseId = @FilArkivCaseId" })]
-    public async Task GetAll_ShouldReturnEmptyCollection_WhenNoTicketsAreFound(TicketId? deskproId, long? podioItemId, string? filArkivCaseId, string[] sqlConditions)
+    public async Task GetAll_ShouldReturnEmptyCollection_WhenNoTicketsAreFound(TicketId deskproId, long? podioItemId, string? filArkivCaseId, string[] sqlConditions)
     {
         // Mock database return values
         var ticketCasePairs = new List<(Ticket, Case)>();

@@ -93,7 +93,7 @@ internal class CreateDocumentListQueueItem(
             agent.Value.Email,
             Navn = agent.Value.FullName,
             PodioID = job.PodioItemId.Id,
-            DeskproID = deskproTicket.Value?.Id,
+            DeskproID = deskproTicket.Value?.Id.Value,
             Titel = deskproTicket.Value?.Subject,
             IndsenderNavn = person.Value.FullName,
             IndsenderMail = person.Value.Email,

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Tickets;
 
-internal record GetTicketsRequest(TicketId? DeskproId, long? PodioItemId, Guid? FilArkivCaseId);
+internal record GetTicketsRequest(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId);
 
 internal class GetTickets(ITicketRepository ticketRepository) : Endpoint<GetTicketsRequest, IEnumerable<TicketDto>>
 {
@@ -24,7 +24,11 @@ internal class GetTickets(ITicketRepository ticketRepository) : Endpoint<GetTick
 
     public override async Task HandleAsync(GetTicketsRequest req, CancellationToken ct)
     {
-        var tickets = await _ticketRepository.GetAll(req.DeskproId, req.PodioItemId, req.FilArkivCaseId);
+        var ticketId = req.DeskproId == null
+            ? TicketId.Empty
+            : TicketId.Create((int)req.DeskproId);
+
+        var tickets = await _ticketRepository.GetAll(ticketId, req.PodioItemId, req.FilArkivCaseId);
         await SendOkAsync(tickets.ToDto());
     }
 }

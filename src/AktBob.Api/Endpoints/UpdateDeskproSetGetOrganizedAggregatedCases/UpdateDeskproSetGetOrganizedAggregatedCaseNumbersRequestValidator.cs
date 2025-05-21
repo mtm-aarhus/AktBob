@@ -8,6 +8,6 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbersRequestValidator
     public UpdateDeskproSetGetOrganizedAggregatedCaseNumbersRequestValidator()
     {
         RuleFor(x => x.CaseIds).NotEmpty();
-        RuleFor(x => x.DeskproTicketId.Value).GreaterThan(0);
+        RuleFor(x => x.DeskproTicketId).GreaterThan(0);
     }
 }

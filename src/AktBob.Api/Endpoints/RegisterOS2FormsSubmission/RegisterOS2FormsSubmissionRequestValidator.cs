@@ -7,7 +7,7 @@ internal class RegisterOS2FormsSubmissionRequestValidator : Validator<RegisterOS
 {
     public RegisterOS2FormsSubmissionRequestValidator()
     {
-        RuleFor(x => x.DeskproTicketId.Value).NotEmpty().GreaterThan(0);
+        RuleFor(x => x.DeskproTicketId).NotEmpty().GreaterThan(0);
         RuleFor(x => x.OS2FormsSubmissionId).NotEmpty();
     }
 }

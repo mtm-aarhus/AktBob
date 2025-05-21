@@ -95,20 +95,20 @@ public class TicketRepositoryExceptionDecoratorTests
     }
 
     [Theory]
-    [InlineData(null, null, null)]
+    [InlineData(0, null, null)]
     [InlineData(123, null, null)]
-    [InlineData(null, 12312312312, null)]
-    [InlineData(null, null, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
-    [InlineData(null, 12312312312, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
+    [InlineData(0, 12312312312, null)]
+    [InlineData(0, null, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
+    [InlineData(0, 12312312312, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
     [InlineData(123, 12312312312, null)]
     [InlineData(123, 12312312312, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
     [InlineData(123, null, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
-    public async Task GetAll_ShouldReturnResult_WhenInnerModuleSucceeds(TicketId? deskproId, long? podioItemId, string? filArkivCaseId)
+    public async Task GetAll_ShouldReturnResult_WhenInnerModuleSucceeds(TicketId deskproId, long? podioItemId, string? filArkivCaseId)
     {
         // Arrange
         var expectedTickets = new List<Ticket>();
         Guid? parsedFilArkivCaseId = !string.IsNullOrEmpty(filArkivCaseId) ? Guid.Parse(filArkivCaseId) : null;
-        _inner.GetAll(Arg.Any<TicketId?>(), Arg.Any<long?>(), Arg.Any<Guid?>()).Returns(expectedTickets);
+        _inner.GetAll(Arg.Any<TicketId>(), Arg.Any<long?>(), Arg.Any<Guid?>()).Returns(expectedTickets);
 
         // Act
         var result = await _sut.GetAll(deskproId, podioItemId, parsedFilArkivCaseId);
@@ -120,19 +120,19 @@ public class TicketRepositoryExceptionDecoratorTests
 
 
     [Theory]
-    [InlineData(null, null, null)]
+    [InlineData(0, null, null)]
     [InlineData(123, null, null)]
-    [InlineData(null, 12312312312, null)]
-    [InlineData(null, null, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
-    [InlineData(null, 12312312312, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
+    [InlineData(0, 12312312312, null)]
+    [InlineData(0, null, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
+    [InlineData(0, 12312312312, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
     [InlineData(123, 12312312312, null)]
     [InlineData(123, 12312312312, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
     [InlineData(123, null, "5020E9AA-FCEB-4AE3-B5FE-49965021F9BA")]
-    public async Task GetAll_ShouldLogErrorAndRethrowException_WhenInnerModuleThrowsExecption(TicketId? deskproId, long? podioItemId, string? filArkivCaseId)
+    public async Task GetAll_ShouldLogErrorAndRethrowException_WhenInnerModuleThrowsExecption(TicketId deskproId, long? podioItemId, string? filArkivCaseId)
     {
         // Arrange
         Guid? parsedFilArkivCaseId = !string.IsNullOrEmpty(filArkivCaseId) ? Guid.Parse(filArkivCaseId) : null;
-        _inner.GetAll(Arg.Any<TicketId?>(), Arg.Any<long?>(), Arg.Any<Guid?>()).ThrowsAsync<Exception>();
+        _inner.GetAll(Arg.Any<TicketId>(), Arg.Any<long?>(), Arg.Any<Guid?>()).ThrowsAsync<Exception>();
 
         // Act
         var act = () => _sut.GetAll(deskproId, podioItemId, parsedFilArkivCaseId);

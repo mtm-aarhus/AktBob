@@ -1,16 +1,18 @@
-﻿using Newtonsoft.Json;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace AktBob.Shared.Types.Deskpro;
 
 public struct TicketId : IParsable<TicketId>, IEquatable<TicketId>
 {
     public int Value { get; }
+    public readonly bool IsEmpty => Value == 0;
 
     public TicketId(int value) => Value = value;
 
     public static TicketId Create(int value) => new TicketId(value);
+    public static TicketId Empty => new TicketId(0);
     public static implicit operator int(TicketId value) => value.Value;
+    public static explicit operator TicketId(int value) => value == 0 ? Empty : Create(value);
     public static explicit operator TicketId(int? value)
     {
         if (value != null)
@@ -29,7 +31,6 @@ public struct TicketId : IParsable<TicketId>, IEquatable<TicketId>
 
         return default;
     }
-
     public override string ToString() => Value.ToString();
 
     public static TicketId Parse(string s, IFormatProvider? provider)

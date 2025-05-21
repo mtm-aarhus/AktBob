@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Tickets;
 
-internal record PostTicketRequest(TicketId DeskproId);
+internal record PostTicketRequest(int DeskproId);
 
 internal class PostTicketRequestValidator : Validator<PostTicketRequest>
 {
@@ -32,7 +32,8 @@ internal class PostTicket(IJobDispatcher jobDispatcher) : Endpoint<PostTicketReq
 
     public override async Task HandleAsync(PostTicketRequest req, CancellationToken ct)
     {
-        var job = new RegisterDeskproTicketJob(req.DeskproId);
+        var ticketId = TicketId.Create(req.DeskproId);
+        var job = new RegisterDeskproTicketJob(ticketId);
         _jobDispatcher.Dispatch(job);
         await SendNoContentAsync(ct);
     }

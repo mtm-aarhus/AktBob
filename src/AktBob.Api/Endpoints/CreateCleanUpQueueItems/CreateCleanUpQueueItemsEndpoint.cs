@@ -31,9 +31,10 @@ internal class CreateCleanUpQueueItemsEndpoint : Endpoint<CreateCleanUpQueueItem
 
     public override async Task HandleAsync(CreateCleanUpQueueItemsRequest req, CancellationToken ct)
     {
-        DispatchCleanUpJobs(req.DeskproTicketId);
-        DispatchCleanUpNotificationJobs(req.DeskproTicketId);
-        SetDeskproFieldFinishedAt(req.DeskproTicketId);
+        var ticketId = TicketId.Create(req.DeskproTicketId);
+        DispatchCleanUpJobs(ticketId);
+        DispatchCleanUpNotificationJobs(ticketId);
+        SetDeskproFieldFinishedAt(ticketId);
         await SendNoContentAsync(ct);
     }
 

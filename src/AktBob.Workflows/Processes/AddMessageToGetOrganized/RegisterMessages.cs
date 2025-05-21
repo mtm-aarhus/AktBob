@@ -5,9 +5,8 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
-internal class RegisterMessages(ILogger<RegisterMessages> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<RegisterMessagesJob>
+internal class RegisterMessages(IServiceScopeFactory serviceScopeFactory) : IJobHandler<RegisterMessagesJob>
 {
-    private readonly ILogger<RegisterMessages> _logger = logger;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
     public async Task Handle(RegisterMessagesJob job, CancellationToken cancellationToken = default)
@@ -41,7 +40,7 @@ internal class RegisterMessages(ILogger<RegisterMessages> logger, IServiceScopeF
 
             if ((existingMessage is null || existingMessage.GODocumentId is null) && !string.IsNullOrEmpty(databaseTicket.CaseNumber))
             {
-                jobDispatcher.Dispatch(new AddMessageToGetOrganizedJob(deskproMessage.Id, databaseTicket.CaseNumber));
+                jobDispatcher.Dispatch(new  AddMessageToGetOrganizedJob(deskproMessage.Id, databaseTicket.CaseNumber));
             }
 
             return Task.CompletedTask;

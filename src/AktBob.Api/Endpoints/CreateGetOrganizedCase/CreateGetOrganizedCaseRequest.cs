@@ -1,4 +1,4 @@
 ﻿using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Api.Endpoints.GetOrganizedCase;
-internal record CreateGetOrganizedCaseRequest(TicketId DeskproTicketId);
+internal record CreateGetOrganizedCaseRequest(int DeskproTicketId);

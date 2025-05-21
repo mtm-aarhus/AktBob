@@ -2,4 +2,4 @@
 
 namespace AktBob.Api.Endpoints.UpdateDeskproSetGetOrganizedAggregatedCases;
 
-internal record UpdateDeskproSetGetOrganizedAggregatedCaseNumbersRequest(TicketId DeskproTicketId, string CaseIds);
+internal record UpdateDeskproSetGetOrganizedAggregatedCaseNumbersRequest(int DeskproTicketId, string CaseIds);

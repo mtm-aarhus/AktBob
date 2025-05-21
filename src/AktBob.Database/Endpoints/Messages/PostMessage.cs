@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Messages;
 
-internal record PostMessageRequest(TicketId DeskproTicketId);
+internal record PostMessageRequest(int DeskproTicketId);
 
 internal record PostMessageResponse(int Id);
 
@@ -25,7 +25,8 @@ internal class PostMessage(IJobDispatcher jobDispatcher) : Endpoint<PostMessageR
 
     public override async Task HandleAsync(PostMessageRequest req, CancellationToken ct)
     {
-        _jobDispatcher.Dispatch(new RegisterMessagesJob(req.DeskproTicketId), TimeSpan.FromSeconds(30));
+        var ticketId = TicketId.Create(req.DeskproTicketId);
+        _jobDispatcher.Dispatch(new RegisterMessagesJob(ticketId), TimeSpan.FromSeconds(30));
         await SendNoContentAsync(ct);
     }
 }

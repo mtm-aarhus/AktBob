@@ -75,7 +75,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             Lovgivning = lovgivning
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"DeskproID {job.TicketId}", payload.ToJson());
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"DeskproID {job.TicketId.ToString()}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
     }
 

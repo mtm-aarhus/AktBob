@@ -42,7 +42,7 @@ internal class TicketRepositoryExceptionDecorator : ITicketRepository
         }
     }
 
-    public async Task<IReadOnlyCollection<Ticket>> GetAll(TicketId? deskproId, long? podioItemId, Guid? filArkivCaseId)
+    public async Task<IReadOnlyCollection<Ticket>> GetAll(TicketId deskproId, long? podioItemId, Guid? filArkivCaseId)
     {
         try
         {

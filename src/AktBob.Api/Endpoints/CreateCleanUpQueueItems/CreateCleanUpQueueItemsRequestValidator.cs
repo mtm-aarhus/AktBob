@@ -7,6 +7,6 @@ internal class CreateCleanUpQueueItemsRequestValidator : Validator<CreateCleanUp
 {
     public CreateCleanUpQueueItemsRequestValidator()
     {
-        RuleFor(x => x.DeskproTicketId.Value).NotNull().GreaterThan(0);
+        RuleFor(x => x.DeskproTicketId).NotNull().GreaterThan(0);
     }
 }

@@ -2,6 +2,7 @@
 using AktBob.Shared;
 using FastEndpoints;
 using AktBob.Api.Endpoints.CreateAfgørelsesskrivelseQueueItem;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Api.Endpoints.AfgørelsesskrivelseQueueItem;
 
@@ -21,7 +22,8 @@ internal class AfgørelsesskrivelseQueueItemEndpoint(IJobDispatcher jobDispatche
 
     public override async Task HandleAsync(AfgørelsesskrivelseQueueItemRequest req, CancellationToken ct)
     {
-        var job = new CreateAfgørelsesskrivelseQueueItemJob(req.DeskproId);
+        var ticketId = TicketId.Create(req.DeskproId);
+        var job = new CreateAfgørelsesskrivelseQueueItemJob(ticketId);
         _jobDispatcher.Dispatch(job);
         await SendNoContentAsync(ct);
     }

@@ -1,5 +1,6 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.CloseNovaCaseQueueItem;
@@ -25,7 +26,8 @@ internal class CloseNovaCaseQueueItemEndpoint : Endpoint<CloseNovaCaseQueueItemR
 
     public override async Task HandleAsync(CloseNovaCaseQueueItemRequest req, CancellationToken ct)
     {
-        var job = new CreateCloseNovaCaseQueueItemJob(req.DeskproId);
+        var ticketId = TicketId.Create(req.DeskproId);
+        var job = new CreateCloseNovaCaseQueueItemJob(ticketId);
         _jobDispatcher.Dispatch(job);
         await SendNoContentAsync();
     }

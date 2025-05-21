@@ -2,4 +2,4 @@
 
 namespace AktBob.Api.Endpoints.DeskproTicketToGetOrganized;
 
-internal record DeskproTicketToGetOrganizedRequest(TicketId TicketId, string GOCaseNumber, int[] CustomFieldIds, int[] CaseNumberFieldIds);
+internal record DeskproTicketToGetOrganizedRequest(int TicketId, string GOCaseNumber, int[] CustomFieldIds, int[] CaseNumberFieldIds);

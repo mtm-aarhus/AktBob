@@ -2,4 +2,4 @@
 
 namespace AktBob.Api.Endpoints.CreateCleanUpQueueItems;
 
-internal record CreateCleanUpQueueItemsRequest(TicketId DeskproTicketId);
+internal record CreateCleanUpQueueItemsRequest(int DeskproTicketId);

@@ -21,8 +21,9 @@ internal class UpdateDokumentlisteField(IConfiguration configuration, IJobDispat
     {
         var appId = _configuration.GetValue<int>("Podio:AktindsigtApp:Id");
         var fieldId = _configuration.GetValue<int>("Podio:AktindsigtApp:Fields:Dokumentliste");
-
-        var job = new UpdateTextFieldJob(new ItemId(appId, req.ItemId), fieldId, req.Value);
+        var itemId = ItemId.Create(appId, req.ItemId);
+        
+        var job = new UpdateTextFieldJob(itemId, fieldId, req.Value);
         _jobDispatcher.Dispatch(job);
         await SendNoContentAsync(ct);
     }
