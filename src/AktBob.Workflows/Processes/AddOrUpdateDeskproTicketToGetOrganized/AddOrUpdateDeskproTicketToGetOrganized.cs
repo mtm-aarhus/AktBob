@@ -6,7 +6,7 @@ using AktBob.Shared.Jobs;
 using System.Text;
 using AktBob.Workflows.Helpers;
 using System.Globalization;
-using AktBob.Shared.Contracts.CloudConvert;
+using AktBob.CloudConvert.Contracts;
 using AktBob.Deskpro.Contracts;
 
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;

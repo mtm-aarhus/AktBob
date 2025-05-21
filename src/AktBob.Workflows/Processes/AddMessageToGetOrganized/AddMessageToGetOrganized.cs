@@ -3,9 +3,9 @@ using AktBob.GetOrganized.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Workflows.Helpers;
-using AktBob.Shared.Contracts.CloudConvert;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.CloudConvert.Contracts;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 

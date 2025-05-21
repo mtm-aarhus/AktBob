@@ -1,6 +1,4 @@
-﻿using ErrorOr;
-
-namespace AktBob.Shared.Contracts.CloudConvert;
+﻿namespace AktBob.CloudConvert.Contracts;
 public interface ICloudConvertModule
 {
     Task<ErrorOr<Guid>> ConvertHtmlToPdf(IReadOnlyDictionary<Guid, object> tasks, CancellationToken cancellationToken);
