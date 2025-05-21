@@ -1,7 +1,7 @@
-﻿using AktBob.CloudConvert.Models.JobResponse;
+﻿using AktBob.CloudConvert.Client.Models.JobResponse;
 
-namespace AktBob.CloudConvert;
-public interface ICloudConvertClient
+namespace AktBob.CloudConvert.Client;
+internal interface ICloudConvertClient
 {
     Task<ErrorOr<Guid>> CreateJob(object payload, CancellationToken cancellationToken = default);
     Task<ErrorOr<byte[]>> GetFile(string url, CancellationToken cancellationToken = default);

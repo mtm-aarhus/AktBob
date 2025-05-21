@@ -1,4 +1,5 @@
-﻿using AktBob.CloudConvert.Models;
+﻿using AktBob.CloudConvert.Client;
+using AktBob.CloudConvert.Client.Models;
 
 namespace AktBob.CloudConvert.Handlers.ConvertHtmlToPdf;
 

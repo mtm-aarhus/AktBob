@@ -1,8 +1,9 @@
-﻿using AktBob.CloudConvert.Models;
-using FluentAssertions;
+﻿using FluentAssertions;
 using NSubstitute;
 using ErrorOr;
 using AktBob.CloudConvert.Handlers.ConvertHtmlToPdf;
+using AktBob.CloudConvert.Client;
+using AktBob.CloudConvert.Client.Models;
 
 namespace AktBob.CloudConvert.Tests.Unit.Handlers.ConvertHtmlToPdf;
 

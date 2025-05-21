@@ -1,5 +1,6 @@
-﻿using AktBob.CloudConvert.Handlers.GetDownloadUrl;
-using AktBob.CloudConvert.Models.JobResponse;
+﻿using AktBob.CloudConvert.Client;
+using AktBob.CloudConvert.Handlers.GetDownloadUrl;
+using AktBob.CloudConvert.Client.Models.JobResponse;
 using AktBob.Shared;
 using ErrorOr;
 using FluentAssertions;

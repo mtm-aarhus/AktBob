@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace AktBob.CloudConvert.Models.JobResponse;
+namespace AktBob.CloudConvert.Client.Models.JobResponse;
 
-public class JobResponseResult
+internal class JobResponseResult
 {
     [JsonPropertyName("files")]
     public JobResponseFiles[] Files { get; set; } = Array.Empty<JobResponseFiles>();

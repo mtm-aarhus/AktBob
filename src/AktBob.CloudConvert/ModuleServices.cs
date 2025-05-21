@@ -1,4 +1,5 @@
-﻿using AktBob.CloudConvert.Contracts;
+﻿using AktBob.CloudConvert.Client;
+using AktBob.CloudConvert.Contracts;
 using AktBob.CloudConvert.Handlers.ConvertHtmlToPdf;
 using AktBob.CloudConvert.Handlers.DownloadFile;
 using AktBob.CloudConvert.Handlers.GenerateTasks;
@@ -11,11 +12,13 @@ public static class ModuleServices
 {
     public static IServiceCollection AddCloudConvertModule(this IServiceCollection services, IConfiguration configuration)
     {
+        const string CLOUDCONVERT_HTTPCLIENT_NAME = "CLOUDCONVERT_HTTPCLIENT";
+    
         // Add CloudConvert client
         var cloudConvertBaseUrl = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CloudConvert:BaseUrl"));
         var cloudConvertToken = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CloudConvert:Token"));
 
-        services.AddHttpClient(Constants.CLOUDCONVERT_HTTPCLIENT_NAME, client =>
+        services.AddHttpClient(CLOUDCONVERT_HTTPCLIENT_NAME, client =>
         {
             client.BaseAddress = new Uri(cloudConvertBaseUrl);
         });
@@ -23,7 +26,7 @@ public static class ModuleServices
         services.AddScoped<ICloudConvertClient>(serviceProvider =>
         {
             var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-            var client = httpClientFactory.CreateClient(Constants.CLOUDCONVERT_HTTPCLIENT_NAME);
+            var client = httpClientFactory.CreateClient(CLOUDCONVERT_HTTPCLIENT_NAME);
 
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + cloudConvertToken);
 

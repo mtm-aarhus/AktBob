@@ -1,9 +1,9 @@
-﻿using AktBob.CloudConvert.Models.JobResponse;
+﻿using AktBob.CloudConvert.Client.Models.JobResponse;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
-namespace AktBob.CloudConvert;
+namespace AktBob.CloudConvert.Client;
 internal class CloudConvertClient : ICloudConvertClient
 {
     private readonly HttpClient _httpClient;

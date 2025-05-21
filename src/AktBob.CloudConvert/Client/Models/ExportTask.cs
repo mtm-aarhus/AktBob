@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace AktBob.CloudConvert.Models;
+namespace AktBob.CloudConvert.Client.Models;
 internal class ExportTask
 {
     [JsonPropertyName("operation")]

@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace AktBob.CloudConvert.Models.JobResponse;
+namespace AktBob.CloudConvert.Client.Models.JobResponse;
 
-public class JobResponseTask
+internal class JobResponseTask
 {
     [JsonPropertyName("operation")]
     public string Operation { get; set; } = string.Empty;

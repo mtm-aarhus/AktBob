@@ -1,4 +1,5 @@
-﻿using AktBob.CloudConvert.Handlers.DownloadFile;
+﻿using AktBob.CloudConvert.Client;
+using AktBob.CloudConvert.Handlers.DownloadFile;
 using ErrorOr;
 using FluentAssertions;
 using NSubstitute;

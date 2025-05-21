@@ -1,4 +1,5 @@
-using AktBob.CloudConvert.Models.JobResponse;
+using AktBob.CloudConvert.Client;
+using AktBob.CloudConvert.Client.Models.JobResponse;
 using AktBob.Tests.Unit.Shared;
 using FluentAssertions;
 using System.Net;

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using AktBob.CloudConvert.Client;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AktBob.CloudConvert.Handlers.DownloadFile;
 internal static class RegisterHandler
