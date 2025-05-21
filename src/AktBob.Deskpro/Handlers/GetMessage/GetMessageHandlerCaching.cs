@@ -1,4 +1,5 @@
 ﻿using AktBob.Shared;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Deskpro.Handlers.GetMessage;
 internal class GetMessageHandlerCaching : IGetMessageHandler
@@ -12,9 +13,9 @@ internal class GetMessageHandlerCaching : IGetMessageHandler
         _cache = cache;
     }
 
-    public async Task<ErrorOr<MessageDto>> Handle(int ticketId, int messageId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<MessageDto>> Handle(MessageId messageId, CancellationToken cancellationToken)
     {
-        var cacheKey = $"Deskpro_Message_{ticketId}_{messageId}";
+        var cacheKey = $"Deskpro_Message_{messageId.TicketId}_{messageId.Id}";
         var cachedMessage = _cache.Get<MessageDto>(cacheKey);
 
         if (cachedMessage != null)
@@ -22,7 +23,7 @@ internal class GetMessageHandlerCaching : IGetMessageHandler
             return cachedMessage;
         }
 
-        var result = await _inner.Handle(ticketId, messageId, cancellationToken);
+        var result = await _inner.Handle(messageId, cancellationToken);
         if (!result.IsError)
         {
             _cache.Set(cacheKey, result.Value, TimeSpan.FromDays(5));

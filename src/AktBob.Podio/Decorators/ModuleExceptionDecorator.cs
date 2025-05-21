@@ -1,6 +1,6 @@
 ﻿using AAK.Podio.Models;
 using AktBob.Podio.Contracts;
-using AktBob.Shared;
+using AktBob.Shared.Types.Podio;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Podio.Decorators;
@@ -10,7 +10,7 @@ internal class ModuleExceptionDecorator(IPodioModule inner, ILogger<PodioModule>
     private readonly IPodioModule _inner = inner;
     private readonly ILogger<PodioModule> _logger = logger;
 
-    public async Task<Result<Item>> GetItem(PodioItemId podioItemId, CancellationToken cancellationToken)
+    public async Task<Result<Item>> GetItem(ItemId podioItemId, CancellationToken cancellationToken)
     {
         try
         {

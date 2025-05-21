@@ -23,10 +23,10 @@ internal class CreateCloseNovaCaseQueueItem : IJobHandler<CreateCloseNovaCaseQue
 
         var payload = new
         {
-            DeskProID = job.DeskproId
+            DeskProID = job.TicketId
         };
 
-        var command = new CreateQueueItemCommand(queueName, $"Deskpro {job.DeskproId}", payload.ToJson());
+        var command = new CreateQueueItemCommand(queueName, $"Deskpro {job.TicketId}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
 
         return Task.CompletedTask;

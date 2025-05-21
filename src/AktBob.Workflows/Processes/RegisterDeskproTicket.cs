@@ -16,23 +16,23 @@ internal class RegisterDeskproTicket : IJobHandler<RegisterDeskproTicketJob>
 
     public async Task Handle(RegisterDeskproTicketJob job, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Registering Deskpro ticket {id}", job.DeskproTicketId);
+        _logger.LogInformation("Registering Deskpro ticket {id}", job.TicketId);
 
         using var scope = _scopeFactory.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<ITicketRepository>();
 
         var ticket = new Ticket
         {
-            DeskproId = job.DeskproTicketId,
+            DeskproId = job.TicketId,
         };
 
         var success = await repository.Add(ticket);
         if (success)
         {
-            _logger.LogInformation("Deskpro ticket {id} registered", job.DeskproTicketId);
+            _logger.LogInformation("Deskpro ticket {id} registered", job.TicketId);
             return;
         }
 
-        _logger.LogError("Error registering Deskpro ticket {id}", job.DeskproTicketId);
+        _logger.LogError("Error registering Deskpro ticket {id}", job.TicketId);
     }
 }

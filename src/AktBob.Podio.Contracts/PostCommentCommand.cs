@@ -1,5 +1,5 @@
-﻿using AktBob.Shared;
+﻿using AktBob.Shared.Types.Podio;
 
 namespace AktBob.Podio.Contracts;
 
-public record PostCommentCommand(PodioItemId PodioItemId, string TextValue);
+public record PostCommentCommand(ItemId PodioItemId, string TextValue);

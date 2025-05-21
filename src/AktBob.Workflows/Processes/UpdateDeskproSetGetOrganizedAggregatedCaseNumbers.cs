@@ -18,7 +18,7 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
             return;
         }
 
-        Guard.Against.NegativeOrZero(job.DeskproTicketId);
+        Guard.Against.NegativeOrZero(job.TicketId);
 
         using var scope = _serviceScopeFactory.CreateScope();
         var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
@@ -44,7 +44,7 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
 
         var payload = new
         {
-            DeskproTicketId = job.DeskproTicketId,
+            DeskproTicketId = job.TicketId.Value,
             CaseIds = string.Join(",", caseIds)
         };
 

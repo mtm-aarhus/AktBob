@@ -1,11 +1,12 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Messages;
 
-internal record PostMessageRequest(int DeskproTicketId);
+internal record PostMessageRequest(TicketId DeskproTicketId);
 
 internal record PostMessageResponse(int Id);
 

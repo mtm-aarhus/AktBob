@@ -3,6 +3,7 @@ using AAK.Deskpro.Models;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Deskpro.Handlers.GetMessages;
+using AktBob.Shared.Types.Deskpro;
 using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -64,8 +65,8 @@ public class GetMessagesHandlerTests
         };
 
         var expectedMessages = new List<MessageDto>();
-        expectedMessages.AddRange(deskproMessages1.Data.Select(x => new MessageDto { Id = x.Id, Person = new PersonDto { Id = person.Id } }));
-        expectedMessages.AddRange(deskproMessages2.Data.Select(x => new MessageDto { Id = x.Id, Person = new PersonDto { Id = person.Id } }));
+        expectedMessages.AddRange(deskproMessages1.Data.Select(x => new MessageDto { Id = MessageId.Create(x.TicketId, x.Id), Person = new PersonDto { Id = person.Id } }));
+        expectedMessages.AddRange(deskproMessages2.Data.Select(x => new MessageDto { Id = MessageId.Create(x.TicketId, x.Id), Person = new PersonDto { Id = person.Id } }));
 
         _deskproClient
             .GetTicketMessages(

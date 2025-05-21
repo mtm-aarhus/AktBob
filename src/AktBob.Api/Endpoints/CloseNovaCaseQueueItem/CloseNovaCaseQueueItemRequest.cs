@@ -1,3 +1,5 @@
-﻿namespace AktBob.Api.Endpoints.CloseNovaCaseQueueItem;
+﻿using AktBob.Shared.Types.Deskpro;
 
-internal record CloseNovaCaseQueueItemRequest(int DeskproId);
+namespace AktBob.Api.Endpoints.CloseNovaCaseQueueItem;
+
+internal record CloseNovaCaseQueueItemRequest(TicketId DeskproId);

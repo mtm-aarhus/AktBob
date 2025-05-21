@@ -1,11 +1,12 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Dtos;
+using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.OS2FormsSubmissions;
 
-internal record GetCaseRequest(int DeskproId);
+internal record GetCaseRequest(TicketId DeskproId);
 
 internal class GetCase : Endpoint<GetCaseRequest, IEnumerable<RequestCaseDto>>
 {

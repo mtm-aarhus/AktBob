@@ -1,11 +1,11 @@
 ﻿using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Deskpro.Handlers.GetMessage;
+using AktBob.Shared.Types.Deskpro;
 using ErrorOr;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
-using NSubstitute.Core;
 using NSubstitute.ExceptionExtensions;
 
 namespace AktBob.Deskpro.Tests.Unit.Handlers.GetMessage;
@@ -24,20 +24,19 @@ public class GetMessageHandlerExceptionTests
     public async Task Handle_ReturnInnerResult_WhenInnerResponseIsSuccessful()
     {
         // Arrange
-        var ticketId = 1;
-        var messageId = 1;
+        var messageId = MessageId.Create(1, 1);
         var dto = new MessageDto();
         var innerResult = ErrorOrFactory.From(dto);
         var expectedResult = ErrorOrFactory.From(dto);
 
-        _inner.Handle(ticketId, messageId, Arg.Any<CancellationToken>()).Returns(innerResult);
+        _inner.Handle(messageId, Arg.Any<CancellationToken>()).Returns(innerResult);
 
         // Act
-        var result = await _sut.Handle(ticketId, messageId, CancellationToken.None);
+        var result = await _sut.Handle(messageId, CancellationToken.None);
 
         // Assert
         result.Should().BeEquivalentTo(expectedResult);
-        await _inner.Received(1).Handle(ticketId, messageId, Arg.Any<CancellationToken>());
+        await _inner.Received(1).Handle(messageId, Arg.Any<CancellationToken>());
         _logger.Collector.Count.Should().Be(0);
     }
 
@@ -45,16 +44,15 @@ public class GetMessageHandlerExceptionTests
     public async Task Handle_LogAndReturnError_WhenInnerModuleThrowsException()
     {
         // Arrange
-        var ticketId = 1;
-        var messageId = 1;
-        _inner.Handle(ticketId, messageId, Arg.Any<CancellationToken>()).ThrowsAsync<Exception>();
+        var messageId = MessageId.Create(1, 1);
+        _inner.Handle(messageId, Arg.Any<CancellationToken>()).ThrowsAsync<Exception>();
 
         // Act
-        var result = await _sut.Handle(ticketId, messageId, CancellationToken.None);
+        var result = await _sut.Handle(messageId, CancellationToken.None);
 
         // Assert
         result.IsError.Should().BeTrue();
-        await _inner.Received(1).Handle(ticketId, messageId, Arg.Any<CancellationToken>());
+        await _inner.Received(1).Handle(messageId, Arg.Any<CancellationToken>());
         _logger.Collector.LatestRecord.Level.Should().Be(LogLevel.Error);
     }
 }

@@ -1,13 +1,14 @@
 ﻿using AktBob.Database.Dtos;
 using AktBob.Shared;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Tickets;
 
-internal record PostTicketRequest(int DeskproId);
+internal record PostTicketRequest(TicketId DeskproId);
 
 internal class PostTicketRequestValidator : Validator<PostTicketRequest>
 {

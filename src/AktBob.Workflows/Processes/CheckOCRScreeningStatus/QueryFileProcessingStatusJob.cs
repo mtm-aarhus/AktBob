@@ -1,3 +1,5 @@
-﻿namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
+﻿using AktBob.Shared.Types.Podio;
 
-internal record QueryFileProcessingStatusJob(PodioItemId PodioItemId, Guid FilArkivCaseId, Guid FilArkivFileId, int Count);
+namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
+
+internal record QueryFileProcessingStatusJob(ItemId PodioItemId, Guid FilArkivCaseId, Guid FilArkivFileId, int Count);

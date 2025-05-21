@@ -1,3 +1,5 @@
-﻿namespace AktBob.Api.Endpoints.UpdateDeskproSetGetOrganizedAggregatedCases;
+﻿using AktBob.Shared.Types.Deskpro;
 
-internal record UpdateDeskproSetGetOrganizedAggregatedCaseNumbersRequest(int DeskproTicketId, string CaseIds);
+namespace AktBob.Api.Endpoints.UpdateDeskproSetGetOrganizedAggregatedCases;
+
+internal record UpdateDeskproSetGetOrganizedAggregatedCaseNumbersRequest(TicketId DeskproTicketId, string CaseIds);

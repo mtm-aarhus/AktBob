@@ -31,7 +31,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
 
             // Get the individual attachments from Deskpro
             var getAttachmentStreamResult = await deskproModule.DownloadMessageAttachment(attachment.DownloadUrl, cancellationToken);
-            if (getAttachmentStreamResult.IsError) throw new BusinessException($"Unable to download message attachment '{attachment.FileName}' from Deskpro message {attachment.MessageId}, ticketId {attachment.TicketId}");
+            if (getAttachmentStreamResult.IsError) throw new BusinessException($"Unable to download message attachment '{attachment.FileName}' from Deskpro message {attachment.MessageId}");
 
             getAttachmentStreamResult.Value.CopyTo(stream);
             var attachmentBytes = stream.ToArray();

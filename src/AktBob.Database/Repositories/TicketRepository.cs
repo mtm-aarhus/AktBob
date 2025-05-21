@@ -2,6 +2,7 @@
 using AktBob.Database.Entities;
 using AktBob.Database.Validators;
 using AktBob.Shared.DataAccess;
+using AktBob.Shared.Types.Deskpro;
 using FluentValidation;
 using System.Data;
 
@@ -36,7 +37,7 @@ internal class TicketRepository : ITicketRepository
         return tickets.FirstOrDefault();
     }
 
-    public async Task<Ticket?> GetByDeskproTicketId(int deskproTicketId)
+    public async Task<Ticket?> GetByDeskproTicketId(TicketId deskproTicketId)
     {
         var where = "t.DeskproId = @DeskproId";
         var tickets = await GetTicketsWithCases(where, new { DeskproId = deskproTicketId });
@@ -67,7 +68,7 @@ internal class TicketRepository : ITicketRepository
         return await _sqlDataAccess.Execute(sql, ticket) == 1;
     }
 
-    public async Task<IReadOnlyCollection<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
+    public async Task<IReadOnlyCollection<Ticket>> GetAll(TicketId? deskproId, long? podioItemId, Guid? filArkivCaseId)
     {
         // Prepare filter
         var filter = new List<string>();

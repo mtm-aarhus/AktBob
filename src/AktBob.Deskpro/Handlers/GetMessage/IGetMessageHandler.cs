@@ -1,5 +1,7 @@
-﻿namespace AktBob.Deskpro.Handlers.GetMessage;
+﻿using AktBob.Shared.Types.Deskpro;
+
+namespace AktBob.Deskpro.Handlers.GetMessage;
 internal interface IGetMessageHandler
 {
-    Task<ErrorOr<MessageDto>> Handle(int ticketId, int messageId, CancellationToken cancellationToken);
+    Task<ErrorOr<MessageDto>> Handle(MessageId messageId, CancellationToken cancellationToken);
 }

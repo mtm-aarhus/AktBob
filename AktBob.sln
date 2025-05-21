@@ -84,6 +84,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.FilArkiv.Contracts",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{C8B73F55-D8C6-403F-B2B4-D4BC645339F5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AktBob.Shared.Jobs", "src\AktBob.Shared.Jobs\AktBob.Shared.Jobs.csproj", "{92CB315A-68CC-4151-9A0E-9704F199F219}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -200,6 +202,10 @@ Global
 		{5A6E4E5F-3837-4E50-B1D6-55EF2AEA8139}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A6E4E5F-3837-4E50-B1D6-55EF2AEA8139}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A6E4E5F-3837-4E50-B1D6-55EF2AEA8139}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92CB315A-68CC-4151-9A0E-9704F199F219}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92CB315A-68CC-4151-9A0E-9704F199F219}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92CB315A-68CC-4151-9A0E-9704F199F219}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92CB315A-68CC-4151-9A0E-9704F199F219}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -241,6 +247,7 @@ Global
 		{E571AA01-4114-4D7A-B76E-29BAC6DE940C} = {777A310F-601C-4153-ADB7-14263FAA86DA}
 		{5A6E4E5F-3837-4E50-B1D6-55EF2AEA8139} = {777A310F-601C-4153-ADB7-14263FAA86DA}
 		{C8B73F55-D8C6-403F-B2B4-D4BC645339F5} = {F4C64018-0A98-4F30-8B25-201D834C5C3A}
+		{92CB315A-68CC-4151-9A0E-9704F199F219} = {F4C64018-0A98-4F30-8B25-201D834C5C3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}

@@ -104,13 +104,13 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
                 if (message.AttachmentIds.Any())
                 {
 
-                    var getAttachmentsResult = await deskpro.GetMessageAttachments(ticket.Id, message.Id, cancellationToken);
+                    var getAttachmentsResult = await deskpro.GetMessageAttachments(message.Id, cancellationToken);
                     attachments = getAttachmentsResult.Value ?? Enumerable.Empty<AttachmentDto>();
                 }
 
                 // Get message number from API database
                 var messageNumber = 0;
-                var databaseMessage = await messageRepository.GetByDeskproMessageId(message.Id);
+                var databaseMessage = await messageRepository.GetByDeskproMessageId(message.Id.Id);
 
                 if (databaseMessage is null)
                 {

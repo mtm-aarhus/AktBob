@@ -1,4 +1,6 @@
-﻿namespace AktBob.Database.Entities;
+﻿using AktBob.Shared.Types.Deskpro;
+
+namespace AktBob.Database.Entities;
 public class Message
 {
     public int Id { get; set; }

@@ -1,16 +1,16 @@
 ﻿using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
-using ErrorOr;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.Cleanup;
 internal static class CleanUpShared
 {
-    public static async Task<ErrorOr<TicketDto>> GetDeskproTicket(int deskproTicketId, IDeskproModule deskpro, CancellationToken cancellationToken)
+    public static async Task<ErrorOr<TicketDto>> GetDeskproTicket(TicketId ticketId, IDeskproModule deskpro, CancellationToken cancellationToken)
     {
-        var getDeskproTicketResult = await deskpro.GetTicket(deskproTicketId, cancellationToken);
+        var getDeskproTicketResult = await deskpro.GetTicket(ticketId, cancellationToken);
         if (getDeskproTicketResult.IsError || getDeskproTicketResult.Value is null)
         {
-            throw new BusinessException($"Error getting ticket {deskproTicketId} from Deskpro.");
+            throw new BusinessException($"Error getting ticket {ticketId} from Deskpro.");
         }
 
         return getDeskproTicketResult;

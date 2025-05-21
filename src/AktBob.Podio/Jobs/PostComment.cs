@@ -1,12 +1,13 @@
 ﻿using AktBob.Podio.Contracts;
 using AktBob.Shared;
 using AktBob.Shared.Extensions;
+using AktBob.Shared.Types.Podio;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AktBob.Podio.Jobs;
 
-internal record PostCommentJob(PodioItemId PodioItemId, string TextValue);
+internal record PostCommentJob(ItemId PodioItemId, string TextValue);
 
 internal class PostComment(IServiceScopeFactory serviceScopeFactory) : IJobHandler<PostCommentJob>
 {

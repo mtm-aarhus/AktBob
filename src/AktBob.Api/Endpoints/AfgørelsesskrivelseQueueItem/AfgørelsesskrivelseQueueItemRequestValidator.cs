@@ -9,6 +9,6 @@ public class AfgørelsesskrivelseQueueItemRequestValidator : Validator<Afgørels
     public AfgørelsesskrivelseQueueItemRequestValidator()
     {
         RuleFor(x => x.DeskproId).NotNull();
-        RuleFor(x => x.DeskproId).GreaterThan(0);
+        RuleFor(x => x.DeskproId.Value).GreaterThan(0);
     }
 }

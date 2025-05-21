@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace AktBob.Shared;
+namespace AktBob.Shared.Types.Podio;
 
-public readonly struct PodioItemId : IEquatable<PodioItemId>
+public readonly struct ItemId : IEquatable<ItemId>
 {
-    public PodioItemId(int appId, long id)
+    public ItemId(int appId, long id)
     {
         AppId = appId;
         Id = id;
@@ -14,8 +14,8 @@ public readonly struct PodioItemId : IEquatable<PodioItemId>
     public long Id { get; }
 
     public override string ToString() => $"(AppId = {AppId}, ItemId = {Id})";
-    public override bool Equals([NotNullWhen(true)] object? obj) => obj is PodioItemId other && Equals(other);
-    public bool Equals(PodioItemId other) => AppId == other.AppId && Id == other.Id;
+    public override bool Equals([NotNullWhen(true)] object? obj) => obj is ItemId other && Equals(other);
+    public bool Equals(ItemId other) => AppId == other.AppId && Id == other.Id;
     public override int GetHashCode()
     {
         return HashCode.Combine(AppId, Id);

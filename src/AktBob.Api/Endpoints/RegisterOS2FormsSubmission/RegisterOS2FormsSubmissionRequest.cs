@@ -1,3 +1,5 @@
-﻿namespace AktBob.Api.Endpoints.RegisterOS2FormsSubmission;
+﻿using AktBob.Shared.Types.Deskpro;
 
-internal record RegisterOS2FormsSubmissionRequest(int DeskproTicketId, Guid OS2FormsSubmissionId);
+namespace AktBob.Api.Endpoints.RegisterOS2FormsSubmission;
+
+internal record RegisterOS2FormsSubmissionRequest(TicketId DeskproTicketId, Guid OS2FormsSubmissionId);

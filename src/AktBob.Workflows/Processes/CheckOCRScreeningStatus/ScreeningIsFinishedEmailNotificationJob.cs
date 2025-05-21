@@ -1,2 +1,4 @@
-﻿namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
-internal record ScreeningIsFinishedEmailNotificationJob(PodioItemId PodioItemId, Guid FilArkivCaseId);
+﻿using AktBob.Shared.Types.Podio;
+
+namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
+internal record ScreeningIsFinishedEmailNotificationJob(ItemId PodioItemId, Guid FilArkivCaseId);

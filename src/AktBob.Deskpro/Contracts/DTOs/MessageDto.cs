@@ -1,9 +1,10 @@
-﻿namespace AktBob.Deskpro.Contracts.DTOs;
+﻿using AktBob.Shared.Types.Deskpro;
+
+namespace AktBob.Deskpro.Contracts.DTOs;
 
 public record MessageDto
 {
-    public int Id { get; init; }
-    public int TicketId { get; init; }
+    public MessageId Id { get; set; }
     public PersonDto Person { get; set; } = new();
     public DateTime CreatedAt { get; init; }
     public bool IsAgentNote { get; init; }

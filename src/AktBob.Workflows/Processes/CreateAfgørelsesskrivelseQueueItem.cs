@@ -14,7 +14,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
 
     public async Task Handle(CreateAfgørelsesskrivelseQueueItemJob job, CancellationToken cancellationToken = default)
     {
-        Guard.Against.NegativeOrZero(job.DeskproTicketId);
+        Guard.Against.NegativeOrZero(job.TicketId);
 
         using var scope = _serviceScopeFactory.CreateScope();
         var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
@@ -27,7 +27,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         var deskproLovgivningFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:LovgivningFieldId"));
 
         // Get data from Deskpro
-        var deskproTicketResult = await deskpro.GetTicket(job.DeskproTicketId, cancellationToken);
+        var deskproTicketResult = await deskpro.GetTicket(job.TicketId, cancellationToken);
         if (deskproTicketResult.IsError || deskproTicketResult.Value is null) throw new BusinessException("Unable to get ticket from Deskpro");
 
         // Deskpro ticket fields
@@ -51,7 +51,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             : Task.FromResult(Error.NotFound().ToErrorOr<TeamDto>());
 
         // Database ticket
-        var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproTicketId);
+        var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.TicketId);
 
         await Task.WhenAll([
             getPerson,
@@ -70,12 +70,12 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             Afdeling = getTeam.Result.Value?.Name,
             Aktindsigtsovermappe = getDatabaseTicket.Result?.SharepointFolderName,
             SagsbehandlerEmail = getAgent.Result.Value?.Email,
-            DeskProID = job.DeskproTicketId,
+            DeskProID = job.TicketId.Value,
             AktindsigtsDato = modtagelsesdato,
             Lovgivning = lovgivning
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"DeskproID {job.DeskproTicketId}", payload.ToJson());
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"DeskproID {job.TicketId}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
     }
 

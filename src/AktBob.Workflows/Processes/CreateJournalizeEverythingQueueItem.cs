@@ -15,7 +15,7 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
 
     public async Task Handle(CreateJournalizeEverythingQueueItemJob job, CancellationToken cancellationToken = default)
     {
-        Guard.Against.NegativeOrZero(job.DeskproId);
+        Guard.Against.NegativeOrZero(job.TicketId);
 
         var scope = _serviceScopeFactory.CreateScope();
 
@@ -28,8 +28,8 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:OpenOrchestratorQueueName"));
 
         // Begin
-        var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproId);
-        var getDeskproTicket = deskpro.GetTicket(job.DeskproId, cancellationToken);
+        var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.TicketId);
+        var getDeskproTicket = deskpro.GetTicket(job.TicketId, cancellationToken);
 
         await Task.WhenAll([getDatabaseTicket, getDeskproTicket]);
 
@@ -38,7 +38,7 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
 
         if (string.IsNullOrEmpty(getDatabaseTicket.Result.CaseNumber))
         {
-            _logger.LogWarning("GO Aktindsigtssagsnummer not registered for Deskpro Id {id}", job.DeskproId);
+            _logger.LogWarning("GO Aktindsigtssagsnummer not registered for Deskpro Id {id}", job.TicketId);
         }
 
         var agent = getDeskproTicket.Result.Value.Agent?.Id != null
@@ -50,11 +50,11 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
             Aktindsigtssag = getDatabaseTicket.Result.CaseNumber,
             Email = agent.Value.Email,
             Navn = agent.Value.FullName,
-            DeskproID = job.DeskproId,
+            DeskproID = job.TicketId.Value,
             Overmappenavn = getDatabaseTicket.Result.SharepointFolderName
         };
 
-        var createOpenOrchestratorQueueItemCommand = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload.ToJson());
+        var createOpenOrchestratorQueueItemCommand = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro ID {job.TicketId}", payload.ToJson());
         openOrchestrator.CreateQueueItem(createOpenOrchestratorQueueItemCommand);
     }
 }

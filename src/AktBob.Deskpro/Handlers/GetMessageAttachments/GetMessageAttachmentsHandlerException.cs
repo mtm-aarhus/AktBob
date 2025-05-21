@@ -1,4 +1,4 @@
-﻿using AktBob.Deskpro.Contracts.DTOs;
+﻿using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Deskpro.Handlers.GetMessageAttachments;
 internal class GetMessageAttachmentsHandlerException : IGetMessageAttachmentsHandler
@@ -12,17 +12,17 @@ internal class GetMessageAttachmentsHandlerException : IGetMessageAttachmentsHan
         _logger = logger;
     }
 
-    public async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> Handle(int ticketId, int messageId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> Handle(MessageId messageId, CancellationToken cancellationToken)
     {
         try
         {
-            return await _inner.Handle(ticketId, messageId, cancellationToken);
+            return await _inner.Handle(messageId, cancellationToken);
         }
         catch (HttpRequestException ex)
         {
             if (ex.StatusCode is System.Net.HttpStatusCode.NotFound)
             {
-                return Error.NotFound("GetMessageAttachmentsHandler.NotFound", $"Ticket {ticketId} messageId {messageId} attachments not found.");
+                return Error.NotFound("GetMessageAttachmentsHandler.NotFound", $"Message {messageId} attachments not found.");
             }
 
             throw;

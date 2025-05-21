@@ -1,6 +1,7 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Database.Repositories;
+using AktBob.Shared.Types.Deskpro;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Database.Decorators;
@@ -49,11 +50,11 @@ internal class MessageRepositoryExceptionDecorator(IMessageRepository inner, ILo
         }
     }
 
-    public async Task<Message?> GetByDeskproMessageId(int deskproMessageId)
+    public async Task<Message?> GetByDeskproMessageId(int messageId)
     {
         try
         {
-            return await _inner.GetByDeskproMessageId(deskproMessageId);
+            return await _inner.GetByDeskproMessageId(messageId);
         }
         catch (Exception ex)
         {

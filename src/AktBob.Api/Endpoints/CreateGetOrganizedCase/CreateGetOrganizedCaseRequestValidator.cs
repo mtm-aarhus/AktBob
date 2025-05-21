@@ -6,6 +6,6 @@ internal class CreateGetOrganizedCaseRequestValidator : Validator<CreateGetOrgan
 {
     public CreateGetOrganizedCaseRequestValidator()
     {
-        RuleFor(x => x.DeskproTicketId).NotNull().GreaterThan(0);
+        RuleFor(x => x.DeskproTicketId.Value).NotNull().GreaterThan(0);
     }
 }

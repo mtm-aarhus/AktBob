@@ -1,5 +1,5 @@
-﻿using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Shared.Extensions;
+﻿using AktBob.Shared.Extensions;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Deskpro.Handlers.GetMessageAttachments;
 internal class GetMessageAttachmentsHandlerLogging : IGetMessageAttachmentsHandler
@@ -13,14 +13,14 @@ internal class GetMessageAttachmentsHandlerLogging : IGetMessageAttachmentsHandl
         _logger = logger;
     }
 
-    public async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> Handle(int ticketId, int messageId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> Handle(MessageId messageId, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Getting Deskpro ticket {ticketId} message {messageId} attachments", ticketId, messageId);
+        _logger.LogInformation("Getting Deskpro message {messageId} attachments", messageId);
 
-        var result = await _inner.Handle(ticketId, messageId, cancellationToken);
+        var result = await _inner.Handle(messageId, cancellationToken);
 
         result.Switch(
-            _ => _logger.LogInformation("Deskpro ticket {ticketId} message {messageId} attachments retrieved", ticketId, messageId),
+            _ => _logger.LogInformation("Deskpro message {messageId} attachments retrieved", messageId),
             errors => _logger.LogWarning("{name}: {errors}", nameof(GetMessageAttachmentsHandler), errors.ToCommaDelimitedString()));
 
         return result;

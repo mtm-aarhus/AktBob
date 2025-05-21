@@ -1,3 +1,5 @@
-﻿namespace AktBob.Api.Endpoints.JournalizeEverythingQueueItem;
+﻿using AktBob.Shared.Types.Deskpro;
 
-internal record JournalizeEverythingQueueItemRequest(int DeskproId);
+namespace AktBob.Api.Endpoints.JournalizeEverythingQueueItem;
+
+internal record JournalizeEverythingQueueItemRequest(TicketId DeskproId);

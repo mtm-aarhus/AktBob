@@ -12,31 +12,28 @@ internal class RegisterMessages(ILogger<RegisterMessages> logger, IServiceScopeF
 
     public async Task Handle(RegisterMessagesJob job, CancellationToken cancellationToken = default)
     {
-        // Validate job parameters
-        Guard.Against.NegativeOrZero(job.DeskproTicketId);
-
         var scope = _serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
         var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
         var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
 
         // Get message from Deskpro
-        var getDeskproMessagesResult = await deskpro.GetMessages(job.DeskproTicketId, cancellationToken);
+        var getDeskproMessagesResult = await deskpro.GetMessages(job.TicketId, cancellationToken);
         if (getDeskproMessagesResult.IsError) throw new BusinessException("Unable to get messages from Deskpro.");
 
         // Persist the Deskpro ticket ID and message ID in the database
         var tasks = getDeskproMessagesResult.Value.Select(async deskproMessage =>
         {
-            var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproTicketId);
+            var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(job.TicketId);
             if (databaseTicket is null) throw new BusinessException("Unable to get ticket from database.");
 
-            var existingMessage = await unitOfWork.Messages.GetByDeskproMessageId(deskproMessage.Id);
+            var existingMessage = await unitOfWork.Messages.GetByDeskproMessageId(deskproMessage.Id.Id);
             if (existingMessage is null)
             {
                 var message = new Message
                 {
                     TicketId = databaseTicket.Id,
-                    DeskproMessageId = deskproMessage.Id,
+                    DeskproMessageId = deskproMessage.Id.Id,
                 };
 
                 if (!await unitOfWork.Messages.Add(message)) throw new BusinessException($"Unable to add new message to database (TicketId = {databaseTicket.Id}, DeskproMessageId = {deskproMessage.Id})");

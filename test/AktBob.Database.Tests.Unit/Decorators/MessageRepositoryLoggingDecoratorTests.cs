@@ -2,6 +2,7 @@
 using AktBob.Database.Decorators;
 using AktBob.Database.Entities;
 using AktBob.Database.Repositories;
+using AktBob.Shared.Types.Deskpro;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;

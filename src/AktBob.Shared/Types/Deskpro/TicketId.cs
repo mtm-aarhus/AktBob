@@ -1,6 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
 
-namespace AktBob.Deskpro.Types;
+namespace AktBob.Shared.Types.Deskpro;
+
 public struct TicketId : IParsable<TicketId>, IEquatable<TicketId>
 {
     public int Value { get; }
@@ -9,6 +11,15 @@ public struct TicketId : IParsable<TicketId>, IEquatable<TicketId>
 
     public static TicketId Create(int value) => new TicketId(value);
     public static implicit operator int(TicketId value) => value.Value;
+    public static explicit operator TicketId(int? value)
+    {
+        if (value != null)
+        {
+            return Create((int)value);
+        }
+
+        return default;
+    }
     public static explicit operator TicketId(string? value)
     {
         if (int.TryParse(value, out int result))

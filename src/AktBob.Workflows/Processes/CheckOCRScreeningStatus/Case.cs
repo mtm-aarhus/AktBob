@@ -1,11 +1,13 @@
-﻿namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
+﻿using AktBob.Shared.Types.Podio;
+
+namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 internal class Case
 {
     public Guid FilArkivCaseId { get; }
-    public PodioItemId PodioItemId { get; }
+    public ItemId PodioItemId { get; }
     public Dictionary<Guid, File> Files { get; set; } = new();
 
-    public Case(Guid filArkivCaseId, PodioItemId podioItemId)
+    public Case(Guid filArkivCaseId, ItemId podioItemId)
     {
         FilArkivCaseId = filArkivCaseId;
         PodioItemId = podioItemId;

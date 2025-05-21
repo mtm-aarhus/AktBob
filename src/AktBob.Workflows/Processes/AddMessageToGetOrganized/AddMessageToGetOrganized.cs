@@ -6,10 +6,11 @@ using AktBob.Workflows.Helpers;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.CloudConvert.Contracts;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
-internal record AddMessageToGetOrganizedJob(int DeskproMessageId, string CaseNumber);
+internal record AddMessageToGetOrganizedJob(MessageId DeskproMessageId, string CaseNumber);
 
 internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddMessageToGetOrganizedJob>
 {
@@ -20,8 +21,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
     {
         // Validate job parameters
         Guard.Against.NullOrEmpty(job.CaseNumber);
-        Guard.Against.Zero(job.DeskproMessageId);
-
+        
         using var scope = _serviceScopeFactory.CreateScope();
         var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
         var cloudConvert = scope.ServiceProvider.GetRequiredServiceOrThrow<ICloudConvertModule>();
@@ -29,7 +29,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
         var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
 
-        var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(job.DeskproMessageId);
+        var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(job.DeskproMessageId.Id);
         if (databaseMessage is null) throw new BusinessException("Unable to get message from database.");
 
         // Get message from database, check if documentId is null
@@ -48,7 +48,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var deskproTicket = deskproTicketResult.Value;
 
         // Get Deskpro message
-        var getDeskproMessageResult = await deskpro.GetMessage(databaseTicket.DeskproId, databaseMessage.DeskproMessageId, cancellationToken);
+        var getDeskproMessageResult = await deskpro.GetMessage(job.DeskproMessageId, cancellationToken);
         if (getDeskproMessageResult.IsError) throw new BusinessException("Unable to get message from Deskpro. Please mark message as deleted to avoid future processing failure.");
         var deskproMessage = getDeskproMessageResult.Value;
 
@@ -65,7 +65,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var attachments = Enumerable.Empty<AttachmentDto>();
         if (getDeskproMessageResult.Value.AttachmentIds.Any())
         {
-            var getAttachmentsResult = await deskpro.GetMessageAttachments(deskproTicket.Id, deskproMessage.Id, cancellationToken);
+            var getAttachmentsResult = await deskpro.GetMessageAttachments(job.DeskproMessageId, cancellationToken);
             attachments = getAttachmentsResult.Value ?? Enumerable.Empty<AttachmentDto>();
         }
 

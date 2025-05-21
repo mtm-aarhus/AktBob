@@ -1,5 +1,6 @@
 ﻿using AAK.Deskpro;
 using AktBob.Deskpro.Contracts;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Deskpro.Handlers.GetMessages;
 internal class GetMessagesHandler(IDeskproClient deskproClient, IGetPersonByIdHandler getPersonByIdHandler) : IGetMessagesHandler
@@ -22,18 +23,17 @@ internal class GetMessagesHandler(IDeskproClient deskproClient, IGetPersonByIdHa
             {
                 messages.AddRange(deskproMessages.Data.Select(x => new MessageDto
                 {
+                    Id = MessageId.Create(ticketId, x.Id),
                     AttachmentIds = x.AttachmentIds,
                     CreatedAt = x.CreatedAt,
                     IsAgentNote = x.IsAgentNote,
                     Content = x.Content,
-                    Id = x.Id,
                     Recipients = x.Recipients,
                     CreationSystem = x.CreationSystem,
                     Person = new PersonDto
                     {
                         Id = x.Person.Id,
-                    },
-                    TicketId = x.TicketId
+                    }
                 }));
 
                 totalPages = deskproMessages.Pagination.TotalPages;

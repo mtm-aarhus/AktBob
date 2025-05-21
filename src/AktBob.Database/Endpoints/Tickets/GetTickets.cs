@@ -1,12 +1,13 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Dtos;
 using AktBob.Database.Extensions;
+using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace AktBob.Database.Endpoints.Tickets;
 
-internal record GetTicketsRequest(int? DeskproId, long? PodioItemId, Guid? FilArkivCaseId);
+internal record GetTicketsRequest(TicketId? DeskproId, long? PodioItemId, Guid? FilArkivCaseId);
 
 internal class GetTickets(ITicketRepository ticketRepository) : Endpoint<GetTicketsRequest, IEnumerable<TicketDto>>
 {

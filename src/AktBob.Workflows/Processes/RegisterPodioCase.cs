@@ -4,11 +4,11 @@ using AktBob.Database.Entities;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes;
-internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<RegisterPodioCaseJob>
+internal class RegisterPodioCase(IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<RegisterPodioCaseJob>
 {
-    private readonly ILogger<RegisterPodioCase> _logger = logger;
     private readonly IConfiguration _configuration = configuration;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
@@ -41,11 +41,11 @@ internal class RegisterPodioCase(ILogger<RegisterPodioCase> logger, IConfigurati
         var deskproIdString = podioItemResult.Value.GetField(podioFieldDeskproId.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(deskproIdString)) throw new BusinessException("Deskpro Id field value from Podio Item is null or empty");
 
-        if (!int.TryParse(deskproIdString, out int deskproId)) throw new BusinessException("Unable to parse Podio item Deskpro Id field value as integer");
+        if (!TicketId.TryParse(deskproIdString, default, out TicketId deskproTicketId)) throw new BusinessException("Unable to parse Podio item Deskpro Id field value as integer");
 
         // Get ticket from repository
-        var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(deskproId);
-        if (databaseTicket is null) throw new BusinessException($"Unable to get Deskpro ticket {deskproId} from database");
+        var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(deskproTicketId);
+        if (databaseTicket is null) throw new BusinessException($"Unable to get Deskpro ticket {deskproTicketId} from database");
 
         // Add case to database
         var @case = new Case

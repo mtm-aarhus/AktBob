@@ -25,15 +25,15 @@ internal class CreateCleanupSharepointQueueItem : IJobHandler<CreateCleanupShare
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
 
         // Get Sharepoint folder name from database
-        var ticket = await ticketRepository.GetByDeskproTicketId(job.DeskproTicketId);
+        var ticket = await ticketRepository.GetByDeskproTicketId(job.TicketId);
         if (ticket == null)
         {
-            throw new BusinessException($"Deskpro ticket {job.DeskproTicketId} not found in database,");
+            throw new BusinessException($"Deskpro ticket {job.TicketId} not found in database,");
         }
 
         if (string.IsNullOrWhiteSpace(ticket.SharepointFolderName))
         {
-            throw new BusinessException($"No Sharepoint folder name registered for Deskpro ticket {job.DeskproTicketId}.");
+            throw new BusinessException($"No Sharepoint folder name registered for Deskpro ticket {job.TicketId}.");
         }
 
         var payload = new
@@ -41,7 +41,7 @@ internal class CreateCleanupSharepointQueueItem : IJobHandler<CreateCleanupShare
             SharepointMappeNavn = ticket.SharepointFolderName
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro {job.DeskproTicketId}", payload.ToJson());
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro {job.TicketId}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
     }
 }

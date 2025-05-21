@@ -1,12 +1,12 @@
 ﻿using AAK.Deskpro;
-using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Deskpro.Handlers.GetMessageAttachments;
 public class GetMessageAttachmentsHandler(IDeskproClient deskpro) : IGetMessageAttachmentsHandler
 {
     private readonly IDeskproClient _deskpro = deskpro;
 
-    public async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> Handle(int ticketId, int messageId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> Handle(MessageId messageId, CancellationToken cancellationToken)
     {
         var attachments = new List<AttachmentDto>();
         var pageNumber = 1;
@@ -17,7 +17,7 @@ public class GetMessageAttachmentsHandler(IDeskproClient deskpro) : IGetMessageA
         // -> loop through all pages and add all the attachment objects to the list
         do
         {
-            var pageAttachments = await _deskpro.GetMessageAttachments(ticketId, messageId, pageNumber, attachmentsPerPage, cancellationToken);
+            var pageAttachments = await _deskpro.GetMessageAttachments(messageId.TicketId, messageId.Id, pageNumber, attachmentsPerPage, cancellationToken);
             var dtos = pageAttachments.Attachments.Select(x => new AttachmentDto
             {
                 IsAgentNote = x.IsAgentNote,
@@ -26,9 +26,8 @@ public class GetMessageAttachmentsHandler(IDeskproClient deskpro) : IGetMessageA
                 DownloadUrl = x.DownloadUrl,
                 FileName = x.FileName,
                 Id = x.Id,
-                MessageId = x.MessageId,
-                PersonId = x.PersonId,
-                TicketId = x.TicketId
+                MessageId = MessageId.Create(x.TicketId, x.MessageId),
+                PersonId = x.PersonId
             });
 
             attachments.AddRange(dtos);

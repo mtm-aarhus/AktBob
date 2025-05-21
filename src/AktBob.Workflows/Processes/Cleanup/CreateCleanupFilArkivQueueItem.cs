@@ -27,10 +27,10 @@ internal class CreateCleanupFilArkivQueueItem : IJobHandler<CreateCleanupFilArki
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
 
         // Get FilArkiv caseId from database
-        var tickets = await ticketRepository.GetAll(DeskproId: job.DeskproTicketId, null, null);
+        var tickets = await ticketRepository.GetAll(DeskproId: job.TicketId, null, null);
         if (tickets is null || tickets.Count() == 0)
         {
-            throw new BusinessException($"Deskpro ticket {job.DeskproTicketId} not found in database");
+            throw new BusinessException($"Deskpro ticket {job.TicketId} not found in database");
         }
 
         foreach (var ticket in tickets)
@@ -45,7 +45,7 @@ internal class CreateCleanupFilArkivQueueItem : IJobHandler<CreateCleanupFilArki
             {
                 if (@case.FilArkivCaseId is null)
                 {
-                    _logger.LogInformation("FilArkivCaseId is null for case {caseId} DeskproTicketId {id}", @case.CaseNumber, job.DeskproTicketId);
+                    _logger.LogInformation("FilArkivCaseId is null for case {caseId} DeskproTicketId {id}", @case.CaseNumber, job.TicketId);
                     continue;
                 }
 
@@ -54,7 +54,7 @@ internal class CreateCleanupFilArkivQueueItem : IJobHandler<CreateCleanupFilArki
                     @case.FilArkivCaseId
                 };
 
-                var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro {job.DeskproTicketId} {@case.CaseNumber}", payload.ToJson());
+                var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro {job.TicketId} {@case.CaseNumber}", payload.ToJson());
                 openOrchestrator.CreateQueueItem(command);
             }
         }

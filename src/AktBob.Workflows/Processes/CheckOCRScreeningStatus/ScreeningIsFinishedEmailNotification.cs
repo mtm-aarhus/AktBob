@@ -3,6 +3,7 @@ using AktBob.Podio.Contracts;
 using AktBob.Email.Contracts;
 using AktBob.Workflows.Helpers;
 using AktBob.Deskpro.Contracts;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
@@ -45,7 +46,7 @@ internal class ScreeningIsFinishedEmailNotification : IJobHandler<ScreeningIsFin
         var ticketSubject = string.Empty;
 
         // Try get Deskpro ticket
-        if (int.TryParse(ticketId, out var deskproTicketId))
+        if (TicketId.TryParse(ticketId, default, out var deskproTicketId))
         {
             var getDeskproTicket = await deskpro.GetTicket(deskproTicketId, cancellationToken);
             if (!getDeskproTicket.IsError)

@@ -20,6 +20,7 @@
     <ProjectReference Include="..\AktBob.OpenOrchestrator.Contracts\AktBob.OpenOrchestrator.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.OS2Forms.Contracts\AktBob.OS2Forms.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.Podio.Contracts\AktBob.Podio.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.Shared.Jobs\AktBob.Shared.Jobs.csproj" />
     <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
   </ItemGroup>
 
