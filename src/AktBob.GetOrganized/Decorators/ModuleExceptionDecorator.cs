@@ -1,6 +1,7 @@
 ﻿using AktBob.GetOrganized.Contracts;
 using AktBob.GetOrganized.Contracts.DTOs;
 using Ardalis.Result;
+using ErrorOr;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.GetOrganized.Decorators;
@@ -55,6 +56,19 @@ internal class ModuleExceptionDecorator : IGetOrganizedModule
         }
     }
 
+    public async Task<ErrorOr<CaseMetadataDto>> GetCaseMetadata(string caseId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _inner.GetCaseMetadata(caseId, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {name}", nameof(GetCaseMetadata));
+            throw;
+        }
+    }
+
     public async Task RelateDocuments(RelateDocumentsCommand command, CancellationToken cancellationToken = default)
     {
         try
@@ -64,6 +78,19 @@ internal class ModuleExceptionDecorator : IGetOrganizedModule
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {name}", nameof(RelateDocuments));
+            throw;
+        }
+    }
+
+    public async Task<ErrorOr<Success>> UpdateCaseMetadata(string caseId, UpdateCaseMetadataCommand command, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _inner.UpdateCaseMetadata(caseId, command, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {name}", nameof(UpdateCaseMetadata));
             throw;
         }
     }

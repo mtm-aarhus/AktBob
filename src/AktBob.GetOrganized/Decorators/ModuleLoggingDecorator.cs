@@ -1,6 +1,7 @@
 ﻿using AktBob.GetOrganized.Contracts;
 using AktBob.GetOrganized.Contracts.DTOs;
 using Ardalis.Result;
+using ErrorOr;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.GetOrganized.Decorators;
@@ -49,10 +50,36 @@ internal class ModuleLoggingDecorator(IGetOrganizedModule inner, ILogger<GetOrga
         return result!;
     }
 
+    public async Task<ErrorOr<CaseMetadataDto>> GetCaseMetadata(string caseId, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Getting GetOrganized case {id} metadata", caseId);
+
+        var result = await _inner.GetCaseMetadata(caseId, cancellationToken);
+
+        result.Switch(
+            _ => _logger.LogInformation("GetOrganized case {id} metadata retrieved", caseId),
+            errors => _logger.LogWarning("Error getting GetOrganized case {id} metadata", caseId));
+
+        return result;
+    }
+
     public async Task RelateDocuments(RelateDocumentsCommand command, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Relating GetOrganized documents. {command}", command);
         await _inner.RelateDocuments(command, cancellationToken);
+    }
+
+    public async Task<ErrorOr<Success>> UpdateCaseMetadata(string caseId, UpdateCaseMetadataCommand command, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Update GetOrganized case {id} metadata: Kle = {kle}", caseId, command.Kle);
+
+        var result = await _inner.UpdateCaseMetadata(caseId, command, cancellationToken);
+
+        result.Switch(
+            _ => _logger.LogInformation("GetOrganized case {id} metadata updated", caseId),
+            errors => _logger.LogError("Error updating GetOrganized case {id} metadata", caseId));
+
+        return result;
     }
 
     public async Task<Result<int>> UploadDocument(UploadDocumentCommand command, CancellationToken cancellationToken)

@@ -31,6 +31,8 @@ public static class ModuleServices
         services.AddScoped<IRelateDocumentsHandler, RelateDocumentsHandler>();
         services.AddScoped<IUploadDocumentHandler, UploadDocumenHandler>();
         services.AddScoped<IGetAggregatedCaseHandler, GetAggregatedCaseHandler>();
+        services.AddScoped<IGetCaseMetadataHandler, GetCaseMetadataHandler>();
+        services.AddScoped<IUpdateCaseMetadata,  UpdateCaseMetadataHandler>();
 
         // Jobs
         services.AddScoped<IJobHandler<FinalizeDocumentJob>, FinalizeDocument>();
@@ -43,7 +45,9 @@ public static class ModuleServices
                 provider.GetRequiredService<ICreateCaseHandler>(),
                 provider.GetRequiredService<IRelateDocumentsHandler>(),
                 provider.GetRequiredService<IUploadDocumentHandler>(),
-                provider.GetRequiredService<IGetAggregatedCaseHandler>());
+                provider.GetRequiredService<IGetAggregatedCaseHandler>(),
+                provider.GetRequiredService<IGetCaseMetadataHandler>(),
+                provider.GetRequiredService<IUpdateCaseMetadata>());
 
             var withLogging = new ModuleLoggingDecorator(
                 inner,
