@@ -57,14 +57,14 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
 
         // Get current status from FilArkiv
         var response = await filArkiv.GetFileProcessStatus(job.FilArkivFileId, cancellationToken);
-        if (!response.IsSuccess)
+        if (response.IsError)
         {
             file.SetStatus(true);
             NotifyWhenAllFilesAreFinished(job.PodioItemId, @case);
 
-            if (response.Status == ResultStatus.NotFound)
+            if (response.FirstError == Error.NotFound())
             {
-                _logger.LogError("FilArkiv file {fileId} not found.", job.FilArkivFileId);
+                _logger.LogError(response.FirstError.Description);
                 return;
             }
 

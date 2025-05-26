@@ -1,17 +1,17 @@
 ﻿using AAK.FilArkiv;
-using AktBob.FilArkiv.Contracts;
-using Ardalis.Result;
+using AktBob.FilArkiv.Contracts.DTOs;
+using ErrorOr;
 
-namespace AktBob.FilArkiv.Handlers;
-internal class GetDocumentsHandler : IGetDocumentsHandler
+namespace AktBob.FilArkiv.Handlers.GetDocumentsByCaseId;
+internal class GetDocumentsByCaseIdHandler : IGetDocumentsByCaseIdHandler
 {
     private readonly IFilArkiv _filArkiv;
 
-    public GetDocumentsHandler(IFilArkiv filArkiv)
+    public GetDocumentsByCaseIdHandler(IFilArkiv filArkiv)
     {
         _filArkiv = filArkiv;
     }
-    public async Task<Result<IReadOnlyCollection<DocumentDto>>> Handle(Guid caseId, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<IReadOnlyCollection<DocumentDto>>> Handle(Guid caseId, CancellationToken cancellationToken = default)
     {
         var documents = await _filArkiv.GetCaseDocumentOverview(caseId, cancellationToken);
         return documents.Select(d => new DocumentDto

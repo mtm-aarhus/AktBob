@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace AktBob.FilArkiv.Contracts;
+namespace AktBob.FilArkiv.Contracts.DTOs;
 public record DocumentDto
 {
     public Guid Id { get; set; }

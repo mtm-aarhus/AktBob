@@ -13,32 +13,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="55cfb395-baf7-46ea-bfc5-efc5b60760dd" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Handler/ISendEmailHandler.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Handler/RegisterHandler.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Handler/SendEmailHandlerException.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Handler/SendEmailHandlerLogging.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Jobs/SendEmailJob.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Jobs/SendEmailJobHandler.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Handler/SendEmailHandlerLoggingTests.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsByCaseId/GetDocumentsByCaseIdHandlerException.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsByCaseId/GetDocumentsByCaseIdHandlerLogging.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsByCaseId/RegisterHandler.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatus/GetFileProcessStatusHandlerException.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatus/GetFileProcessStatusHandlerLogging.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatus/RegisterHandler.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AktBob/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AktBob/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AktBob.sln" beforeDir="false" afterPath="$PROJECT_DIR$/AktBob.sln" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Email.Contracts/AktBob.Email.Contracts.csproj" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Email.Contracts/IEmailModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/Contracts/IEmailModule.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/Decorators/ModuleExceptionDecorator.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/Decorators/ModuleLoggingDecorator.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/Email.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/Handler/SendEmailHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/EmailModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/EmailModule.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/IEmail.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/ISmtpClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/Client/ISmtpClient.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/ModuleServices.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/ModuleServices.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/SendEmailJobHandler.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/SmtpClientWrapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/Client/SmtpClientWrapper.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv.Contracts/DocumentDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/DTOs/DocumentDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv.Contracts/FileDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/DTOs/FileDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv.Contracts/FileProcessStatusDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/DTOs/FileProcessStatusDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv.Contracts/IFilArkivModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/IFilArkivModule.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/AktBob.FilArkiv.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/AktBob.FilArkiv.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/IGetDocumentsHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsByCaseId/IGetDocumentsByCaseIdHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/IGetFileProcessStatusHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatus/IGetFileProcessStatusHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Decorators/ModuleExceptionDecorator.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Decorators/ModuleLoggingDecorator.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/FilArkivModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/FilArkivModule.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsByCaseId/GetDocumentsByCaseIdHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatusHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatus/GetFileProcessStatusHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/ModuleServices.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/ModuleServices.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AktBob.Workflows/AktBob.Workflows.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Workflows/AktBob.Workflows.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/AktBob.Email.Tests.Unit.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/AktBob.Email.Tests.Unit.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Decorators/ModuleExceptionDecoratorTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Handler/SendEmailHandlerExceptionTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Decorators/ModuleLoggingDecoratorTests.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/EmailTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Handler/SendEmailHandlerTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/SendEmailJobHandlerTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Jobs/SendEmailJobHandlerTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Workflows/Processes/CheckOCRScreeningStatus/CheckOCRScreeningStatusRegisterFiles.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Workflows/Processes/CheckOCRScreeningStatus/CheckOCRScreeningStatusRegisterFiles.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Workflows/Processes/CheckOCRScreeningStatus/QueryFileProcessingStatus.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Workflows/Processes/CheckOCRScreeningStatus/QueryFileProcessingStatus.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,23 +81,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;refactor-email-module&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;inlay.hints&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "refactor-filarkiv-moduel",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "inlay.hints",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Docker.AktBob.Api/Dockerfile">
     <configuration name="AktBob.Worker: FolderProfile" type="DotNetMsBuildPublish" factoryName="Publish to IIS">
       <riderPublish publish_profile="FolderProfile.pubxml" pubxml_path="$PROJECT_DIR$/src/AktBob.Worker/Properties/PublishProfiles/FolderProfile.pubxml" uuid_high="-6092961110301258695" uuid_low="-6706897832372083129" />
@@ -255,7 +252,8 @@
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="Add Rider specific files" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add Rider specific files" />
+    <MESSAGE value="Refactor and reorganized Email module" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor and reorganized Email module" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

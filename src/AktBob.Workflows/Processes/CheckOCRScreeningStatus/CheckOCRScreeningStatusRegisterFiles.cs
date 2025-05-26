@@ -33,7 +33,7 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
         }
 
         var documents = await filArkiv.GetDocumentsByCaseId(@case.FilArkivCaseId, cancellationToken);
-        if (!documents.IsSuccess) throw new BusinessException($"Unable to get document for case {@case.FilArkivCaseId} from FilArkiv");
+        if (documents.IsError) throw new BusinessException($"Unable to get document for case {@case.FilArkivCaseId} from FilArkiv");
         
         foreach (var document in documents.Value)
         {

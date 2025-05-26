@@ -1,11 +1,10 @@
 ﻿using AAK.FilArkiv;
 using AktBob.FilArkiv.Contracts;
-using AktBob.FilArkiv.Decorators;
-using AktBob.FilArkiv.Handlers;
+using AktBob.FilArkiv.Handlers.GetDocumentsByCaseId;
+using AktBob.FilArkiv.Handlers.GetFileProcessStatus;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.FilArkiv;
 
@@ -21,25 +20,10 @@ public static class ModuleServices
         var filArkivOptions = new FilArkivOptions(baseAddress, clientId, clientSecret, tokenEndpoint);
         services.AddFilArkiv(filArkivOptions);
 
-        services.AddScoped<IGetDocumentsHandler, GetDocumentsHandler>();
-        services.AddScoped<IGetFileProcessStatusHandler, GetFileProcessStatusHandler>();
+        services.AddGetDocumentsByCaseIdHandler();
+        services.AddGetFileProcessStatusHandler();
 
-        services.AddScoped<IFilArkivModule>(serviceProvider =>
-        {
-            var inner = new FilArkivModule(
-                serviceProvider.GetRequiredService<IGetDocumentsHandler>(),
-                serviceProvider.GetRequiredService<IGetFileProcessStatusHandler>());
-
-            var withLogging = new ModuleLoggingDecorator(
-                inner,
-                serviceProvider.GetRequiredService<ILogger<FilArkivModule>>());
-
-            var withExceptionHandling = new ModuleExceptionDecorator(
-                withLogging,
-                serviceProvider.GetRequiredService<ILogger<FilArkivModule>>());
-
-            return withExceptionHandling;
-        });
+        services.AddScoped<IFilArkivModule, FilArkivModule>();
 
         return services;
     }

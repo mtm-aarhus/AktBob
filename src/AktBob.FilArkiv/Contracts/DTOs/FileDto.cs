@@ -1,4 +1,4 @@
-﻿namespace AktBob.FilArkiv.Contracts;
+﻿namespace AktBob.FilArkiv.Contracts.DTOs;
 public record FileDto
 {
     public Guid Id { get; set; }
