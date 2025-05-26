@@ -44,6 +44,7 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<RegisterDeskproTicketJob>, RegisterDeskproTicket>();
         services.AddScoped<IJobHandler<UpdateDatabaseTicketJob>, UpdateDatabaseTicket>();
         services.AddScoped<IJobHandler<UpdateDatabaseCaseJob>, UpdateDatabaseCase>();
+        services.AddScoped<IJobHandler<UpdateGetOrganizedCaseSetKleValueJob>, UpdateGetOrganizedCaseSetKleValue>();
 
         return services;
     }
