@@ -1,19 +1,18 @@
-﻿using AktBob.Email.Contracts;
-using AktBob.Email.Decorators;
+﻿using AktBob.Email.Handler;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 
-namespace AktBob.Email.Tests.Unit.Decorators;
-public class ModuleExceptionDecoratorTests
+namespace AktBob.Email.Tests.Unit.Handler;
+public class SendEmailHandlerExceptionTests
 {
-    private readonly ModuleExceptionDecorator _sut;
-    private readonly IEmailModule _inner = Substitute.For<IEmailModule>();
-    private readonly FakeLogger<EmailModule> _logger = new FakeLogger<EmailModule>();
+    private readonly SendEmailHandlerException _sut;
+    private readonly ISendEmailHandler _inner = Substitute.For<ISendEmailHandler>();
+    private readonly FakeLogger<SendEmailHandler> _logger = new FakeLogger<SendEmailHandler>();
 
-    public ModuleExceptionDecoratorTests()
+    public SendEmailHandlerExceptionTests()
     {
-        _sut = new ModuleExceptionDecorator(_inner, _logger);
+        _sut = new SendEmailHandlerException(_inner, _logger);
     }
 
     [Fact]
@@ -25,10 +24,10 @@ public class ModuleExceptionDecoratorTests
         var body = "body";
 
         // Act
-        _sut.Send(to, subject, body);
+        _sut.Handle(to, subject, body);
 
         // Assert
-        _inner.Received(1).Send(Arg.Is(to), Arg.Is(subject), Arg.Is(body));
+        _inner.Received(1).Handle(Arg.Is(to), Arg.Is(subject), Arg.Is(body));
         _logger.Collector.Count.Should().Be(0);
     }
 
@@ -40,11 +39,11 @@ public class ModuleExceptionDecoratorTests
         var subject = "subject";
         var body = "body";
         _inner
-            .When(x => x.Send(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()))
+            .When(x => x.Handle(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()))
             .Do(call => throw new Exception());
 
         // Act
-        var act = () => _sut.Send(to, subject, body);
+        var act = () => _sut.Handle(to, subject, body);
 
         // Assert
         act.Should().Throw<Exception>();

@@ -1,28 +1,30 @@
-﻿using AktBob.Shared;
+﻿using AktBob.Email.Client;
+using AktBob.Email.Handler;
+using AktBob.Shared;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;
 using MimeKit;
 using NSubstitute;
 
-namespace AktBob.Email.Tests.Unit;
+namespace AktBob.Email.Tests.Unit.Handler;
 
-public class EmailTests
+public class SendEmailHandlerTests
 {
-    private readonly Email _sut;
+    private readonly SendEmailHandler _sut;
     private readonly string _smtpUrl = "smtpUrl";
     private readonly int _smtpPort = 123;
     private readonly string _from = "from";
     private readonly IAppConfig _appConfig = Substitute.For<IAppConfig>();
     private readonly ISmtpClient _smtpClient = Substitute.For<ISmtpClient>();
-    private readonly FakeLogger<Email> _logger = new FakeLogger<Email>();
+    private readonly FakeLogger<SendEmailHandler> _logger = new FakeLogger<SendEmailHandler>();
     
 
-    public EmailTests()
+    public SendEmailHandlerTests()
     {
         _appConfig.GetValue<string>("EmailModule:SmtpUrl").Returns(_smtpUrl);
         _appConfig.GetValue<int>("EmailModule:SmtpPort").Returns(_smtpPort);
         _appConfig.GetValue<string>("EmailModule:From").Returns(_from);
-        _sut = new Email(_appConfig, _smtpClient, _logger);
+        _sut = new SendEmailHandler(_appConfig, _smtpClient, _logger);
     }
 
     [Fact]
@@ -34,7 +36,7 @@ public class EmailTests
         var body = "body";
 
         // Act
-        _sut.Send(to, subject, body);
+        _sut.Handle(to, subject, body);
 
         // Assert
         _smtpClient.Received(1).Connect(Arg.Is(_smtpUrl), Arg.Is(_smtpPort));
@@ -52,7 +54,7 @@ public class EmailTests
             .Do(call => throw new Exception());
 
         // Act
-        var act = () => _sut.Send(to, subject, body);
+        var act = () => _sut.Handle(to, subject, body);
 
         // Assert
         act.Should().Throw<Exception>();
@@ -67,7 +69,7 @@ public class EmailTests
         var body = "body";
         
         // Act
-        _sut.Send(to, subject, body);
+        _sut.Handle(to, subject, body);
 
         // Assert
          _smtpClient.Received(1).Send(Arg.Any<MimeMessage>());
@@ -82,7 +84,7 @@ public class EmailTests
         var body = "body";
 
         // Act
-        _sut.Send(to, subject, body);
+        _sut.Handle(to, subject, body);
 
         // Assert
         _smtpClient.Received(1).Disconnect(Arg.Any<bool>());
@@ -100,7 +102,7 @@ public class EmailTests
             .Do(call => throw new Exception());
 
         // Act
-        var act = () => _sut.Send(to, subject, body);
+        var act = () => _sut.Handle(to, subject, body);
 
         // Assert
         act.Should().Throw<Exception>();
@@ -115,7 +117,7 @@ public class EmailTests
         var body = "body";
 
         // Act
-        var act = () => _sut.Send(to, subject, body);
+        var act = () => _sut.Handle(to, subject, body);
 
         // Assert
         act.Should().Throw<Exception>();

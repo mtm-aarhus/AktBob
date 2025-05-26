@@ -1,10 +1,11 @@
-﻿using AktBob.Email.Contracts;
-using AktBob.Email.Decorators;
+﻿using AktBob.Email.Client;
+using AktBob.Email.Contracts;
+using AktBob.Email.Handler;
+using AktBob.Email.Jobs;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.Email;
 
@@ -15,24 +16,12 @@ public static class ModuleServices
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:From"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:SmtpUrl"));
 
-        services.AddTransient<IEmail, Email>();
+        services.AddTransient<ISendEmailHandler, SendEmailHandler>();
         services.AddTransient<ISmtpClient, SmtpClientWrapper>();
         services.AddScoped<IJobHandler<SendEmailJob>, SendEmailJobHandler>();
 
-        services.AddScoped<IEmailModule>(provider =>
-        {
-            var inner = new EmailModule(provider.GetRequiredService<IJobDispatcher>());
-
-            var withLogging = new ModuleLoggingDecorator(
-                inner,
-                provider.GetRequiredService<ILogger<EmailModule>>());
-
-            var withExceptionHandling = new ModuleExceptionDecorator(
-                withLogging,
-                provider.GetRequiredService<ILogger<EmailModule>>());
-
-            return withExceptionHandling;
-        });
+        services.AddSendEmailHandler();
+        services.AddScoped<IEmailModule, EmailModule>();
 
         return services;
     }

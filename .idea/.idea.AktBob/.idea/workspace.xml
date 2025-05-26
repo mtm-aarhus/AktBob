@@ -12,7 +12,34 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="55cfb395-baf7-46ea-bfc5-efc5b60760dd" name="Changes" comment="" />
+    <list default="true" id="55cfb395-baf7-46ea-bfc5-efc5b60760dd" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Handler/ISendEmailHandler.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Handler/RegisterHandler.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Handler/SendEmailHandlerException.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Handler/SendEmailHandlerLogging.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Jobs/SendEmailJob.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.Email/Jobs/SendEmailJobHandler.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Handler/SendEmailHandlerLoggingTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.AktBob/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AktBob/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AktBob.sln" beforeDir="false" afterPath="$PROJECT_DIR$/AktBob.sln" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Email.Contracts/AktBob.Email.Contracts.csproj" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Email.Contracts/IEmailModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/Contracts/IEmailModule.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/Decorators/ModuleExceptionDecorator.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/Decorators/ModuleLoggingDecorator.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/Email.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/Handler/SendEmailHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/EmailModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/EmailModule.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/IEmail.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/ISmtpClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/Client/ISmtpClient.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/ModuleServices.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/ModuleServices.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/SendEmailJobHandler.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Email/SmtpClientWrapper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Email/Client/SmtpClientWrapper.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Workflows/AktBob.Workflows.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Workflows/AktBob.Workflows.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/AktBob.Email.Tests.Unit.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/AktBob.Email.Tests.Unit.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Decorators/ModuleExceptionDecoratorTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Handler/SendEmailHandlerExceptionTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Decorators/ModuleLoggingDecoratorTests.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/EmailTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Handler/SendEmailHandlerTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/SendEmailJobHandlerTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/test/AktBob.Email.Tests.Unit/Jobs/SendEmailJobHandlerTests.cs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -21,7 +48,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="update-go-case-kle-value" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -38,27 +65,39 @@
     &quot;accountId&quot;: &quot;f629f87a-e8ef-416a-ac3d-eae6b07dd3ee&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/AktBob.Workflows/Processes/CheckOCRScreeningStatus/ScreeningIsFinishedEmailNotification.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
   <component name="ProjectId" id="2xceXRxrGO0A2U0MNjImEzU3Rvd" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;refactor-email-module&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.IDE.editor.colors.Language Defaults&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;inlay.hints&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -156,6 +195,8 @@
       <updated>1748241829219</updated>
       <workItem from="1748241830604" duration="118000" />
       <workItem from="1748241982601" duration="4636000" />
+      <workItem from="1748248343181" duration="4400000" />
+      <workItem from="1748256285014" duration="256000" />
     </task>
     <task id="LOCAL-00001" summary="Add Rider specific files">
       <option name="closed" value="true" />
@@ -174,6 +215,21 @@
   <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="refactor-email-module" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
@@ -184,7 +240,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="development" />
+                        <option value="refactor-email-module" />
                       </list>
                     </value>
                   </entry>

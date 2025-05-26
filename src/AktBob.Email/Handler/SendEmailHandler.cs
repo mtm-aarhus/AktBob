@@ -1,20 +1,21 @@
-﻿using AktBob.Shared;
+﻿using AktBob.Email.Client;
+using AktBob.Shared;
 using AktBob.Shared.Exceptions;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 
-namespace AktBob.Email;
-internal class Email : IEmail
+namespace AktBob.Email.Handler;
+internal class SendEmailHandler : ISendEmailHandler
 {
     private readonly IAppConfig _appConfig;
     private readonly ISmtpClient _smtpClient;
-    private readonly ILogger<Email> _logger;
+    private readonly ILogger<SendEmailHandler> _logger;
     private readonly string _smtpUrl;
     private readonly int _smtpPort;
     private readonly string _from;
 
-    public Email(IAppConfig appConfig, ISmtpClient smtpClient, ILogger<Email> logger)
+    public SendEmailHandler(IAppConfig appConfig, ISmtpClient smtpClient, ILogger<SendEmailHandler> logger)
     {
         _appConfig = appConfig;
         _smtpClient = smtpClient;
@@ -24,13 +25,12 @@ internal class Email : IEmail
         _from = Guard.Against.NullOrEmpty(_appConfig.GetValue<string>("EmailModule:From"));
     }
 
-    public void Send(string to, string subject, string body, bool bodyIsHtml = false)
+    public void Handle(string to, string subject, string body, bool bodyIsHtml = false)
     {
         if (string.IsNullOrWhiteSpace(to))
         {
             throw new BusinessException("Email recipient is empty");
         }
-
 
         _smtpClient.Connect(_smtpUrl, _smtpPort);
 

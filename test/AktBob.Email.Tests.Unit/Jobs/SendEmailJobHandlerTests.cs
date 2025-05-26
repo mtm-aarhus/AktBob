@@ -1,15 +1,18 @@
-﻿using NSubstitute;
-using System.Text;
+﻿using System.Text;
+using AktBob.Email.Contracts;
+using AktBob.Email.Handler;
+using AktBob.Email.Jobs;
+using NSubstitute;
 
-namespace AktBob.Email.Tests.Unit;
+namespace AktBob.Email.Tests.Unit.Jobs;
 public class SendEmailJobHandlerTests
 {
     private readonly SendEmailJobHandler _sut;
-    private readonly IEmail _email = Substitute.For<IEmail>();
+    private readonly ISendEmailHandler _sendEmailHandler = Substitute.For<ISendEmailHandler>();
 
     public SendEmailJobHandlerTests()
     {
-        _sut = new SendEmailJobHandler(_email);
+        _sut = new SendEmailJobHandler(_sendEmailHandler);
     }
 
     [Fact]
@@ -27,6 +30,6 @@ public class SendEmailJobHandlerTests
         _sut.Handle(job, CancellationToken.None);
 
         // Assert
-        _email.Received(1).Send(Arg.Is(to), Arg.Is(subject), Arg.Is(body));
+        _sendEmailHandler.Received(1).Handle(Arg.Is(to), Arg.Is(subject), Arg.Is(body));
     }
 }
