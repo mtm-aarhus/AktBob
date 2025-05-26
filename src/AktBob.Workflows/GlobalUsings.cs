@@ -5,3 +5,4 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using AktBob.Shared;
 global using AktBob.Shared.Exceptions;
+global using ErrorOr;

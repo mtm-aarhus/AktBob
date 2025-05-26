@@ -1,15 +1,16 @@
-﻿using AktBob.Deskpro.Contracts.DTOs;
-using System.Text;
-using AktBob.CloudConvert.Contracts;
+﻿using System.Text;
 using AktBob.GetOrganized.Contracts;
-using AktBob.Deskpro.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Workflows.Helpers;
+using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.CloudConvert.Contracts;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
-internal record AddMessageToGetOrganizedJob(int DeskproMessageId, string CaseNumber);
+internal record AddMessageToGetOrganizedJob(MessageId DeskproMessageId, string CaseNumber);
 
 internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddMessageToGetOrganizedJob>
 {
@@ -20,8 +21,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
     {
         // Validate job parameters
         Guard.Against.NullOrEmpty(job.CaseNumber);
-        Guard.Against.Zero(job.DeskproMessageId);
-
+        
         using var scope = _serviceScopeFactory.CreateScope();
         var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
         var cloudConvert = scope.ServiceProvider.GetRequiredServiceOrThrow<ICloudConvertModule>();
@@ -29,7 +29,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
         var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
 
-        var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(job.DeskproMessageId);
+        var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(job.DeskproMessageId.Id);
         if (databaseMessage is null) throw new BusinessException("Unable to get message from database.");
 
         // Get message from database, check if documentId is null
@@ -44,28 +44,28 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
 
         // Get Deskpro ticket (we need the deskpro ticket id to query the message ifself)
         var deskproTicketResult = await deskpro.GetTicket(databaseTicket.DeskproId, cancellationToken);
-        if (!deskproTicketResult.IsSuccess) throw new BusinessException("Unable to get ticket {id} from Deskpro.");
+        if (deskproTicketResult.IsError) throw new BusinessException("Unable to get ticket {id} from Deskpro.");
         var deskproTicket = deskproTicketResult.Value;
 
         // Get Deskpro message
-        var getDeskproMessageResult = await deskpro.GetMessage(databaseTicket.DeskproId, databaseMessage.DeskproMessageId, cancellationToken);
-        if (!getDeskproMessageResult.IsSuccess) throw new BusinessException("Unable to get message from Deskpro. Please mark message as deleted to avoid future processing failure.");
+        var getDeskproMessageResult = await deskpro.GetMessage(job.DeskproMessageId, cancellationToken);
+        if (getDeskproMessageResult.IsError) throw new BusinessException("Unable to get message from Deskpro. Please mark message as deleted to avoid future processing failure.");
         var deskproMessage = getDeskproMessageResult.Value;
 
         // Get Deskpro person
-        var personResult = await deskpro.GetPerson(deskproMessage.Person.Id, cancellationToken);
+        var personResult = await deskpro.GetPersonById(deskproMessage.Person.Id, cancellationToken);
         var person = personResult.Value;
 
         // Get recipient
         var recipient = deskproMessage.Recipients.FirstOrDefault() != null && !deskproMessage.CreationSystem.Equals("web.api")
-            ? await deskpro.GetPerson(deskproMessage.Recipients.First(), cancellationToken)
-            : Result<PersonDto>.Error();
+            ? await deskpro.GetPersonByEmail(deskproMessage.Recipients.First(), cancellationToken)
+            : Error.NotFound().ToErrorOr<PersonDto>();
 
         // Get attachments
         var attachments = Enumerable.Empty<AttachmentDto>();
         if (getDeskproMessageResult.Value.AttachmentIds.Any())
         {
-            var getAttachmentsResult = await deskpro.GetMessageAttachments(deskproTicket.Id, deskproMessage.Id, cancellationToken);
+            var getAttachmentsResult = await deskpro.GetMessageAttachments(job.DeskproMessageId, cancellationToken);
             attachments = getAttachmentsResult.Value ?? Enumerable.Empty<AttachmentDto>();
         }
 
@@ -84,7 +84,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             attachments,
             deskproMessage.IsAgentNote,
             cancellationToken);
-        if (!generateDocumentResult.IsSuccess) throw new BusinessException($"Unable to generate PDF document using CloudConvert: {generateDocumentResult.Errors.AsString()}");
+        if (generateDocumentResult.IsError) throw new BusinessException($"Unable to generate PDF document using CloudConvert: {generateDocumentResult.Errors.ToCommaDelimitedString()}");
 
         // Upload parent document
         DateTime createdAtDanishTime = deskproMessage.CreatedAt.UtcToDanish();
@@ -157,7 +157,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
     }
 
 
-    private async Task<Result<byte[]>> GenerateDocument(ICloudConvertModule cloudConvertModule,
+    private async Task<ErrorOr<byte[]>> GenerateDocument(ICloudConvertModule cloudConvertModule,
                                                         DateTime createdAt,
                                                         string personName,
                                                         string personEmail,
@@ -187,27 +187,27 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var bytes = Encoding.UTF8.GetBytes(html);
 
         var generateTasksResult = cloudConvertModule.GenerateTasks([bytes]);
-        if (!generateTasksResult.IsSuccess)
+        if (generateTasksResult.IsError)
         {
-            return Result.Error("Failed generating tasks.");
+            return generateTasksResult.Errors;
         }
 
         var jobIdResult = await cloudConvertModule.ConvertHtmlToPdf(generateTasksResult.Value, cancellationToken);
-        if (!jobIdResult.IsSuccess)
+        if (jobIdResult.IsError)
         {
-            return Result.Error("Failed converting HTML to PDF.");
+            return jobIdResult.Errors;
         }
 
         var getUrlResult = await cloudConvertModule.GetDownloadUrl(jobIdResult.Value, cancellationToken);
-        if (!getUrlResult.IsSuccess || string.IsNullOrEmpty(getUrlResult))
+        if (getUrlResult.IsError|| string.IsNullOrEmpty(getUrlResult.Value))
         {
-            return Result.Error("Failed to get download url.");
+            return getUrlResult.Errors;
         }
 
-        var fileResult = await cloudConvertModule.DownloadFile(getUrlResult, cancellationToken);
-        if (!fileResult.IsSuccess)
+        var fileResult = await cloudConvertModule.DownloadFile(getUrlResult.Value, cancellationToken);
+        if (fileResult.IsError)
         {
-            return Result.Error($"Failed to download file: {getUrlResult.Value}");
+            return fileResult.Errors;
         }
 
         return fileResult.Value;

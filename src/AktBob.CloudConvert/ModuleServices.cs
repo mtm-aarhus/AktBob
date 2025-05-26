@@ -1,5 +1,9 @@
-﻿using AktBob.CloudConvert.Handlers;
-using AktBob.Email.Contracts;
+﻿using AktBob.CloudConvert.Client;
+using AktBob.CloudConvert.Contracts;
+using AktBob.CloudConvert.Handlers.ConvertHtmlToPdf;
+using AktBob.CloudConvert.Handlers.DownloadFile;
+using AktBob.CloudConvert.Handlers.GenerateTasks;
+using AktBob.CloudConvert.Handlers.GetDownloadUrl;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,51 +12,35 @@ public static class ModuleServices
 {
     public static IServiceCollection AddCloudConvertModule(this IServiceCollection services, IConfiguration configuration)
     {
+        const string CLOUDCONVERT_HTTPCLIENT_NAME = "CLOUDCONVERT_HTTPCLIENT";
+    
         // Add CloudConvert client
         var cloudConvertBaseUrl = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CloudConvert:BaseUrl"));
         var cloudConvertToken = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CloudConvert:Token"));
 
-        services.AddHttpClient(Constants.CLOUDCONVERT_HTTPCLIENT_NAME, client =>
+        services.AddHttpClient(CLOUDCONVERT_HTTPCLIENT_NAME, client =>
         {
             client.BaseAddress = new Uri(cloudConvertBaseUrl);
         });
 
         services.AddScoped<ICloudConvertClient>(serviceProvider =>
         {
-            var logger = serviceProvider.GetRequiredService<ILogger<CloudConvertClient>>();
             var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-            var client = httpClientFactory.CreateClient(Constants.CLOUDCONVERT_HTTPCLIENT_NAME);
+            var client = httpClientFactory.CreateClient(CLOUDCONVERT_HTTPCLIENT_NAME);
 
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + cloudConvertToken);
 
-            return new CloudConvertClient(client, logger);
+            return new CloudConvertClient(client);
         });
 
-        // Add module handlers
-        services.AddScoped<IConvertHtmlToPdfHandler, ConvertHtmlToPdfHandler>();
-        services.AddScoped<IGenerateTasksHandler, GenerateTasksHandler>();
-        services.AddScoped<IGetDownloadUrlHandler, GetDownloadUrlHandler>();
-        services.AddScoped<IDownloadFileHandler, DownloadFileHandler>();
+        // Add handlers
+        services.AddConvertHtmlToPdfHandler();
+        services.AddDownloadFileHandler();
+        services.AddGenerateTasksHandler();
+        services.AddGetDownloadUrlHandler();
 
         // Module service orchestration
-        services.AddScoped<ICloudConvertModule>(provider =>
-        {
-            var inner = new CloudConvertModule(
-                provider.GetRequiredService<IConvertHtmlToPdfHandler>(),
-                provider.GetRequiredService<IGetDownloadUrlHandler>(),
-                provider.GetRequiredService<IDownloadFileHandler>(),
-                provider.GetRequiredService<IGenerateTasksHandler>());
-
-            var withLogging = new ModuleLoggingDecorator(
-                inner,
-                provider.GetRequiredService<ILogger<CloudConvertModule>>());
-
-            var withExceptionHandling = new ModuleExceptionDecorator(
-                withLogging,
-                provider.GetRequiredService<ILogger<CloudConvertModule>>());
-
-            return withExceptionHandling;
-        });
+        services.AddScoped<ICloudConvertModule, CloudConvertModule>();
 
         return services;
     }

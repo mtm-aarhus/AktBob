@@ -1,8 +1,9 @@
 ﻿using AAK.Podio.Models;
 using AktBob.Podio.Contracts;
-using AktBob.Deskpro.Contracts;
 using AktBob.Email.Contracts;
 using AktBob.Workflows.Helpers;
+using AktBob.Deskpro.Contracts;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
@@ -42,15 +43,15 @@ internal class ScreeningIsFinishedEmailNotification : IJobHandler<ScreeningIsFin
         var to = podioItemResult.Value.Fields.FirstOrDefault(f => f.Id == sagsansvarligEmailFieldId)?.GetValues<FieldValueText>()?.Value ?? throw new BusinessException($"Not able to get recipient email from {job.PodioItemId} field {sagsansvarligEmailFieldId}");
         var caseNumber = podioItemResult.Value.Fields.FirstOrDefault(f => f.Id == caseNumberFieldId)?.GetValues<FieldValueText>()?.Value ?? "IKKE ANGIVET";
         var ticketId = podioItemResult.Value.Fields.FirstOrDefault(f => f.Id == ticketNumberFieldId)?.GetValues<FieldValueText>()?.Value ?? "IKKE ANGIVET";
-        var ticektSubject = string.Empty;
+        var ticketSubject = string.Empty;
 
         // Try get Deskpro ticket
-        if (int.TryParse(ticketId, out var deskproTicketId))
+        if (TicketId.TryParse(ticketId, default, out var deskproTicketId))
         {
             var getDeskproTicket = await deskpro.GetTicket(deskproTicketId, cancellationToken);
-            if (getDeskproTicket.IsSuccess)
+            if (!getDeskproTicket.IsError)
             {
-                ticektSubject = getDeskproTicket.Value.Subject;
+                ticketSubject = getDeskproTicket.Value.Subject;
             }
         }
 
@@ -59,7 +60,7 @@ internal class ScreeningIsFinishedEmailNotification : IJobHandler<ScreeningIsFin
         var fields = new Dictionary<string, string>
         {
             { "caseNumber", caseNumber },
-            { "ticketSubject", ticektSubject },
+            { "ticketSubject", ticketSubject },
             { "ticketId", ticketId },
             { "linkFilArkivCase", $"https://aarhus.filarkiv.dk/archives/case/{job.FilArkivCaseId}" }
         };

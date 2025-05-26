@@ -1,5 +1,5 @@
-﻿using AktBob.Shared;
+﻿using AktBob.Shared.Types.Podio;
 
 namespace AktBob.Podio.Contracts;
 
-public record UpdateTextFieldCommand(PodioItemId PodioItemId, int FieldId, string TextValue);
+public record UpdateTextFieldCommand(ItemId PodioItemId, int FieldId, string TextValue);

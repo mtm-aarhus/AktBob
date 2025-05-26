@@ -1,5 +1,6 @@
 ﻿using AktBob.Deskpro.Contracts;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.Cleanup;
 internal class DispatchCleanupJobs : IJobHandler<DispatchCleanupJobsJob>
@@ -17,8 +18,6 @@ internal class DispatchCleanupJobs : IJobHandler<DispatchCleanupJobsJob>
 
     public async Task Handle(DispatchCleanupJobsJob job, CancellationToken cancellationToken = default)
     {
-        Guard.Against.Zero(job.DeskproTicketId);
-
         // Variables
         var validWorkflowChoices = Guard.Against.Null(_configuration.GetSection("DispatchCleanupJobsHandler:ValidWorkflowChoices").Get<List<int>>());
         var afslutningsdatoFieldId = Guard.Against.Zero(_configuration.GetValue<int>("DispatchCleanupJobsHandler:AfslutningsdatoFieldId"));
@@ -31,21 +30,23 @@ internal class DispatchCleanupJobs : IJobHandler<DispatchCleanupJobsJob>
         var jobDispatcher = scope.ServiceProvider.GetRequiredService<IJobDispatcher>();
 
         // Check Deskpro to ensure a) it's time to execute, b) the ticket is still closed
-        var deskproTicket = await CleanUpShared.GetDeskproTicket(job.DeskproTicketId, deskpro, cancellationToken);
-        var workflowFieldValue =  CleanUpShared.ParseWorkflowValue(deskproTicket, workflowFieldId);
-        var afslutningsdatoFieldValue = CleanUpShared.ParseAfslutningsdatoValue(deskproTicket, afslutningsdatoFieldId);
+        var deskproTicket = await CleanUpShared.GetDeskproTicket(job.TicketId, deskpro, cancellationToken);
+        if (deskproTicket.IsError) throw new BusinessException($"Error getting Deskpro ticket {job.TicketId}");
+
+        var workflowFieldValue =  CleanUpShared.ParseWorkflowValue(deskproTicket.Value, workflowFieldId);
+        var afslutningsdatoFieldValue = CleanUpShared.ParseAfslutningsdatoValue(deskproTicket.Value, afslutningsdatoFieldId);
 
 
         // If there is no timestamp in Deskpro or the ticket is not closed, exit the job
         if (workflowFieldValue is null || !validWorkflowChoices.Contains((int)workflowFieldValue))
         {
-            _logger.LogWarning("Cannot create cleanup queue items since Deskpro ticket {ticketId} is not closed.", job.DeskproTicketId);
+            _logger.LogWarning("Cannot create cleanup queue items since Deskpro ticket {ticketId} is not closed.", job.TicketId);
             return;
         }
 
         if (afslutningsdatoFieldValue is null)
         {
-            _logger.LogWarning("Cannot create cleanup queue items since Deskpro ticket {ticketId} does not have a value for afslutningsdato.", job.DeskproTicketId);
+            _logger.LogWarning("Cannot create cleanup queue items since Deskpro ticket {ticketId} does not have a value for afslutningsdato.", job.TicketId);
             return;
         }
 
@@ -54,18 +55,18 @@ internal class DispatchCleanupJobs : IJobHandler<DispatchCleanupJobsJob>
 
 
         // If it's too early, reschedule the job (Deskpro timestamp have changed since the job initially was scheduled)
-        if (JobHasBeenRescheduled(job.DeskproTicketId, jobDispatcher, afslutningsdato))
+        if (JobHasBeenRescheduled(job.TicketId, jobDispatcher, afslutningsdato))
         {
             return;
         }
 
         // Create the cleanup jobs
-        jobDispatcher.Dispatch(new CreateCleanupSharepointQueueItemJob(job.DeskproTicketId));
-        jobDispatcher.Dispatch(new CreateCleanupFilArkivQueueItemJob(job.DeskproTicketId));
+        jobDispatcher.Dispatch(new CreateCleanupSharepointQueueItemJob(job.TicketId));
+        jobDispatcher.Dispatch(new CreateCleanupFilArkivQueueItemJob(job.TicketId));
     }
 
 
-    private bool JobHasBeenRescheduled(int deskproTicketId, IJobDispatcher jobDispatcher, DateTime afslutningsdato)
+    private bool JobHasBeenRescheduled(TicketId ticketId, IJobDispatcher jobDispatcher, DateTime afslutningsdato)
     {
         var executionDelayDays = Guard.Against.Zero(_configuration.GetValue<int>("DispatchCleanupJobsHandler:ExecutionDelayDays"));
         var utcNow = DateTimeOffset.UtcNow;
@@ -75,14 +76,14 @@ internal class DispatchCleanupJobs : IJobHandler<DispatchCleanupJobsJob>
 
         if (DateTime.UtcNow >= afslutningsdato.AddDays(executionDelayDays))
         {
-            _logger.LogInformation("Creating of cleanup job for Deskpro ticket {ticketId} due.", deskproTicketId);
+            _logger.LogInformation("Creating of cleanup job for Deskpro ticket {ticketId} due.", ticketId);
             return false;
         }
 
 
-        _logger.LogInformation("Rescheduling cleanup job for Deskpro ticket {ticketId}. Next try in {days} days.", deskproTicketId, Math.Round(daysDifference.TotalDays, 2));
+        _logger.LogInformation("Rescheduling cleanup job for Deskpro ticket {ticketId}. Next try in {days} days.", ticketId, Math.Round(daysDifference.TotalDays, 2));
 
-        var rescheduledJob = new DispatchCleanupJobsJob(deskproTicketId);
+        var rescheduledJob = new DispatchCleanupJobsJob(ticketId);
         jobDispatcher.Dispatch(rescheduledJob, offset.AddHours(1));
         
         return true;

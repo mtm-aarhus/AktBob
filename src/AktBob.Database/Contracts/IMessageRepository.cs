@@ -1,4 +1,5 @@
 ﻿using AktBob.Database.Entities;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Database.Contracts;
 public interface IMessageRepository

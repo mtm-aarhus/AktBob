@@ -1,6 +1,7 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Database.Repositories;
+using AktBob.Shared.Types.Deskpro;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Database.Decorators;
@@ -38,14 +39,14 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
         return success;
     }
 
-    public async Task<Message?> GetByDeskproMessageId(int deskproMessageId)
+    public async Task<Message?> GetByDeskproMessageId(int messageId)
     {
-        _logger.LogInformation("Getting message by DeskproMessageId {id}", deskproMessageId);
+        _logger.LogInformation("Getting message by DeskproMessageId {id}", messageId);
 
-        var message = await _inner.GetByDeskproMessageId(deskproMessageId);
+        var message = await _inner.GetByDeskproMessageId(messageId);
         if (message is null)
         {
-            _logger.LogDebug("{name}: Message by DeskproMessageId {id} not found in database", nameof(GetByDeskproMessageId), deskproMessageId);
+            _logger.LogDebug("{name}: Message by DeskproMessageId {id} not found in database", nameof(GetByDeskproMessageId), messageId);
         }
 
         return message;

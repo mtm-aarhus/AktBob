@@ -1,5 +1,6 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.DeskproTicketToGetOrganized;
@@ -20,9 +21,10 @@ internal class DeskproTicketToGetOrganizedEndpoint(IJobDispatcher jobDispatcher)
 
     public override async Task HandleAsync(DeskproTicketToGetOrganizedRequest req, CancellationToken ct)
     {
+        var ticketId = TicketId.Create(req.TicketId);
         var command = new AddOrUpdateDeskproTicketToGetOrganizedJob
         {
-            TicketId = req.TicketId,
+            TicketId = ticketId,
             GOCaseNumber = req.GOCaseNumber,
             CustomFieldIds = req.CustomFieldIds,
             CaseNumberFieldIds = req.CaseNumberFieldIds

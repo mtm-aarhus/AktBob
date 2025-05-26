@@ -1,5 +1,6 @@
 ﻿using AktBob.Podio.Jobs;
 using AktBob.Shared;
+using AktBob.Shared.Types.Podio;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -20,9 +21,11 @@ internal class UpdateSharepointmappeField(IJobDispatcher jobDispatcher, IConfigu
     {
         var appId = _configuration.GetValue<int>("Podio:AktindsigtApp:Id");
         var fieldId = _configuration.GetValue<int>("Podio:AktindsigtApp:Fields:Sharepointmappe");
-
-        var job = new UpdateTextFieldJob(new PodioItemId(appId, req.ItemId), fieldId, req.Value);
+        var itemId = ItemId.Create(appId, req.ItemId);
+        
+        var job = new UpdateTextFieldJob(itemId, fieldId, req.Value);
         _jobDispatcher.Dispatch(job);
+        
         await SendNoContentAsync(ct);
     }
 }

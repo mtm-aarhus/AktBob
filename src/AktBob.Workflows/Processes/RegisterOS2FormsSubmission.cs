@@ -12,10 +12,10 @@ internal class RegisterOS2FormsSubmission(ILogger<RegisterOS2FormsSubmission> lo
 
     public async Task Handle(RegisterOS2FormsSubmissionJob job, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Registering OS2Forms submission {submissionId} for DeskproTicketId {deskproTicketId}", job.SubmissionId, job.DeskproId);
+        _logger.LogInformation("Registering OS2Forms submission {submissionId} for DeskproTicketId {deskproTicketId}", job.SubmissionId, job.TicketId);
 
         Guard.Against.Null(job.SubmissionId);
-        Guard.Against.Null(job.DeskproId);
+        Guard.Against.Zero(job.TicketId);
         
         using var scope = _serviceScopeFactory.CreateScope();
 
@@ -46,11 +46,11 @@ internal class RegisterOS2FormsSubmission(ILogger<RegisterOS2FormsSubmission> lo
         var entity = new OS2FormsSubmission
         {
             SubmissionId = job.SubmissionId,
-            DeskproTicketId = job.DeskproId,
+            DeskproTicketId = job.TicketId,
             DescriptionFieldValue = submission.Value.Data.FirstOrDefault(x => x.Key == descriptionFieldId).Value ?? string.Empty
         };
 
-        _logger.LogInformation("Persisting OS2Forms submission {id} DeskproTicketId {deskproTicketId}", job.SubmissionId, job.DeskproId);
+        _logger.LogInformation("Persisting OS2Forms submission {id} DeskproTicketId {deskproTicketId}", job.SubmissionId, job.TicketId);
 
         var success = await unitOfWork.OS2FormsSubmissions.Add(entity);
         if (!success)

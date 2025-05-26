@@ -1,6 +1,7 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Database.Repositories;
+using AktBob.Shared.Types.Deskpro;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Database.Decorators;
@@ -41,37 +42,44 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
         return ticket;
     }
 
-    public async Task<IReadOnlyCollection<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
+    public async Task<IReadOnlyCollection<Ticket>> GetAll(TicketId deskproId, long? podioItemId, Guid? filArkivCaseId)
     {
         _logger.LogInformation("Getting all tickets by DeskproId = {deskproId}, PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", deskproId, podioItemId, filArkivCaseId);
         var tickets = await _inner.GetAll(deskproId, podioItemId, filArkivCaseId);
         
         if (!tickets.Any())
         {
-            switch (deskproId)
+            switch (deskproId.IsEmpty)
             {
-                case null when podioItemId is null && filArkivCaseId is null:
+                case true when podioItemId is null && filArkivCaseId is null:
                     _logger.LogDebug("{name}: No tickets found", nameof(GetAll));
                     break;
-                case not null when podioItemId is null && filArkivCaseId is null:
+
+                case false when podioItemId is null && filArkivCaseId is null:
                     _logger.LogDebug("{name}: no tickets found by DeskproId = {deskproId}", nameof(GetAll), deskproId);
                     break;
-                case null when podioItemId is not null && filArkivCaseId is null:
+
+                case true when podioItemId is not null && filArkivCaseId is null:
                     _logger.LogDebug("{name}: no tickets found by PodioItemId = {podioItemId}", nameof(GetAll), podioItemId);
                     break;
-                case null when podioItemId is null && filArkivCaseId is not null:
+
+                case true when podioItemId is null && filArkivCaseId is not null:
                     _logger.LogDebug("{name}: no tickets found by FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), filArkivCaseId);
                     break;
-                case not null when podioItemId is not null && filArkivCaseId is null:
+
+                case false when podioItemId is not null && filArkivCaseId is null:
                     _logger.LogDebug("{name}: no tickets found by DeskproId = {deskproId} AND PodioItemId = {podioItemId}", nameof(GetAll), deskproId, podioItemId);
                     break;
-                case not null when podioItemId is not null && filArkivCaseId is not null:
+
+                case false when podioItemId is not null && filArkivCaseId is not null:
                     _logger.LogDebug("{name}: no tickets found by DeskproId = {deskproId} AND PodioItemId = {podioItemId} AND FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), deskproId, podioItemId, filArkivCaseId);
                     break;
-                case null when podioItemId is not null && filArkivCaseId is not null:
+
+                case true when podioItemId is not null && filArkivCaseId is not null:
                     _logger.LogDebug("{name}: no tickets found by PodioItemId = {podioItemId} AND FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), podioItemId, filArkivCaseId);
                     break;
-                case not null when podioItemId is null && filArkivCaseId is not null:
+
+                case false when podioItemId is null && filArkivCaseId is not null:
                     _logger.LogDebug("{name}: no tickets found by DeskproId = {deskproId} AND FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), deskproId, filArkivCaseId);
                     break;
             }
@@ -80,7 +88,7 @@ internal class TicketRepositoryLoggingDecorator : ITicketRepository
         return tickets;
     }
 
-    public async Task<Ticket?> GetByDeskproTicketId(int deskproTicketId)
+    public async Task<Ticket?> GetByDeskproTicketId(TicketId deskproTicketId)
     {
         _logger.LogInformation("Getting ticket by Deskpro ticket id {id}", deskproTicketId);
 

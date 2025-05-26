@@ -59,24 +59,24 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
 
         // Get data from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(getDatabaseTicket.Result.DeskproId, cancellationToken);
-        if (!deskproTicketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
+        if (deskproTicketResult.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
 
         // Get Deskpro agent
         var agent = deskproTicketResult.Value.Agent?.Id != null
-            ? await deskpro.GetPerson(deskproTicketResult.Value.Agent.Id, cancellationToken)
-            : Result<PersonDto>.Error();
+            ? await deskpro.GetPersonById(deskproTicketResult.Value.Agent.Id, cancellationToken)
+            : Error.NotFound().ToErrorOr<PersonDto>();
 
         // Get Deskpro person
         var person = deskproTicketResult.Value.Person?.Id != null
-            ? await deskpro.GetPerson(deskproTicketResult.Value.Person.Id, cancellationToken)
-            : Result<PersonDto>.Error();
+            ? await deskpro.GetPersonById(deskproTicketResult.Value.Person.Id, cancellationToken)
+            : Error.NotFound().ToErrorOr<PersonDto>();
 
         // Create queue item
         var payload = new
         {
             Sagsnummer = caseNumber,
             MailModtager = agent.Value.Email,
-            DeskProID = getDatabaseTicket.Result.DeskproId,
+            DeskProID = getDatabaseTicket.Result.DeskproId.Value,
             DeskProTitel = deskproTicketResult.Value.Subject,
             PodioID = job.PodioItemId.Id,
             Overmappe = getDatabaseTicket.Result.SharepointFolderName,
@@ -89,7 +89,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             AktindsigtsDato = deskproTicketResult.Value.CreatedAt
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId.ToString()}", payload.ToJson());
         openOrchestrator.CreateQueueItem(command);
     }
 }

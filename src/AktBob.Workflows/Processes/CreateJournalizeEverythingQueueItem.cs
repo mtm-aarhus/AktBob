@@ -15,7 +15,7 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
 
     public async Task Handle(CreateJournalizeEverythingQueueItemJob job, CancellationToken cancellationToken = default)
     {
-        Guard.Against.NegativeOrZero(job.DeskproId);
+        Guard.Against.NegativeOrZero(job.TicketId);
 
         var scope = _serviceScopeFactory.CreateScope();
 
@@ -28,33 +28,33 @@ internal class CreateJournalizeEverythingQueueItem(IServiceScopeFactory serviceS
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(_configuration.GetValue<string>($"{_configurationObjectName}:OpenOrchestratorQueueName"));
 
         // Begin
-        var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.DeskproId);
-        var getDeskproTicket = deskpro.GetTicket(job.DeskproId, cancellationToken);
+        var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.TicketId);
+        var getDeskproTicket = deskpro.GetTicket(job.TicketId, cancellationToken);
 
         await Task.WhenAll([getDatabaseTicket, getDeskproTicket]);
 
         if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
-        if (!getDeskproTicket.Result.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
+        if (getDeskproTicket.Result.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
 
         if (string.IsNullOrEmpty(getDatabaseTicket.Result.CaseNumber))
         {
-            _logger.LogWarning("GO Aktindsigtssagsnummer not registered for Deskpro Id {id}", job.DeskproId);
+            _logger.LogWarning("GO Aktindsigtssagsnummer not registered for Deskpro Id {id}", job.TicketId);
         }
 
         var agent = getDeskproTicket.Result.Value.Agent?.Id != null
-            ? await deskpro.GetPerson(getDeskproTicket.Result.Value.Agent.Id, cancellationToken)
-            : Result<PersonDto>.Error();
+            ? await deskpro.GetPersonById(getDeskproTicket.Result.Value.Agent.Id, cancellationToken)
+            : Error.NotFound().ToErrorOr<PersonDto>();
 
         var payload = new
         {
             Aktindsigtssag = getDatabaseTicket.Result.CaseNumber,
             Email = agent.Value.Email,
             Navn = agent.Value.FullName,
-            DeskproID = job.DeskproId,
+            DeskproID = job.TicketId.Value,
             Overmappenavn = getDatabaseTicket.Result.SharepointFolderName
         };
 
-        var createOpenOrchestratorQueueItemCommand = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro ID {job.DeskproId}", payload.ToJson());
+        var createOpenOrchestratorQueueItemCommand = new CreateQueueItemCommand(openOrchestratorQueueName, $"Deskpro ID {job.TicketId.ToString()}", payload.ToJson());
         openOrchestrator.CreateQueueItem(createOpenOrchestratorQueueItemCommand);
     }
 }

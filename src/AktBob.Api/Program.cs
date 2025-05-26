@@ -9,6 +9,7 @@ using AktBob.Database;
 using AktBob.Podio;
 using Hangfire.Dashboard.BasicAuthorization;
 using Ardalis.GuardClauses;
+using AktBob.Shared.Types;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,8 @@ builder.Services
     .AddAuthorization()
     .AddAuthentication(ApiKeyAuthentication.SchemeName)
     .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthentication>(ApiKeyAuthentication.SchemeName, null);
+
+builder.Services.AddConverters();
 
 // Swagger
 builder.Services.SwaggerDocument(o =>

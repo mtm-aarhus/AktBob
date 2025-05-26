@@ -1,5 +1,6 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 
 namespace AktBob.Api.Endpoints.GetOrganizedCase;
@@ -19,7 +20,8 @@ internal class CreateGetOrganizedCaseEndpoint(IJobDispatcher jobDispatcher) : En
 
     public override async Task HandleAsync(CreateGetOrganizedCaseRequest req, CancellationToken ct)
     {
-        _jobDispatcher.Dispatch(new CreateGetOrganizedCaseJob(req.DeskproTicketId));
+        var ticketId = TicketId.Create(req.DeskproTicketId);
+        _jobDispatcher.Dispatch(new CreateGetOrganizedCaseJob(ticketId));
         await SendNoContentAsync(ct);
     }
 }

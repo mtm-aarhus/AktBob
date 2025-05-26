@@ -1,5 +1,6 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
@@ -24,7 +25,8 @@ internal class PostMessage(IJobDispatcher jobDispatcher) : Endpoint<PostMessageR
 
     public override async Task HandleAsync(PostMessageRequest req, CancellationToken ct)
     {
-        _jobDispatcher.Dispatch(new RegisterMessagesJob(req.DeskproTicketId), TimeSpan.FromSeconds(30));
+        var ticketId = TicketId.Create(req.DeskproTicketId);
+        _jobDispatcher.Dispatch(new RegisterMessagesJob(ticketId), TimeSpan.FromSeconds(30));
         await SendNoContentAsync(ct);
     }
 }

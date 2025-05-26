@@ -2,6 +2,7 @@
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Podio;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 
@@ -92,7 +93,7 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
         _jobDispatcher.Dispatch(job with { Count = job.Count + 1 }, delay);
     }
 
-    private void NotifyWhenAllFilesAreFinished(PodioItemId podioItemId, Case @case)
+    private void NotifyWhenAllFilesAreFinished(ItemId podioItemId, Case @case)
     {
         // Not all files are finished - exit
         if (@case.AnyFilesNotFinished)

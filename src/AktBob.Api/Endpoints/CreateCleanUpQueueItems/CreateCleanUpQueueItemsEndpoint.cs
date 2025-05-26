@@ -1,5 +1,6 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 using Ardalis.GuardClauses;
 using FastEndpoints;
 
@@ -30,45 +31,46 @@ internal class CreateCleanUpQueueItemsEndpoint : Endpoint<CreateCleanUpQueueItem
 
     public override async Task HandleAsync(CreateCleanUpQueueItemsRequest req, CancellationToken ct)
     {
-        DispatchCleanUpJobs(req.DeskproTicketId);
-        DispatchCleanUpNotificationJobs(req.DeskproTicketId);
-        SetDeskproFieldFinishedAt(req.DeskproTicketId);
+        var ticketId = TicketId.Create(req.DeskproTicketId);
+        DispatchCleanUpJobs(ticketId);
+        DispatchCleanUpNotificationJobs(ticketId);
+        SetDeskproFieldFinishedAt(ticketId);
         await SendNoContentAsync(ct);
     }
 
-    private void SetDeskproFieldFinishedAt(int deskproTicketId)
+    private void SetDeskproFieldFinishedAt(TicketId ticketId)
     {
-        var job = new UpdateDeskproSetFærdigbehandletDatoFieldJob(deskproTicketId);
+        var job = new UpdateDeskproSetFærdigbehandletDatoFieldJob(ticketId);
         _jobDispatcher.Dispatch(job);
     }
 
-    private void DispatchCleanUpJobs(int deskproTicketId)
+    private void DispatchCleanUpJobs(TicketId ticketId)
     {
-        if (_jobDispatcher.IsJobAlreadyScheduled(typeof(DispatchCleanupJobsJob), deskproTicketId, nameof(DispatchCleanupJobsJob.DeskproTicketId)))
+        if (_jobDispatcher.IsJobAlreadyScheduled(typeof(DispatchCleanupJobsJob), ticketId, nameof(DispatchCleanupJobsJob.TicketId)))
         {
-            _logger.LogInformation("{type} with identifier {name}: {id} already scheduled.", typeof(DispatchCleanupJobsJob).Name, nameof(DispatchCleanupJobsJob.DeskproTicketId), deskproTicketId);
+            _logger.LogInformation("{type} with identifier {name}: {id} already scheduled.", typeof(DispatchCleanupJobsJob).Name, nameof(DispatchCleanupJobsJob.TicketId), ticketId);
             return;
         }
 
         var delayDays = Guard.Against.Zero(_configuration.GetValue<int>("CleanUpJobsDelayDays"));
         var offset = new DateTimeOffset(DateTime.UtcNow.AddDays(delayDays).AddHours(1));
 
-        var job = new DispatchCleanupJobsJob(deskproTicketId);
+        var job = new DispatchCleanupJobsJob(ticketId);
         _jobDispatcher.Dispatch(job, offset);
     }
 
-    private void DispatchCleanUpNotificationJobs(int deskproTicketId)
+    private void DispatchCleanUpNotificationJobs(TicketId ticketId)
     {
-        if (_jobDispatcher.IsJobAlreadyScheduled(typeof(NotitfyAboutUpcomingCleanupJob), deskproTicketId, nameof(NotitfyAboutUpcomingCleanupJob.DeskproTicketId)))
+        if (_jobDispatcher.IsJobAlreadyScheduled(typeof(NotitfyAboutUpcomingCleanupJob), ticketId, nameof(NotitfyAboutUpcomingCleanupJob.TicketId)))
         {
-            _logger.LogInformation("{type} with identifier {name}: {id} already scheduled.", typeof(NotitfyAboutUpcomingCleanupJob).Name, nameof(NotitfyAboutUpcomingCleanupJob.DeskproTicketId), deskproTicketId);
+            _logger.LogInformation("{type} with identifier {name}: {id} already scheduled.", typeof(NotitfyAboutUpcomingCleanupJob).Name, nameof(NotitfyAboutUpcomingCleanupJob.TicketId), ticketId);
             return;
         }
 
         var delayDays = Guard.Against.Zero(_configuration.GetValue<int>("CleanUpJobsNotificationDelayDays"));
         var offset = new DateTimeOffset(DateTime.UtcNow.AddDays(delayDays).AddHours(1));
 
-        var job = new NotitfyAboutUpcomingCleanupJob(deskproTicketId);
+        var job = new NotitfyAboutUpcomingCleanupJob(ticketId);
         _jobDispatcher.Dispatch(job, offset);
     }
 }

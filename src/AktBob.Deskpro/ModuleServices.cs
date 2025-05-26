@@ -1,6 +1,16 @@
 ﻿using AAK.Deskpro;
-using AktBob.Deskpro.Decorators;
-using AktBob.Deskpro.Handlers;
+using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Handlers.DownloadMessageAttachment;
+using AktBob.Deskpro.Handlers.GetCustomFieldSpecifications;
+using AktBob.Deskpro.Handlers.GetMessage;
+using AktBob.Deskpro.Handlers.GetMessageAttachments;
+using AktBob.Deskpro.Handlers.GetMessages;
+using AktBob.Deskpro.Handlers.GetPersonByEmail;
+using AktBob.Deskpro.Handlers.GetPersonById;
+using AktBob.Deskpro.Handlers.GetTeam;
+using AktBob.Deskpro.Handlers.GetTicket;
+using AktBob.Deskpro.Handlers.GetTicketsByFieldSearch;
+using AktBob.Deskpro.Handlers.InvokeWebhook;
 using AktBob.Deskpro.Jobs;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
@@ -23,49 +33,23 @@ public static class ModuleServices
         services.AddDeskpro(deskproOptions);
 
         // Add module handlers
-        services.AddScoped<IGetCustomFieldSpecificationsHandler, GetCustomFieldSpecificationsHandler>();
-        services.AddScoped<IDownloadMessageAttachmentHandler, DownloadMessageAttachmentHandler>();
-        services.AddScoped<IGetMessageAttachmentsHandler, GetMessageAttachmentsHandler>();
-        services.AddScoped<IGetMessageHandler, GetMessageHandler>();
-        services.AddScoped<IGetMessagesHandler, GetMessagesHandler>();
-        services.AddScoped<IGetPersonHandler, GetPersonHandler>();
-        services.AddScoped<IGetTicketHandler, GetTicketHandler>();
-        services.AddScoped<IGetTicketsByFieldSearchHandler, GetTicketsByFieldSearchHandler>();
-        services.AddScoped<IInvokeWebhookHandler, InvokeWebhookHandler>();
-        services.AddScoped<IGetTeamHandler, GetTeamHandler>();
+        services.AddDownloadMessageAttachmentHandler();
+        services.AddGetCustomFieldSpecificationsHandler();
+        services.AddGetMessageHandler();
+        services.AddGetMessageAttachmentsHandler();
+        services.AddGetMessagesHandler();
+        services.AddGetPersonByEmailHandler();
+        services.AddGetPersonByIdHandler();
+        services.AddGetTeamHandler();
+        services.AddGetTicketHandler();
+        services.AddGetTicketsByFieldSearchHandler();
+        services.AddInvokeWebhookHandler();
 
         // Jobs
         services.AddScoped<IJobHandler<InvokeWebhookJob>, InvokeWebhook>();
 
-        // Module service orchestration
-        services.AddScoped<IDeskproModule>(provider =>
-        {
-            var inner = new DeskproModule(
-                provider.GetRequiredService<IJobDispatcher>(),
-                provider.GetRequiredService<IGetCustomFieldSpecificationsHandler>(),
-                provider.GetRequiredService<IDownloadMessageAttachmentHandler>(),
-                provider.GetRequiredService<IGetMessageAttachmentsHandler>(),
-                provider.GetRequiredService<IGetMessageHandler>(),
-                provider.GetRequiredService<IGetMessagesHandler>(),
-                provider.GetRequiredService<IGetPersonHandler>(),
-                provider.GetRequiredService<IGetTicketHandler>(),
-                provider.GetRequiredService<IGetTicketsByFieldSearchHandler>(),
-                provider.GetRequiredService<IGetTeamHandler>());
-
-            var withCaching = new ModuleCachingDecorator(
-                inner,
-                provider.GetRequiredService<ICacheService>());
-
-            var withLogging = new ModuleLoggingDecorator(
-                withCaching,
-                provider.GetRequiredService<ILogger<DeskproModule>>());
-
-            var withExceptionHandling = new ModuleExceptionDecorator(
-                withLogging,
-                provider.GetRequiredService<ILogger<DeskproModule>>());
-
-            return withExceptionHandling;
-        });
+        // Module orchestration
+        services.AddScoped<IDeskproModule, DeskproModule>();
 
         return services;
     }

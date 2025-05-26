@@ -1,11 +1,12 @@
 ﻿using AktBob.Shared.Jobs;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Database.Contracts;
-using AktBob.Deskpro.Contracts;
-using AktBob.Deskpro.Contracts.DTOs;
 using System.Text.Json;
 using Hangfire;
 using AktBob.Shared.Extensions;
+using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
@@ -27,7 +28,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
     [AutomaticRetry(Attempts = 3)]
     public async Task Handle(CreateGetOrganizedCaseJob job, CancellationToken cancellationToken = default)
     {
-        Guard.Against.NegativeOrZero(job.DeskproId);
+        Guard.Against.NegativeOrZero(job.TicketId);
 
         using var scope = _serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
@@ -36,8 +37,8 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
 
         // Get subject from Deskpro
-        var deskproTicketResult = await deskpro.GetTicket(job.DeskproId, cancellationToken);
-        if (!deskproTicketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
+        var deskproTicketResult = await deskpro.GetTicket(job.TicketId, cancellationToken);
+        if (deskproTicketResult.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
 
         // Create GO-case
         var caseTitle = deskproTicketResult.Value.Subject ?? "Uden titel";
@@ -58,9 +59,9 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
 
         _logger.LogInformation("GetOrganized case {caseId} created", caseId);
 
-        UpdateDeskproSetGetOrganizedCaseId(deskpro, job.DeskproId, caseId, caseUrl);
-        await UpdateDatabaseSetGetOrganizedCaseId(job.DeskproId, unitOfWork, caseId, caseUrl);
-        jobDispatcher.Dispatch(new RegisterMessagesJob(job.DeskproId), TimeSpan.FromMinutes(1)); // Add Deskpro messages to the just created GO-case
+        UpdateDeskproSetGetOrganizedCaseId(deskpro, job.TicketId, caseId, caseUrl);
+        await UpdateDatabaseSetGetOrganizedCaseId(job.TicketId, unitOfWork, caseId, caseUrl);
+        jobDispatcher.Dispatch(new RegisterMessagesJob(job.TicketId), TimeSpan.FromMinutes(1)); // Add Deskpro messages to the just created GO-case
     }
 
     // Map Deskpro field "afdeling" to GetOrganized department
@@ -93,9 +94,9 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         return mapping.Where(m => fieldChoices.Contains(m.Key)).Select(m => m.Value).FirstOrDefault() ?? string.Empty;
     }
 
-    private async Task UpdateDatabaseSetGetOrganizedCaseId(int deskproId, IUnitOfWork unitOfWork, string caseId, string caseUrl)
+    private async Task UpdateDatabaseSetGetOrganizedCaseId(TicketId ticketId, IUnitOfWork unitOfWork, string caseId, string caseUrl)
     {
-        var ticket = await unitOfWork.Tickets.GetByDeskproTicketId(deskproId);
+        var ticket = await unitOfWork.Tickets.GetByDeskproTicketId(ticketId);
         if (ticket is null)
         {
             return;
@@ -107,14 +108,14 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         await unitOfWork.Tickets.Update(ticket);
     }
 
-    private void UpdateDeskproSetGetOrganizedCaseId(IDeskproModule deskproModule, int deskproId, string caseId, string caseUrl)
+    private void UpdateDeskproSetGetOrganizedCaseId(IDeskproModule deskproModule, TicketId ticketId, string caseId, string caseUrl)
     {
         var deskproWebhookId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("Deskpro:Webhooks:UpdateTicketSetGoCaseId"));
         var payload = new
         {
             GetOrganizedCaseId = caseId,
             GetOrganizedCaseUrlClean = caseUrl,
-            DeskproTicketId = deskproId
+            DeskproTicketId = ticketId.Value
         };
 
         var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });

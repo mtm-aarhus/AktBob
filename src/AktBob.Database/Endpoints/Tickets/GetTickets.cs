@@ -1,6 +1,7 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Dtos;
 using AktBob.Database.Extensions;
+using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
@@ -23,7 +24,11 @@ internal class GetTickets(ITicketRepository ticketRepository) : Endpoint<GetTick
 
     public override async Task HandleAsync(GetTicketsRequest req, CancellationToken ct)
     {
-        var tickets = await _ticketRepository.GetAll(req.DeskproId, req.PodioItemId, req.FilArkivCaseId);
+        var ticketId = req.DeskproId == null
+            ? TicketId.Empty
+            : TicketId.Create((int)req.DeskproId);
+
+        var tickets = await _ticketRepository.GetAll(ticketId, req.PodioItemId, req.FilArkivCaseId);
         await SendOkAsync(tickets.ToDto());
     }
 }

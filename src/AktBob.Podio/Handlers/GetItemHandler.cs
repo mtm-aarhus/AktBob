@@ -1,7 +1,7 @@
 ﻿using AAK.Podio;
 using AAK.Podio.Models;
 using AktBob.Podio.Contracts;
-using AktBob.Shared;
+using AktBob.Shared.Types.Podio;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Podio.Handlers;
@@ -10,7 +10,7 @@ internal class GetItemHandler(IPodioFactory podioFactory, IConfiguration configu
     private readonly IPodioFactory _podioFactory = podioFactory;
     private readonly IConfiguration _configuration = configuration;
 
-    public async Task<Result<Item>> Handle(PodioItemId podioItemId, CancellationToken cancellationToken)
+    public async Task<Result<Item>> Handle(ItemId podioItemId, CancellationToken cancellationToken)
     {
         var podio = _podioFactory.Create(
             appId: podioItemId.AppId, 

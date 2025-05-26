@@ -1,5 +1,16 @@
-﻿using AktBob.Deskpro.Jobs;
+﻿using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Handlers.DownloadMessageAttachment;
+using AktBob.Deskpro.Handlers.GetCustomFieldSpecifications;
+using AktBob.Deskpro.Handlers.GetMessage;
+using AktBob.Deskpro.Handlers.GetMessageAttachments;
+using AktBob.Deskpro.Handlers.GetMessages;
+using AktBob.Deskpro.Handlers.GetPerson;
+using AktBob.Deskpro.Handlers.GetTeam;
+using AktBob.Deskpro.Handlers.GetTicket;
+using AktBob.Deskpro.Handlers.GetTicketsByFieldSearch;
+using AktBob.Deskpro.Jobs;
 using AktBob.Shared;
+using AktBob.Shared.Types.Deskpro;
 using System.Text;
 
 namespace AktBob.Deskpro;
@@ -10,7 +21,8 @@ internal class DeskproModule(
     IGetMessageAttachmentsHandler getMessageAttachmentsHandler,
     IGetMessageHandler getMessageHandler,
     IGetMessagesHandler getMessagesHandler,
-    IGetPersonHandler getPersonHandler,
+    IGetPersonByIdHandler getPersonByIdHandler,
+    IGetPersonByEmailHandler getPersonByEmailHandler,
     IGetTicketHandler getTicketHandler,
     IGetTicketsByFieldSearchHandler getTicketsByFieldSearchHandler,
     IGetTeamHandler getTeamHandler) : IDeskproModule
@@ -24,22 +36,23 @@ internal class DeskproModule(
         jobDispatcher.Dispatch(new InvokeWebhookJob(webhookId, base64Payload));
     }
     
-    public async Task<Result<IReadOnlyCollection<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken) => await getCustomFieldSpecificationsHandler.Handle(cancellationToken);
+    public async Task<ErrorOr<IReadOnlyCollection<CustomFieldSpecificationDto>>> GetCustomFieldSpecifications(CancellationToken cancellationToken) => await getCustomFieldSpecificationsHandler.Handle(cancellationToken);
 
-    public async Task<Result<IReadOnlyCollection<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken) => await getMessageAttachmentsHandler.Handle(ticketId, messageId, cancellationToken);
+    public async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> GetMessageAttachments(MessageId messageId, CancellationToken cancellationToken) => await getMessageAttachmentsHandler.Handle(messageId, cancellationToken);
 
-    public async Task<Result<MessageDto>> GetMessage(int ticketId, int messageId, CancellationToken cancellationToken) => await getMessageHandler.Handle(ticketId, messageId, cancellationToken);
+    public async Task<ErrorOr<MessageDto>> GetMessage(MessageId messageId, CancellationToken cancellationToken) => await getMessageHandler.Handle(messageId, cancellationToken);
 
-    public async Task<Result<IReadOnlyCollection<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken) => await getMessagesHandler.Handle(ticketId, cancellationToken);
+    public async Task<ErrorOr<IReadOnlyCollection<MessageDto>>> GetMessages(TicketId ticketId, CancellationToken cancellationToken) => await getMessagesHandler.Handle(ticketId, cancellationToken);
 
-    public async Task<Result<Stream>> DownloadMessageAttachment(string downloadUrl, CancellationToken cancellationToken) => await getMessageAttachmentHandler.Handle(downloadUrl, cancellationToken);
+    public async Task<ErrorOr<Stream>> DownloadMessageAttachment(string downloadUrl, CancellationToken cancellationToken) => await getMessageAttachmentHandler.Handle(downloadUrl, cancellationToken);
 
-    public async Task<Result<PersonDto>> GetPerson(int personId, CancellationToken cancellationToken) => await getPersonHandler.GetById(personId, cancellationToken);
-    public async Task<Result<PersonDto>> GetPerson(string email, CancellationToken cancellationToken) => await getPersonHandler.GetByEmail(email, cancellationToken);
+    public async Task<ErrorOr<PersonDto>> GetPersonById(int personId, CancellationToken cancellationToken) => await getPersonByIdHandler.Handle(personId, cancellationToken);
+    
+    public async Task<ErrorOr<PersonDto>> GetPersonByEmail(string email, CancellationToken cancellationToken) => await getPersonByEmailHandler.Handle(email, cancellationToken);
 
-    public async Task<Result<TicketDto>> GetTicket(int ticketId, CancellationToken cancellationToken) => await getTicketHandler.Handle(ticketId, cancellationToken);
+    public async Task<ErrorOr<TicketDto>> GetTicket(TicketId ticketId, CancellationToken cancellationToken) => await getTicketHandler.Handle(ticketId, cancellationToken);
 
-    public async Task<Result<IReadOnlyCollection<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken) => await getTicketsByFieldSearchHandler.Handle(fields, searchValue, cancellationToken);
+    public async Task<ErrorOr<IReadOnlyCollection<TicketDto>>> GetTicketsByFieldSearch(int[] fields, string searchValue, CancellationToken cancellationToken) => await getTicketsByFieldSearchHandler.Handle(fields, searchValue, cancellationToken);
 
-    public async Task<Result<TeamDto>> GetTeam(int teamId, CancellationToken cancellationToken) => await _getTeamHandler.Handle(teamId, cancellationToken);
+    public async Task<ErrorOr<TeamDto>> GetTeam(int teamId, CancellationToken cancellationToken) => await _getTeamHandler.Handle(teamId, cancellationToken);
 }

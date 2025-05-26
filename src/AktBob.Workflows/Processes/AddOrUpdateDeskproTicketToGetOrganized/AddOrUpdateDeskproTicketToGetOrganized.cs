@@ -1,18 +1,13 @@
-﻿using AktBob.CloudConvert.Contracts;
-using AktBob.Database.Contracts;
-using AktBob.Deskpro.Contracts;
+﻿using AktBob.Database.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text;
 using AktBob.Workflows.Helpers;
-using Org.BouncyCastle.Asn1;
-using Newtonsoft.Json.Linq;
-using Org.BouncyCastle.Bcpg.OpenPgp;
-using AktBob.Workflows.Extensions;
 using System.Globalization;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using AktBob.CloudConvert.Contracts;
+using AktBob.Deskpro.Contracts;
 
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
@@ -46,25 +41,25 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         }
 
         var ticketResult = await deskpro.GetTicket(job.TicketId, cancellationToken);
-        if (!ticketResult.IsSuccess) throw new BusinessException("Unable to get ticket from Deskpro");
+        if (ticketResult.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
         var ticket = ticketResult.Value;
 
         var getTicketCustomFields = deskpro.GetCustomFieldSpecifications(cancellationToken);
 
         var getAgent = ticket.Agent != null
-            ? deskpro.GetPerson(ticket.Agent.Id, cancellationToken)
-            : Task.FromResult(Result<PersonDto>.Error());
+            ? deskpro.GetPersonById(ticket.Agent.Id, cancellationToken)
+            : Task.FromResult(Error.NotFound().ToErrorOr<PersonDto>());
 
         var getUser = ticket.Person != null
-            ? deskpro.GetPerson(ticket.Person.Id, cancellationToken)
-            : Task.FromResult(Result<PersonDto>.Error());
+            ? deskpro.GetPersonById(ticket.Person.Id, cancellationToken)
+            : Task.FromResult(Error.NotFound().ToErrorOr<PersonDto>());
 
         await Task.WhenAll([
             getTicketCustomFields,
             getAgent,
             getUser]);
 
-        if (!getTicketCustomFields.Result.IsSuccess) throw new BusinessException("Unable to get Deskpro custom field specifications");
+        if (getTicketCustomFields.Result.IsError) throw new BusinessException("Unable to get Deskpro custom field specifications");
 
         // Map ticket fields
         var customFields = GenerateCustomFieldValues(job.CustomFieldIds, getTicketCustomFields.Result.Value, ticket);
@@ -90,32 +85,32 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
 
         // Messages
         var getMessagesResult = await deskpro.GetMessages(ticket.Id, cancellationToken);
-        if (getMessagesResult.IsSuccess)
+        if (getMessagesResult.IsError)
         {
             var messages = getMessagesResult.Value.OrderByDescending(x => x.CreatedAt);
 
             // Get and handle all messages at the same time
             await Task.WhenAll(messages.Select(async message =>
             {
-                var person = await deskpro.GetPerson(message.Person.Id, cancellationToken);
+                var person = await deskpro.GetPersonById(message.Person.Id, cancellationToken);
                 message.Person = person.Value;
 
                 // Get recipient
                 var recipient = message.Recipients.FirstOrDefault() != null
-                    ? await deskpro.GetPerson(message.Recipients.First(), cancellationToken)
-                    : Result<PersonDto>.Error();
+                    ? await deskpro.GetPersonByEmail(message.Recipients.First(), cancellationToken)
+                    : Error.NotFound().ToErrorOr<PersonDto>();
 
                 var attachments = Enumerable.Empty<AttachmentDto>();
                 if (message.AttachmentIds.Any())
                 {
 
-                    var getAttachmentsResult = await deskpro.GetMessageAttachments(ticket.Id, message.Id, cancellationToken);
+                    var getAttachmentsResult = await deskpro.GetMessageAttachments(message.Id, cancellationToken);
                     attachments = getAttachmentsResult.Value ?? Enumerable.Empty<AttachmentDto>();
                 }
 
                 // Get message number from API database
                 var messageNumber = 0;
-                var databaseMessage = await messageRepository.GetByDeskproMessageId(message.Id);
+                var databaseMessage = await messageRepository.GetByDeskproMessageId(message.Id.Id);
 
                 if (databaseMessage is null)
                 {
@@ -143,7 +138,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         }
 
         var fileResult = await GeneratePDF(cloudConvertModule, contentElements, cancellationToken);
-        if (!fileResult.IsSuccess) throw new BusinessException($"Unable to generate PDF document using CloudConvert: {fileResult.Errors.AsString()}");
+        if (fileResult.IsError) throw new BusinessException($"Unable to generate PDF document using CloudConvert: {fileResult.Errors.ToCommaDelimitedString()}");
 
         // Check if this submission is the most recent for the specified ticket. Check this as late as possible.
         if (IsMostRecentSubmission(currentPendingTicket, pendingsTickets))
@@ -164,32 +159,32 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         }
     }
 
-    private async Task<Result<byte[]>> GeneratePDF(ICloudConvertModule cloudConvertModule, IList<ContentElement> contentElements, CancellationToken cancellationToken)
+    private async Task<ErrorOr<byte[]>> GeneratePDF(ICloudConvertModule cloudConvertModule, IList<ContentElement> contentElements, CancellationToken cancellationToken)
     {
         // Generate PDF
         var orderedContentElements = contentElements.OrderByDescending(x => x.Timestamp).Select(x => x.Bytes);
         var generateTasksResult = cloudConvertModule.GenerateTasks(orderedContentElements);
-        if (!generateTasksResult.IsSuccess)
+        if (generateTasksResult.IsError)
         {
-            return Result.Error("Error generating CloudConvert tasks dictionary");
+            return generateTasksResult.Errors;
         }
 
         var jobIdResult = await cloudConvertModule.ConvertHtmlToPdf(generateTasksResult.Value, cancellationToken);
-        if (!jobIdResult.IsSuccess)
+        if (jobIdResult.IsError)
         {
-            return Result.Error("Error creating CloudConvert job");
+            return jobIdResult.Errors;
         }
 
         var urlResult = await cloudConvertModule.GetDownloadUrl(jobIdResult.Value, cancellationToken);
-        if (!urlResult.IsSuccess)
+        if (urlResult.IsError)
         {
-            return Result.Error($"Error querying job '{jobIdResult.Value}' from PDF from CloudConvert");
+            return urlResult.Errors;
         }
 
         var fileResult = await cloudConvertModule.DownloadFile(urlResult.Value, cancellationToken);
-        if (!fileResult.IsSuccess)
+        if (fileResult.IsError)
         {
-            return Result.Error($"CloudConvert job {jobIdResult.Value}: Error downloading file from url: {urlResult.Value}");
+            return fileResult.Errors;
         }
 
         return fileResult;

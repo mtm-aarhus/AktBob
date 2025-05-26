@@ -1,9 +1,8 @@
 ﻿using AktBob.Deskpro.Contracts;
-using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Email.Contracts;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 using AktBob.Workflows.Helpers;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace AktBob.Workflows.Processes.Cleanup;
 internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingCleanupJob>
@@ -20,7 +19,7 @@ internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingClea
     }
     public async Task Handle(NotitfyAboutUpcomingCleanupJob job, CancellationToken cancellationToken = default)
     {
-        Guard.Against.Zero(job.DeskproTicketId);
+        Guard.Against.Zero(job.TicketId);
 
         // Variables
         var validWorkflowChoices = Guard.Against.Null(_configuration.GetSection("DispatchCleanupJobsHandler:ValidWorkflowChoices").Get<List<int>>());
@@ -36,21 +35,23 @@ internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingClea
 
 
         // Check Deskpro to ensure a) it's time to execute, b) the ticket is still closed
-        TicketDto deskproTicket = await CleanUpShared.GetDeskproTicket(job.DeskproTicketId, deskpro, cancellationToken);
-        var workflowFieldValue = CleanUpShared.ParseWorkflowValue(deskproTicket, workflowFieldId);
-        var afslutningsdatoFieldValue = CleanUpShared.ParseAfslutningsdatoValue(deskproTicket, afslutningsdatoFieldId);
+        var deskproTicket = await CleanUpShared.GetDeskproTicket(job.TicketId, deskpro, cancellationToken);
+        if (deskproTicket.IsError) throw new BusinessException($"Error getting Deskpro ticket {job.TicketId}");
+
+        var workflowFieldValue = CleanUpShared.ParseWorkflowValue(deskproTicket.Value, workflowFieldId);
+        var afslutningsdatoFieldValue = CleanUpShared.ParseAfslutningsdatoValue(deskproTicket.Value, afslutningsdatoFieldId);
 
 
         // If there is no timestamp in Deskpro or the ticket is not closed, exit the job
         if (workflowFieldValue is null || !validWorkflowChoices.Contains((int)workflowFieldValue))
         {
-            _logger.LogWarning("Cannot notify about upcoming deletion since Deskpro ticket {ticketId} is not closed.", job.DeskproTicketId);
+            _logger.LogWarning("Cannot notify about upcoming deletion since Deskpro ticket {ticketId} is not closed.", job.TicketId);
             return;
         }
 
         if (afslutningsdatoFieldValue is null)
         {
-            _logger.LogWarning("Cannot notify about upcoming deleton since Deskpro ticket {ticketId} does not have a value for afslutningsdato.", job.DeskproTicketId);
+            _logger.LogWarning("Cannot notify about upcoming deleton since Deskpro ticket {ticketId} does not have a value for afslutningsdato.", job.TicketId);
             return;
         }
 
@@ -59,37 +60,34 @@ internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingClea
 
 
         // If it's too early, reschedule the job (Deskpro timestamp have changed since the job initially was scheduled)
-        if (JobHasToBeRescheduled(job.DeskproTicketId, jobDispatcher, afslutningsdato))
+        if (JobHasToBeRescheduled(job.TicketId, jobDispatcher, afslutningsdato))
         {
             return;
         }
 
         // Get notification recipient
-        var agentId = deskproTicket.Agent?.Id;
+        var agentId = deskproTicket.Value.Agent?.Id;
         if (agentId == null)
         {
-            throw new BusinessException($"Cannot notify about upcoming cleanup. Deskpro ticket {job.DeskproTicketId} has no agent.");
+            throw new BusinessException($"Cannot notify about upcoming cleanup. Deskpro ticket {job.TicketId} has no agent.");
         }
 
-        var agent = await deskpro.GetPerson((int)agentId, cancellationToken);
-        if (!agent.IsSuccess)
-        {
-            throw new BusinessException($"Agent {agentId} not found in Deskpro");
-        }
+        var agent = await deskpro.GetPersonById((int)agentId, cancellationToken);
+        if (agent.IsError) throw new BusinessException($"Agent {agentId} not found in Deskpro");
 
         // Send notification
-        var subject = $"{job.DeskproTicketId}: Midlertidige dokumenter i screenings- og udleveringsmapperne bliver snart slettet";
+        var subject = $"{job.TicketId}: Midlertidige dokumenter i screenings- og udleveringsmapperne bliver snart slettet";
         var fields = new Dictionary<string, string>
         {
-            { "ticketId", job.DeskproTicketId.ToString() },
-            { "ticketSubject", deskproTicket.Subject }
+            { "ticketId", job.TicketId.ToString() },
+            { "ticketSubject", deskproTicket.Value.Subject }
         };
 
         var emailBody = HtmlHelper.GenerateHtml(fields, "EmailTemplates/upcoming-clean-up-notification.html");
         email.Send(agent.Value.Email, subject, emailBody, true);
     }
 
-    private bool JobHasToBeRescheduled(int deskproTicketId, IJobDispatcher jobDispatcher, DateTime afslutningsdato)
+    private bool JobHasToBeRescheduled(TicketId ticketId, IJobDispatcher jobDispatcher, DateTime afslutningsdato)
     {
         var executionDelayDays = Guard.Against.Zero(_configuration.GetValue<int>("DispatchCleanupJobsHandler:NotificationDelayDays"));
         var utcNow = DateTimeOffset.UtcNow;
@@ -99,13 +97,13 @@ internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingClea
 
         if (DateTime.UtcNow >= afslutningsdato.AddDays(executionDelayDays))
         {
-            _logger.LogInformation("Notification about upcoming deletion for Deskpro ticket {ticketId} due.", deskproTicketId);
+            _logger.LogInformation("Notification about upcoming deletion for Deskpro ticket {ticketId} due.", ticketId);
             return false;
         }
 
-        _logger.LogInformation("Rescheduling job notifying about upcoming cleanup for Deskpro ticket {ticketId}. Try next in {days} days.", deskproTicketId, Math.Round(daysDifference.TotalDays, 2));
+        _logger.LogInformation("Rescheduling job notifying about upcoming cleanup for Deskpro ticket {ticketId}. Try next in {days} days.", ticketId, Math.Round(daysDifference.TotalDays, 2));
 
-        var rescheduledJob = new NotitfyAboutUpcomingCleanupJob(deskproTicketId);
+        var rescheduledJob = new NotitfyAboutUpcomingCleanupJob(ticketId);
         jobDispatcher.Dispatch(rescheduledJob, offset.AddHours(1));
 
         return true;

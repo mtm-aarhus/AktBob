@@ -1,12 +1,13 @@
 ﻿using AktBob.Podio.Contracts;
 using AktBob.Shared;
 using AktBob.Shared.Extensions;
+using AktBob.Shared.Types.Podio;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AktBob.Podio.Jobs;
 
-internal record UpdateTextFieldJob(PodioItemId PodioItemId, int FieldId, string TextValue);
+internal record UpdateTextFieldJob(ItemId PodioItemId, int FieldId, string TextValue);
 
 internal class UpdateTextField(IServiceScopeFactory serviceScopeFactory) : IJobHandler<UpdateTextFieldJob>
 {

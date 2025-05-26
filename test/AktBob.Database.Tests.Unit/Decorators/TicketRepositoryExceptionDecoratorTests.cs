@@ -2,6 +2,7 @@
 using AktBob.Database.Decorators;
 using AktBob.Database.Entities;
 using AktBob.Database.Repositories;
+using AktBob.Shared.Types.Deskpro;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
@@ -107,10 +108,11 @@ public class TicketRepositoryExceptionDecoratorTests
         // Arrange
         var expectedTickets = new List<Ticket>();
         Guid? parsedFilArkivCaseId = !string.IsNullOrEmpty(filArkivCaseId) ? Guid.Parse(filArkivCaseId) : null;
-        _inner.GetAll(Arg.Any<int?>(), Arg.Any<long?>(), Arg.Any<Guid?>()).Returns(expectedTickets);
+        _inner.GetAll(Arg.Any<TicketId>(), Arg.Any<long?>(), Arg.Any<Guid?>()).Returns(expectedTickets);
+        var ticketId = deskproId == null ? TicketId.Empty : TicketId.Create((int)deskproId);
 
         // Act
-        var result = await _sut.GetAll(deskproId, podioItemId, parsedFilArkivCaseId);
+        var result = await _sut.GetAll(ticketId, podioItemId, parsedFilArkivCaseId);
 
         // Assert
         result.Should().BeSameAs(expectedTickets);
@@ -131,10 +133,11 @@ public class TicketRepositoryExceptionDecoratorTests
     {
         // Arrange
         Guid? parsedFilArkivCaseId = !string.IsNullOrEmpty(filArkivCaseId) ? Guid.Parse(filArkivCaseId) : null;
-        _inner.GetAll(Arg.Any<int?>(), Arg.Any<long?>(), Arg.Any<Guid?>()).ThrowsAsync<Exception>();
-
+        _inner.GetAll(Arg.Any<TicketId>(), Arg.Any<long?>(), Arg.Any<Guid?>()).ThrowsAsync<Exception>();
+        var ticketId = deskproId == null ? TicketId.Empty : TicketId.Create((int)deskproId);
+       
         // Act
-        var act = () => _sut.GetAll(deskproId, podioItemId, parsedFilArkivCaseId);
+        var act = () => _sut.GetAll(ticketId, podioItemId, parsedFilArkivCaseId);
 
         // Assert
         await act.Should().ThrowAsync<Exception>();
@@ -145,9 +148,9 @@ public class TicketRepositoryExceptionDecoratorTests
     public async Task GetByDeskproTicketId_ShouldReturnResult_WhenInnerModuleReturnsTicket()
     {
         // Arrange
-        var id = 1;
+        var id = TicketId.Create(1);
         var expectedTicket = new Ticket { DeskproId = id };
-        _inner.GetByDeskproTicketId(Arg.Any<int>()).Returns(expectedTicket);
+        _inner.GetByDeskproTicketId(Arg.Any<TicketId>()).Returns(expectedTicket);
 
         // Act
         var result = await _sut.GetByDeskproTicketId(id);
@@ -161,10 +164,10 @@ public class TicketRepositoryExceptionDecoratorTests
     public async Task GetByDeskproTicketId_ShouldReturnResult_WhenInnerModuleReturnsNull()
     {
         // Arrange
-        _inner.GetByDeskproTicketId(Arg.Any<int>()).ReturnsNull();
+        _inner.GetByDeskproTicketId(Arg.Any<TicketId>()).ReturnsNull();
 
         // Act
-        var result = await _sut.GetByDeskproTicketId(1);
+        var result = await _sut.GetByDeskproTicketId(TicketId.Create(1));
 
         // Assert
         result.Should().BeNull();
@@ -175,10 +178,10 @@ public class TicketRepositoryExceptionDecoratorTests
     public async Task GetByDeskproTicketId_ShouldLogErrorAndRethrowException_WhenInnerModuleThrowsException()
     {
         // Arrange
-        _inner.GetByDeskproTicketId(Arg.Any<int>()).ThrowsAsync<Exception>();
+        _inner.GetByDeskproTicketId(Arg.Any<TicketId>()).ThrowsAsync<Exception>();
 
         // Act
-        var act = () => _sut.GetByDeskproTicketId(1);
+        var act = () => _sut.GetByDeskproTicketId(TicketId.Create(1));
 
         // Assert
         await act.Should().ThrowAsync<Exception>();

@@ -22,7 +22,7 @@ internal class UpdateDeskproSetFærdigbehandletDatoField : IJobHandler<UpdateDes
 
         var payload = new
         {
-            job.DeskproTicketId,
+            job.TicketId.Value,
             DateValue = DateTime.UtcNow.ToString("yyyy-MM-dd")
         };
 

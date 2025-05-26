@@ -14,6 +14,8 @@ using Ardalis.GuardClauses;
 using Serilog.Formatting.Display;
 using AktBob.OS2Forms;
 using AktBob.FilArkiv;
+using Newtonsoft.Json;
+using AktBob.Shared.Types.Deskpro;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -66,6 +68,10 @@ var builder = Host.CreateDefaultBuilder(args)
         // Hangfire
         services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
         services.AddSingleton<FailedJobLoggingFilter>();
+        //JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+        //{
+        //    Converters = new List<JsonConverter> { new TicketIdConverter() }
+        //};
         services.AddHangfire(config =>
         {
             config.UseSqlServerStorage(hostContext.Configuration.GetConnectionString("Hangfire"));

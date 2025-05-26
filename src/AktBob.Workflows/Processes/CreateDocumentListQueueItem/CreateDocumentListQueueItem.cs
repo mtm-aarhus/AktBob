@@ -1,11 +1,12 @@
 ﻿using AAK.Podio.Models;
 using AktBob.Database.Contracts;
-using AktBob.Deskpro.Contracts;
 using AktBob.OpenOrchestrator.Contracts;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.Deskpro.Contracts;
+using ErrorOr;
 
 namespace AktBob.Workflows.Processes.CreateDocumentListQueueItem;
 
@@ -74,19 +75,15 @@ internal class CreateDocumentListQueueItem(
         ReschedulingCounter.Instance.Remove(job.PodioItemId);
 
         var deskproTicket = await deskpro.GetTicket(getDatabaseTicket.Result.DeskproId, cancellationToken);
-
-        if (!deskproTicket.IsSuccess)
-        {
-            throw new BusinessException($"Error getting Deskpro ticket {getDatabaseTicket.Result.DeskproId}.");
-        }
+        if (deskproTicket.IsError) throw new BusinessException($"Error getting Deskpro ticket {getDatabaseTicket.Result.DeskproId}.");
 
         var agent = deskproTicket.Value?.Agent?.Id != null
-            ? await deskpro.GetPerson(deskproTicket.Value.Agent.Id, cancellationToken) 
-            : Result<PersonDto>.Error();
+            ? await deskpro.GetPersonById(deskproTicket.Value.Agent.Id, cancellationToken) 
+            : Error.NotFound().ToErrorOr<PersonDto>();
 
         var person = deskproTicket.Value?.Person?.Id != null
-            ? await deskpro.GetPerson(deskproTicket.Value.Person.Id, cancellationToken)
-            : Result<PersonDto>.Error();
+            ? await deskpro.GetPersonById(deskproTicket.Value.Person.Id, cancellationToken)
+            : Error.NotFound().ToErrorOr<PersonDto>();
 
         var caseNumber = getPodioItem.Result.Value?.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value;
 
@@ -96,7 +93,7 @@ internal class CreateDocumentListQueueItem(
             agent.Value.Email,
             Navn = agent.Value.FullName,
             PodioID = job.PodioItemId.Id,
-            DeskproID = deskproTicket.Value?.Id,
+            DeskproID = deskproTicket.Value?.Id.Value,
             Titel = deskproTicket.Value?.Subject,
             IndsenderNavn = person.Value.FullName,
             IndsenderMail = person.Value.Email,

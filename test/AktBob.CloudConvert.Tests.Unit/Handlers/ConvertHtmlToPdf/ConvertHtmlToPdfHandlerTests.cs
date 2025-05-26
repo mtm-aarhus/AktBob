@@ -1,0 +1,100 @@
+﻿using FluentAssertions;
+using NSubstitute;
+using ErrorOr;
+using AktBob.CloudConvert.Handlers.ConvertHtmlToPdf;
+using AktBob.CloudConvert.Client;
+using AktBob.CloudConvert.Client.Models;
+
+namespace AktBob.CloudConvert.Tests.Unit.Handlers.ConvertHtmlToPdf;
+
+public class ConvertHtmlToPdfHandlerTests
+{
+    private readonly ConvertHtmlToPdfHandler _sut;
+    private readonly ICloudConvertClient _cloudConvertClient = Substitute.For<ICloudConvertClient>();
+    public ConvertHtmlToPdfHandlerTests()
+    {
+        _sut = new ConvertHtmlToPdfHandler(_cloudConvertClient);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnJobId_WhenInvokedWithValidTasks()
+    {
+        // Arrange
+        var tasks = new Dictionary<Guid, object>
+        {
+            { Guid.NewGuid(), new { SomeProperty = "Some value 1" } },
+            { Guid.NewGuid(), new { SomeProperty = "Some value 2" } },
+            { Guid.NewGuid(), new { SomeProperty = "Some value 3" } }
+        };
+        
+        var expectedId = Guid.NewGuid();
+        _cloudConvertClient
+            .CreateJob(Arg.Any<object>(), Arg.Any<CancellationToken>())
+            .Returns(ErrorOrFactory.From(expectedId));
+
+        // Act
+        var result = await _sut.Handle(tasks, CancellationToken.None);
+
+        // Assert
+        result.Value.Should().Be(expectedId);
+        result.IsError.Should().BeFalse();
+        await _cloudConvertClient.Received(1).CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnError_WhenOneOrMoreTasksAreInvalid()
+    {
+        // Arrange
+        var tasks = new Dictionary<Guid, object>
+        {
+            { Guid.NewGuid(), null! },
+            { Guid.NewGuid(), new { SomeProperty = "Some value 2" } },
+            { Guid.NewGuid(), new { SomeProperty = "Some value 3" } }
+        };
+
+        // Act
+        var result = await _sut.Handle(tasks, CancellationToken.None);
+
+        // Assert
+        result.IsError.Should().BeTrue();
+        result.Errors.Should().NotBeEmpty();
+        await _cloudConvertClient.DidNotReceive().CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
+    }
+
+
+    [Fact]
+    public async Task Handle_ShouldReturnError_WhenInvokedWithEmptyDictionary()
+    {
+        // Arrange
+        var tasks = new Dictionary<Guid, object>();
+
+        // Act
+        var result = await _sut.Handle(tasks, CancellationToken.None);
+
+        // Assert
+        result.IsError.Should().BeTrue();
+        result.Errors.Should().NotBeEmpty();
+        await _cloudConvertClient.DidNotReceive().CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnError_WhenCreatingCloudConvertJobFails()
+    {
+        // Arrange
+        var tasks = new Dictionary<Guid, object>
+        {
+            { Guid.NewGuid(), new { SomeProperty = "Some value 1" } },
+            { Guid.NewGuid(), new { SomeProperty = "Some value 2" } },
+            { Guid.NewGuid(), new { SomeProperty = "Some value 3" } }
+        };
+        _cloudConvertClient.CreateJob(Arg.Any<object>(), Arg.Any<CancellationToken>()).Returns(Error.Failure());
+
+        // Act
+        var result = await _sut.Handle(tasks, CancellationToken.None);
+
+        // Assert
+        result.IsError.Should().BeTrue();
+        result.Errors.Should().NotBeEmpty();
+        await _cloudConvertClient.Received(1).CreateJob(Arg.Any<Payload>(), Arg.Any<CancellationToken>());
+    }
+}
