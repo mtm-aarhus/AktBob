@@ -1,13 +1,17 @@
 ﻿using AAK.GetOrganized;
 using AktBob.GetOrganized.Contracts;
-using AktBob.GetOrganized.Decorators;
-using AktBob.GetOrganized.Handlers;
+using AktBob.GetOrganized.Handlers.CreateCase;
+using AktBob.GetOrganized.Handlers.FinalizeDocument;
+using AktBob.GetOrganized.Handlers.GetAggregatedCase;
+using AktBob.GetOrganized.Handlers.GetCaseMetadata;
+using AktBob.GetOrganized.Handlers.RelateDocuments;
+using AktBob.GetOrganized.Handlers.UpdateCaseMetadata;
+using AktBob.GetOrganized.Handlers.UploadDocument;
 using AktBob.GetOrganized.Jobs;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.GetOrganized;
 public static class ModuleServices
@@ -26,39 +30,19 @@ public static class ModuleServices
         services.AddGetOrganized(getOrganizedOptions);
 
         // Handlers
-        services.AddScoped<ICreateCaseHandler, CreateCaseHandler>();
-        services.AddScoped<IFinalizeDocumentHandler, FinalizeDocumentHandler>();
-        services.AddScoped<IRelateDocumentsHandler, RelateDocumentsHandler>();
-        services.AddScoped<IUploadDocumentHandler, UploadDocumenHandler>();
-        services.AddScoped<IGetAggregatedCaseHandler, GetAggregatedCaseHandler>();
-        services.AddScoped<IGetCaseMetadataHandler, GetCaseMetadataHandler>();
-        services.AddScoped<IUpdateCaseMetadata,  UpdateCaseMetadataHandler>();
-
+        services.AddCreateCaseHandler();
+        services.AddFinalizeDocumentHandler();
+        services.AddGetAggregatedCaseHandler();
+        services.AddGetCaseMetadataHandler();
+        services.AddRelateDocumentsHandler();
+        services.AddUpdateCaseMetadataHandler();
+        services.AddUploadDocumentHandler();
+        
         // Jobs
         services.AddScoped<IJobHandler<FinalizeDocumentJob>, FinalizeDocument>();
 
         // Module Service orchestration
-        services.AddScoped<IGetOrganizedModule>(provider =>
-        {
-            var inner = new GetOrganizedModule(
-                provider.GetRequiredService<IJobDispatcher>(),
-                provider.GetRequiredService<ICreateCaseHandler>(),
-                provider.GetRequiredService<IRelateDocumentsHandler>(),
-                provider.GetRequiredService<IUploadDocumentHandler>(),
-                provider.GetRequiredService<IGetAggregatedCaseHandler>(),
-                provider.GetRequiredService<IGetCaseMetadataHandler>(),
-                provider.GetRequiredService<IUpdateCaseMetadata>());
-
-            var withLogging = new ModuleLoggingDecorator(
-                inner,
-                provider.GetRequiredService<ILogger<GetOrganizedModule>>());
-
-            var withExceptionHandling = new ModuleExceptionDecorator(
-                withLogging,
-                provider.GetRequiredService<ILogger<GetOrganizedModule>>());
-
-            return withExceptionHandling;
-        });
+        services.AddScoped<IGetOrganizedModule, GetOrganizedModule>();
 
         return services;
     }

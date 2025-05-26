@@ -49,10 +49,8 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         var facet = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:Facet"));
         var kle = MapKle(deskproTicketResult.Value.Fields);
 
-        var createCaseCommand = new CreateGetOrganizedCaseCommand(caseTitle, caseProfile, status, access, department, facet, kle);
-        var createCaseResult = await getOrganized.CreateCase(createCaseCommand, cancellationToken: cancellationToken);
-
-        if (!createCaseResult.IsSuccess) throw new BusinessException("Unable to create GetOrganized case");
+        var createCaseResult = await getOrganized.CreateCase(caseTitle, caseProfile, status, access, department, facet, kle, cancellationToken: cancellationToken);
+        if (createCaseResult.IsError) throw new BusinessException($"{createCaseResult.FirstError.Code}: {createCaseResult.FirstError.Description}");
 
         var caseId = createCaseResult.Value.CaseId;
         var caseUrl = createCaseResult.Value.CaseUrl.Replace("ad.", "");

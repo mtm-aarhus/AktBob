@@ -12,9 +12,6 @@ using AktBob.Deskpro.Contracts;
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
 {
-    private readonly ILogger<AddOrUpdateDeskproTicketToGetOrganized> _logger = logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-
     record ContentElement(DateTime Timestamp, byte[] Bytes);
 
     public async Task Handle(AddOrUpdateDeskproTicketToGetOrganizedJob job, CancellationToken cancellationToken = default)
@@ -23,7 +20,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         Guard.Against.NegativeOrZero(job.TicketId);
         Guard.Against.NullOrEmpty(job.GOCaseNumber);
 
-        var scope = _serviceScopeFactory.CreateScope();
+        var scope = serviceScopeFactory.CreateScope();
         var pendingsTickets = PendingsTickets.Instance;
 
         var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
@@ -114,7 +111,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
 
                 if (databaseMessage is null)
                 {
-                    _logger.LogWarning("No message found in database for Deskpro message ID {id}", message.Id);
+                    logger.LogWarning("No message found in database for Deskpro message ID {id}", message.Id);
                 }
                 else
                 {
@@ -144,18 +141,18 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         if (IsMostRecentSubmission(currentPendingTicket, pendingsTickets))
         {
             // Upload to GO
-            var uploadDocumentCommand = new UploadDocumentCommand(
+            pendingsTickets.RemovePendingTicket(currentPendingTicket);
+            var uploadDocumentResult = await getOrganized.UploadDocument(
                 fileResult.Value,
                 job.GOCaseNumber,
                 "Samlet korrespondance.pdf",
                 string.Empty,
                 DateTime.UtcNow.UtcToDanish(),
                 UploadDocumentCategory.Internal,
-                true);
-
-            pendingsTickets.RemovePendingTicket(currentPendingTicket);
-            var uploadDocumentResult = await getOrganized.UploadDocument(uploadDocumentCommand, cancellationToken);
-            if (!uploadDocumentResult.IsSuccess) throw new BusinessException("Unable to uplaod ticket PDF document to GetOrganized");
+                true,
+                cancellationToken);
+            
+            if (uploadDocumentResult.IsError) throw new BusinessException(uploadDocumentResult.Errors.ToCommaDelimitedString());
         }
     }
 
@@ -192,13 +189,14 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
 
     private bool IsMostRecentSubmission(PendingTicket pendingTicket, PendingsTickets pendingsTickets)
     {
-        if (!pendingsTickets.IsMostRecent(pendingTicket))
+        if (pendingsTickets.IsMostRecent(pendingTicket))
         {
-            pendingsTickets.RemovePendingTicket(pendingTicket);
-            return false;
+            return true;
         }
 
-        return true;
+        pendingsTickets.RemovePendingTicket(pendingTicket);
+        return false;
+
     }
 
     private IEnumerable<string> GenerateCustomFieldValues(int[] customFieldIds, IEnumerable<CustomFieldSpecificationDto> customFieldSpecificationDtos, TicketDto ticketDto)

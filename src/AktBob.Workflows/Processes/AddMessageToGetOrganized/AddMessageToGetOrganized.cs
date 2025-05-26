@@ -84,6 +84,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             attachments,
             deskproMessage.IsAgentNote,
             cancellationToken);
+        
         if (generateDocumentResult.IsError) throw new BusinessException($"Unable to generate PDF document using CloudConvert: {generateDocumentResult.Errors.ToCommaDelimitedString()}");
 
         // Upload parent document
@@ -91,17 +92,17 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         var documentCategory = deskproMessage.IsAgentNote ? UploadDocumentCategory.Internal : MapDocumentCategoryFromPerson(personResult.Value);
         var fileName = GenerateFileName(databaseMessage.MessageNumber ?? 0, person.FullName, createdAtDanishTime);
 
-        var upoadDocumentCommand = new UploadDocumentCommand(
-            generateDocumentResult.Value,
-            job.CaseNumber,
-            fileName,
-            string.Empty,
-            createdAtDanishTime,
-            documentCategory,
-            false);
-
-        var uploadedDocumentIdResult = await getOrganized.UploadDocument(upoadDocumentCommand, cancellationToken);
-        if (!uploadedDocumentIdResult.IsSuccess) throw new BusinessException("Unable to upload the message PDF document to GetOrganized");
+        var uploadedDocumentIdResult = await getOrganized.UploadDocument(
+            bytes: generateDocumentResult.Value,
+            caseNumber: job.CaseNumber,
+            fileName: fileName,
+            customProperty: string.Empty,
+            documentDate: createdAtDanishTime,
+            category: documentCategory,
+            overwriteExisting: false,
+            cancellationToken: cancellationToken);
+        
+        if (uploadedDocumentIdResult.IsError) throw new BusinessException(uploadedDocumentIdResult.Errors.ToCommaDelimitedString());
 
         // Update database
         databaseMessage.GODocumentId = uploadedDocumentIdResult.Value;
@@ -116,8 +117,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
         else
         {
             // Finalize the parent document
-            var finalizeDocumentCommand = new FinalizeDocumentCommand(uploadedDocumentIdResult.Value);
-            getOrganized.FinalizeDocument(finalizeDocumentCommand);
+            getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value, false);
         }
         
     }

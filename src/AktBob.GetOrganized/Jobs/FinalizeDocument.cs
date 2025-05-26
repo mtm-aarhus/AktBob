@@ -1,4 +1,5 @@
 ﻿using AktBob.GetOrganized.Contracts;
+using AktBob.GetOrganized.Handlers.FinalizeDocument;
 using AktBob.Shared;
 using AktBob.Shared.Extensions;
 using Microsoft.Extensions.DependencyInjection;

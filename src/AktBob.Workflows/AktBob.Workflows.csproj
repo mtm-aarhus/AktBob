@@ -16,7 +16,7 @@
     <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
     <ProjectReference Include="..\AktBob.Email\AktBob.Email.csproj" />
     <ProjectReference Include="..\AktBob.FilArkiv\AktBob.FilArkiv.csproj" />
-    <ProjectReference Include="..\AktBob.GetOrganized.Contracts\AktBob.GetOrganized.Contracts.csproj" />
+    <ProjectReference Include="..\AktBob.GetOrganized\AktBob.GetOrganized.csproj" />
     <ProjectReference Include="..\AktBob.OpenOrchestrator.Contracts\AktBob.OpenOrchestrator.Contracts.csproj" />
     <ProjectReference Include="..\AktBob.OS2Forms\AktBob.OS2Forms.csproj" />
     <ProjectReference Include="..\AktBob.Podio.Contracts\AktBob.Podio.Contracts.csproj" />

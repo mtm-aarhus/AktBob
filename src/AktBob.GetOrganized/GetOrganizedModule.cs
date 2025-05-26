@@ -1,8 +1,13 @@
 ﻿using AktBob.GetOrganized.Contracts;
 using AktBob.GetOrganized.Contracts.DTOs;
+using AktBob.GetOrganized.Handlers.CreateCase;
+using AktBob.GetOrganized.Handlers.GetAggregatedCase;
+using AktBob.GetOrganized.Handlers.GetCaseMetadata;
+using AktBob.GetOrganized.Handlers.RelateDocuments;
+using AktBob.GetOrganized.Handlers.UpdateCaseMetadata;
+using AktBob.GetOrganized.Handlers.UploadDocument;
 using AktBob.GetOrganized.Jobs;
 using AktBob.Shared;
-using Ardalis.Result;
 using ErrorOr;
 
 namespace AktBob.GetOrganized;
@@ -14,21 +19,45 @@ internal class GetOrganizedModule(
     IUploadDocumentHandler uploadDocumentHandler,
     IGetAggregatedCaseHandler aggregatedCaseHandler,
     IGetCaseMetadataHandler getCaseMetadataHandler,
-    IUpdateCaseMetadata updateCaseMetadataHandler) : IGetOrganizedModule
+    IUpdateCaseMetadataHandler updateCaseMetadataHandlerHandler) : IGetOrganizedModule
 {
-    public async Task<Result<CreateCaseResponse>> CreateCase(CreateGetOrganizedCaseCommand command, CancellationToken cancellationToken)
-        => await createCaseHandler.Handle(command, cancellationToken);
+    public async Task<ErrorOr<CreateCaseResponse>> CreateCase(
+        string caseTitle,
+        string caseProfile,
+        string status,
+        string access,
+        string department,
+        string facet,
+        string kle,
+        CancellationToken cancellationToken) => await createCaseHandler.Handle(caseTitle, caseProfile, status, access, department, facet, kle, cancellationToken);
 
-    public void FinalizeDocument(FinalizeDocumentCommand command) => jobDispatcher.Dispatch(new FinalizeDocumentJob(command.DocumentId, command.ShouldCloseOpenTasks));
+    public void FinalizeDocument(int documentId, bool shouldCloseOpenTasks) => jobDispatcher.Dispatch(new FinalizeDocumentJob(documentId, shouldCloseOpenTasks));
 
-    public async Task<IReadOnlyCollection<string>> GetAggregatedCase(string aggregatedCaseId, CancellationToken cancellationToken) => await aggregatedCaseHandler.Handle(aggregatedCaseId, cancellationToken);
+    public async Task<ErrorOr<IReadOnlyCollection<string>>> GetAggregatedCase(string aggregatedCaseId, CancellationToken cancellationToken) => await aggregatedCaseHandler.Handle(aggregatedCaseId, cancellationToken);
 
     public async Task<ErrorOr<CaseMetadataDto>> GetCaseMetadata(string caseId, CancellationToken cancellationToken = default) => await getCaseMetadataHandler.Handle(caseId, cancellationToken);
 
-    public async Task RelateDocuments(RelateDocumentsCommand command, CancellationToken cancellationToken = default) => await relateDocumentsHandler.Handle(command, cancellationToken);
+    public async Task RelateDocuments(int parentDocumentId, int[] childrenDocumentsIds, CancellationToken cancellationToken = default) => await relateDocumentsHandler.Handle(parentDocumentId, childrenDocumentsIds, cancellationToken);
 
-    public Task<ErrorOr<Success>> UpdateCaseMetadata(string caseId, UpdateCaseMetadataCommand command, CancellationToken cancellationToken = default) => updateCaseMetadataHandler.Handle(caseId, command, cancellationToken);
+    public Task<ErrorOr<Success>> UpdateCaseMetadata(string caseId, string kle, CancellationToken cancellationToken = default) => updateCaseMetadataHandlerHandler.Handle(caseId, kle, cancellationToken);
 
-    public async Task<Result<int>> UploadDocument(UploadDocumentCommand command, CancellationToken cancellationToken) => await uploadDocumentHandler.Handle(command, cancellationToken);
+    public async Task<ErrorOr<int>> UploadDocument(
+        byte[] bytes,
+        string caseNumber,
+        string fileName,
+        string customProperty,
+        DateTime documentDate,
+        UploadDocumentCategory category,
+        bool overwriteExisting,
+        CancellationToken cancellationToken) 
+        => await uploadDocumentHandler.Handle(
+            bytes,
+            caseNumber,
+            fileName,
+            customProperty,
+            documentDate,
+            category,
+            overwriteExisting,
+            cancellationToken);
 
 }

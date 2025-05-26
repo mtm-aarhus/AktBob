@@ -1,5 +1,5 @@
-﻿using AktBob.Deskpro.Contracts;
-using AktBob.GetOrganized.Contracts;
+﻿using AktBob.GetOrganized.Contracts;
+using AktBob.Deskpro.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text.Json;
@@ -32,7 +32,7 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
             async aggregatedCaseId =>
             {
                 var result = await getOrganized.GetAggregatedCase(aggregatedCaseId.Trim(), cancellationToken);
-                caseIds.AddRange(result);
+                caseIds.AddRange(result.Value);
             }).ToArray();
         
         await Task.WhenAll(tasks);

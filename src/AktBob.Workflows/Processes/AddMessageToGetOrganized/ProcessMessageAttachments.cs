@@ -10,8 +10,6 @@ internal record ProcessMessageAttachmentsJob(int ParentDocumentId, string CaseNu
 
 internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactory) : IJobHandler<ProcessMessageAttachmentsJob>
 {
-    private readonly IServiceScopeFactory serviceScopeFactory = serviceScopeFactory;
-
     public async Task Handle(ProcessMessageAttachmentsJob job, CancellationToken cancellationToken = default)
     {
         // Validate job parameters
@@ -41,35 +39,32 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
             var fileExtension = Path.GetExtension(attachment.FileName);
             var filename = $"{filenameNoExtension} ({job.Timestamp.ToString("dd-MM-yyyy HH-mm-ss")}){fileExtension}";
 
-            var uploadDocumentCommand = new UploadDocumentCommand(
-                attachmentBytes,
-                job.CaseNumber,
-                filename,
-                string.Empty,
-                createdAtDanishTime,
-                job.DocumentCategory,
-                true);
-
-            var uploadedDocumentIdResult = await getOrganized.UploadDocument(uploadDocumentCommand, cancellationToken);
-            if (!uploadedDocumentIdResult.IsSuccess) throw new BusinessException($"Unable to upload message attachment to GetOrganized (Filename: '{attachment.FileName}' Download URL: {attachment.DownloadUrl})");
+            var uploadedDocumentIdResult = await getOrganized.UploadDocument(
+                bytes: attachmentBytes,
+                caseNumber: job.CaseNumber,
+                fileName: filename,
+                customProperty: string.Empty,
+                documentDate: createdAtDanishTime,
+                category: job.DocumentCategory,
+                overwriteExisting: true,
+                cancellationToken: cancellationToken);
+            
+            if (uploadedDocumentIdResult.IsError) throw new BusinessException(uploadedDocumentIdResult.Errors.ToCommaDelimitedString());
 
             childrenDocumentIds.Add(uploadedDocumentIdResult.Value);
 
             // Finalize the attachment
-            var finalizeDocumentCommand = new FinalizeDocumentCommand(uploadedDocumentIdResult.Value);
-            getOrganized.FinalizeDocument(finalizeDocumentCommand);
+            getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value, false);
         }
 
         if (childrenDocumentIds.Count > 0)
         {
             // Set attachments as children
-            var relatedDocumentsCommand = new RelateDocumentsCommand(job.ParentDocumentId, childrenDocumentIds.ToArray());
-            await getOrganized.RelateDocuments(relatedDocumentsCommand, cancellationToken);
+            await getOrganized.RelateDocuments(job.ParentDocumentId, childrenDocumentIds.ToArray(), cancellationToken);
         }
 
         // Finalize the parent document
         // The parent document must not be finalized before the attachments has been set as children
-        var finalizeParentDocumentCommand = new FinalizeDocumentCommand(job.ParentDocumentId);
-        getOrganized.FinalizeDocument(finalizeParentDocumentCommand);
+        getOrganized.FinalizeDocument(job.ParentDocumentId, false);
     }
 }
