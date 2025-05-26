@@ -1,5 +1,5 @@
-﻿using AktBob.Database.Contracts;
-using AktBob.Database.Entities;
+﻿using AktBob.Database.Entities;
+using AktBob.Database.Contracts;
 using AktBob.OS2Forms.Contracts;
 using AktBob.Shared.Jobs;
 
@@ -37,9 +37,9 @@ internal class RegisterOS2FormsSubmission(ILogger<RegisterOS2FormsSubmission> lo
         _logger.LogInformation("Getting submission {id} from OS2Forms", job.SubmissionId);
 
         var submission = await os2Forms.GetSubmission(job.SubmissionId, webformId, cancellationToken);
-        if (submission is null)
+        if (submission.IsError)
         {
-            throw new BusinessException($"Unable to get submisison {job.SubmissionId} from OS2Forms.");
+            throw new BusinessException($"{submission.FirstError.Code}: {submission.FirstError.Description}");
         }
 
         // Save submission to database

@@ -13,29 +13,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="55cfb395-baf7-46ea-bfc5-efc5b60760dd" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsByCaseId/GetDocumentsByCaseIdHandlerException.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsByCaseId/GetDocumentsByCaseIdHandlerLogging.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsByCaseId/RegisterHandler.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatus/GetFileProcessStatusHandlerException.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatus/GetFileProcessStatusHandlerLogging.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatus/RegisterHandler.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.OS2Forms/Handlers/GetSubmission/GetSubmissionHandlerException.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.OS2Forms/Handlers/GetSubmission/GetSubmissionHandlerLogging.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/AktBob.OS2Forms/Handlers/GetSubmission/RegisterHandler.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.AktBob/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AktBob/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv.Contracts/DocumentDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/DTOs/DocumentDto.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv.Contracts/FileDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/DTOs/FileDto.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv.Contracts/FileProcessStatusDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/DTOs/FileProcessStatusDto.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv.Contracts/IFilArkivModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/IFilArkivModule.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/AktBob.FilArkiv.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/AktBob.FilArkiv.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/IGetDocumentsHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsByCaseId/IGetDocumentsByCaseIdHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Contracts/IGetFileProcessStatusHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatus/IGetFileProcessStatusHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Decorators/ModuleExceptionDecorator.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Decorators/ModuleLoggingDecorator.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/FilArkivModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/FilArkivModule.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetDocumentsByCaseId/GetDocumentsByCaseIdHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatusHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/Handlers/GetFileProcessStatus/GetFileProcessStatusHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.FilArkiv/ModuleServices.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.FilArkiv/ModuleServices.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.OS2Forms.Contracts/IOS2FormsModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.OS2Forms/Contracts/IOS2FormsModule.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.OS2Forms.Contracts/SubmissionDto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.OS2Forms/Contracts/SubmissionDto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.OS2Forms/AktBob.OS2Forms.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.OS2Forms/AktBob.OS2Forms.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.OS2Forms/GetSubmissionHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.OS2Forms/Handlers/GetSubmission/GetSubmissionHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.OS2Forms/IGetSubmissionHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.OS2Forms/Handlers/GetSubmission/IGetSubmissionHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.OS2Forms/OS2FormsModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.OS2Forms/OS2FormsModule.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.OS2Forms/RegisterServices.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.OS2Forms/RegisterServices.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AktBob.Workflows/AktBob.Workflows.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Workflows/AktBob.Workflows.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Workflows/Processes/CheckOCRScreeningStatus/CheckOCRScreeningStatusRegisterFiles.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Workflows/Processes/CheckOCRScreeningStatus/CheckOCRScreeningStatusRegisterFiles.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AktBob.Workflows/Processes/CheckOCRScreeningStatus/QueryFileProcessingStatus.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Workflows/Processes/CheckOCRScreeningStatus/QueryFileProcessingStatus.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AktBob.Workflows/Processes/RegisterOS2FormsSubmission.cs" beforeDir="false" afterPath="$PROJECT_DIR$/src/AktBob.Workflows/Processes/RegisterOS2FormsSubmission.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,7 +77,7 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "refactor-filarkiv-moduel",
+    "git-widget-placeholder": "refactor-os2forms-module",
     "ignore.virus.scanning.warn.message": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -203,7 +193,15 @@
       <option name="project" value="LOCAL" />
       <updated>1748243895866</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Refactor and reorganized FilArkiv module">
+      <option name="closed" value="true" />
+      <created>1748258920980</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1748258920980</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

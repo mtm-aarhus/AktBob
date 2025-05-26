@@ -1,8 +1,8 @@
-﻿using AAK.OS2Forms;
-using AktBob.OS2Forms.Contracts;
-using Ardalis.Result;
+﻿using AktBob.OS2Forms.Contracts;
+using AAK.OS2Forms;
+using ErrorOr;
 
-namespace AktBob.OS2Forms;
+namespace AktBob.OS2Forms.Handlers.GetSubmission;
 internal class GetSubmissionHandler : IGetSubmissionHandler
 {
     private readonly IOS2FormsClient _os2Forms;
@@ -12,12 +12,12 @@ internal class GetSubmissionHandler : IGetSubmissionHandler
         _os2Forms = os2Forms;
     }
 
-    public async Task<Result<SubmissionDto>> Handle(Guid submissionId, string webformId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<SubmissionDto>> Handle(Guid submissionId, string webformId, CancellationToken cancellationToken)
     {
         var submission = await _os2Forms.GetSubmission(submissionId, webformId, cancellationToken);
         if (submission == null)
         {
-            return Result.NotFound();
+            return Error.NotFound("OS2Forms.SubmissionNotFound", $"Submission with ID {submissionId} not found");
         }
 
         var dto = new SubmissionDto(

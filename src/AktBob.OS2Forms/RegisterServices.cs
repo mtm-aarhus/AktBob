@@ -1,5 +1,6 @@
 ﻿using AAK.OS2Forms;
 using AktBob.OS2Forms.Contracts;
+using AktBob.OS2Forms.Handlers.GetSubmission;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,8 @@ public static class RegisterServices
 
         services.AddOS2Forms(baseUrl, apiKey);
         services.AddScoped<IOS2FormsModule, OS2FormsModule>();
-        services.AddScoped<IGetSubmissionHandler, GetSubmissionHandler>();
+        services.AddGetSubmissionHandler();
+        
         return services;
     }
 }
