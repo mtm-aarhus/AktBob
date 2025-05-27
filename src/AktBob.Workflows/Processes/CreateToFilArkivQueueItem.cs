@@ -45,7 +45,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             getDatabaseCase,
             getDatabaseTicket]);
 
-        if (!getPodioItem.Result.IsSuccess) throw new BusinessException("Unable to get item from Podio");
+        if (getPodioItem.Result.IsError) throw new BusinessException(getPodioItem.Result.Errors.ToCommaDelimitedString());
         if (getDatabaseCase.Result.FirstOrDefault() is null) throw new BusinessException("Unable to get case from database");
         if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
 

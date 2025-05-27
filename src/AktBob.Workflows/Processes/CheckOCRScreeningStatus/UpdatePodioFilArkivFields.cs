@@ -24,11 +24,11 @@ internal class UpdatePodioFilArkivFields : IJobHandler<UpdatePodioFilArkivFields
 
         // FilArkivCaseId
         var filArkivCaseIdFieldId = podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "FilArkivCaseId").Key;
-        podio.UpdateTextField(new UpdateTextFieldCommand(job.PodioItemId, filArkivCaseIdFieldId, job.FilArkivCaseId.ToString()));
+        podio.UpdateTextField(job.PodioItemId, filArkivCaseIdFieldId, job.FilArkivCaseId.ToString());
 
         // FilArkivLink
         var filArkivLinkFieldId = podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "FilArkivLink").Key;
-        podio.UpdateTextField(new UpdateTextFieldCommand(job.PodioItemId, filArkivLinkFieldId, $"https://aarhus.filarkiv.dk/archives/case/{job.FilArkivCaseId}"));
+        podio.UpdateTextField(job.PodioItemId, filArkivLinkFieldId, $"https://aarhus.filarkiv.dk/archives/case/{job.FilArkivCaseId}");
 
         return Task.CompletedTask;
     }

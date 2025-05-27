@@ -1,30 +1,25 @@
-﻿using AktBob.Podio.Jobs;
-using AktBob.Shared;
+﻿using AktBob.Podio.Contracts;
 using AktBob.Shared.Types.Podio;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Podio.Endpoints;
-internal class UpdateDokumentlisteField(IConfiguration configuration, IJobDispatcher jobDispatcher) : Endpoint<UpdatePodioFieldRequest>
+internal class UpdateDokumentlisteField(IConfiguration configuration, IPodioModule podio) : Endpoint<UpdatePodioFieldRequest>
 {
-    private readonly IConfiguration _configuration = configuration;
-    private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
-
     public override void Configure()
     {
         Put("/Podio/{ItemId}/Fields/Dokumentliste", "/Podio/{ItemId}/DokumentlisteField");
         Options(x => x.WithTags("Podio"));
     }
 
-    public async override Task HandleAsync(UpdatePodioFieldRequest req, CancellationToken ct)
+    public override async Task HandleAsync(UpdatePodioFieldRequest req, CancellationToken ct)
     {
-        var appId = _configuration.GetValue<int>("Podio:AktindsigtApp:Id");
-        var fieldId = _configuration.GetValue<int>("Podio:AktindsigtApp:Fields:Dokumentliste");
+        var appId = configuration.GetValue<int>("Podio:AktindsigtApp:Id");
+        var fieldId = configuration.GetValue<int>("Podio:AktindsigtApp:Fields:Dokumentliste");
         var itemId = ItemId.Create(appId, req.ItemId);
         
-        var job = new UpdateTextFieldJob(itemId, fieldId, req.Value);
-        _jobDispatcher.Dispatch(job);
+        podio.UpdateTextField(itemId, fieldId, req.Value);
         await SendNoContentAsync(ct);
     }
 }

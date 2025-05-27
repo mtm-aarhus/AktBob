@@ -1,4 +1,4 @@
-﻿using AktBob.Podio.Contracts;
+﻿using AktBob.Podio.Handlers.PostComment;
 using AktBob.Shared;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Types.Podio;
@@ -7,22 +7,19 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AktBob.Podio.Jobs;
 
-internal record PostCommentJob(ItemId PodioItemId, string TextValue);
+internal record PostCommentJob(ItemId ItemId, string TextValue);
 
 internal class PostComment(IServiceScopeFactory serviceScopeFactory) : IJobHandler<PostCommentJob>
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-
     public async Task Handle(PostCommentJob job, CancellationToken cancellationToken = default)
     {
-        Guard.Against.NegativeOrZero(job.PodioItemId.AppId);
-        Guard.Against.NegativeOrZero(job.PodioItemId.Id);
+        Guard.Against.NegativeOrZero(job.ItemId.AppId);
+        Guard.Against.NegativeOrZero(job.ItemId.Id);
         Guard.Against.NullOrEmpty(job.TextValue);
 
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var postPodioCommentHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IPostCommentHandler>();
 
-        var command = new PostCommentCommand(job.PodioItemId, job.TextValue);
-        await postPodioCommentHandler.Handle(command, cancellationToken);
+        await postPodioCommentHandler.Handle(job.ItemId, job.TextValue, cancellationToken);
     }
 }

@@ -33,7 +33,7 @@ internal class RegisterPodioCase(IConfiguration configuration, IServiceScopeFact
         
         // Get metadata from Podio
         var podioItemResult = await podio.GetItem(job.PodioItemId, cancellationToken);
-        if (!podioItemResult.IsSuccess) throw new BusinessException("Unable to get item from Podio");
+        if (podioItemResult.IsError) throw new BusinessException(podioItemResult.Errors.ToCommaDelimitedString());
 
         var caseNumber = podioItemResult.Value.GetField(podioFieldCaseNumber.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(caseNumber)) throw new BusinessException("Case number field value from Podio Item is null or empty");

@@ -46,7 +46,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
             getDatabaseCases,
             getDatabaseTicket]);
 
-        if (!getPodioItem.Result.IsSuccess) throw new BusinessException("Unable to get item from Podio");
+        if (getPodioItem.Result.IsError) throw new BusinessException(getPodioItem.Result.Errors.ToCommaDelimitedString());
         if (getDatabaseCases.Result.FirstOrDefault() is null) throw new BusinessException("Unable to get case from databaase");
         if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
 

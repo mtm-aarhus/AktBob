@@ -50,7 +50,7 @@ internal class CreateDocumentListQueueItem(
 
         await Task.WhenAll([getPodioItem, getDatabaseTicket]);
 
-        if (getPodioItem.Result is null) throw new BusinessException($"Could not get valid data from Podio.");
+        if (getPodioItem.Result.IsError) throw new BusinessException(getPodioItem.Result.Errors.ToCommaDelimitedString());
 
         // RETRY: Trying to get the ticket data from the database might fail initially since Podio triggers both the create event
         // and DocumentListTrigger event almost at the same time. Because of this race condition, the database might not have

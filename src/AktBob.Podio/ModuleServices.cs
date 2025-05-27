@@ -1,13 +1,13 @@
 ﻿using AAK.Podio;
 using AktBob.Podio.Contracts;
-using AktBob.Podio.Decorators;
-using AktBob.Podio.Handlers;
+using AktBob.Podio.Handlers.GetItem;
+using AktBob.Podio.Handlers.PostComment;
+using AktBob.Podio.Handlers.UpdateTextField;
 using AktBob.Podio.Jobs;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace AktBob.Podio;
 
@@ -19,31 +19,16 @@ public static class ModuleServices
         services.AddPodioFactory(new Uri(Guard.Against.NullOrEmpty(configuration.GetValue<string>("Podio:BaseAddress"))));
 
         // Handlers
-        services.AddScoped<IGetItemHandler, GetItemHandler>();
-        services.AddScoped<IPostCommentHandler, PostCommentHandler>();
-        services.AddScoped<IUpdateTextFieldHandler, UpdateTextFieldHandler>();
+        services.AddGetItemHandler();
+        services.AddPostCommentHandler();
+        services.AddUpdateTextFieldHandler();
 
         // Jobs
         services.AddScoped<IJobHandler<UpdateTextFieldJob>, UpdateTextField>();
         services.AddScoped<IJobHandler<PostCommentJob>, PostComment>();
 
-        // Module service orchestrator
-        services.AddScoped<IPodioModule>(provider =>
-        {
-            var inner = new PodioModule(
-                provider.GetRequiredService<IJobDispatcher>(),
-                provider.GetRequiredService<IGetItemHandler>());
-
-            var withLogging = new ModuleLoggingDecorator(
-                inner,
-                provider.GetRequiredService<ILogger<PodioModule>>());
-
-            var withExceptionHandling = new ModuleExceptionDecorator(
-                withLogging,
-                provider.GetRequiredService<ILogger<PodioModule>>());
-
-            return withExceptionHandling;
-        });
+        // Module
+        services.AddScoped<IPodioModule, PodioModule>();
 
         return services;
     }

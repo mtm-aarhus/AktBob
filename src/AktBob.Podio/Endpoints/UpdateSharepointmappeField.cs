@@ -1,16 +1,12 @@
-﻿using AktBob.Podio.Jobs;
-using AktBob.Shared;
+﻿using AktBob.Podio.Contracts;
 using AktBob.Shared.Types.Podio;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace AktBob.Podio.Endpoints;
-internal class UpdateSharepointmappeField(IJobDispatcher jobDispatcher, IConfiguration configuration) : Endpoint<UpdatePodioFieldRequest>
+internal class UpdateSharepointmappeField(IPodioModule podio, IConfiguration configuration) : Endpoint<UpdatePodioFieldRequest>
 {
-    private readonly IJobDispatcher _jobDispatcher = jobDispatcher;
-    private readonly IConfiguration _configuration = configuration;
-
     public override void Configure()
     {
         Put("/Podio/{ItemId}/Fields/Sharepointmappe", "/Podio/{ItemId}/SharepointmappeField");
@@ -19,13 +15,11 @@ internal class UpdateSharepointmappeField(IJobDispatcher jobDispatcher, IConfigu
 
     public override async Task HandleAsync(UpdatePodioFieldRequest req, CancellationToken ct)
     {
-        var appId = _configuration.GetValue<int>("Podio:AktindsigtApp:Id");
-        var fieldId = _configuration.GetValue<int>("Podio:AktindsigtApp:Fields:Sharepointmappe");
+        var appId = configuration.GetValue<int>("Podio:AktindsigtApp:Id");
+        var fieldId = configuration.GetValue<int>("Podio:AktindsigtApp:Fields:Sharepointmappe");
         var itemId = ItemId.Create(appId, req.ItemId);
         
-        var job = new UpdateTextFieldJob(itemId, fieldId, req.Value);
-        _jobDispatcher.Dispatch(job);
-        
+        podio.UpdateTextField(itemId, fieldId, req.Value);
         await SendNoContentAsync(ct);
     }
 }

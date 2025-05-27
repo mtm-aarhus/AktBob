@@ -1,4 +1,4 @@
-﻿using AktBob.Podio.Contracts;
+﻿using AktBob.Podio.Handlers.UpdateTextField;
 using AktBob.Shared;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Types.Podio;
@@ -7,23 +7,20 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AktBob.Podio.Jobs;
 
-internal record UpdateTextFieldJob(ItemId PodioItemId, int FieldId, string TextValue);
+internal record UpdateTextFieldJob(ItemId ItemId, int FieldId, string TextValue);
 
 internal class UpdateTextField(IServiceScopeFactory serviceScopeFactory) : IJobHandler<UpdateTextFieldJob>
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-
     public async Task Handle(UpdateTextFieldJob job, CancellationToken cancellationToken = default)
     {
-        Guard.Against.NegativeOrZero(job.PodioItemId.AppId);
-        Guard.Against.NegativeOrZero(job.PodioItemId.Id);
+        Guard.Against.NegativeOrZero(job.ItemId.AppId);
+        Guard.Against.NegativeOrZero(job.ItemId.Id);
         Guard.Against.NegativeOrZero(job.FieldId);
         Guard.Against.NullOrEmpty(job.TextValue);
 
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var handler = scope.ServiceProvider.GetRequiredServiceOrThrow<IUpdateTextFieldHandler>();
 
-        var command = new UpdateTextFieldCommand(job.PodioItemId, job.FieldId, job.TextValue);
-        await handler.Handle(command, cancellationToken);
+        await handler.Handle(job.ItemId, job.FieldId, job.TextValue, cancellationToken);
     }
 }

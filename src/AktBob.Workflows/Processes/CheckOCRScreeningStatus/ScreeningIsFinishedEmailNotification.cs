@@ -3,6 +3,7 @@ using AktBob.Podio.Contracts;
 using AktBob.Email.Contracts;
 using AktBob.Workflows.Helpers;
 using AktBob.Deskpro.Contracts;
+using AktBob.Shared.Extensions;
 using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.CheckOCRScreeningStatus;
@@ -35,9 +36,9 @@ internal class ScreeningIsFinishedEmailNotification : IJobHandler<ScreeningIsFin
 
         // Get Podio Items
         var podioItemResult = await podio.GetItem(job.PodioItemId, cancellationToken);
-        if (!podioItemResult.IsSuccess || podioItemResult.Value is null)
+        if (podioItemResult.IsError)
         {
-            throw new BusinessException($"Could not get {job.PodioItemId} from Podio");
+            throw new BusinessException(podioItemResult.Errors.ToCommaDelimitedString());
         }
 
         var to = podioItemResult.Value.Fields.FirstOrDefault(f => f.Id == sagsansvarligEmailFieldId)?.GetValues<FieldValueText>()?.Value ?? throw new BusinessException($"Not able to get recipient email from {job.PodioItemId} field {sagsansvarligEmailFieldId}");

@@ -16,8 +16,7 @@ internal class ScreeningIsFinishedPodioNotification : IJobHandler<ScreeningIsFin
         var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
 
         var commentText = "Screening af dokumenterne er færdig.";
-        var postCommandCommand = new PostCommentCommand(job.PodioItemId, commentText);
-        podio.PostComment(postCommandCommand);
+        podio.PostComment(job.PodioItemId, commentText );
 
         return Task.CompletedTask;
     }
