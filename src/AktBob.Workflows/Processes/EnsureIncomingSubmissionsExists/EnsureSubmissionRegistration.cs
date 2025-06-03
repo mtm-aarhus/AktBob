@@ -1,4 +1,5 @@
 ﻿using AktBob.Database.Contracts;
+using AktBob.Deskpro.Contracts;
 using AktBob.OS2Forms.Contracts;
 using AktBob.Shared.Extensions;
 
@@ -26,6 +27,7 @@ internal class EnsureSubmissionRegistration : IJobHandler<EnsureSubmissionRegist
         using var scope = _scopeFactory.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IOS2FormsSubmissionRepository>();
         var os2Forms = scope.ServiceProvider.GetRequiredService<IOS2FormsModule>();
+        var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
         
         // Check if submission has been registered in database
         var submission = await repository.GetBySubmissionId(job.SubmissionId);
@@ -35,8 +37,25 @@ internal class EnsureSubmissionRegistration : IJobHandler<EnsureSubmissionRegist
             return;
         }
         
-        // Submission has not been registered yet
-        // -> retry 3 times then fail
+        // Submission has not been registered in database yet -> check Deskpro
+        var deskproTicket = await deskpro.GetTicketsByFieldSearch([191], job.SubmissionId.ToString(), cancellationToken);
+        if (deskproTicket is { IsError: false, Value.Count: > 0 })
+        {
+            switch (deskproTicket.Value.Count)
+            {
+                case 1:
+                    // One Deskpro ticket is registered with the submission ID -> all is good
+                    _logger.LogWarning("OS2Forms submission {id} is not yet registered in database but has been registered in Deskpro, ticket ID {ticketId}", job.SubmissionId, deskproTicket.Value.First().Id);
+                    return;
+                
+                case > 1:
+                    // Multiple Deskpro tickets exists for the specified OS2Forms submission ID -> weird.
+                    _logger.LogError("OS2Forms submission {id} has been registered to multiple Deskpro tickets: {tickets}", job.SubmissionId, string.Join(", ", deskproTicket.Value.Select(x => x.Id)));
+                    return;
+            }
+        }
+        
+        // Submission not yet registered -> check again maximum 3 times then fail
         var count = job.Count + 1;
         if (count > 3)
         {
