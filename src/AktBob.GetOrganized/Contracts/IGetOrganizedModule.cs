@@ -28,5 +28,5 @@ public interface IGetOrganizedModule
         CancellationToken cancellationToken);
     Task<ErrorOr<IReadOnlyCollection<string>>> GetAggregatedCase(string aggregatedCaseId, CancellationToken cancellationToken);
     Task<ErrorOr<CaseMetadataDto>> GetCaseMetadata(string caseId, CancellationToken cancellationToken = default);
-    Task<ErrorOr<Success>> UpdateCaseMetadata(string caseId, string kle, CancellationToken cancellationToken = default);
+    Task<ErrorOr<Success>> UpdateCaseMetadata(string caseId, Guid kleId, CancellationToken cancellationToken = default);
 }

@@ -14,11 +14,11 @@ internal class UpdateCaseMetadataHandlerLogging : IUpdateCaseMetadataHandler
         _logger = logger;
     }
     
-    public async Task<ErrorOr<Success>> Handle(string caseId, string kle, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<Success>> Handle(string caseId, Guid kleId, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Update GetOrganized case {id} metadata: Kle = {kle}", caseId, kle);
+        _logger.LogInformation("Update GetOrganized case {id} metadata: Kle = {kle}", caseId, kleId);
 
-        var result = await _next.Handle(caseId, kle, cancellationToken);
+        var result = await _next.Handle(caseId, kleId, cancellationToken);
 
         result.Switch(
             _ => _logger.LogInformation("GetOrganized case {id} metadata updated", caseId),

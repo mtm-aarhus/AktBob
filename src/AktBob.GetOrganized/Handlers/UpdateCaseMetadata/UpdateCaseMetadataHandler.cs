@@ -1,9 +1,8 @@
 ﻿using AAK.GetOrganized;
-using AktBob.GetOrganized.Handlers.UpdateCaseMetadata;
 using ErrorOr;
 using Result = ErrorOr.Result;
 
-namespace AktBob.GetOrganized.Handlers;
+namespace AktBob.GetOrganized.Handlers.UpdateCaseMetadata;
 internal class UpdateCaseMetadataHandler : IUpdateCaseMetadataHandler
 {
     private readonly IGetOrganizedClient _getOrganized;
@@ -12,10 +11,10 @@ internal class UpdateCaseMetadataHandler : IUpdateCaseMetadataHandler
     {
         _getOrganized = getOrganized;
     }
-
-    public async Task<ErrorOr<Success>> Handle(string caseId, string kle, CancellationToken cancellationToken = default)
+    
+    public async Task<ErrorOr<Success>> Handle(string caseId, Guid kleId, CancellationToken cancellationToken = default)
     {
-        await _getOrganized.UpdateCaseMetadata(caseId, new() { Kle = kle }, cancellationToken);
+        await _getOrganized.UpdateCaseMetadata(caseId, new() { KleId = kleId }, cancellationToken);
         return Result.Success;
     }
 }

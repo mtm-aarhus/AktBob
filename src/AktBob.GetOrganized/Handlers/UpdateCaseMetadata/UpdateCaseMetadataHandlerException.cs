@@ -14,11 +14,11 @@ internal class UpdateCaseMetadataHandlerException : IUpdateCaseMetadataHandler
         _logger = logger;
     }
     
-    public async Task<ErrorOr<Success>> Handle(string caseId, string kle, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<Success>> Handle(string caseId, Guid kleId, CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _next.Handle(caseId, kle, cancellationToken);
+            return await _next.Handle(caseId, kleId, cancellationToken);
         }
         catch (Exception ex)
         {

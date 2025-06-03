@@ -27,7 +27,7 @@ internal class UpdateGetOrganizedCaseSetKleValue : IJobHandler<UpdateGetOrganize
 
 
         // If target case already has a KLE value assigned - do nothing
-        if (!string.IsNullOrWhiteSpace(getTargetCase.Value.Kle))
+        if (getTargetCase.Value.KleId != Guid.Empty)
         {
             return;
         }
@@ -36,7 +36,7 @@ internal class UpdateGetOrganizedCaseSetKleValue : IJobHandler<UpdateGetOrganize
         // If source case is a Nova-case: set KLE
         if (job.SourceCaseId.IsNovaCase())
         {
-            var kleValue = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("UpdateGetOrganizedCaseSetKleValue:NovaCaseKleMapping"));
+            var kleValue = Guard.Against.NullOrEmpty(_configuration.GetValue<Guid>("UpdateGetOrganizedCaseSetKleValue:NovaCaseKleMapping"));
             await UpdateTargetCaseKle(go, job.TargetCaseId, kleValue, cancellationToken);
             return;
         }
@@ -48,12 +48,12 @@ internal class UpdateGetOrganizedCaseSetKleValue : IJobHandler<UpdateGetOrganize
 
 
         // Set target case KLE using KLE value from source case
-        await UpdateTargetCaseKle(go, job.TargetCaseId, sourceCase.Value.Kle, cancellationToken);        
+        await UpdateTargetCaseKle(go, job.TargetCaseId, sourceCase.Value.KleId, cancellationToken);        
     }
 
-    private async Task UpdateTargetCaseKle(IGetOrganizedModule go, string caseId, string kle, CancellationToken cancellationToken)
+    private async Task UpdateTargetCaseKle(IGetOrganizedModule go, string caseId, Guid kleId, CancellationToken cancellationToken)
     {
-        var result = await go.UpdateCaseMetadata(caseId, new(kle), cancellationToken);
+        var result = await go.UpdateCaseMetadata(caseId, kleId, cancellationToken);
         if (result.IsError) throw new BusinessException($"Error update GetOrganized case {caseId} metadata");
     }
 }

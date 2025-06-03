@@ -17,6 +17,6 @@ internal class GetCaseMetadataHandler : IGetCaseMetadataHandler
         var result = await _getOrganized.GetCaseMetadata(caseId, cancellation);
         return result == null
             ? Error.NotFound("GetOrganized.CaseNotFound", $"Case {caseId} not found.").ToErrorOr<CaseMetadataDto>()
-            : new CaseMetadataDto(result.CaseId, result.Kle);
+            : new CaseMetadataDto(result.CaseId, result.KleId);
     }
 }

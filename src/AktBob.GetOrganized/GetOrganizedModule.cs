@@ -39,7 +39,7 @@ internal class GetOrganizedModule(
 
     public async Task RelateDocuments(int parentDocumentId, int[] childrenDocumentsIds, CancellationToken cancellationToken = default) => await relateDocumentsHandler.Handle(parentDocumentId, childrenDocumentsIds, cancellationToken);
 
-    public Task<ErrorOr<Success>> UpdateCaseMetadata(string caseId, string kle, CancellationToken cancellationToken = default) => updateCaseMetadataHandlerHandler.Handle(caseId, kle, cancellationToken);
+    public Task<ErrorOr<Success>> UpdateCaseMetadata(string caseId, Guid kleId, CancellationToken cancellationToken = default) => updateCaseMetadataHandlerHandler.Handle(caseId, kleId, cancellationToken);
 
     public async Task<ErrorOr<int>> UploadDocument(
         byte[] bytes,
