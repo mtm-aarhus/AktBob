@@ -82,7 +82,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
 
         // Messages
         var getMessagesResult = await deskpro.GetMessages(ticket.Id, cancellationToken);
-        if (getMessagesResult.IsError)
+        if (!getMessagesResult.IsError)
         {
             var messages = getMessagesResult.Value.OrderByDescending(x => x.CreatedAt);
 
