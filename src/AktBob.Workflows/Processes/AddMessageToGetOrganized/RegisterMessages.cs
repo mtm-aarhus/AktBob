@@ -3,6 +3,7 @@ using AktBob.Database.Entities;
 using AktBob.Deskpro.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 internal class RegisterMessages(IServiceScopeFactory serviceScopeFactory) : IJobHandler<RegisterMessagesJob>
@@ -38,9 +39,11 @@ internal class RegisterMessages(IServiceScopeFactory serviceScopeFactory) : IJob
                 if (!await unitOfWork.Messages.Add(message)) throw new BusinessException($"Unable to add new message to database (TicketId = {databaseTicket.Id}, DeskproMessageId = {deskproMessage.Id})");
             }
 
-            if ((existingMessage is null || existingMessage.GODocumentId is null) && !string.IsNullOrEmpty(databaseTicket.CaseNumber))
+            if (
+                (existingMessage is null || existingMessage.GODocumentId is null)
+                && !string.IsNullOrEmpty(databaseTicket.CaseNumber))
             {
-                jobDispatcher.Dispatch(new  AddMessageToGetOrganizedJob(deskproMessage.Id, databaseTicket.CaseNumber));
+                jobDispatcher.Dispatch(new AddMessageToGetOrganizedJob(deskproMessage.Id.TicketId, deskproMessage.Id.Id, databaseTicket.CaseNumber));
             }
 
             return Task.CompletedTask;

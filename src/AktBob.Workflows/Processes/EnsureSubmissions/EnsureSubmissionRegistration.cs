@@ -3,9 +3,7 @@ using AktBob.Deskpro.Contracts;
 using AktBob.OS2Forms.Contracts;
 using AktBob.Shared.Extensions;
 
-namespace AktBob.Workflows.Processes.EnsureIncomingSubmissionsExists;
-
-internal record EnsureSubmissionRegistrationJob(Guid SubmissionId, int Count);
+namespace AktBob.Workflows.Processes.EnsureSubmissions;
 
 internal class EnsureSubmissionRegistration : IJobHandler<EnsureSubmissionRegistrationJob>
 {
@@ -61,8 +59,11 @@ internal class EnsureSubmissionRegistration : IJobHandler<EnsureSubmissionRegist
         {
             var webformId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("OS2Forms:WebformId"));
             var os2FormsSubmission = await os2Forms.GetSubmission(job.SubmissionId, webformId, cancellationToken);
-            if (os2FormsSubmission.IsError) throw new BusinessException($"OS2Forms submission {job.SubmissionId} not registered in Deskpro and also not found in OS2Forms! Error: {os2FormsSubmission.Errors.ToCommaDelimitedString()}");
-            throw new BusinessException($"OS2Forms submission {job.SubmissionId} not registered in Deskpro!");
+            if (os2FormsSubmission.IsError) throw new BusinessException($"Error requesting submission {job.SubmissionId} from OS2Forms: {os2FormsSubmission.Errors.ToCommaDelimitedString()}");
+            
+            // Max retries -> log critical
+            _logger.LogCritical("OS2Forms submission {id} not registered in Deskpro!", job.SubmissionId);
+            return;
         }
 
         var schedule = TimeSpan.FromMinutes(2);

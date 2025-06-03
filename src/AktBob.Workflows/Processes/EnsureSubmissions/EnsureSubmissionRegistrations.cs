@@ -1,23 +1,22 @@
 ﻿using AktBob.OS2Forms.Contracts;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.Jobs;
 
-namespace AktBob.Workflows.Processes.EnsureIncomingSubmissionsExists;
+namespace AktBob.Workflows.Processes.EnsureSubmissions;
 
-internal class EnsureIncomingSubmissionsExists : IJobHandler<EnsureIncomingSubmissionsExistsJob>
+internal class EnsureSubmissionRegistrations : IJobHandler<EnsureSubmissionRegistrationsJob>
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IConfiguration _configuration;
     private readonly IJobDispatcher _jobDispatcher;
 
-    public EnsureIncomingSubmissionsExists(IServiceScopeFactory scopeFactory, IConfiguration configuration, IJobDispatcher jobDispatcher)
+    public EnsureSubmissionRegistrations(IServiceScopeFactory scopeFactory, IConfiguration configuration, IJobDispatcher jobDispatcher)
     {
         _scopeFactory = scopeFactory;
         _configuration = configuration;
         _jobDispatcher = jobDispatcher;
     }
     
-    public async Task Handle(EnsureIncomingSubmissionsExistsJob job, CancellationToken cancellationToken = default)
+    public async Task Handle(EnsureSubmissionRegistrationsJob job, CancellationToken cancellationToken = default)
     {
         using var scope = _scopeFactory.CreateScope();
         var webformId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("OS2Forms:WebformId"));

@@ -14,9 +14,8 @@ using Ardalis.GuardClauses;
 using Serilog.Formatting.Display;
 using AktBob.OS2Forms;
 using AktBob.FilArkiv;
-using AktBob.Shared.Jobs;
-using Newtonsoft.Json;
-using AktBob.Shared.Types.Deskpro;
+using AktBob.Shared.Exceptions;
+using AktBob.Workflows.Processes.EnsureSubmissions;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -69,18 +68,14 @@ var builder = Host.CreateDefaultBuilder(args)
         // Hangfire
         services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
         services.AddSingleton<FailedJobLoggingFilter>();
-        //JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-        //{
-        //    Converters = new List<JsonConverter> { new TicketIdConverter() }
-        //};
         services.AddHangfire(config =>
         {
             config.UseSqlServerStorage(hostContext.Configuration.GetConnectionString("Hangfire"));
-            //config.UseFilter(new AutomaticRetryAttribute
-            //{
-            //    Attempts = 2,
-            //    OnlyOn = [typeof(BusinessException)]
-            //});
+            // config.UseFilter(new AutomaticRetryAttribute
+            // {
+            //     Attempts = 2,
+            //     OnlyOn = [typeof(BusinessException)]
+            // });
         });
 
         services.AddHangfireServer(config =>
@@ -110,7 +105,7 @@ using var scope = host.Services.CreateScope();
 GlobalJobFilters.Filters.Add(scope.ServiceProvider.GetRequiredService<FailedJobLoggingFilter>());
 
 // Register recurring jobs
-var ensureIncomingSubmissionsExistsJobHandler = host.Services.GetRequiredService<IJobHandler<EnsureIncomingSubmissionsExistsJob>>();
-RecurringJob.AddOrUpdate(nameof(EnsureIncomingSubmissionsExistsJob), () => ensureIncomingSubmissionsExistsJobHandler.Handle(new EnsureIncomingSubmissionsExistsJob(), CancellationToken.None), "*/30 * * * *");
+var ensureSubmissionRegistrationsJobHandler = scope.ServiceProvider.GetRequiredService<IJobHandler<EnsureSubmissionRegistrationsJob>>();
+RecurringJob.AddOrUpdate(nameof(EnsureSubmissionRegistrationsJob), () => ensureSubmissionRegistrationsJobHandler.Handle(new EnsureSubmissionRegistrationsJob(), CancellationToken.None), "*/30 * * * *");
 
 host.Run();
