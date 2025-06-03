@@ -62,7 +62,7 @@ internal class EnsureSubmissionRegistration : IJobHandler<EnsureSubmissionRegist
             if (os2FormsSubmission.IsError) throw new BusinessException($"Error requesting submission {job.SubmissionId} from OS2Forms: {os2FormsSubmission.Errors.ToCommaDelimitedString()}");
             
             // Max retries -> log critical
-            _logger.LogCritical("OS2Forms submission {id} not registered in Deskpro!", job.SubmissionId);
+            _logger.LogCritical("OS2Forms submission {id} not found in Deskpro", job.SubmissionId);
             return;
         }
 
