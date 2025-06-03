@@ -5,6 +5,8 @@ using AktBob.Workflows.Processes;
 using AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 using AktBob.Workflows.Processes.CreateDocumentListQueueItem;
 using AktBob.Workflows.Processes.Cleanup;
+using AktBob.Workflows.Processes.EnsureIncomingSubmissionsExists;
+using Hangfire;
 
 namespace AktBob.Workflows;
 public static class ModuleServices
@@ -45,7 +47,10 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<UpdateDatabaseTicketJob>, UpdateDatabaseTicket>();
         services.AddScoped<IJobHandler<UpdateDatabaseCaseJob>, UpdateDatabaseCase>();
         services.AddScoped<IJobHandler<UpdateGetOrganizedCaseSetKleValueJob>, UpdateGetOrganizedCaseSetKleValue>();
-
+        services.AddScoped<IJobHandler<EnsureIncomingSubmissionsExistsJob>, EnsureIncomingSubmissionsExists>();
+        services.AddScoped<IJobHandler<EnsureSubmissionRegistrationJob>, EnsureSubmissionRegistration>();
+        
         return services;
     }
+
 }
