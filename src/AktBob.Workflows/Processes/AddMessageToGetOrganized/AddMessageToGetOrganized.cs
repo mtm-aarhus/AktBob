@@ -12,15 +12,18 @@ namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
 internal record AddMessageToGetOrganizedJob(int TicketId, int MessageId, string CaseNumber);
 
-internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddMessageToGetOrganizedJob>
+internal class AddMessageToGetOrganized(
+    ILogger<AddMessageToGetOrganized> logger,
+    IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddMessageToGetOrganizedJob>
 {
     private readonly ILogger<AddMessageToGetOrganized> _logger = logger;
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
     public async Task Handle(AddMessageToGetOrganizedJob job, CancellationToken cancellationToken = default)
     {
-        // Validate job parameters
         Guard.Against.NullOrEmpty(job.CaseNumber);
+        
+        _logger.LogInformation("Adding document to GetOrganized for ticket {ticket} message {message}.", job.TicketId, job.MessageId);
         
         using var scope = _serviceScopeFactory.CreateScope();
         var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
@@ -31,26 +34,26 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
 
         var messageId = MessageId.Create(job.TicketId, job.MessageId);
         var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(messageId.Id);
-        if (databaseMessage is null) throw new BusinessException("Unable to get message from database.");
+        if (databaseMessage is null) throw new BusinessException($"Error adding document to GetOrganized: Unable to get ticket {job.TicketId} message {job.MessageId} from database.");
 
         // Get message from database, check if documentId is null
         if (databaseMessage.GODocumentId is not null)
         {
-            _logger.LogDebug("Message in database already has a value for {propertyName}. Exiting job.", nameof(databaseMessage.GODocumentId));
+            _logger.LogDebug("GetOrganized document already exists for Deskpro ticket {ticketId} message {message}.", job.TicketId, job.MessageId);
             return;
         }
 
         var databaseTicket = await unitOfWork.Tickets.Get(databaseMessage.TicketId);
-        if (databaseTicket is null) throw new BusinessException($"Unable to get ticket {databaseMessage.TicketId} from database.");
+        if (databaseTicket is null) throw new BusinessException($"Error adding document to GetOrganized: Unable to get ticket {databaseMessage.TicketId} from database.");
 
         // Get Deskpro ticket (we need the deskpro ticket id to query the message ifself)
         var deskproTicketResult = await deskpro.GetTicket(databaseTicket.DeskproId, cancellationToken);
-        if (deskproTicketResult.IsError) throw new BusinessException("Unable to get ticket {id} from Deskpro.");
+        if (deskproTicketResult.IsError) throw new BusinessException($"Error adding document to GetOrganized: Unable to get ticket {databaseTicket.DeskproId} from Deskpro.");
         var deskproTicket = deskproTicketResult.Value;
 
         // Get Deskpro message
         var getDeskproMessageResult = await deskpro.GetMessage(messageId, cancellationToken);
-        if (getDeskproMessageResult.IsError) throw new BusinessException("Unable to get message from Deskpro. Please mark message as deleted to avoid future processing failure.");
+        if (getDeskproMessageResult.IsError) throw new BusinessException("rror adding document to GetOrganized: Unable to get message from Deskpro. Mark message in database as deleted to avoid future failures.");
         var deskproMessage = getDeskproMessageResult.Value;
 
         // Get Deskpro person
@@ -121,6 +124,7 @@ internal class AddMessageToGetOrganized(ILogger<AddMessageToGetOrganized> logger
             getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value, false);
         }
         
+        _logger.LogInformation("Document added to GetOrganized for ticket {ticket} message {message}.", job.TicketId, job.MessageId);
     }
 
 

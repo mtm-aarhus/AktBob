@@ -6,9 +6,10 @@ using AktBob.Shared.Jobs;
 using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
-internal class RegisterMessages(IServiceScopeFactory serviceScopeFactory) : IJobHandler<RegisterMessagesJob>
+internal class RegisterMessages(IServiceScopeFactory serviceScopeFactory, ILogger<RegisterMessages> logger) : IJobHandler<RegisterMessagesJob>
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+    private readonly ILogger<RegisterMessages> _logger = logger;
 
     public async Task Handle(RegisterMessagesJob job, CancellationToken cancellationToken = default)
     {
@@ -16,7 +17,9 @@ internal class RegisterMessages(IServiceScopeFactory serviceScopeFactory) : IJob
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
         var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
         var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
-
+        
+        _logger.LogInformation("Registering messages for Deskpro ticket {id}", job.TicketId);
+        
         // Get message from Deskpro
         var getDeskproMessagesResult = await deskpro.GetMessages(job.TicketId, cancellationToken);
         if (getDeskproMessagesResult.IsError) throw new BusinessException("Unable to get messages from Deskpro.");
@@ -35,13 +38,12 @@ internal class RegisterMessages(IServiceScopeFactory serviceScopeFactory) : IJob
                     TicketId = databaseTicket.Id,
                     DeskproMessageId = deskproMessage.Id.Id,
                 };
-
+                
                 if (!await unitOfWork.Messages.Add(message)) throw new BusinessException($"Unable to add new message to database (TicketId = {databaseTicket.Id}, DeskproMessageId = {deskproMessage.Id})");
+                _logger.LogInformation("Deskpro message {messageId} added to database", message.Id);
             }
 
-            if (
-                (existingMessage is null || existingMessage.GODocumentId is null)
-                && !string.IsNullOrEmpty(databaseTicket.CaseNumber))
+            if (existingMessage?.GODocumentId is null && !string.IsNullOrEmpty(databaseTicket.CaseNumber))
             {
                 jobDispatcher.Dispatch(new AddMessageToGetOrganizedJob(deskproMessage.Id.TicketId, deskproMessage.Id.Id, databaseTicket.CaseNumber));
             }

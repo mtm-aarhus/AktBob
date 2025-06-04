@@ -8,15 +8,20 @@ namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
 internal record ProcessMessageAttachmentsJob(int ParentDocumentId, string CaseNumber, DateTime Timestamp, UploadDocumentCategory DocumentCategory, IEnumerable<AttachmentDto> Attachments);
 
-internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactory) : IJobHandler<ProcessMessageAttachmentsJob>
+internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactory, ILogger<ProcessMessageAttachments> logger) : IJobHandler<ProcessMessageAttachmentsJob>
 {
+    private readonly ILogger<ProcessMessageAttachments> _logger = logger;
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
+
     public async Task Handle(ProcessMessageAttachmentsJob job, CancellationToken cancellationToken = default)
     {
         // Validate job parameters
         Guard.Against.Zero(job.ParentDocumentId);
         Guard.Against.NullOrEmpty(job.CaseNumber);
 
-        using var scope = serviceScopeFactory.CreateScope();
+        _logger.LogInformation("Handling attachments for GetOrganized case {caseNumber} document {id}", job.CaseNumber, job.ParentDocumentId);
+        
+        using var scope = _serviceScopeFactory.CreateScope();
         var deskproModule = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
         var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
 
@@ -25,6 +30,8 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
 
         foreach (var attachment in job.Attachments)
         {
+            _logger.LogInformation("Adding attachment for GetOrganized case {caseNumber} document {documentId}: {filename}", job.CaseNumber, job.ParentDocumentId, attachment.FileName);
+            
             using var stream = new MemoryStream();
 
             // Get the individual attachments from Deskpro
@@ -37,7 +44,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
             // Upload the attachment to GO
             var filenameNoExtension = Path.GetFileNameWithoutExtension(attachment.FileName);
             var fileExtension = Path.GetExtension(attachment.FileName);
-            var filename = $"{filenameNoExtension} ({job.Timestamp.ToString("dd-MM-yyyy HH-mm-ss")}){fileExtension}";
+            var filename = $"{filenameNoExtension} ({job.Timestamp:dd-MM-yyyy HH-mm-ss}){fileExtension}";
 
             var uploadedDocumentIdResult = await getOrganized.UploadDocument(
                 bytes: attachmentBytes,
@@ -55,12 +62,16 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
 
             // Finalize the attachment
             getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value, false);
+            
+            _logger.LogInformation("Attachmenta added for GetOrganized case {caseNumber} document {documentId}: {filename}", job.CaseNumber, job.ParentDocumentId, attachment.FileName);
         }
 
         if (childrenDocumentIds.Count > 0)
         {
             // Set attachments as children
             await getOrganized.RelateDocuments(job.ParentDocumentId, childrenDocumentIds.ToArray(), cancellationToken);
+            _logger.LogInformation("Setting attachments as children for GetOrganized case {caseNumber} document {documentId}", job.CaseNumber, job.ParentDocumentId);
+            
         }
 
         // Finalize the parent document
