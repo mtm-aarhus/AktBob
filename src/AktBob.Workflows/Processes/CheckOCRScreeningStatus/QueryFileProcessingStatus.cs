@@ -59,7 +59,7 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
         var response = await filArkiv.GetFileProcessStatus(job.FilArkivFileId, cancellationToken);
         if (response.IsError)
         {
-            file.SetStatus(true);
+            file.IsFinished = true;
             NotifyWhenAllFilesAreFinished(job.PodioItemId, @case);
 
             if (response.FirstError == Error.NotFound())
@@ -80,7 +80,7 @@ internal class QueryFileProcessingStatus : IJobHandler<QueryFileProcessingStatus
 
         // Finished - update cache
         _logger.LogInformation("Case {caseId} File {fileId} finished", @case.FilArkivCaseId, job.FilArkivFileId);
-        file.SetStatus(true);
+        file.IsFinished = true;
 
         // Notify if all files are finished
         NotifyWhenAllFilesAreFinished(job.PodioItemId, @case);

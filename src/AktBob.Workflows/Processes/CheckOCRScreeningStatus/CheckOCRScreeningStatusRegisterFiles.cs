@@ -13,9 +13,10 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
 
     public async Task Handle(CheckOCRScreeningStatusRegisterFilesJob job, CancellationToken cancellationToken = default)
     {
-        var scope = _serviceScopeFactory.CreateScope();
+        _logger.LogInformation("Initializing OCR screening status checking for FilArkiv case {id}", job.FilArkivCaseId);
+        
+        using var scope = _serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
-        var podio = scope.ServiceProvider.GetRequiredServiceOrThrow<IPodioModule>();
         var filArkiv = scope.ServiceProvider.GetRequiredServiceOrThrow<IFilArkivModule>();
         var cachedData = CachedData.Instance;
 
@@ -23,13 +24,10 @@ internal class CheckOCRScreeningStatusRegisterFiles(IServiceScopeFactory service
 
         if (!cachedData.Cases.TryAdd(job.FilArkivCaseId, @case))
         {
-            if (cachedData.Cases.ContainsKey(job.FilArkivCaseId))
-            {
-                _logger.LogWarning("Case {caseId} already added to cache", job.FilArkivCaseId);
-                return;
-            }
-
-            throw new BusinessException("Unable to add case to cache");
+            if (!cachedData.Cases.ContainsKey(job.FilArkivCaseId)) throw new BusinessException("Unable to add case to cache");
+            
+            _logger.LogWarning("Case {caseId} already added to cache", job.FilArkivCaseId);
+            return;
         }
 
         var documents = await filArkiv.GetDocumentsByCaseId(@case.FilArkivCaseId, cancellationToken);

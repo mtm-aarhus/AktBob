@@ -13,15 +13,6 @@ internal class Case
         PodioItemId = podioItemId;
     }
 
-    public File? GetFile(Guid id)
-    {
-        if (Files.TryGetValue(id, out var file))
-        {
-            return file;
-        }
-
-        return null;
-    }
-
+    public File? GetFile(Guid id) => Files.GetValueOrDefault(id);
     public bool AnyFilesNotFinished => Files.Values.Any(f => !f.IsFinished);
 }

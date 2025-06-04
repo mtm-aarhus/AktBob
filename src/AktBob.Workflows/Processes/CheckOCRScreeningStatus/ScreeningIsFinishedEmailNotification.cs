@@ -15,7 +15,6 @@ internal class ScreeningIsFinishedEmailNotification : IJobHandler<ScreeningIsFin
 
     private record FieldSection(int AppId, string Label);
 
-
     public ScreeningIsFinishedEmailNotification(IServiceScopeFactory serviceScopeFactory, IAppConfig appConfig)
     {
         _serviceScopeFactory = serviceScopeFactory;
@@ -24,6 +23,8 @@ internal class ScreeningIsFinishedEmailNotification : IJobHandler<ScreeningIsFin
 
     public async Task Handle(ScreeningIsFinishedEmailNotificationJob job, CancellationToken cancellationToken = default)
     {
+        
+        
         using var scope = _serviceScopeFactory.CreateScope();
         var podio = scope.ServiceProvider.GetRequiredService<IPodioModule>();
         var deskpro = scope.ServiceProvider.GetRequiredService<IDeskproModule>();
