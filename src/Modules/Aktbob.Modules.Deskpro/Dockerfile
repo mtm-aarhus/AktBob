@@ -1,0 +1,37 @@
+﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+USER $APP_UID
+ENV ASPNETCORE_URLS=http://+:80
+ENV HTTP_PORTS=""
+
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
+
+WORKDIR /src
+
+# Copy the NuGet configuration file and local NuGet packages
+COPY nuget.config ./
+
+COPY ["Modules/Aktbob.Modules.Deskpro/Aktbob.Modules.Deskpro.csproj", "Modules/Aktbob.Modules.Deskpro/"]
+COPY ["AktBob.Shared/AktBob.Shared.csproj", "AktBob.Shared/"]
+
+RUN dotnet restore "./Modules/Aktbob.Modules.Deskpro/Aktbob.Modules.Deskpro.csproj"
+COPY . .
+
+WORKDIR "/src/Modules/Aktbob.Modules.Deskpro"
+RUN dotnet build "./Aktbob.Modules.Deskpro.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet publish "./Aktbob.Modules.Deskpro.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+
+# Use build argument to copy the right configuration file
+ARG ENVIRONMENT=Production
+COPY --from=build /app/publish .
+
+# Copy the appsettings file based on the build argument
+COPY Modules/Aktbob.Modules.Deskpro/appsettings.${ENVIRONMENT}.json ./appsettings.json
+
+ENTRYPOINT ["dotnet", "Aktbob.Modules.Deskpro.dll"]
