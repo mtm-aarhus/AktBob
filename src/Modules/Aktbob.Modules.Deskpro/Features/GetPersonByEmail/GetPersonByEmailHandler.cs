@@ -9,7 +9,7 @@ internal class GetPersonByEmailHandler(IDeskproClient deskpro, IAppConfig appCon
 
     public async Task<ErrorOr<PersonDto>> Handle(string email, CancellationToken cancellationToken)
     {
-        var section = _appConfig.GetSection("Deskpro:GetPersonHandler:IgnoreEmails");
+        var section = _appConfig.GetSection("GetPersonHandler:IgnoreEmails");
         var ignoreList = section?.Split(',') ?? Enumerable.Empty<string>();
         if (ignoreList.Contains(email))
         {

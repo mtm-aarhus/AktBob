@@ -10,8 +10,8 @@ internal static class RegisterModuleServices
         // Add Deskpro client
         var deskproOptions = new DeskproOptions
         {
-            BaseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Deskpro:BaseAddress")),
-            AuthorizationKey = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Deskpro:AuthorizationKey"))
+            BaseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("BaseAddress")),
+            AuthorizationKey = Guard.Against.NullOrEmpty(configuration.GetValue<string>("AuthorizationKey"))
         };
 
         services.AddDeskpro(deskproOptions);

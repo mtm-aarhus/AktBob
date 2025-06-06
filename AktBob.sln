@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		src\compose.yaml = src\compose.yaml
 		src\nuget.config = src\nuget.config
 		README.md = README.md
+		README-deployment.md = README-deployment.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Shared", "src\AktBob.Shared\AktBob.Shared.csproj", "{5B795FD1-81A1-4878-8802-1AF87DEBC4D7}"

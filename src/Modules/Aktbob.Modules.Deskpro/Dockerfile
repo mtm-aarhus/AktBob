@@ -1,10 +1,7 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
-ENV ASPNETCORE_URLS=http://+:80
-ENV HTTP_PORTS=""
-
 WORKDIR /app
-EXPOSE 80
+EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -28,7 +25,7 @@ FROM base AS final
 WORKDIR /app
 
 # Use build argument to copy the right configuration file
-ARG ENVIRONMENT=Production
+ARG ENVIRONMENT=production
 COPY --from=build /app/publish .
 
 # Copy the appsettings file based on the build argument
