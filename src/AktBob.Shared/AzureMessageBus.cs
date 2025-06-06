@@ -26,7 +26,11 @@ internal class AzureMessageBus(IConfiguration configuration) : IMessageBus
             await using var sender = client.CreateSender(queue);
 
             var payloadSerialized = payload is null ? string.Empty : JsonSerializer.Serialize(payload, _jsonSerializerOptions);
-            var message = new ServiceBusMessage(payloadSerialized);
+            var message = new ServiceBusMessage(payloadSerialized)
+            {
+                ContentType = "application/json"
+            };
+
             await sender.SendMessageAsync(message, cancellationToken);
 
             return Result.Success;
