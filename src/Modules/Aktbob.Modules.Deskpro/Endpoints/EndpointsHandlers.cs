@@ -14,7 +14,7 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Types.Deskpro;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Aktbob.Modules.Deskpro;
+namespace Aktbob.Modules.Deskpro.Endpoints;
 
 internal static class EndpointsHandlers
 {

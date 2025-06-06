@@ -1,5 +1,6 @@
 ﻿using AAK.Deskpro;
 using AktBob.Deskpro;
+using Aktbob.Modules.Deskpro.Extensions;
 using AktBob.Shared.Types.Deskpro;
 
 namespace Aktbob.Modules.Deskpro.Features.GetTicket;
@@ -20,8 +21,8 @@ internal class GetTicketHandler(IDeskproClient deskproClient) : IGetTicketHandle
         {
             Id = TicketId.Create(ticket.Id),
             CreatedAt = (DateTime)ticket.CreatedAt!,
-            Agent = Mappers.MapPerson(ticket.Agent),
-            Person = Mappers.MapPerson(ticket.Person),
+            Agent = ticket.Agent.ToDto(),
+            Person = ticket.Person.ToDto(),
             AgentTeamId = ticket.AgentTeamId,
             Auth = ticket.Auth,
             Department = ticket.Department,

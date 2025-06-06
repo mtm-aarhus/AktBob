@@ -1,4 +1,5 @@
 using Aktbob.Modules.Deskpro;
+using Aktbob.Modules.Deskpro.Endpoints;
 using AktBob.Shared;
 using AktBob.Shared.Middlewares;
 using Serilog;

@@ -1,4 +1,4 @@
-﻿namespace Aktbob.Modules.Deskpro;
+﻿namespace Aktbob.Modules.Deskpro.Endpoints;
 
 internal static class RegisterModuleEndpoints
 {

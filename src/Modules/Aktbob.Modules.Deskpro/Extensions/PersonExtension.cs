@@ -1,10 +1,9 @@
 ﻿using AAK.Deskpro.Models;
-using AktBob.Deskpro.Contracts.DTOs;
 
-namespace AktBob.Deskpro;
-internal static class Mappers
+namespace Aktbob.Modules.Deskpro.Extensions;
+internal static class PersonExtension
 {
-    public static PersonDto MapPerson(Person? person)
+    public static PersonDto ToDto(this Person? person)
     {
         if (person == null)
         {

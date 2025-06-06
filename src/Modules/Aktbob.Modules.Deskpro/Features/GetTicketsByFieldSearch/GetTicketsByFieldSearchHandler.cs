@@ -2,6 +2,7 @@
 using AAK.Deskpro;
 using AAK.Deskpro.Models;
 using AktBob.Deskpro;
+using Aktbob.Modules.Deskpro.Extensions;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Types.Deskpro;
 
@@ -29,8 +30,8 @@ internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTick
         {
             Id = TicketId.Create(t.Id),
             CreatedAt = (DateTime)t.CreatedAt!,
-            Agent = Mappers.MapPerson(t.Agent),
-            Person = Mappers.MapPerson(t.Person),
+            Agent = t.Agent.ToDto(),
+            Person = t.Person.ToDto(),
             AgentTeamId = t.AgentTeamId,
             Auth = t.Auth,
             Department = t.Department,
