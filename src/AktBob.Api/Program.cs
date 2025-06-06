@@ -18,8 +18,7 @@ builder.Services.AddFastEndpoints(options =>
     options.Assemblies = [
         typeof(Program).Assembly,
         typeof(AktBob.Database.ModuleServices).Assembly,
-        typeof(AktBob.Podio.ModuleServices).Assembly,
-        typeof(AktBob.GetOrganized.ModuleServices).Assembly]
+        typeof(AktBob.Podio.ModuleServices).Assembly]
     );
 
 builder.Services

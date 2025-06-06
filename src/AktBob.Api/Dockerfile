@@ -29,7 +29,7 @@ FROM base AS final
 WORKDIR /app
 
 # Use build argument to copy the right configuration file
-ARG ENVIRONMENT=Production
+ARG ENVIRONMENT=production
 COPY --from=build /app/publish .
 
 # Copy the appsettings file based on the build argument
