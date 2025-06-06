@@ -1,5 +1,23 @@
 services:
+  
+  api:
+    build:
+      dockerfile: AktBob.Api/Dockerfile
+      args:
+        ENVIRONMENT: "development"
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sql
 
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "mhYQ%I9l*aOqYwQzCXip"
+      
   # Modules
   deskpro-module:
     build:
@@ -11,27 +29,10 @@ services:
       - "5001:80"
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
-#      ASPNETCORE_URLS: "http://+:80"
-  
+      
+      
   # Processes
-
-#  api:
-#    build:
-#      dockerfile: AktBob.Api/Dockerfile
-#      args:
-#        ENVIRONMENT: "development"
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - sql
 #    
-#  sql:
-#    image: mcr.microsoft.com/mssql/server:2022-latest
-#    ports:
-#      - "1433:1433"
-#    environment:
-#      ACCEPT_EULA: "Y"
-#      MSSQL_SA_PASSWORD: "mhYQ%I9l*aOqYwQzCXip"
 #
 #  mailserver:
 #    image: jijiechen/papercut:latest

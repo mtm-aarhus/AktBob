@@ -5,14 +5,15 @@ using AktBob.Shared.Jobs;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Workflows.Extensions;
 using AktBob.Deskpro.Contracts;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes;
-internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseQueueItemJob>
+internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelse>
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly IConfiguration _configuration = configuration;
 
-    public async Task Handle(CreateAfgørelsesskrivelseQueueItemJob job, CancellationToken cancellationToken = default)
+    public async Task Handle(CreateAfgørelsesskrivelse job, CancellationToken cancellationToken = default)
     {
         Guard.Against.NegativeOrZero(job.TicketId);
 
@@ -25,9 +26,11 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
         var deskproAfdelingFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:AfdelingFieldId"));
         var deskproModtagelsesdatoFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:ModtagelsesdatoFieldId"));
         var deskproLovgivningFieldId = Guard.Against.Null(_configuration.GetValue<int>("CreateAfgørelsesskrivelseQueueItemJobHandler:LovgivningFieldId"));
-
+    
+        var ticketId = TicketId.Create(job.TicketId);
+        
         // Get data from Deskpro
-        var deskproTicketResult = await deskpro.GetTicket(job.TicketId, cancellationToken);
+        var deskproTicketResult = await deskpro.GetTicket(ticketId, cancellationToken);
         if (deskproTicketResult.IsError || deskproTicketResult.Value is null) throw new BusinessException("Unable to get ticket from Deskpro");
 
         // Deskpro ticket fields
@@ -51,7 +54,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             : Task.FromResult(Error.NotFound().ToErrorOr<TeamDto>());
 
         // Database ticket
-        var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(job.TicketId);
+        var getDatabaseTicket = unitOfWork.Tickets.GetByDeskproTicketId(ticketId);
 
         await Task.WhenAll([
             getPerson,
@@ -70,7 +73,7 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             Afdeling = getTeam.Result.Value?.Name,
             Aktindsigtsovermappe = getDatabaseTicket.Result?.SharepointFolderName,
             SagsbehandlerEmail = getAgent.Result.Value?.Email,
-            DeskProID = job.TicketId.Value,
+            DeskProID = ticketId.Value,
             AktindsigtsDato = modtagelsesdato,
             Lovgivning = lovgivning
         };

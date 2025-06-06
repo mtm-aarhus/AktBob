@@ -1,4 +1,5 @@
 using AktBob.Api;
+using AktBob.Api.Endpoints.CreateAfgørelsesskrivelse;
 using AktBob.Shared;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -94,6 +95,8 @@ app.UseFastEndpoints(c =>
         ep.Description(b => b.ClearDefaultProduces());
     };
 });
+
+app.MapCreateAfgørelsesskrivelseEndpoint();
 
 app.UseSwaggerGen();
 app.Run();

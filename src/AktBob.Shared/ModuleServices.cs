@@ -9,7 +9,8 @@ public static class ModuleServices
         services.AddSingleton<ITimeProvider, TimeProvider>();
         services.AddMemoryCache();
         services.AddSingleton<ICacheService, CacheService>();
-
+        services.AddScoped<IMessageBus, AzureMessageBus>();
+        
         return services;
     }
 }
