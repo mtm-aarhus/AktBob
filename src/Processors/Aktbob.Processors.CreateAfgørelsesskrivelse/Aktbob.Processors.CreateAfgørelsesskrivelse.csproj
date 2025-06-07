@@ -15,7 +15,10 @@
         <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.2"/>
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\..\AktBob.Database\AktBob.Database.csproj" />
       <ProjectReference Include="..\..\AktBob.Shared.Jobs\AktBob.Shared.Jobs.csproj" />
       <ProjectReference Include="..\..\AktBob.Shared\AktBob.Shared.csproj" />
+      <ProjectReference Include="..\..\Modules\Aktbob.Modules.Deskpro\Aktbob.Modules.Deskpro.csproj" />
+      <ProjectReference Include="..\..\Modules\Aktbob.Modules.OpenOrchestrator\Aktbob.Modules.OpenOrchestrator.csproj" />
     </ItemGroup>
 </Project>
