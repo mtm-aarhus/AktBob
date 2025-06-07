@@ -27,7 +27,7 @@ public static class ModuleServices
 
         // Other workflows
         services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
-        services.AddScoped<IJobHandler<CreateAfgørelsesskrivelse>, CreateAfgørelsesskrivelseQueueItem>();
+        services.AddScoped<IJobHandler<CreateAfgørelsesskrivelseJob>, CreateAfgørelsesskrivelseQueueItem>();
         services.AddScoped<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItem>();
         services.AddScoped<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCase>();
         services.AddScoped<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateToFilArkivQueueItem>();

@@ -8,12 +8,12 @@ using AktBob.Deskpro.Contracts;
 using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes;
-internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelse>
+internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration) : IJobHandler<CreateAfgørelsesskrivelseJob>
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly IConfiguration _configuration = configuration;
 
-    public async Task Handle(CreateAfgørelsesskrivelse job, CancellationToken cancellationToken = default)
+    public async Task Handle(CreateAfgørelsesskrivelseJob job, CancellationToken cancellationToken = default)
     {
         Guard.Against.NegativeOrZero(job.TicketId);
 
