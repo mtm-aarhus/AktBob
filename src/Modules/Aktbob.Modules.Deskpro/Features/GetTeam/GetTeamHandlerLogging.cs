@@ -1,4 +1,5 @@
-﻿using AktBob.Shared.Extensions;
+﻿using Aktbob.Modules.Deskpro.Contracts.DTOs;
+using AktBob.Shared.Extensions;
 
 namespace Aktbob.Modules.Deskpro.Features.GetTeam;
 internal class GetTeamHandlerLogging(IGetTeamHandler inner, ILogger<GetTeamHandler> logger) : IGetTeamHandler

@@ -1,4 +1,5 @@
-﻿using AktBob.Shared;
+﻿using Aktbob.Modules.Deskpro.Contracts.DTOs;
+using AktBob.Shared;
 using AktBob.Shared.Types.Deskpro;
 
 namespace Aktbob.Modules.Deskpro.Features.GetMessage;

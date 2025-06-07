@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Aktbob.Modules.Deskpro.Contracts.DTOs;
 
 namespace Aktbob.Modules.Deskpro.Features.GetTicketsByFieldSearch;
 internal class GetTicketsByFieldSearchHandlerException(IGetTicketsByFieldSearchHandler inner, ILogger<GetTicketsByFieldSearchHandler> logger) : IGetTicketsByFieldSearchHandler

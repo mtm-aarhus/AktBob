@@ -2,6 +2,7 @@
 using AAK.Deskpro;
 using AAK.Deskpro.Models;
 using AktBob.Deskpro;
+using Aktbob.Modules.Deskpro.Contracts.DTOs;
 using Aktbob.Modules.Deskpro.Extensions;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Types.Deskpro;

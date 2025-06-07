@@ -1,4 +1,4 @@
-﻿namespace AktBob.Deskpro.Contracts.DTOs;
+﻿namespace Aktbob.Modules.Deskpro.Contracts.DTOs;
 public class FieldDto
 {
     public int Id { get; init; }

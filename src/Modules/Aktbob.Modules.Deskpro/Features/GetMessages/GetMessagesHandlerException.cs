@@ -1,4 +1,6 @@
-﻿namespace Aktbob.Modules.Deskpro.Features.GetMessages;
+﻿using Aktbob.Modules.Deskpro.Contracts.DTOs;
+
+namespace Aktbob.Modules.Deskpro.Features.GetMessages;
 internal class GetMessagesHandlerException(IGetMessagesHandler inner, ILogger<GetMessagesHandler> logger) : IGetMessagesHandler
 {
     private readonly IGetMessagesHandler _inner = inner;

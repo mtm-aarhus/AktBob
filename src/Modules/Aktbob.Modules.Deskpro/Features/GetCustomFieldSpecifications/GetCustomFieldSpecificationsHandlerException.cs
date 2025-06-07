@@ -1,4 +1,6 @@
-﻿namespace Aktbob.Modules.Deskpro.Features.GetCustomFieldSpecifications;
+﻿using Aktbob.Modules.Deskpro.Contracts.DTOs;
+
+namespace Aktbob.Modules.Deskpro.Features.GetCustomFieldSpecifications;
 internal class GetCustomFieldSpecificationsHandlerException(
     IGetCustomFieldSpecificationsHandler inner,
     ILogger<GetCustomFieldSpecificationsHandler> logger)

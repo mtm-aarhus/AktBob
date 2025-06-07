@@ -1,4 +1,6 @@
-﻿namespace Aktbob.Modules.Deskpro.Features.GetTeam;
+﻿using Aktbob.Modules.Deskpro.Contracts.DTOs;
+
+namespace Aktbob.Modules.Deskpro.Features.GetTeam;
 internal class GetTeamHandlerException(IGetTeamHandler inner, ILogger<GetTeamHandler> logger) : IGetTeamHandler
 {
     private readonly IGetTeamHandler _inner = inner;

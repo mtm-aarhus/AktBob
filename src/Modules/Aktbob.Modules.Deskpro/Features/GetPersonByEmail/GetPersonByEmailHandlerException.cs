@@ -1,4 +1,6 @@
-﻿namespace Aktbob.Modules.Deskpro.Features.GetPersonByEmail;
+﻿using Aktbob.Modules.Deskpro.Contracts.DTOs;
+
+namespace Aktbob.Modules.Deskpro.Features.GetPersonByEmail;
 internal class GetPersonByEmailHandlerException(IGetPersonByEmailHandler inner, ILogger<GetPersonByEmailHandler> logger) : IGetPersonByEmailHandler
 {
     private readonly IGetPersonByEmailHandler _inner = inner;

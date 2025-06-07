@@ -1,2 +1,2 @@
-﻿namespace AktBob.Deskpro.Contracts.DTOs;
+﻿namespace Aktbob.Modules.Deskpro.Contracts.DTOs;
 public record CustomFieldSpecificationDto(int Id, string Title, IReadOnlyDictionary<int, string> Choices);

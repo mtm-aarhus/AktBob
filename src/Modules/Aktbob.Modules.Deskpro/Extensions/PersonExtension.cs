@@ -1,4 +1,5 @@
 ﻿using AAK.Deskpro.Models;
+using Aktbob.Modules.Deskpro.Contracts.DTOs;
 
 namespace Aktbob.Modules.Deskpro.Extensions;
 internal static class PersonExtension

@@ -1,4 +1,5 @@
-﻿using AktBob.Shared;
+﻿using Aktbob.Modules.Deskpro.Contracts.DTOs;
+using AktBob.Shared;
 
 namespace Aktbob.Modules.Deskpro.Features.GetTeam;
 internal class GetTeamHandlerCaching(IGetTeamHandler inner, ICacheService cache) : IGetTeamHandler

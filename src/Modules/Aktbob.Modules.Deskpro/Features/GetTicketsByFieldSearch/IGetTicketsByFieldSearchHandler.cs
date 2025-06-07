@@ -1,4 +1,6 @@
-﻿namespace Aktbob.Modules.Deskpro.Features.GetTicketsByFieldSearch;
+﻿using Aktbob.Modules.Deskpro.Contracts.DTOs;
+
+namespace Aktbob.Modules.Deskpro.Features.GetTicketsByFieldSearch;
 internal interface IGetTicketsByFieldSearchHandler
 {
     Task<ErrorOr<IReadOnlyCollection<TicketDto>>> Handle(int[] fields, string searchValue, CancellationToken cancellationToken);

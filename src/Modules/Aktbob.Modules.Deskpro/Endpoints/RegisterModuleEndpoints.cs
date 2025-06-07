@@ -7,8 +7,9 @@ internal static class RegisterModuleEndpoints
         endpoints.MapGet("/download-message-attachment", EndpointsHandlers.DownloadMessageAttachment);
         endpoints.MapGet("/custom-field-specifications", EndpointsHandlers.GetCustomFieldSpecifications);
         
+        endpoints.MapGet("/search/tickets", EndpointsHandlers.SearchTicketsByFields);
+        
         endpoints.MapGet("/tickets/{id:int}", EndpointsHandlers.GetTicket);
-        endpoints.MapGet("/tickets", EndpointsHandlers.SearchTicketsByFields);
         endpoints.MapGet("/tickets/{ticketId:int}/messages", EndpointsHandlers.GetMessages);
         endpoints.MapGet("/tickets/{ticketId:int}/messages/{messageId:int}", EndpointsHandlers.GetMessage);
         endpoints.MapGet("/tickets/{ticketId:int}/messages/{messageId:int}/attachments", EndpointsHandlers.GetMessageAttachments);

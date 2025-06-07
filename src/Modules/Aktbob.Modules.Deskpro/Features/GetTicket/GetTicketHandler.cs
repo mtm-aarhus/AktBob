@@ -1,5 +1,6 @@
 ﻿using AAK.Deskpro;
 using AktBob.Deskpro;
+using Aktbob.Modules.Deskpro.Contracts.DTOs;
 using Aktbob.Modules.Deskpro.Extensions;
 using AktBob.Shared.Types.Deskpro;
 

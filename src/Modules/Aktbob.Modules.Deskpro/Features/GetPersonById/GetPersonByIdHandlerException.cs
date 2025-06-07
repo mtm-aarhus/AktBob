@@ -1,4 +1,6 @@
-﻿namespace Aktbob.Modules.Deskpro.Features.GetPersonById;
+﻿using Aktbob.Modules.Deskpro.Contracts.DTOs;
+
+namespace Aktbob.Modules.Deskpro.Features.GetPersonById;
 internal class GetPersonByIdHandlerException(IGetPersonByIdHandler inner, ILogger<GetPersonByIdHandler> logger) : IGetPersonByIdHandler
 {
     private readonly IGetPersonByIdHandler _inner = inner;

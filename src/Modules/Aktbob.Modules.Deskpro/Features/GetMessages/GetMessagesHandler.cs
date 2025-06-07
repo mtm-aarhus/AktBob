@@ -1,4 +1,5 @@
 ﻿using AAK.Deskpro;
+using Aktbob.Modules.Deskpro.Contracts.DTOs;
 using Aktbob.Modules.Deskpro.Features.GetPersonById;
 using AktBob.Shared.Types.Deskpro;
 

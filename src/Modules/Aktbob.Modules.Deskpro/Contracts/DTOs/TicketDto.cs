@@ -1,6 +1,6 @@
 ﻿using AktBob.Shared.Types.Deskpro;
 
-namespace AktBob.Deskpro.Contracts.DTOs;
+namespace Aktbob.Modules.Deskpro.Contracts.DTOs;
 public class TicketDto
 {
     public TicketId Id { get; set; }

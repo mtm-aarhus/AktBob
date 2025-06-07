@@ -1,4 +1,5 @@
 ﻿using AAK.Deskpro;
+using Aktbob.Modules.Deskpro.Contracts.DTOs;
 using AktBob.Shared;
 
 namespace Aktbob.Modules.Deskpro.Features.GetPersonByEmail;

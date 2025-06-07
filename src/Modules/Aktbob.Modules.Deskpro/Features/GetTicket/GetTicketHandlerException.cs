@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Aktbob.Modules.Deskpro.Contracts.DTOs;
 
 namespace Aktbob.Modules.Deskpro.Features.GetTicket;
 internal class GetTicketHandlerException(IGetTicketHandler inner, ILogger<GetTicketHandler> logger) : IGetTicketHandler

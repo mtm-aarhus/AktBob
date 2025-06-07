@@ -1,4 +1,5 @@
-﻿using AktBob.Shared.Extensions;
+﻿using Aktbob.Modules.Deskpro.Contracts.DTOs;
+using AktBob.Shared.Extensions;
 
 namespace Aktbob.Modules.Deskpro.Features.GetTicket;
 internal class GetTicketHandlerLogging(IGetTicketHandler inner, ILogger<GetTicketHandler> logger) : IGetTicketHandler
