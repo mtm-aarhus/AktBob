@@ -1,4 +1,5 @@
 using AktBob.Api;
+using AktBob.Api.Endpoints.CreateAfgørelsesskrivelse;
 using AktBob.Shared;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -18,8 +19,7 @@ builder.Services.AddFastEndpoints(options =>
     options.Assemblies = [
         typeof(Program).Assembly,
         typeof(AktBob.Database.ModuleServices).Assembly,
-        typeof(AktBob.Podio.ModuleServices).Assembly,
-        typeof(AktBob.GetOrganized.ModuleServices).Assembly]
+        typeof(AktBob.Podio.ModuleServices).Assembly]
     );
 
 builder.Services
@@ -95,6 +95,8 @@ app.UseFastEndpoints(c =>
         ep.Description(b => b.ClearDefaultProduces());
     };
 });
+
+app.MapCreateAfgørelsesskrivelseEndpoint();
 
 app.UseSwaggerGen();
 app.Run();

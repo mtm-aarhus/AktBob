@@ -1,0 +1,49 @@
+@Module_Deskpro_HostAddress = http://localhost:5001
+
+GET {{Module_Deskpro_HostAddress}}/download-message-attachment?url=http://host.docker.internal:3007/test
+
+###
+
+GET {{Module_Deskpro_HostAddress}}/custom-field-specifications
+
+###
+
+GET {{Module_Deskpro_HostAddress}}/tickets/1
+
+###
+
+GET {{Module_Deskpro_HostAddress}}/tickets?fields=1,2,3&searchValue=something
+
+###
+
+GET {{Module_Deskpro_HostAddress}}/tickets/1/messages
+
+###
+
+GET {{Module_Deskpro_HostAddress}}/tickets/1/messages/1
+
+###
+
+GET {{Module_Deskpro_HostAddress}}/tickets/1/messages/1/attachments
+
+###
+
+GET {{Module_Deskpro_HostAddress}}/persons?email=somebody@somewhere.com
+
+###
+
+GET {{Module_Deskpro_HostAddress}}/persons/1
+
+###
+
+GET {{Module_Deskpro_HostAddress}}/teams/1
+
+###
+
+POST {{Module_Deskpro_HostAddress}}/webhook/ABCDEF1234
+Content-Type: application/json
+
+{
+    "id": 1234,
+    "title": "some value"
+}
