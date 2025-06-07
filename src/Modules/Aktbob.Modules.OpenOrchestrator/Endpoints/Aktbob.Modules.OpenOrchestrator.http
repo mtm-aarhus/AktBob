@@ -1,0 +1,15 @@
+@HostAddress = http://localhost:5002
+
+POST {{HostAddress}}/queue-item/
+Content-Type: application/json
+
+{
+  "queueName": "abc",
+  "reference": "item123",
+  "payload": {
+    "id": 123,
+    "title": "some value"
+  }
+}
+
+###
