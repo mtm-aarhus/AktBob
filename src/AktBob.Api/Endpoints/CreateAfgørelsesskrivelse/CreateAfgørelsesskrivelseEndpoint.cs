@@ -18,7 +18,7 @@ internal static class CreateAfgørelsesskrivelseEndpoint
         {
             var queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Queues:CreateAfgørelsesskrivelse"));
             var ticketId = TicketId.Create(request.DeskproId);
-            var job = new Shared.Jobs.CreateAfgørelsesskrivelse(ticketId);
+            var job = new Shared.Jobs.CreateAfgørelsesskrivelseJob(ticketId);
             var result = await messageBus.SendMessage(queueName, job, cancellationToken);
             return result.ToMinimalApiResponse();
         });
