@@ -98,9 +98,9 @@ public class CreateAfgørelsesskrivelse(
         // Create OpenOrchestrator queue item
         var payload = new
         {
-            AnsøgerNavn = ansøger?.FullName ?? string.Empty,
-            AnsøgerEmail = ansøger?.Email ?? string.Empty,
-            Afdeling = team?.Name ?? string.Empty,
+            AnsøgerNavn = ansøger?.FullName,
+            AnsøgerEmail = ansøger?.Email,
+            Afdeling = team?.Name,
             Aktindsigtsovermappe = getDatabaseTicket.Result?.SharepointFolderName,
             SagsbehandlerEmail = agent?.Email,
             DeskProID = ticketId.Value,
