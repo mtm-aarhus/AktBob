@@ -101,7 +101,8 @@ internal class CreateDocumentListQueueItem(
             AktSagsURL = getDatabaseTicket.Result.CaseUrl
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson());
+        var serializerOptions = SerializerConfiguration.SerializerOptions(caseInsensitive: false, jsonNamingPolicy: null);
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId}", payload.ToJson(serializerOptions));
         openOrchestrator.CreateQueueItem(command);
     }
 }

@@ -1,11 +1,12 @@
 ﻿using System.Text.Json;
 using AktBob.Database.Contracts;
-using Aktbob.Modules.Deskpro;
-using Aktbob.Modules.Deskpro.Contracts.DTOs;
-using Aktbob.Modules.OpenOrchestrator;
+using AktBob.Shared;
+using AktBob.Shared.Contracts.Modules.Deskpro;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
+using AktBob.Shared.Contracts.Modules.OpenOrchestrator;
 using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.Jobs;
+using AktBob.Shared.ModuleClients;
 using AktBob.Shared.Types.Deskpro;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
@@ -16,17 +17,19 @@ using Microsoft.Extensions.Configuration;
 
 namespace Aktbob.Processors.CreateAfgørelsesskrivelse;
 
-public class CreateAfgoerelsesskrivelse(ILogger<CreateAfgoerelsesskrivelse> logger)
+public class CreateAfgørelsesskrivelse(
+    ILogger<CreateAfgørelsesskrivelse> logger,
+    IConfiguration configuration,
+    DeskproModuleClient deskpro,
+    OpenOrchestratorModuleClient openOrchestrator,
+    ITicketRepository ticketRepository)
 {
-    [Function(nameof(CreateAfgoerelsesskrivelse))]
+    
+    [Function("CreateAfgoerelsesskrivelse")]
     public async Task Run(
         [ServiceBusTrigger("%QueueName%", Connection = "AzureServiceBus")]
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions,
-        IConfiguration configuration,
-        DeskproModuleClient deskpro,
-        OpenOrchestratorModuleClient openOrchestrator,
-        ITicketRepository ticketRepository,
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Message ID: {id}", message.MessageId);
@@ -34,7 +37,7 @@ public class CreateAfgoerelsesskrivelse(ILogger<CreateAfgoerelsesskrivelse> logg
         logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
         
         // Deserialize message body to expected job type
-        var job = JsonSerializer.Deserialize<CreateAfgørelsesskrivelseJob>(message.Body);
+        var job = JsonSerializer.Deserialize<CreateAfgørelsesskrivelseJob>(message.Body, SerializerConfiguration.SerializerOptions());
         if (job is null) throw new BusinessException($"Message {message.MessageId} error: Body could not be deserialized to type {nameof(CreateAfgørelsesskrivelseJob)}. Body content = {message.Body}");
         
         // Complete the message

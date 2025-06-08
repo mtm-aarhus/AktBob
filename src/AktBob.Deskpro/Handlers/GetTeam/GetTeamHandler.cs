@@ -1,4 +1,5 @@
 ﻿using AAK.Deskpro;
+using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Deskpro.Handlers.GetTeam;
 internal class GetTeamHandler : IGetTeamHandler

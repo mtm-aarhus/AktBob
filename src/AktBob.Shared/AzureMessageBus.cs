@@ -11,12 +11,6 @@ internal class AzureMessageBus(IConfiguration configuration) : IMessageBus
 {
     private readonly string _connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureServiceBus"));
     private readonly ServiceBusClientOptions _options = new() { TransportType = ServiceBusTransportType.AmqpWebSockets };
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    };
     
     public async Task<ErrorOr<Success>> SendMessage(string queue, object? payload, CancellationToken cancellationToken = default)
     {
@@ -25,7 +19,7 @@ internal class AzureMessageBus(IConfiguration configuration) : IMessageBus
             await using var client = new ServiceBusClient(_connectionString, _options);
             await using var sender = client.CreateSender(queue);
 
-            var payloadSerialized = payload is null ? string.Empty : JsonSerializer.Serialize(payload, _jsonSerializerOptions);
+            var payloadSerialized = payload is null ? string.Empty : JsonSerializer.Serialize(payload, SerializerConfiguration.SerializerOptions());
             var message = new ServiceBusMessage(payloadSerialized)
             {
                 ContentType = "application/json"

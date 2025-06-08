@@ -81,7 +81,8 @@ internal static class EndpointsHandlers
 
     public static async Task<IResult> GetTicket([FromRoute] int id, [FromServices] IGetTicketHandler handler, CancellationToken cancellationToken)
     {
-        var result = await handler.Handle(id, cancellationToken);
+        var ticketId = TicketId.Create(id);
+        var result = await handler.Handle(ticketId, cancellationToken);
         return result.ToMinimalApiResponse(values => values);
     }
 

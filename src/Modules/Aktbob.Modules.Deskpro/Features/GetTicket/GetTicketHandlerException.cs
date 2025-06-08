@@ -1,5 +1,6 @@
 ﻿using System.Net;
-using Aktbob.Modules.Deskpro.Contracts.DTOs;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
+using AktBob.Shared.Types.Deskpro;
 
 namespace Aktbob.Modules.Deskpro.Features.GetTicket;
 internal class GetTicketHandlerException(IGetTicketHandler inner, ILogger<GetTicketHandler> logger) : IGetTicketHandler
@@ -7,7 +8,7 @@ internal class GetTicketHandlerException(IGetTicketHandler inner, ILogger<GetTic
     private readonly IGetTicketHandler _inner = inner;
     private readonly ILogger<GetTicketHandler> _logger = logger;
 
-    public async Task<ErrorOr<TicketDto>> Handle(int ticketId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<TicketDto>> Handle(TicketId ticketId, CancellationToken cancellationToken)
     {
         try
         {

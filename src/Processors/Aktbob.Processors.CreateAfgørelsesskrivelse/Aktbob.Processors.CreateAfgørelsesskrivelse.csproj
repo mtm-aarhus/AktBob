@@ -5,6 +5,7 @@
         <OutputType>Exe</OutputType>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
@@ -16,9 +17,11 @@
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\..\AktBob.Database\AktBob.Database.csproj" />
-      <ProjectReference Include="..\..\AktBob.Shared.Jobs\AktBob.Shared.Jobs.csproj" />
       <ProjectReference Include="..\..\AktBob.Shared\AktBob.Shared.csproj" />
-      <ProjectReference Include="..\..\Modules\Aktbob.Modules.Deskpro\Aktbob.Modules.Deskpro.csproj" />
-      <ProjectReference Include="..\..\Modules\Aktbob.Modules.OpenOrchestrator\Aktbob.Modules.OpenOrchestrator.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="..\..\..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 </Project>

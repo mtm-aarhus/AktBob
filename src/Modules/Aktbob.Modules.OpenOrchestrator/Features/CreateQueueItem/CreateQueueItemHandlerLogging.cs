@@ -1,15 +1,16 @@
 ﻿using System.Text.Json;
+using AktBob.Shared.Contracts.Modules.OpenOrchestrator;
 using AktBob.Shared.Extensions;
 using ErrorOr;
 
-namespace Aktbob.Modules.OpenOrchestrator.Features.AddQueueItem;
+namespace Aktbob.Modules.OpenOrchestrator.Features.CreateQueueItem;
 
-internal class AddQueueItemHandlerLogging(IAddQueueItemHandler next, ILogger<AddQueueItemHandler> logger) : IAddQueueItemHandler
+internal class CreateQueueItemHandlerLogging(ICreateQueueItemHandler next, ILogger<CreateQueueItemHandler> logger) : ICreateQueueItemHandler
 {
-    private readonly IAddQueueItemHandler _next = next;
-    private readonly ILogger<AddQueueItemHandler> _logger = logger;
+    private readonly ICreateQueueItemHandler _next = next;
+    private readonly ILogger<CreateQueueItemHandler> _logger = logger;
 
-    public async Task<ErrorOr<Guid>> Handle(string queueName, string reference, JsonDocument? payload, CancellationToken cancellationToken)
+    public async Task<ErrorOr<CreateQueueItemResponse>> Handle(string queueName, string reference, JsonDocument? payload, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Adding queue item. Queue = {queueName}, Reference = {reference}", queueName, reference);
         

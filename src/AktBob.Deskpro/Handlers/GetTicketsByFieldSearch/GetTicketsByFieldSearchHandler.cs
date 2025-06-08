@@ -3,6 +3,7 @@ using AAK.Deskpro.Models;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Types.Deskpro;
 using System.Collections.ObjectModel;
+using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Deskpro.Handlers.GetTicketsByFieldSearch;
 internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTicketsByFieldSearchHandler

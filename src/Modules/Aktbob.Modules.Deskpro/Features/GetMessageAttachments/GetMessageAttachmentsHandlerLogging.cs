@@ -1,4 +1,4 @@
-﻿using Aktbob.Modules.Deskpro.Contracts.DTOs;
+﻿using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Types.Deskpro;
 

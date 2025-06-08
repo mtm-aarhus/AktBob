@@ -1,4 +1,6 @@
-﻿namespace AktBob.Deskpro.Handlers.GetTicket;
+﻿using AktBob.Deskpro.Contracts.DTOs;
+
+namespace AktBob.Deskpro.Handlers.GetTicket;
 internal class GetTicketHandlerLogging : IGetTicketHandler
 {
     private readonly IGetTicketHandler _inner;

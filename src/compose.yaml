@@ -19,7 +19,7 @@ services:
       MSSQL_SA_PASSWORD: "mhYQ%I9l*aOqYwQzCXip"
       
   # Modules
-  deskpro-module:
+  module-deskpro:
     build:
       dockerfile: Modules/Aktbob.Modules.Deskpro/Dockerfile
       args:
@@ -31,7 +31,7 @@ services:
       ASPNETCORE_ENVIRONMENT: "Development"
       
   
-  open-orchestrator-module:
+  module-open-orchestrator:
     build:
       dockerfile: Modules/Aktbob.Modules.OpenOrchestrator/Dockerfile
       args:
@@ -43,8 +43,21 @@ services:
       ASPNETCORE_ENVIRONMENT: "Development"
       
       
-  # Processes
-#    
+  # Processors
+  processor-create-afgoerelsesskrivelse:
+    build:
+      dockerfile: Processors/Aktbob.Processors.CreateAfgørelsesskrivelse/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+      AzureWebJobsStorage: "UseDevelopmentStorage=true"
+    env_file:
+      - Processors/Aktbob.Processors.CreateAfgørelsesskrivelse/development.env
+    depends_on:
+      - module-deskpro
+      - module-open-orchestrator
+      - sql
+##    
 #
 #  mailserver:
 #    image: jijiechen/papercut:latest

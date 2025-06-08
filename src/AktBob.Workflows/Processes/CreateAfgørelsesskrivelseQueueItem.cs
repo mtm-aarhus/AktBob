@@ -78,7 +78,8 @@ internal class CreateAfgørelsesskrivelseQueueItem(IServiceScopeFactory serviceS
             Lovgivning = lovgivning
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"DeskproID {job.TicketId.ToString()}", payload.ToJson());
+        var serializerOptions = SerializerConfiguration.SerializerOptions(caseInsensitive: false, jsonNamingPolicy: null);
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"DeskproID {job.TicketId.ToString()}", payload.ToJson(serializerOptions));
         openOrchestrator.CreateQueueItem(command);
     }
 

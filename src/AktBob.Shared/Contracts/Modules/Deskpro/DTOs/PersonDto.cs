@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace Aktbob.Modules.Deskpro.Contracts.DTOs;
+namespace AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 public record PersonDto
 {
     public int Id { get; set; }

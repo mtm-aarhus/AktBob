@@ -2,20 +2,23 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Aktbob.Modules.OpenOrchestrator.Client.DTOs;
+using AktBob.Shared;
+using AktBob.Shared.Contracts.Modules.OpenOrchestrator;
 
 namespace Aktbob.Modules.OpenOrchestrator.Client;
 
 internal class OpenOrchestratorClient(HttpClient httpClient)
 {
     private readonly HttpClient _httpClient = httpClient;
+
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        WriteIndented = false,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        PropertyNameCaseInsensitive = false
     };
-
-    public async Task<PostQueueItemResponse?> PostQueueItem(string queueName, string? reference, JsonDocument? payload, CancellationToken cancellationToken = default)
+    
+    public async Task<CreateQueueItemResponse?> PostQueueItem(string queueName, string? reference, JsonDocument? payload, CancellationToken cancellationToken = default)
     {
         var body = new QueueItem
         {
@@ -23,7 +26,7 @@ internal class OpenOrchestratorClient(HttpClient httpClient)
             Data = payload,
             Reference = reference ?? string.Empty
         };
-        
+
         var json = JsonSerializer.Serialize(body, _jsonSerializerOptions);
 
         var request = new HttpRequestMessage
@@ -37,7 +40,7 @@ internal class OpenOrchestratorClient(HttpClient httpClient)
         response.EnsureSuccessStatusCode();
         
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
-        var result = JsonSerializer.Deserialize<PostQueueItemResponse>(content, _jsonSerializerOptions);
+        var result = JsonSerializer.Deserialize<CreateQueueItemResponse>(content, SerializerConfiguration.SerializerOptions());
         return result;
     }
 }

@@ -12,6 +12,7 @@ using AktBob.Deskpro.Jobs;
 using AktBob.Shared;
 using AktBob.Shared.Types.Deskpro;
 using System.Text;
+using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Deskpro;
 internal class DeskproModule(

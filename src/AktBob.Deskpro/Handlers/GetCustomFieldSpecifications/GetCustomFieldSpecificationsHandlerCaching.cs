@@ -1,4 +1,5 @@
-﻿using AktBob.Shared;
+﻿using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.Shared;
 
 namespace AktBob.Deskpro.Handlers.GetCustomFieldSpecifications;
 internal class GetCustomFieldSpecificationsHandlerCaching : IGetCustomFieldSpecificationsHandler

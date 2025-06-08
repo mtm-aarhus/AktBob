@@ -25,8 +25,9 @@ internal class CreateCloseNovaCaseQueueItem : IJobHandler<CreateCloseNovaCaseQue
         {
             DeskProID = job.TicketId.Value
         };
-
-        var command = new CreateQueueItemCommand(queueName, $"Deskpro {job.TicketId.ToString()}", payload.ToJson());
+        
+        var serializerOptions = SerializerConfiguration.SerializerOptions(caseInsensitive: false, jsonNamingPolicy: null);
+        var command = new CreateQueueItemCommand(queueName, $"Deskpro {job.TicketId.ToString()}", payload.ToJson(serializerOptions));
         openOrchestrator.CreateQueueItem(command);
 
         return Task.CompletedTask;

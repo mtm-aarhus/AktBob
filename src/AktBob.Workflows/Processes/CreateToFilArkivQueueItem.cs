@@ -89,7 +89,8 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
             AktindsigtsDato = deskproTicketResult.Value.CreatedAt
         };
 
-        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId.ToString()}", payload.ToJson());
+        var serializerOptions = SerializerConfiguration.SerializerOptions(caseInsensitive: false, jsonNamingPolicy: null);
+        var command = new CreateQueueItemCommand(openOrchestratorQueueName, $"Podio {job.PodioItemId.ToString()}", payload.ToJson(serializerOptions));
         openOrchestrator.CreateQueueItem(command);
     }
 }

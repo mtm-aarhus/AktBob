@@ -1,4 +1,5 @@
-﻿using AktBob.Shared.Types.Deskpro;
+﻿using AktBob.Deskpro.Contracts.DTOs;
+using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Deskpro.Contracts;
 public interface IDeskproModule

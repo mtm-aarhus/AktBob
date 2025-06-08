@@ -1,5 +1,6 @@
 ﻿using AAK.Deskpro;
 using AktBob.Deskpro.Contracts;
+using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Deskpro.Handlers.GetMessages;

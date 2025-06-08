@@ -1,5 +1,5 @@
 ﻿using AAK.Deskpro;
-using Aktbob.Modules.Deskpro.Contracts.DTOs;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 
 namespace Aktbob.Modules.Deskpro.Features.GetPersonById;
 internal class GetPersonByIdHandler(IDeskproClient deskpro) : IGetPersonByIdHandler

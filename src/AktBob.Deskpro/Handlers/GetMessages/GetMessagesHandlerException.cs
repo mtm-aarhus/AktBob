@@ -1,4 +1,6 @@
-﻿namespace AktBob.Deskpro.Handlers.GetMessages;
+﻿using AktBob.Deskpro.Contracts.DTOs;
+
+namespace AktBob.Deskpro.Handlers.GetMessages;
 internal class GetMessagesHandlerException : IGetMessagesHandler
 {
     private readonly IGetMessagesHandler _inner;

@@ -1,4 +1,6 @@
-﻿namespace AktBob.Deskpro.Handlers.GetCustomFieldSpecifications;
+﻿using AktBob.Deskpro.Contracts.DTOs;
+
+namespace AktBob.Deskpro.Handlers.GetCustomFieldSpecifications;
 internal class GetCustomFieldSpecificationsHandlerException : IGetCustomFieldSpecificationsHandler
 {
     private readonly IGetCustomFieldSpecificationsHandler _inner;

@@ -1,38 +1,15 @@
 ﻿using System.Net;
-using System.Text.Encodings.Web;
+using System.Net.Http.Json;
 using System.Text.Json;
-using Aktbob.Modules.Deskpro.Contracts.DTOs;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using AktBob.Shared.Types.Deskpro;
-using Ardalis.GuardClauses;
+using ErrorOr;
 
-namespace Aktbob.Modules.Deskpro;
-
-public static class RegisterModuleClient
-{
-    public static IServiceCollection AddDeskproModuleClient(this IServiceCollection services, IConfiguration configuration)
-    {
-        var baseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Modules:Deskpro"));
-        
-        services.AddScoped<DeskproModuleClient>();
-        services.AddHttpClient<DeskproModuleClient>(client =>
-        {
-            client.BaseAddress = new Uri(baseAddress);
-        });
-        
-        return services;
-    }
-}
+namespace AktBob.Shared.ModuleClients;
 
 public class DeskproModuleClient(HttpClient httpClient)
 {
     private readonly HttpClient _httpClient = httpClient;
-    private readonly JsonSerializerOptions _jsonSerializerOptions =new JsonSerializerOptions
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    };
-
     public async Task<ErrorOr<Stream>> DownloadMessageAttachment(string downloadUrl, CancellationToken cancellationToken = default)
     {
         try
@@ -221,7 +198,7 @@ public class DeskproModuleClient(HttpClient httpClient)
         try
         {
             var url = new Uri($"webhook/{webhookId}", UriKind.Relative);
-            await _httpClient.PostAsJsonAsync(url, payload, _jsonSerializerOptions, cancellationToken);
+            await _httpClient.PostAsJsonAsync(url, payload, SerializerConfiguration.SerializerOptions(), cancellationToken);
             return Result.Success;
         }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
