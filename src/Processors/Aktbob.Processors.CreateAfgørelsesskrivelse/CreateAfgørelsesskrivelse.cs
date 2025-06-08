@@ -7,6 +7,7 @@ using AktBob.Shared.Contracts.Modules.OpenOrchestrator;
 using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.ModuleClients;
+using AktBob.Shared.Processors;
 using AktBob.Shared.Types.Deskpro;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
@@ -38,10 +39,11 @@ public class CreateAfgørelsesskrivelse(
         
         // Deserialize message body to expected job type
         var job = JsonSerializer.Deserialize<CreateAfgørelsesskrivelseJob>(message.Body, SerializerConfiguration.SerializerOptions());
-        if (job is null) throw new BusinessException($"Message {message.MessageId} error: Body could not be deserialized to type {nameof(CreateAfgørelsesskrivelseJob)}. Body content = {message.Body}");
+        if (job is null)
+        {
+            throw new BusinessException($"{LogSnippets.MessageDeliveryCount(message.MessageId, message.DeliveryCount)}: Body could not be deserialized to type {nameof(CreateAfgørelsesskrivelseJob)}. Body content = {message.Body}");
+        }
         
-        // Complete the message
-        await messageActions.CompleteMessageAsync(message, cancellationToken);
         
         // Start process
         var ticketId = TicketId.Create(job.TicketId);
@@ -59,6 +61,7 @@ public class CreateAfgørelsesskrivelse(
         string lovgivning = GetChoiceFieldValue(deskproTicket.Value, deskproLovgivningFieldId);
         DateTime? modtagelsesdato = GetDateTimeFieldValue(deskproTicket.Value, deskproModtagelsesdatoFieldId);
 
+        logger.LogInformation("Ticket {id} retrieved from Deskpro", ticketId);
         
         // Person
         var getPerson = deskproTicket.Value.Person != null
@@ -83,8 +86,12 @@ public class CreateAfgørelsesskrivelse(
             getAgent,
             getDatabaseTicket,
             getTeam]);
+        
+        getPerson.Result.LogResultErrors(logger);
+        getAgent.Result.LogResultErrors(logger);
+        getTeam.Result.LogResultErrors(logger);
 
-        if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
+        if (getDatabaseTicket.Result is null) throw new BusinessException($"{LogSnippets.MessageDeliveryCount(message.MessageId, message.DeliveryCount)}: Unable to get ticket from database");
         
         var ansøger = getPerson.Result.IsError ? null : getPerson.Result.Value;
         var team = getTeam.Result.IsError ? null : getTeam.Result.Value;
@@ -104,7 +111,7 @@ public class CreateAfgørelsesskrivelse(
         };
         
         var result = await openOrchestrator.AddQueueItem(openOrchestratorQueueName, $"DeskproID {job.TicketId.ToString()}", payload, cancellationToken);
-        logger.LogInformation("Queue item added: {id}", result.Value);
+        logger.LogInformation("OpenOrchestrator Queue item created: {response}", result.Value);
     }
     
     private static DateTime? GetDateTimeFieldValue(TicketDto deskproTicket, int fieldId)
