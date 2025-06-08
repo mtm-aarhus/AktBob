@@ -1,9 +1,7 @@
 ﻿using System.Text.Json;
 using AktBob.Database.Contracts;
 using AktBob.Shared;
-using AktBob.Shared.Contracts.Modules.Deskpro;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
-using AktBob.Shared.Contracts.Modules.OpenOrchestrator;
 using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.ModuleClients;
