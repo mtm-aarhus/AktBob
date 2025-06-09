@@ -1,5 +1,12 @@
 services:
   
+  mailserver:
+    image: jijiechen/papercut:latest
+    ports:
+      - "25:25"
+      - "37408:37408"
+  
+  
   api:
     build:
       dockerfile: AktBob.Api/Dockerfile
@@ -10,6 +17,7 @@ services:
     depends_on:
       - sql
 
+
   sql:
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
@@ -18,7 +26,11 @@ services:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "mhYQ%I9l*aOqYwQzCXip"
       
-  # Modules
+
+  ###########   
+  # Modules #
+  ###########
+  
   module-deskpro:
     build:
       dockerfile: Modules/Aktbob.Modules.Deskpro/Dockerfile
@@ -42,8 +54,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       
-      
-  # Processors
+
+  ##############
+  # Processors #
+  ##############
+  
   processor-create-afgoerelsesskrivelse:
     build:
       dockerfile: Processors/Aktbob.Processors.Afgørelsesskrivelse/Dockerfile
@@ -57,10 +72,18 @@ services:
       - module-deskpro
       - module-open-orchestrator
       - sql
-##    
-#
-#  mailserver:
-#    image: jijiechen/papercut:latest
-#    ports:
-#      - "25:25"
-#      - "37408:37408"
+        
+        
+  processor-journalize-everything:
+    build:
+      dockerfile: Processors/Aktbob.Processors.JournalizeEverything/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+      AzureWebJobsStorage: "UseDevelopmentStorage=true"
+    env_file:
+      - Processors/Aktbob.Processors.JournalizeEverything/development.env
+    depends_on:
+      - module-deskpro
+      - module-open-orchestrator
+      - sql
