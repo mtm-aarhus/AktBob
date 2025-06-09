@@ -7,14 +7,14 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.ModuleClients;
 using AktBob.Shared.Processors;
 using AktBob.Shared.Types.Deskpro;
-using Azure.Messaging.ServiceBus;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
 using Ardalis.GuardClauses;
+using Azure.Messaging.ServiceBus;
 using ErrorOr;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
-namespace Aktbob.Processors.CreateAfgørelsesskrivelse;
+namespace Aktbob.Processors.Afgørelsesskrivelse;
 
 public class CreateAfgørelsesskrivelse(
     ILogger<CreateAfgørelsesskrivelse> logger,

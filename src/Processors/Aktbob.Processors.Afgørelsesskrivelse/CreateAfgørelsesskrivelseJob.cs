@@ -1,3 +1,3 @@
-﻿namespace Aktbob.Processors.CreateAfgørelsesskrivelse;
+﻿namespace Aktbob.Processors.Afgørelsesskrivelse;
 
 public record CreateAfgørelsesskrivelseJob(int TicketId);

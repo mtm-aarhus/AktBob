@@ -6,6 +6,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <AssemblyName>Aktbob.Processors.Afgørelsesskrivelse</AssemblyName>
+        <RootNamespace>Aktbob.Processors.Afgørelsesskrivelse</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
