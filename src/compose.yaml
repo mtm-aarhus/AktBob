@@ -46,13 +46,13 @@ services:
   # Processors
   processor-create-afgoerelsesskrivelse:
     build:
-      dockerfile: Processors/Aktbob.Processors.CreateAfgørelsesskrivelse/Dockerfile
+      dockerfile: Processors/Aktbob.Processors.Afgørelsesskrivelse/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
       AzureWebJobsStorage: "UseDevelopmentStorage=true"
     env_file:
-      - Processors/Aktbob.Processors.CreateAfgørelsesskrivelse/development.env
+      - Processors/Aktbob.Processors.Afgørelsesskrivelse/development.env
     depends_on:
       - module-deskpro
       - module-open-orchestrator
