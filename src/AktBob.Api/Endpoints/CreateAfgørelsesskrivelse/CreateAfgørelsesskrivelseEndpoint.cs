@@ -11,7 +11,7 @@ internal static class CreateAfgørelsesskrivelseEndpoint
 {
     public static IEndpointRouteBuilder MapCreateAfgørelsesskrivelseEndpoint(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/api/Jobs/Afgoerelsesskrivelse", async (
+        endpoints.MapPost("/api/jobs/create-afgoerelsesskrivelse", async (
             [FromServices] IConfiguration configuration,
             [FromServices] IMessageBus messageBus,
             [FromBody] CreateAfgørelsesskrivelseRequest request,
