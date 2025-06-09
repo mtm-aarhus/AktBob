@@ -5,6 +5,7 @@ using AktBob.Shared;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using AktBob.Shared.Contracts.Processors;
 using AktBob.Shared.Exceptions;
+using AktBob.Shared.Extensions;
 using AktBob.Shared.ModuleClients;
 using AktBob.Shared.Processors;
 using AktBob.Shared.Types.Deskpro;
@@ -50,6 +51,8 @@ public class JournalizeEverything(
         var agent = GetAgent(ticketId, cancellationToken);
         await Task.WhenAll([databaseTicket, agent]);
         
+        agent.Result.LogResultErrors(logger);
+        
         // Create OpenOrchestrator queue item
         await CreateOpenOrchestratorQueueItem(
             ticketId: ticketId,
@@ -91,12 +94,12 @@ public class JournalizeEverything(
     private async Task<ErrorOr<PersonDto>> GetAgent(TicketId ticketId, CancellationToken cancellationToken)
     {
         var ticket = await deskpro.GetTicket(ticketId, cancellationToken);
-        if (ticket.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
+        if (ticket.IsError) return ticket.Errors;
         
         var agent = ticket.Value.Agent?.Id != null
             ? await deskpro.GetPersonById(ticket.Value.Agent.Id, cancellationToken)
             : Error.NotFound().ToErrorOr<PersonDto>();
-        
+
         return agent;
     }
 }

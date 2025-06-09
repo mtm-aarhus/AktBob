@@ -1,4 +1,6 @@
+using AktBob.Database;
 using AktBob.Shared;
+using AktBob.Shared.ModuleClients;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,5 +14,12 @@ builder.Services
 
 // Logging
 builder.Services.ConfigureLogging();
+
+builder.Services.AddSharedModule();
+builder.Services.AddDatabaseModule(builder.Configuration);
+    
+// Module clients
+builder.Services.AddDeskproModuleClient(builder.Configuration);
+builder.Services.AddOpenOrchestratorModuleClient(builder.Configuration);
 
 builder.Build().Run();
