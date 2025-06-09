@@ -6,10 +6,10 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var key = Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY");
-SerilogBootstrapper.ConfigureLogging(key);
-builder.Services.AddSerilog();
+// Logging
+builder.Services.ConfigureLogging();
 
+// Modules
 builder.Services.AddSharedModule();
 builder.Services.AddModuleServices(builder.Configuration);
 

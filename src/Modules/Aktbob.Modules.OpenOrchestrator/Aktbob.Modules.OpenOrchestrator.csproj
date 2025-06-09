@@ -14,8 +14,4 @@
       <ProjectReference Include="..\..\AktBob.Shared\AktBob.Shared.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Contracts\" />
-    </ItemGroup>
-
 </Project>
