@@ -6,7 +6,6 @@ using AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 using AktBob.Workflows.Processes.CreateDocumentListQueueItem;
 using AktBob.Workflows.Processes.Cleanup;
 using AktBob.Workflows.Processes.EnsureSubmissions;
-using Hangfire;
 
 namespace AktBob.Workflows;
 public static class ModuleServices
@@ -27,7 +26,6 @@ public static class ModuleServices
 
         // Other workflows
         services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
-        services.AddScoped<IJobHandler<CreateAfgørelsesskrivelseJob>, CreateAfgørelsesskrivelseQueueItem>();
         services.AddScoped<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItem>();
         services.AddScoped<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCase>();
         services.AddScoped<IJobHandler<CreateGoToFilArkivQueueItemJob>, CreateToFilArkivQueueItem>();
