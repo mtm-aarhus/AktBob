@@ -1,5 +1,4 @@
 ﻿using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Deskpro.Handlers.GetMessage;
 internal class GetMessageHandlerException : IGetMessageHandler
@@ -13,11 +12,11 @@ internal class GetMessageHandlerException : IGetMessageHandler
         _logger = logger;
     }
 
-    public async Task<ErrorOr<MessageDto>> Handle(MessageId messageId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<MessageDto>> Handle(int ticketId, int messageId, CancellationToken cancellationToken)
     {
         try
         {
-            return await _inner.Handle(messageId, cancellationToken);
+            return await _inner.Handle(ticketId, messageId, cancellationToken);
         }
         catch (HttpRequestException ex)
         {

@@ -1,11 +1,10 @@
-﻿using AktBob.Shared.Types.Deskpro;
-
-namespace AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
+﻿namespace AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 public class AttachmentDto
 {
     public int Id { get; set; }
     public int BlobId { get; set; }
-    public MessageId MessageId { get; set; }
+    public int TicketId { get; set; }
+    public int MessageId { get; set; }
     public int PersonId { get; set; }
     public bool IsAgentNote { get; set; }
     public string ContentType { get; set; } = string.Empty;

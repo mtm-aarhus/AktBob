@@ -6,7 +6,6 @@ using AktBob.Workflows.Helpers;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.CloudConvert.Contracts;
-using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
@@ -32,8 +31,7 @@ internal class AddMessageToGetOrganized(
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
         var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
 
-        var messageId = MessageId.Create(job.TicketId, job.MessageId);
-        var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(messageId.Id);
+        var databaseMessage = await unitOfWork.Messages.GetByDeskproMessageId(job.MessageId);
         if (databaseMessage is null) throw new BusinessException($"Error adding document to GetOrganized: Unable to get ticket {job.TicketId} message {job.MessageId} from database.");
 
         // Get message from database, check if documentId is null
@@ -52,7 +50,7 @@ internal class AddMessageToGetOrganized(
         var deskproTicket = deskproTicketResult.Value;
 
         // Get Deskpro message
-        var getDeskproMessageResult = await deskpro.GetMessage(messageId, cancellationToken);
+        var getDeskproMessageResult = await deskpro.GetMessage(job.TicketId, job.MessageId, cancellationToken);
         if (getDeskproMessageResult.IsError) throw new BusinessException("rror adding document to GetOrganized: Unable to get message from Deskpro. Mark message in database as deleted to avoid future failures.");
         var deskproMessage = getDeskproMessageResult.Value;
 
@@ -69,7 +67,7 @@ internal class AddMessageToGetOrganized(
         var attachments = Enumerable.Empty<AttachmentDto>();
         if (getDeskproMessageResult.Value.AttachmentIds.Any())
         {
-            var getAttachmentsResult = await deskpro.GetMessageAttachments(messageId, cancellationToken);
+            var getAttachmentsResult = await deskpro.GetMessageAttachments(job.TicketId, job.MessageId, cancellationToken);
             attachments = getAttachmentsResult.Value ?? Enumerable.Empty<AttachmentDto>();
         }
 

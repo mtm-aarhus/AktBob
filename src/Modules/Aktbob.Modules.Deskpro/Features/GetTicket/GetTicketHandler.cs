@@ -1,17 +1,15 @@
 ﻿using AAK.Deskpro;
-using AktBob.Deskpro;
 using Aktbob.Modules.Deskpro.Extensions;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
-using AktBob.Shared.Types.Deskpro;
 
 namespace Aktbob.Modules.Deskpro.Features.GetTicket;
 internal class GetTicketHandler(IDeskproClient deskproClient) : IGetTicketHandler
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
 
-    public async Task<ErrorOr<TicketDto>> Handle(TicketId ticketId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<TicketDto>> Handle(int ticketId, CancellationToken cancellationToken)
     {
-        var ticket = await _deskproClient.GetTicketById(ticketId.Value, cancellationToken);
+        var ticket = await _deskproClient.GetTicketById(ticketId, cancellationToken);
 
         if (ticket == null)
         {
@@ -20,7 +18,7 @@ internal class GetTicketHandler(IDeskproClient deskproClient) : IGetTicketHandle
 
         var dto = new TicketDto
         {
-            Id = TicketId.Create(ticket.Id),
+            Id = ticket.Id,
             CreatedAt = (DateTime)ticket.CreatedAt!,
             Agent = ticket.Agent.ToDto(),
             Person = ticket.Person.ToDto(),

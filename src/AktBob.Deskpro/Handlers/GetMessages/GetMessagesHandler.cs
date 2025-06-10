@@ -1,7 +1,6 @@
 ﻿using AAK.Deskpro;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Deskpro.Handlers.GetMessages;
 internal class GetMessagesHandler(IDeskproClient deskproClient, IGetPersonByIdHandler getPersonByIdHandler) : IGetMessagesHandler
@@ -24,7 +23,8 @@ internal class GetMessagesHandler(IDeskproClient deskproClient, IGetPersonByIdHa
             {
                 messages.AddRange(deskproMessages.Data.Select(x => new MessageDto
                 {
-                    Id = MessageId.Create(ticketId, x.Id),
+                    Id = x.Id,
+                    TicketId = ticketId,
                     AttachmentIds = x.AttachmentIds,
                     CreatedAt = x.CreatedAt,
                     IsAgentNote = x.IsAgentNote,

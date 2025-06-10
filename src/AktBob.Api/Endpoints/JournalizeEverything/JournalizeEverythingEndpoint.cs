@@ -1,7 +1,6 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Contracts.Processors;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.Types.Deskpro;
 using Microsoft.AspNetCore.Mvc;
 using Ardalis.GuardClauses;
 
@@ -18,8 +17,7 @@ internal static class JournalizeEverythingEndpoint
             CancellationToken cancellationToken) =>
         {
             var queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Queues:JournalizeEverything"));
-            var ticketId = TicketId.Create(request.DeskproId);
-            var job = new JournalizeEverythingJob(ticketId);
+            var job = new JournalizeEverythingJob(request.DeskproId);
             var result = await messageBus.SendMessage(queueName, job, cancellationToken);
             return result.ToMinimalApiResponse();
         });

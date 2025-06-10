@@ -11,7 +11,6 @@ using Aktbob.Modules.Deskpro.Features.GetTicket;
 using Aktbob.Modules.Deskpro.Features.GetTicketsByFieldSearch;
 using Aktbob.Modules.Deskpro.Features.InvokeWebhook;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.Types.Deskpro;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Aktbob.Modules.Deskpro.Endpoints;
@@ -36,24 +35,21 @@ internal static class EndpointsHandlers
     
     public static async Task<IResult> GetMessage(int ticketId, int messageId, [FromServices] IGetMessageHandler handler, CancellationToken cancellationToken)
     {
-        var id = MessageId.Create(ticketId, messageId);
-        var result = await handler.Handle(id, cancellationToken);
+        var result = await handler.Handle(ticketId, messageId, cancellationToken);
         return result.ToMinimalApiResponse(value => value);
     }
     
     
     public static async Task<IResult> GetMessageAttachments(int ticketId, int messageId, [FromServices] IGetMessageAttachmentsHandler handler, CancellationToken cancellationToken)
     {
-        var id = MessageId.Create(ticketId, messageId);
-        var result = await handler.Handle(id, cancellationToken);
+        var result = await handler.Handle(ticketId, messageId, cancellationToken);
         return result.ToMinimalApiResponse(value => value);
     }
     
     
     public static async Task<IResult> GetMessages(int ticketId, IGetMessagesHandler handler, CancellationToken cancellationToken)
     {
-        var id = TicketId.Create(ticketId);
-        var result = await handler.Handle(id, cancellationToken);
+        var result = await handler.Handle(ticketId, cancellationToken);
         return result.ToMinimalApiResponse(value => value);
     }
 
@@ -81,8 +77,7 @@ internal static class EndpointsHandlers
 
     public static async Task<IResult> GetTicket([FromRoute] int id, [FromServices] IGetTicketHandler handler, CancellationToken cancellationToken)
     {
-        var ticketId = TicketId.Create(id);
-        var result = await handler.Handle(ticketId, cancellationToken);
+        var result = await handler.Handle(id, cancellationToken);
         return result.ToMinimalApiResponse(values => values);
     }
 

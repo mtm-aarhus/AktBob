@@ -44,7 +44,7 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
 
         var payload = new
         {
-            DeskproTicketId = job.TicketId.Value,
+            DeskproTicketId = job.TicketId,
             CaseIds = string.Join(",", caseIds)
         };
 

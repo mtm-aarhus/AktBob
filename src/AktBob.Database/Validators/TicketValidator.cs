@@ -7,6 +7,6 @@ internal class TicketValidator : AbstractValidator<Ticket>
 {
     public TicketValidator()
     {
-        RuleFor(x => x.DeskproId.IsEmpty).NotEqual(true);
+        RuleFor(x => x.DeskproId).NotEmpty();
     }
 }

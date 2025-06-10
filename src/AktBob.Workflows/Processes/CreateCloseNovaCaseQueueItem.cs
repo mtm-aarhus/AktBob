@@ -23,7 +23,7 @@ internal class CreateCloseNovaCaseQueueItem : IJobHandler<CreateCloseNovaCaseQue
 
         var payload = new
         {
-            DeskProID = job.TicketId.Value
+            DeskProID = job.TicketId
         };
         
         var serializerOptions = SerializerConfiguration.SerializerOptions(caseInsensitive: false, jsonNamingPolicy: null);

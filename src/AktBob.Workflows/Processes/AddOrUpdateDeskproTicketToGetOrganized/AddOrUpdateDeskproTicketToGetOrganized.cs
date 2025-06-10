@@ -8,7 +8,6 @@ using AktBob.Workflows.Helpers;
 using System.Globalization;
 using AktBob.CloudConvert.Contracts;
 using AktBob.Deskpro.Contracts;
-using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
@@ -109,7 +108,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         ErrorOr<PersonDto> getAgent,
         ErrorOr<PersonDto> getUser)> 
         GetData(
-            TicketId ticketId,
+            int ticketId,
             IDeskproModule deskpro,
             CancellationToken cancellationToken)
     {
@@ -162,7 +161,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
                         message.Content,
                         caseNumber,
                         ticket.Subject,
-                        await GetMessageNumber(messageRepository, message.Id),
+                        await GetMessageNumber(messageRepository, message.TicketId, message.Id),
                         attachments.Value);
 
                     return new ContentElement(message.CreatedAt, Encoding.UTF8.GetBytes(messageHtml));
@@ -182,19 +181,19 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
             return Array.Empty<AttachmentDto>().ToErrorOr<IReadOnlyCollection<AttachmentDto>>();
         }
 
-        return await deskpro.GetMessageAttachments(message.Id, cancellationToken);
+        return await deskpro.GetMessageAttachments(message.TicketId, message.Id, cancellationToken);
     }
 
     
     /// <summary>
     /// Get the user-friendly message number for a specific message
     /// </summary>
-    private async Task<int> GetMessageNumber(IMessageRepository messageRepository, MessageId messageId)
+    private async Task<int> GetMessageNumber(IMessageRepository messageRepository, int ticketId, int messageId)
     {
-        var databaseMessage = await messageRepository.GetByDeskproMessageId(messageId.Id);
+        var databaseMessage = await messageRepository.GetByDeskproMessageId(messageId);
         if (databaseMessage is null)
         {
-            _logger.LogWarning("No message found in database for Deskpro message ID {id}", messageId);
+            _logger.LogWarning("No message found in database for Deskpro ticket {ticketId} message ID {id}", ticketId, messageId);
         }
         
         return databaseMessage?.MessageNumber ?? 0;

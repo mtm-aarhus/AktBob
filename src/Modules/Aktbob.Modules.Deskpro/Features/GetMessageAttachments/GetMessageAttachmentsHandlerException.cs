@@ -1,5 +1,4 @@
 ﻿using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
-using AktBob.Shared.Types.Deskpro;
 
 namespace Aktbob.Modules.Deskpro.Features.GetMessageAttachments;
 internal class GetMessageAttachmentsHandlerException(
@@ -9,11 +8,11 @@ internal class GetMessageAttachmentsHandlerException(
     private readonly IGetMessageAttachmentsHandler _inner = inner;
     private readonly ILogger<GetMessageAttachmentsHandler> _logger = logger;
 
-    public async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> Handle(MessageId messageId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> Handle(int ticketId, int messageId, CancellationToken cancellationToken)
     {
         try
         {
-            return await _inner.Handle(messageId, cancellationToken);
+            return await _inner.Handle(ticketId, messageId, cancellationToken);
         }
         catch (HttpRequestException ex)
         when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)

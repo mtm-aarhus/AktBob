@@ -1,9 +1,7 @@
-﻿using AktBob.Shared.Types.Deskpro;
-
-namespace AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
+﻿namespace AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 public class TicketDto
 {
-    public TicketId Id { get; set; }
+    public int Id { get; set; }
     public DateTime CreatedAt { get; set; }
     public string Ref { get; set; } = string.Empty;
     public string Auth { get; set; } = string.Empty;

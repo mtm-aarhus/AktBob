@@ -2,14 +2,14 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
-using AktBob.Shared.Types.Deskpro;
 using ErrorOr;
 
-namespace AktBob.Shared.ModuleClients;
+namespace AktBob.Shared.ModuleClients.DeskproModule;
 
-public class DeskproModuleClient(HttpClient httpClient)
+internal class DeskproModuleClient(HttpClient httpClient) : IDeskproModuleClient
 {
     private readonly HttpClient _httpClient = httpClient;
+
     public async Task<ErrorOr<Stream>> DownloadMessageAttachment(string downloadUrl, CancellationToken cancellationToken = default)
     {
         try
@@ -47,11 +47,11 @@ public class DeskproModuleClient(HttpClient httpClient)
         }
     }
     
-    public async Task<ErrorOr<MessageDto>> GetMessage(MessageId messageId, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<MessageDto>> GetMessage(int ticketId, int messageId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var url = new Uri($"tickets/{messageId.TicketId}/messages/{messageId.Id}", UriKind.Relative);
+            var url = new Uri($"tickets/{ticketId}/messages/{messageId}", UriKind.Relative);
             var result = await _httpClient.GetFromJsonAsync<MessageDto>(url, cancellationToken);
             return result?.ToErrorOr() ?? Error.Failure($"{nameof(DeskproModuleClient)}.{nameof(GetMessage)}", "Message value is null");
         }
@@ -65,11 +65,11 @@ public class DeskproModuleClient(HttpClient httpClient)
         }
     }
     
-    public async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> GetMessageAttachments(MessageId messageId, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> GetMessageAttachments(int ticketId, int messageId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var url = new Uri($"tickets/{messageId.TicketId}/messages/{messageId.Id}/attachments", UriKind.Relative);
+            var url = new Uri($"tickets/{ticketId}/messages/{messageId}/attachments", UriKind.Relative);
             var result = await _httpClient.GetFromJsonAsync<IReadOnlyCollection<AttachmentDto>>(url, cancellationToken);
             return result?.ToErrorOr() ?? Error.Failure($"{nameof(DeskproModuleClient)}.{nameof(GetMessageAttachments)}", "Message attachments value is null");
         }
@@ -83,11 +83,11 @@ public class DeskproModuleClient(HttpClient httpClient)
         }
     }
     
-    public async Task<ErrorOr<IReadOnlyCollection<MessageDto>>> GetMessages(TicketId ticketId, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<IReadOnlyCollection<MessageDto>>> GetMessages(int ticketId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var url = new Uri($"tickets/{ticketId.Value}/messages", UriKind.Relative);
+            var url = new Uri($"tickets/{ticketId}/messages", UriKind.Relative);
             var result = await _httpClient.GetFromJsonAsync<IReadOnlyCollection<MessageDto>>(url, cancellationToken);
             return result?.ToErrorOr() ?? Error.Failure($"{nameof(DeskproModuleClient)}.{nameof(GetMessages)}", $"Ticket {ticketId}: Messages value is null");
         }
@@ -156,11 +156,11 @@ public class DeskproModuleClient(HttpClient httpClient)
         }
     }
     
-    public async Task<ErrorOr<TicketDto>> GetTicket(TicketId ticketId, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<TicketDto>> GetTicket(int ticketId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var url = new Uri($"tickets/{ticketId.Value}", UriKind.Relative);
+            var url = new Uri($"tickets/{ticketId}", UriKind.Relative);
             var result = await _httpClient.GetFromJsonAsync<TicketDto>(url, cancellationToken);
             return result?.ToErrorOr() ?? Error.Failure($"{nameof(DeskproModuleClient)}.{nameof(GetTicket)}", $"Ticket {ticketId}: value is null");
         }

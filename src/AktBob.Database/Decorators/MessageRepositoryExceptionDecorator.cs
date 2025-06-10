@@ -1,7 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Database.Repositories;
-using AktBob.Shared.Types.Deskpro;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Database.Decorators;

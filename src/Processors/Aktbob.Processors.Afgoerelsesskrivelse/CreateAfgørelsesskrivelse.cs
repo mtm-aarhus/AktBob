@@ -4,9 +4,9 @@ using AktBob.Shared;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.ModuleClients;
+using AktBob.Shared.ModuleClients.DeskproModule;
+using AktBob.Shared.ModuleClients.OpenOrchestratorModule;
 using AktBob.Shared.Processors;
-using AktBob.Shared.Types.Deskpro;
 using Ardalis.GuardClauses;
 using Azure.Messaging.ServiceBus;
 using ErrorOr;
@@ -19,8 +19,8 @@ namespace Aktbob.Processors.Afgørelsesskrivelse;
 public class CreateAfgørelsesskrivelse(
     ILogger<CreateAfgørelsesskrivelse> logger,
     IConfiguration configuration,
-    DeskproModuleClient deskpro,
-    OpenOrchestratorModuleClient openOrchestrator,
+    IDeskproModuleClient deskpro,
+    IOpenOrchestratorModuleClient openOrchestrator,
     ITicketRepository ticketRepository)
 {
     
@@ -42,24 +42,20 @@ public class CreateAfgørelsesskrivelse(
             throw new BusinessException($"{LogSnippets.MessageDeliveryCount(message.MessageId, message.DeliveryCount)}: Body could not be deserialized to type {nameof(CreateAfgørelsesskrivelseJob)}. Body content = {message.Body}");
         }
         
-        
-        // Start process
-        var ticketId = TicketId.Create(job.TicketId);
-        
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("OpenOrchestratorQueueName"));
         var deskproModtagelsesdatoFieldId = Guard.Against.Null(configuration.GetValue<int>("ModtagelsesdatoFieldId"));
         var deskproLovgivningFieldId = Guard.Against.Null(configuration.GetValue<int>("LovgivningFieldId"));
     
         
         // Get data from Deskpro
-        var deskproTicket = await deskpro.GetTicket(ticketId, cancellationToken);
+        var deskproTicket = await deskpro.GetTicket(job.TicketId, cancellationToken);
         if (deskproTicket.IsError) throw new BusinessException(deskproTicket.Errors.ToCommaDelimitedString());
 
         // Deskpro ticket fields
         string lovgivning = GetChoiceFieldValue(deskproTicket.Value, deskproLovgivningFieldId);
         DateTime? modtagelsesdato = GetDateTimeFieldValue(deskproTicket.Value, deskproModtagelsesdatoFieldId);
 
-        logger.LogInformation("Ticket {id} retrieved from Deskpro", ticketId);
+        logger.LogInformation("Ticket {id} retrieved from Deskpro", job.TicketId);
         
         // Person
         var getPerson = deskproTicket.Value.Person != null
@@ -77,7 +73,7 @@ public class CreateAfgørelsesskrivelse(
             : Task.FromResult(Error.NotFound().ToErrorOr<TeamDto>());
 
         // Database ticket
-        var getDatabaseTicket = ticketRepository.GetByDeskproTicketId(ticketId);
+        var getDatabaseTicket = ticketRepository.GetByDeskproTicketId(job.TicketId);
 
         await Task.WhenAll([
             getPerson,
@@ -103,13 +99,12 @@ public class CreateAfgørelsesskrivelse(
             Afdeling = team?.Name,
             Aktindsigtsovermappe = getDatabaseTicket.Result?.SharepointFolderName,
             SagsbehandlerEmail = agent?.Email,
-            DeskProID = ticketId.Value,
+            DeskProID = job.TicketId,
             AktindsigtsDato = modtagelsesdato,
             Lovgivning = lovgivning
         };
         
-        var result = await openOrchestrator.AddQueueItem(openOrchestratorQueueName, $"DeskproID {job.TicketId.ToString()}", payload, cancellationToken);
-        logger.LogInformation("OpenOrchestrator Queue item created: {response}", result.Value);
+        await openOrchestrator.AddQueueItem(openOrchestratorQueueName, $"DeskproID {job.TicketId.ToString()}", payload, cancellationToken);
     }
     
     private static DateTime? GetDateTimeFieldValue(TicketDto deskproTicket, int fieldId)

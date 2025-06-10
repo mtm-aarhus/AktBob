@@ -1,7 +1,6 @@
 ﻿using AktBob.Database.Dtos;
 using AktBob.Shared;
 using AktBob.Shared.Jobs;
-using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -32,8 +31,7 @@ internal class PostTicket(IJobDispatcher jobDispatcher) : Endpoint<PostTicketReq
 
     public override async Task HandleAsync(PostTicketRequest req, CancellationToken ct)
     {
-        var ticketId = TicketId.Create(req.DeskproId);
-        var job = new RegisterDeskproTicketJob(ticketId);
+        var job = new RegisterDeskproTicketJob(req.DeskproId);
         _jobDispatcher.Dispatch(job);
         await SendNoContentAsync(ct);
     }

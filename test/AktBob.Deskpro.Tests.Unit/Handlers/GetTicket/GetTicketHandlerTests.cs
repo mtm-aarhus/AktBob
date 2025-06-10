@@ -2,7 +2,6 @@
 using AAK.Deskpro.Models;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Deskpro.Handlers.GetTicket;
-using AktBob.Shared.Types.Deskpro;
 using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -39,7 +38,7 @@ public class GetTicketHandlerTests
     public async Task Handle_ShouldReturnTicketDto_WhenTicketExists()
     {
         // Arrange
-        var ticketId = TicketId.Create(1);
+        var ticketId = 1;
         var createdAt = DateTime.UtcNow;
         var expected = new TicketDto
         { 

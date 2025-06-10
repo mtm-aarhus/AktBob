@@ -1,4 +1,2 @@
-﻿using AktBob.Shared.Types.Deskpro;
-
-namespace AktBob.Shared.Jobs;
-public record RegisterDeskproTicketJob(TicketId TicketId);
+﻿namespace AktBob.Shared.Jobs;
+public record RegisterDeskproTicketJob(int TicketId);

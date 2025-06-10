@@ -4,7 +4,6 @@ using AktBob.Database.Entities;
 using AktBob.Podio.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
-using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes;
 internal class RegisterPodioCase(IConfiguration configuration, IServiceScopeFactory serviceScopeFactory) : IJobHandler<RegisterPodioCaseJob>
@@ -41,7 +40,7 @@ internal class RegisterPodioCase(IConfiguration configuration, IServiceScopeFact
         var deskproIdString = podioItemResult.Value.GetField(podioFieldDeskproId.Key)?.GetValues<FieldValueText>()?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(deskproIdString)) throw new BusinessException("Deskpro Id field value from Podio Item is null or empty");
 
-        if (!TicketId.TryParse(deskproIdString, default, out TicketId deskproTicketId)) throw new BusinessException("Unable to parse Podio item Deskpro Id field value as integer");
+        if (!int.TryParse(deskproIdString, default, out var deskproTicketId)) throw new BusinessException("Unable to parse Podio item Deskpro Id field value as integer");
 
         // Get ticket from repository
         var databaseTicket = await unitOfWork.Tickets.GetByDeskproTicketId(deskproTicketId);

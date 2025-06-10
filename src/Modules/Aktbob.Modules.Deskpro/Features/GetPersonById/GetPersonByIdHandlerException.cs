@@ -15,6 +15,7 @@ internal class GetPersonByIdHandlerException(IGetPersonByIdHandler inner, ILogge
         catch (HttpRequestException ex)
         when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
+            _logger.LogWarning("Deskpro person {id} not found", personId);
             return Error.NotFound("GetPersonByIdHandler.NotFound", $"Deskpro person {personId} not found.");
         }
         catch (Exception ex)

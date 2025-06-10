@@ -2,7 +2,6 @@
 using AAK.Deskpro.Models;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Deskpro.Handlers.GetMessage;
-using AktBob.Shared.Types.Deskpro;
 using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -23,17 +22,18 @@ public class GetMessageHandlerTests
     public async Task Handle_ShouldReturnMessageDtoResult_WhenDeskproClientReturnsMessage()
     {
         // Arrange
-        var messageId = MessageId.Create(1, 1);
-        var deskproMessage = new Message { Id = messageId.Id, TicketId = messageId.TicketId };
+        var ticketId = 1;
+        var messageId = 1;
+        var deskproMessage = new Message { Id = messageId, TicketId = messageId };
         var expectedMessage = new MessageDto { Id = messageId };
 
         _deskproClient
-            .GetMessage(messageId.TicketId, messageId.Id, Arg.Any<CancellationToken>())
+            .GetMessage(messageId, messageId, Arg.Any<CancellationToken>())
             .Returns(deskproMessage);
 
 
         // Act
-        var result = await _sut.Handle(messageId, CancellationToken.None);
+        var result = await _sut.Handle(ticketId, messageId, CancellationToken.None);
 
         // Assert
         result.IsError.Should().BeFalse();
@@ -45,11 +45,12 @@ public class GetMessageHandlerTests
     public async Task Handle_ShouldReturnErrorResultWithMessage_WhenDeskproClientReturnsNull()
     {
         // Arrange
-        var messageId = MessageId.Create(1, 1);
+        var ticketId = 1;
+        var messageId = 1;
         _deskproClient.GetMessage(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).ReturnsNull();
 
         // Act
-        var result = await _sut.Handle(messageId, CancellationToken.None);
+        var result = await _sut.Handle(ticketId, messageId, CancellationToken.None);
 
         // Assert
         result.IsError.Should().BeTrue();
@@ -62,11 +63,12 @@ public class GetMessageHandlerTests
     public async Task Handle_ShoudlRethrowException_WhenDeskproClientThrowsAnyException()
     {
         // Arrange
-        var messageId = MessageId.Create(1, 1); 
+        var ticketId = 1;
+        var messageId = 1;
         _deskproClient.GetMessage(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).ThrowsAsync<Exception>();
 
         // Act
-        var act = () => _sut.Handle(messageId, CancellationToken.None);
+        var act = () => _sut.Handle(ticketId, messageId, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<Exception>();

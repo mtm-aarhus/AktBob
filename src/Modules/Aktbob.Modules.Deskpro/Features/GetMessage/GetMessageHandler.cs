@@ -1,15 +1,14 @@
 ﻿using AAK.Deskpro;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
-using AktBob.Shared.Types.Deskpro;
 
 namespace Aktbob.Modules.Deskpro.Features.GetMessage;
 internal class GetMessageHandler(IDeskproClient deskproClient) : IGetMessageHandler
 {
     private readonly IDeskproClient _deskproClient = deskproClient;
 
-    public async Task<ErrorOr<MessageDto>> Handle(MessageId messageId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<MessageDto>> Handle(int ticketId, int messageId, CancellationToken cancellationToken)
     {
-        var message = await _deskproClient.GetMessage(messageId.TicketId, messageId.Id, cancellationToken);
+        var message = await _deskproClient.GetMessage(ticketId, messageId, cancellationToken);
 
         if (message == null)
         {

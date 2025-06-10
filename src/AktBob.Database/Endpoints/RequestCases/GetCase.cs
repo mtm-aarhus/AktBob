@@ -1,10 +1,9 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Dtos;
-using AktBob.Shared.Types.Deskpro;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
-namespace AktBob.Database.Endpoints.OS2FormsSubmissions;
+namespace AktBob.Database.Endpoints.RequestCases;
 
 internal record GetCaseRequest(int DeskproId);
 
@@ -26,8 +25,7 @@ internal class GetCase : Endpoint<GetCaseRequest, IEnumerable<RequestCaseDto>>
 
     public async override Task HandleAsync(GetCaseRequest req, CancellationToken ct)
     {
-        var ticketId = TicketId.Create(req.DeskproId);
-        var tickets = await _unitOfWork.Tickets.GetAll(ticketId, null, null);
+        var tickets = await _unitOfWork.Tickets.GetAll(req.DeskproId, null, null);
         var dtos = new List<RequestCaseDto>();
 
         foreach (var ticket in tickets)

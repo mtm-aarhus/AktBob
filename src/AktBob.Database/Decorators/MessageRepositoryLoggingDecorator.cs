@@ -1,7 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Database.Repositories;
-using AktBob.Shared.Types.Deskpro;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Database.Decorators;
@@ -27,7 +26,7 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
 
     public async Task<bool> Delete(int id)
     {
-        _logger.LogInformation("Marking message {id} as deleted", id);
+        _logger.LogInformation("Marking database message {id} as deleted", id);
 
         var success = await _inner.Delete(id);
 
@@ -46,7 +45,7 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
         var message = await _inner.GetByDeskproMessageId(messageId);
         if (message is null)
         {
-            _logger.LogDebug("{name}: Message by DeskproMessageId {id} not found in database", nameof(GetByDeskproMessageId), messageId);
+            _logger.LogDebug("{name}: Database message by DeskproMessageId {id} not found", nameof(GetByDeskproMessageId), messageId);
         }
 
         return message;
@@ -59,7 +58,7 @@ internal class MessageRepositoryLoggingDecorator(IMessageRepository inner, ILogg
         var message = await _inner.Get(id);
         if (message is null)
         {
-            _logger.LogDebug("{name}: Message {id} not found in database", nameof(Get), id);
+            _logger.LogDebug("{name}: Database message {id} not found", nameof(Get), id);
         }
 
         return message;

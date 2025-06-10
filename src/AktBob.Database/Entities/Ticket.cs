@@ -1,10 +1,8 @@
-﻿using AktBob.Shared.Types.Deskpro;
-
-namespace AktBob.Database.Entities;
+﻿namespace AktBob.Database.Entities;
 public class Ticket
 {
     public int Id { get; set; }
-    public TicketId DeskproId { get; set; }
+    public int DeskproId { get; set; }
     public string? CaseNumber { get; set; }
     public string? CaseUrl { get; set; }
     public string? SharepointFolderName { get; set; }

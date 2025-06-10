@@ -82,7 +82,7 @@ internal class CreateToSharepointQueueItem(ILogger<CreateToSharepointQueueItem> 
         {
             Sagsnummer = caseNumber,
             MailModtager = agent.Value.Email,
-            DeskProID = deskproTicketResult.Value.Id.Value,
+            DeskProID = deskproTicketResult.Value.Id,
             DeskProTitel = deskproTicketResult.Value.Subject,
             PodioID = job.PodioItemId.Id,
             Overmappe = getDatabaseTicket.Result.SharepointFolderName,

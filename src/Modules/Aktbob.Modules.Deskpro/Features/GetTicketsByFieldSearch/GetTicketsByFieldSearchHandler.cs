@@ -1,11 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using AAK.Deskpro;
 using AAK.Deskpro.Models;
-using AktBob.Deskpro;
 using Aktbob.Modules.Deskpro.Extensions;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.Types.Deskpro;
 
 namespace Aktbob.Modules.Deskpro.Features.GetTicketsByFieldSearch;
 internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTicketsByFieldSearchHandler
@@ -29,7 +27,7 @@ internal class GetTicketsByFieldSearchHandler(IDeskproClient deskpro) : IGetTick
 
         return ticketsList.Select(t => new TicketDto
         {
-            Id = TicketId.Create(t.Id),
+            Id = t.Id,
             CreatedAt = (DateTime)t.CreatedAt!,
             Agent = t.Agent.ToDto(),
             Person = t.Person.ToDto(),

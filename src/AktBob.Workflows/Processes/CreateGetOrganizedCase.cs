@@ -6,7 +6,6 @@ using Hangfire;
 using AktBob.Shared.Extensions;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
@@ -92,7 +91,7 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         return mapping.Where(m => fieldChoices.Contains(m.Key)).Select(m => m.Value).FirstOrDefault() ?? string.Empty;
     }
 
-    private async Task UpdateDatabaseSetGetOrganizedCaseId(TicketId ticketId, IUnitOfWork unitOfWork, string caseId, string caseUrl)
+    private async Task UpdateDatabaseSetGetOrganizedCaseId(int ticketId, IUnitOfWork unitOfWork, string caseId, string caseUrl)
     {
         var ticket = await unitOfWork.Tickets.GetByDeskproTicketId(ticketId);
         if (ticket is null)
@@ -106,14 +105,14 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         await unitOfWork.Tickets.Update(ticket);
     }
 
-    private void UpdateDeskproSetGetOrganizedCaseId(IDeskproModule deskproModule, TicketId ticketId, string caseId, string caseUrl)
+    private void UpdateDeskproSetGetOrganizedCaseId(IDeskproModule deskproModule, int ticketId, string caseId, string caseUrl)
     {
         var deskproWebhookId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("Deskpro:Webhooks:UpdateTicketSetGoCaseId"));
         var payload = new
         {
             GetOrganizedCaseId = caseId,
             GetOrganizedCaseUrlClean = caseUrl,
-            DeskproTicketId = ticketId.Value
+            DeskproTicketId = ticketId
         };
 
         var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });

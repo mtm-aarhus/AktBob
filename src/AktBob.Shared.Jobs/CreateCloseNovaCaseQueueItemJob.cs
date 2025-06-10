@@ -1,4 +1,2 @@
-﻿using AktBob.Shared.Types.Deskpro;
-
-namespace AktBob.Shared.Jobs;
-public record CreateCloseNovaCaseQueueItemJob(TicketId TicketId);
+﻿namespace AktBob.Shared.Jobs;
+public record CreateCloseNovaCaseQueueItemJob(int TicketId);

@@ -25,12 +25,12 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
 
     public async Task<Case?> Get(int id)
     {
-        _logger.LogInformation("Getting case {id}", id);
+        _logger.LogInformation("Getting database case {id}", id);
 
         var @case = await _inner.Get(id);
         if (@case is null)
         {
-            _logger.LogDebug("Case {id} not found in database", @case);
+            _logger.LogDebug("Database case {id} not found", @case);
         }
 
         return @case;
@@ -38,24 +38,24 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
 
     public async Task<IReadOnlyCollection<Case>> GetAll(long? podioItemId, Guid? filArkivCaseId)
     {
-        _logger.LogInformation("Getting all cases by PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", podioItemId, filArkivCaseId);
+        _logger.LogInformation("Getting all database cases by PodioItemId = {podioItemId}, FilArkivCaseId = {filArkivCaseId}", podioItemId, filArkivCaseId);
 
         var cases = await _inner.GetAll(podioItemId, filArkivCaseId);
         if (!cases.Any())
         {
             if (podioItemId is null && filArkivCaseId is null)
             {
-                _logger.LogDebug("{name}: No cases found", nameof(GetAll));
+                _logger.LogDebug("{name}: No database cases found", nameof(GetAll));
             }
 
             if (filArkivCaseId is not null)
             {
-                _logger.LogDebug("{name}: No cases found in database by FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), filArkivCaseId);
+                _logger.LogDebug("{name}: No database cases found in database by FilArkivCaseId = {filArkivCaseId}", nameof(GetAll), filArkivCaseId);
             }
 
             if (podioItemId is not null)
             {
-                _logger.LogDebug("{name}: No cases found in database by PodioItemId = {podioItemId}", nameof(GetAll), podioItemId);
+                _logger.LogDebug("{name}: No database cases found in database by PodioItemId = {podioItemId}", nameof(GetAll), podioItemId);
             }
         }
 
@@ -64,7 +64,7 @@ internal class CaseRepositoryLoggingDecorator(ICaseRepository inner, ILogger<Cas
 
     public async Task<bool> Update(Case @case)
     {
-        _logger.LogInformation("Updating {case}", @case);
+        _logger.LogInformation("Updating database {case}", @case);
 
         var success = await _inner.Update(@case);
         if (!success)

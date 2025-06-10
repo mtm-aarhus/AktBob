@@ -76,7 +76,7 @@ internal class CreateToFilArkivQueueItem(ILogger<CreateToFilArkivQueueItem> logg
         {
             Sagsnummer = caseNumber,
             MailModtager = agent.Value.Email,
-            DeskProID = getDatabaseTicket.Result.DeskproId.Value,
+            DeskProID = getDatabaseTicket.Result.DeskproId,
             DeskProTitel = deskproTicketResult.Value.Subject,
             PodioID = job.PodioItemId.Id,
             Overmappe = getDatabaseTicket.Result.SharepointFolderName,

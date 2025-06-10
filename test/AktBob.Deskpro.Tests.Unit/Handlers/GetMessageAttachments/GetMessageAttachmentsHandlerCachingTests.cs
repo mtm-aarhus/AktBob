@@ -6,7 +6,6 @@ using System.Collections.ObjectModel;
 using ErrorOr;
 using FluentAssertions;
 using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Deskpro.Tests.Unit.Handlers.GetMessageAttachments;
 public class GetMessageAttachmentsHandlerCachingTests
@@ -24,14 +23,15 @@ public class GetMessageAttachmentsHandlerCachingTests
     public async Task Handle_ShouldReturnCachedValule_WhenCacheIsHit()
     {
         // Arrange
-        var messageId = MessageId.Create(1, 1);
-        var cacheKey = $"Deskpro_MessageAttachments_{messageId.TicketId}_{messageId.Id}";
+        var ticketId = 1;
+        var messageId = 1;
+        var cacheKey = $"Deskpro_MessageAttachments_{ticketId}_{messageId}";
         var cachedValue = new Collection<AttachmentDto>();
         var expectedResult = ErrorOrFactory.From<IReadOnlyCollection<AttachmentDto>>(cachedValue);
         _cache.Get<IReadOnlyCollection<AttachmentDto>>(Arg.Is(cacheKey)).Returns(cachedValue);
 
         // Act
-        var result = await _sut.Handle(messageId, CancellationToken.None);
+        var result = await _sut.Handle(ticketId, messageId, CancellationToken.None);
 
         // Assert
         result.Should().BeEquivalentTo(expectedResult);
@@ -43,18 +43,19 @@ public class GetMessageAttachmentsHandlerCachingTests
     public async Task Handle_ShouldReturnInnerResultAndCacheResult_WhenCacheIsMiss()
     {
         // Arrange
-        var messageId = MessageId.Create(1, 1);
-        var cacheKey = $"Deskpro_MessageAttachments_{messageId.TicketId}_{messageId.Id}";
+         var ticketId = 1;
+        var messageId = 1;
+        var cacheKey = $"Deskpro_MessageAttachments_{ticketId}_{messageId}";
         _cache.Get<IReadOnlyCollection<AttachmentDto>>(Arg.Is(cacheKey)).ReturnsNull();
         var innerResult = ErrorOrFactory.From<IReadOnlyCollection<AttachmentDto>>(new Collection<AttachmentDto>());
-        _inner.Handle(Arg.Is(messageId), Arg.Any<CancellationToken>()).Returns(innerResult);
+        _inner.Handle(Arg.Is(ticketId), Arg.Is(messageId), Arg.Any<CancellationToken>()).Returns(innerResult);
 
         // Act
-        var result = await _sut.Handle(messageId, CancellationToken.None);
+        var result = await _sut.Handle(ticketId, messageId, CancellationToken.None);
 
         // Assert
         result.Should().Be(innerResult);
-        await _inner.Received(1).Handle(Arg.Is(messageId), Arg.Any<CancellationToken>());
+        await _inner.Received(1).Handle(Arg.Is(ticketId), Arg.Is(messageId), Arg.Any<CancellationToken>());
         _cache.Received(1).Get<IReadOnlyCollection<AttachmentDto>>(Arg.Is(cacheKey));
         _cache.Received(1).Set(Arg.Is(cacheKey), Arg.Is(innerResult.Value), Arg.Any<TimeSpan>());
     }
@@ -63,14 +64,15 @@ public class GetMessageAttachmentsHandlerCachingTests
     public async Task Handle_ShouldNotCache_WhenInnerResultIsNotSuccessful()
     {
         // Arrange
-        var messageId = MessageId.Create(1, 1);
-        var cacheKey = $"Deskpro_MessageAttachments_{messageId.TicketId} _ {messageId.Id}";
+        var ticketId = 1;
+        var messageId = 1;
+        var cacheKey = $"Deskpro_MessageAttachments_{ticketId} _ {messageId}";
         _cache.Get<IReadOnlyCollection<AttachmentDto>>(Arg.Is(cacheKey)).ReturnsNull();
         var innerResult = Error.Failure().ToErrorOr<IReadOnlyCollection<AttachmentDto>>();
-        _inner.Handle(Arg.Is(messageId), Arg.Any<CancellationToken>()).Returns(innerResult);
+        _inner.Handle(Arg.Is(ticketId), Arg.Is(messageId), Arg.Any<CancellationToken>()).Returns(innerResult);
 
         // Act
-        await _sut.Handle(messageId, CancellationToken.None);
+        await _sut.Handle(ticketId, messageId, CancellationToken.None);
 
         // Assert
         _cache.Received(0).Set(Arg.Is(cacheKey), Arg.Any<Arg.AnyType>(), Arg.Any<TimeSpan>());

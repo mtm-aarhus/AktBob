@@ -1,6 +1,5 @@
 ﻿using AktBob.Deskpro.Contracts;
 using AktBob.Shared.Jobs;
-using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Workflows.Processes.Cleanup;
 internal class DispatchCleanupJobs : IJobHandler<DispatchCleanupJobsJob>
@@ -66,7 +65,7 @@ internal class DispatchCleanupJobs : IJobHandler<DispatchCleanupJobsJob>
     }
 
 
-    private bool JobHasBeenRescheduled(TicketId ticketId, IJobDispatcher jobDispatcher, DateTime afslutningsdato)
+    private bool JobHasBeenRescheduled(int ticketId, IJobDispatcher jobDispatcher, DateTime afslutningsdato)
     {
         var executionDelayDays = Guard.Against.Zero(_configuration.GetValue<int>("DispatchCleanupJobsHandler:ExecutionDelayDays"));
         var utcNow = DateTimeOffset.UtcNow;

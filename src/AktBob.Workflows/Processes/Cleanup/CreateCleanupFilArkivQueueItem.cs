@@ -27,7 +27,7 @@ internal class CreateCleanupFilArkivQueueItem : IJobHandler<CreateCleanupFilArki
         var openOrchestrator = scope.ServiceProvider.GetRequiredService<IOpenOrchestratorModule>();
 
         // Get FilArkiv caseId from database
-        var tickets = await ticketRepository.GetAll(DeskproId: job.TicketId, null, null);
+        var tickets = await ticketRepository.GetAll(deskproId: job.TicketId, null, null);
         if (tickets is null || tickets.Count() == 0)
         {
             throw new BusinessException($"Deskpro ticket {job.TicketId} not found in database");

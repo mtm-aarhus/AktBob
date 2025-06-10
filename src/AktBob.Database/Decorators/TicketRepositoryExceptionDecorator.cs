@@ -1,7 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Database.Repositories;
-using AktBob.Shared.Types.Deskpro;
 using Microsoft.Extensions.Logging;
 
 namespace AktBob.Database.Decorators;
@@ -42,7 +41,7 @@ internal class TicketRepositoryExceptionDecorator : ITicketRepository
         }
     }
 
-    public async Task<IReadOnlyCollection<Ticket>> GetAll(TicketId deskproId, long? podioItemId, Guid? filArkivCaseId)
+    public async Task<IReadOnlyCollection<Ticket>> GetAll(int? deskproId, long? podioItemId, Guid? filArkivCaseId)
     {
         try
         {
@@ -55,7 +54,7 @@ internal class TicketRepositoryExceptionDecorator : ITicketRepository
         }
     }
 
-    public async Task<Ticket?> GetByDeskproTicketId(TicketId deskproTicketId)
+    public async Task<Ticket?> GetByDeskproTicketId(int deskproTicketId)
     {
         try
         {

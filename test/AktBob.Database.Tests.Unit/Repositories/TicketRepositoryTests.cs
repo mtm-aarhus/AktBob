@@ -1,13 +1,11 @@
 ﻿using AktBob.Database.Entities;
 using AktBob.Database.Repositories;
 using AktBob.Shared.DataAccess;
-using AktBob.Shared.Types.Deskpro;
 using Dapper;
 using FluentAssertions;
 using FluentValidation;
 using NSubstitute;
 using System.Data;
-using System.Text.Json;
 
 namespace AktBob.Database.Tests.Unit.Repositories;
 
@@ -30,7 +28,7 @@ public class TicketRepositoryTests
         var ticketId = 1;
         var ticket = new Ticket
         {
-            DeskproId = TicketId.Create(1)
+            DeskproId = 1
         };
 
         _dataAccess
@@ -57,7 +55,7 @@ public class TicketRepositoryTests
         // Arrange
         var ticket = new Ticket
         {
-            DeskproId = TicketId.Create(1)
+            DeskproId = 1
         };
 
         _dataAccess
@@ -191,9 +189,9 @@ public class TicketRepositoryTests
     public async Task GetByDeskproTicketId_ShouldReturnTicket_WhenTicketIsFound()
     {
         // Arrange
-        var deskproId = TicketId.Create(123);
+        var deskproId = 123;
         var sqlCondition = "t.DeskproId = @DeskproId";
-        var expectedTicket = new Ticket { Id = 1, DeskproId = TicketId.Create(123), CaseNumber = "Ticket A" };
+        var expectedTicket = new Ticket { Id = 1, DeskproId = 123, CaseNumber = "Ticket A" };
         var expectedCase1 = new Case { Id = 101, PodioItemId = 123, TicketId = 1 };
         var expectedCase2 = new Case { Id = 102, PodioItemId = 456, TicketId = 1 };
 
@@ -207,7 +205,7 @@ public class TicketRepositoryTests
         _dataAccess
             .Query(
                 Arg.Any<string>(),
-                Arg.Is<object>(arg => arg.GetType().GetProperty("DeskproId")!.GetValue(arg)!.Equals(deskproId.Value)),
+                Arg.Is<object>(arg => arg.GetType().GetProperty("DeskproId")!.GetValue(arg)!.Equals(deskproId)),
                 "TicketId",
                 Arg.Any<Func<Ticket, Case, Ticket>>())
             .Returns(call =>
@@ -229,7 +227,7 @@ public class TicketRepositoryTests
         // Assert
         await _dataAccess.Received(1).Query(
             Arg.Is<string>(arg => arg.Contains(sqlCondition)),
-            Arg.Is<object>(arg => arg.GetType().GetProperty("DeskproId")!.GetValue(arg)!.Equals(deskproId.Value)),
+            Arg.Is<object>(arg => arg.GetType().GetProperty("DeskproId")!.GetValue(arg)!.Equals(deskproId)),
             "TicketId",
             Arg.Any<Func<Ticket, Case, Ticket>>());
         result.Should().NotBeNull();
@@ -241,14 +239,14 @@ public class TicketRepositoryTests
     public async Task GetByDeskproTicketId_ShouldReturnNull_WhenTicketIsNotFound()
     {
         // Arrange
-        var deskproId = TicketId.Create(123);
+        var deskproId = 123;
         var sqlCondition = "t.DeskproId = @DeskproId";
         var ticketCasePairs = new List<(Ticket, Case)>();
 
         _dataAccess
             .Query(
                 Arg.Any<string>(),
-                Arg.Is<object>(arg => arg.GetType().GetProperty("DeskproId")!.GetValue(arg)!.Equals(deskproId.Value)),
+                Arg.Is<object>(arg => arg.GetType().GetProperty("DeskproId")!.GetValue(arg)!.Equals(deskproId)),
                 "TicketId",
                 Arg.Any<Func<Ticket, Case, Ticket>>())
             .Returns(call =>
@@ -270,7 +268,7 @@ public class TicketRepositoryTests
         // Assert
         await _dataAccess.Received(1).Query(
             Arg.Is<string>(arg => arg.Contains(sqlCondition)),
-            Arg.Is<object>(arg => arg.GetType().GetProperty("DeskproId")!.GetValue(arg)!.Equals(deskproId.Value)),
+            Arg.Is<object>(arg => arg.GetType().GetProperty("DeskproId")!.GetValue(arg)!.Equals(deskproId)),
             "TicketId",
             Arg.Any<Func<Ticket, Case, Ticket>>());
         result.Should().BeNull();
@@ -285,7 +283,7 @@ public class TicketRepositoryTests
     public async Task GetByPodioItemId_ShouldReturnTicket_WhenTicketIsFound(long podioItemId)
     {
         // Arrange
-        var expectedTicket = new Ticket { Id = 1, DeskproId = TicketId.Create(123), CaseNumber = "Ticket A" };
+        var expectedTicket = new Ticket { Id = 1, DeskproId = 123, CaseNumber = "Ticket A" };
         var expectedCase1 = new Case { Id = 101, PodioItemId = 123, TicketId = 1 };
         var expectedCase2 = new Case { Id = 102, PodioItemId = 456, TicketId = 1 };
 
@@ -390,7 +388,7 @@ public class TicketRepositoryTests
     public async Task GetAll_ShouldReturnTickets_WhenFound(int? deskproId, long? podioItemId, string? filArkivCaseId, string[] sqlConditions)
     {
         // Arrange
-        var expectedTicket = new Ticket { Id = 1, DeskproId = TicketId.Create(123), CaseNumber = "Ticket A" };
+        var expectedTicket = new Ticket { Id = 1, DeskproId = 123, CaseNumber = "Ticket A" };
         var expectedCase1 = new Case { Id = 101, PodioItemId = 12312312312, TicketId = 1, FilArkivCaseId = Guid.Parse("1866CBE9-5B44-4A5B-9F92-A906C3345D6C") };
         var expectedCase2 = new Case { Id = 102, PodioItemId = 98798798798, TicketId = 1, FilArkivCaseId = Guid.Parse("D06FD2B7-D109-4E36-846C-FB1B1F5C1211") };
 
@@ -422,16 +420,13 @@ public class TicketRepositoryTests
 
         Guid? parsedFilArkivCaseId = filArkivCaseId != null ? Guid.Parse(filArkivCaseId) : null;
 
-        var ticketId = deskproId == null ? TicketId.Empty : TicketId.Create((int)deskproId);
-
-
         // Act
-        var result = await _sut.GetAll(ticketId, podioItemId, parsedFilArkivCaseId);
+        var result = await _sut.GetAll((int)deskproId, podioItemId, parsedFilArkivCaseId);
 
         // Assert
         await _dataAccess.Received(1).Query(
             Arg.Is<string>(arg => sqlConditions.All(value => arg.Contains(value))),
-            Arg.Is<object>(arg => MatchesAnonymousObject(arg, ticketId.Value, podioItemId, parsedFilArkivCaseId)),            
+            Arg.Is<object>(arg => MatchesAnonymousObject(arg, (int)deskproId, podioItemId, parsedFilArkivCaseId)),            
             "TicketId",
             Arg.Any<Func<Ticket, Case, Ticket>>());
         result.Should().NotBeNull();
@@ -495,15 +490,13 @@ public class TicketRepositoryTests
 
         Guid? parsedFilArkivCaseId = filArkivCaseId != null ? Guid.Parse(filArkivCaseId) : null;
 
-        var ticketId = deskproId == null ? TicketId.Empty : TicketId.Create((int)deskproId);
-
         // Act
-        var result = await _sut.GetAll(ticketId, podioItemId, parsedFilArkivCaseId);
+        var result = await _sut.GetAll((int)deskproId, podioItemId, parsedFilArkivCaseId);
 
         // Assert
         await _dataAccess.Received(1).Query(
             Arg.Is<string>(arg => sqlConditions.All(value => arg.Contains(value))),
-            Arg.Is<object>(arg => MatchesAnonymousObject(arg, ticketId.Value, podioItemId, parsedFilArkivCaseId)),
+            Arg.Is<object>(arg => MatchesAnonymousObject(arg, (int)deskproId, podioItemId, parsedFilArkivCaseId)),
             "TicketId",
             Arg.Any<Func<Ticket, Case, Ticket>>());
         result.Should().NotBeNull();
@@ -521,7 +514,7 @@ public class TicketRepositoryTests
         {
             Id = 1,
             CaseNumber = "case number",
-            DeskproId = TicketId.Create(123)
+            DeskproId = 123
         };
 
         _dataAccess
@@ -544,7 +537,7 @@ public class TicketRepositoryTests
         {
             Id = 1,
             CaseNumber = "case number",
-            DeskproId = TicketId.Create(123)
+            DeskproId = 123
         };
 
         _dataAccess

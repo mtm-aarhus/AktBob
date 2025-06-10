@@ -1,7 +1,6 @@
 ﻿using AktBob.Database.Dtos;
 using AktBob.Database.Entities;
 using AktBob.Database.Extensions;
-using AktBob.Shared.Types.Deskpro;
 using FluentAssertions;
 
 namespace AktBob.Database.Tests.Unit.Extensions;
@@ -28,7 +27,7 @@ public class TicketExtensionsTests
                 }
             },
             CaseUrl = "case url",
-            DeskproId = TicketId.Create(123),
+            DeskproId = 123,
             Id = 123,
             SharepointFolderName = "sharepoint folder name"
         };
@@ -69,7 +68,7 @@ public class TicketExtensionsTests
                     }
                 },
                 CaseUrl = "case url 1",
-                DeskproId = TicketId.Create(123),
+                DeskproId = 123,
                 Id = 123,
                 SharepointFolderName = "sharepoint folder name 1"
             },
@@ -89,7 +88,7 @@ public class TicketExtensionsTests
                     }
                 },
                 CaseUrl = "case url 2",
-                DeskproId = TicketId.Create(987),
+                DeskproId = 987,
                 Id = 987,
                 SharepointFolderName = "sharepoint folder name 2"
             }

@@ -1,6 +1,5 @@
 ﻿using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.Types.Deskpro;
 
 namespace AktBob.Deskpro.Handlers.GetMessage;
 internal class GetMessageHandlerLogging : IGetMessageHandler
@@ -14,11 +13,11 @@ internal class GetMessageHandlerLogging : IGetMessageHandler
         _logger = logger;
     }
 
-    public async Task<ErrorOr<MessageDto>> Handle(MessageId messageId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<MessageDto>> Handle(int ticketId, int messageId, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Getting Deskpro message {messageId}", messageId);
 
-        var result = await _inner.Handle(messageId, cancellationToken);
+        var result = await _inner.Handle(ticketId, messageId, cancellationToken);
 
         result.Switch(
             _ => _logger.LogInformation("Deskpro message {messageId} retrieved", messageId),

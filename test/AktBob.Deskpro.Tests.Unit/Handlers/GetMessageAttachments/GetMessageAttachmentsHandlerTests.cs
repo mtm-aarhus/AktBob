@@ -2,7 +2,6 @@
 using AAK.Deskpro.Models;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Deskpro.Handlers.GetMessageAttachments;
-using AktBob.Shared.Types.Deskpro;
 using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -22,7 +21,8 @@ public class GetMessageAttachmentsHandlerTests
     public async Task Handle_ShouldReturnAttachmentDtoCollection_WhenDeskproClientReturnsCollectionSuccessfully()
     {
         // Arrange
-        var messageId = MessageId.Create(1, 1);
+        var ticketId = 1;
+        var messageId = 1;
         var currentPage = 1;
         var expected = new List<AttachmentDto> { new AttachmentDto(), new AttachmentDto() };
         var attachments = new MessageAttachments
@@ -46,7 +46,7 @@ public class GetMessageAttachmentsHandlerTests
                 attachments);
 
         // Act
-        var result = await _sut.Handle(messageId, CancellationToken.None);
+        var result = await _sut.Handle(ticketId, messageId, CancellationToken.None);
 
         // Assert
         result.IsError.Should().BeFalse();
@@ -58,11 +58,12 @@ public class GetMessageAttachmentsHandlerTests
     public async Task Handle_ShouldRethrowException_WhenDeskproClientThrowsAnyException()
     {
         // Arrange
-        var messageId = MessageId.Create(1, 1);
+        var ticketId = 1;
+        var messageId = 1;
         _deskproClient.GetMessageAttachments(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).ThrowsAsync<Exception>();
 
         // Act
-        var act = () => _sut.Handle(messageId, CancellationToken.None);
+        var act = () => _sut.Handle(ticketId, messageId, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<Exception>();

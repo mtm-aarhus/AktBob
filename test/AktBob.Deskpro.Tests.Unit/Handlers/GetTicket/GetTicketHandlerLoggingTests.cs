@@ -1,6 +1,5 @@
 ﻿using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Deskpro.Handlers.GetTicket;
-using AktBob.Shared.Types.Deskpro;
 using ErrorOr;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -23,7 +22,7 @@ public class GetTicketHandlerLoggingTests
     public async Task GetTicket_ShouldLogInformationAndReturnInnerResult_WhenInvoked()
     {
         // Arrange
-        var ticketId = TicketId.Create(1);
+        var ticketId = 1;
         var ticketDto = new TicketDto
         {
             Id = ticketId
@@ -47,7 +46,7 @@ public class GetTicketHandlerLoggingTests
     public async Task GetTicket_ShouldLogDebugAndReturnInnerResult_WhenInnerResultIsNotSuccessful()
     {
         // Arrange
-        var ticketId = TicketId.Create(1);
+        var ticketId = 1;
         var ticketDto = new TicketDto
         {
             Id = ticketId

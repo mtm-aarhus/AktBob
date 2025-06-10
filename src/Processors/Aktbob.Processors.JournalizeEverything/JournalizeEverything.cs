@@ -6,9 +6,9 @@ using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using AktBob.Shared.Contracts.Processors;
 using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.ModuleClients;
+using AktBob.Shared.ModuleClients.DeskproModule;
+using AktBob.Shared.ModuleClients.OpenOrchestratorModule;
 using AktBob.Shared.Processors;
-using AktBob.Shared.Types.Deskpro;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -21,13 +21,13 @@ namespace Aktbob.Processors.JournalizeEverything;
 public class JournalizeEverything(
     ILogger<JournalizeEverything> logger,
     IConfiguration configuration,
-    DeskproModuleClient deskpro,
-    OpenOrchestratorModuleClient openOrchestrator,
+    IDeskproModuleClient deskpro,
+    IOpenOrchestratorModuleClient openOrchestrator,
     ITicketRepository ticketRepository)
 {
     [Function("JournalizeEverything")]
     public async Task Run(
-        [ServiceBusTrigger("%QueueName%", Connection = "AzureServiceBus")]
+        [ServiceBusTrigger("%ServiceBusQueueName%", Connection = "AzureServiceBus")]
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions,
         CancellationToken cancellationToken)
@@ -43,42 +43,38 @@ public class JournalizeEverything(
             throw new BusinessException($"{LogSnippets.MessageDeliveryCount(message.MessageId, message.DeliveryCount)}: Body could not be deserialized to type {nameof(JournalizeEverythingJob)}. Body content = {message.Body}");
         }
         
-        // Start process
-        var ticketId = TicketId.Create(job.TicketId);
-        
         // Get data
-        var databaseTicket = GetDatabaseTicket(ticketId, cancellationToken);
-        var agent = GetAgent(ticketId, cancellationToken);
+        var databaseTicket = GetDatabaseTicket(job.TicketId, cancellationToken);
+        var agent = GetAgent(job.TicketId, cancellationToken);
         await Task.WhenAll([databaseTicket, agent]);
         
         agent.Result.LogResultErrors(logger);
         
         // Create OpenOrchestrator queue item
         await CreateOpenOrchestratorQueueItem(
-            ticketId: ticketId,
+            ticketId: job.TicketId,
             caseNumber: databaseTicket.Result?.CaseNumber,
             sharepointFolderName: databaseTicket.Result?.SharepointFolderName,
             agent: agent.Result.Value,
             cancellationToken);
     }
 
-    private async Task CreateOpenOrchestratorQueueItem(TicketId ticketId, string? caseNumber, string? sharepointFolderName, PersonDto? agent, CancellationToken cancellationToken)
+    private async Task CreateOpenOrchestratorQueueItem(int ticketId, string? caseNumber, string? sharepointFolderName, PersonDto? agent, CancellationToken cancellationToken)
     {
         var payload = new
         {
             Aktindsigtssag = caseNumber,
             Email = agent?.Email,
             Navn = agent?.FullName,
-            DeskproID = ticketId.Value,
+            DeskproID = ticketId,
             Overmappenavn = sharepointFolderName
         };
 
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>($"OpenOrchestratorQueueName"));
-        var result = await openOrchestrator.AddQueueItem(openOrchestratorQueueName, $"DeskproID {ticketId.ToString()}", payload, cancellationToken);
-        logger.LogInformation("OpenOrchestrator Queue item created: {response}", result.Value);
+        await openOrchestrator.AddQueueItem(openOrchestratorQueueName, $"DeskproID {ticketId.ToString()}", payload, cancellationToken);
     }
 
-    private async Task<Ticket?> GetDatabaseTicket(TicketId ticketId, CancellationToken cancellationToken)
+    private async Task<Ticket?> GetDatabaseTicket(int ticketId, CancellationToken cancellationToken)
     {
         var data = await ticketRepository.GetByDeskproTicketId(ticketId);
         if (data is null) throw new BusinessException("Unable to get ticket from database");
@@ -91,7 +87,7 @@ public class JournalizeEverything(
         return data;
     }
 
-    private async Task<ErrorOr<PersonDto>> GetAgent(TicketId ticketId, CancellationToken cancellationToken)
+    private async Task<ErrorOr<PersonDto>> GetAgent(int ticketId, CancellationToken cancellationToken)
     {
         var ticket = await deskpro.GetTicket(ticketId, cancellationToken);
         if (ticket.IsError) return ticket.Errors;

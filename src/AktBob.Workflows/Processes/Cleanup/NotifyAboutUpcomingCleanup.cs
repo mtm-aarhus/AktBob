@@ -1,7 +1,6 @@
 ﻿using AktBob.Deskpro.Contracts;
 using AktBob.Email.Contracts;
 using AktBob.Shared.Jobs;
-using AktBob.Shared.Types.Deskpro;
 using AktBob.Workflows.Helpers;
 
 namespace AktBob.Workflows.Processes.Cleanup;
@@ -87,7 +86,7 @@ internal class NotifyAboutUpcomingCleanup : IJobHandler<NotitfyAboutUpcomingClea
         email.Send(agent.Value.Email, subject, emailBody, true);
     }
 
-    private bool JobHasToBeRescheduled(TicketId ticketId, IJobDispatcher jobDispatcher, DateTime afslutningsdato)
+    private bool JobHasToBeRescheduled(int ticketId, IJobDispatcher jobDispatcher, DateTime afslutningsdato)
     {
         var executionDelayDays = Guard.Against.Zero(_configuration.GetValue<int>("DispatchCleanupJobsHandler:NotificationDelayDays"));
         var utcNow = DateTimeOffset.UtcNow;

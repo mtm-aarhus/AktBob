@@ -1,6 +1,5 @@
 ﻿using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Deskpro.Handlers.GetTicketsByFieldSearch;
-using AktBob.Shared.Types.Deskpro;
 using ErrorOr;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -27,7 +26,7 @@ public class GetTicketsByFieldSearchHandlerExceptionTests
         // Arrange
         int[] fields = { 1, 2, 3 };
         var searchValue = "search value";
-        var collection = new Collection<TicketDto> { new TicketDto { Id = TicketId.Create(1) } };
+        var collection = new Collection<TicketDto> { new TicketDto { Id = 1 } };
         var innerResult = ErrorOrFactory.From<IReadOnlyCollection<TicketDto>>(collection);
         var expectedResult = ErrorOrFactory.From<IReadOnlyCollection<TicketDto>>(collection);
         _inner.Handle(fields, searchValue, Arg.Any<CancellationToken>()).Returns(innerResult);

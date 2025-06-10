@@ -1,6 +1,5 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Jobs;
-using AktBob.Shared.Types.Deskpro;
 using Ardalis.GuardClauses;
 using FastEndpoints;
 
@@ -31,20 +30,19 @@ internal class CreateCleanUpQueueItemsEndpoint : Endpoint<CreateCleanUpQueueItem
 
     public override async Task HandleAsync(CreateCleanUpQueueItemsRequest req, CancellationToken ct)
     {
-        var ticketId = TicketId.Create(req.DeskproTicketId);
-        DispatchCleanUpJobs(ticketId);
-        DispatchCleanUpNotificationJobs(ticketId);
-        SetDeskproFieldFinishedAt(ticketId);
+        DispatchCleanUpJobs(req.DeskproTicketId);
+        DispatchCleanUpNotificationJobs(req.DeskproTicketId);
+        SetDeskproFieldFinishedAt(req.DeskproTicketId);
         await SendNoContentAsync(ct);
     }
 
-    private void SetDeskproFieldFinishedAt(TicketId ticketId)
+    private void SetDeskproFieldFinishedAt(int ticketId)
     {
         var job = new UpdateDeskproSetFærdigbehandletDatoFieldJob(ticketId);
         _jobDispatcher.Dispatch(job);
     }
 
-    private void DispatchCleanUpJobs(TicketId ticketId)
+    private void DispatchCleanUpJobs(int ticketId)
     {
         if (_jobDispatcher.IsJobAlreadyScheduled(typeof(DispatchCleanupJobsJob), ticketId, nameof(DispatchCleanupJobsJob.TicketId)))
         {
@@ -59,7 +57,7 @@ internal class CreateCleanUpQueueItemsEndpoint : Endpoint<CreateCleanUpQueueItem
         _jobDispatcher.Dispatch(job, offset);
     }
 
-    private void DispatchCleanUpNotificationJobs(TicketId ticketId)
+    private void DispatchCleanUpNotificationJobs(int ticketId)
     {
         if (_jobDispatcher.IsJobAlreadyScheduled(typeof(NotitfyAboutUpcomingCleanupJob), ticketId, nameof(NotitfyAboutUpcomingCleanupJob.TicketId)))
         {

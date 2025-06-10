@@ -1,7 +1,6 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Contracts.Processors;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.Types.Deskpro;
 using Ardalis.GuardClauses;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,8 +17,7 @@ internal static class CreateAfgørelsesskrivelseEndpoint
             CancellationToken cancellationToken) =>
         {
             var queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Queues:CreateAfgoerelsesskrivelse"));
-            var ticketId = TicketId.Create(request.DeskproId);
-            var job = new CreateAfgørelsesskrivelseJob(ticketId);
+            var job = new CreateAfgørelsesskrivelseJob(request.DeskproId);
             var result = await messageBus.SendMessage(queueName, job, cancellationToken);
             return result.ToMinimalApiResponse();
         });

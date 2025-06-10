@@ -4,9 +4,9 @@ using AktBob.Shared.Contracts.Modules.OpenOrchestrator;
 using AktBob.Shared.Extensions;
 using ErrorOr;
 
-namespace AktBob.Shared.ModuleClients;
+namespace AktBob.Shared.ModuleClients.OpenOrchestratorModule;
 
-public class OpenOrchestratorModuleClient(HttpClient httpClient)
+internal class OpenOrchestratorModuleClient(HttpClient httpClient) : IOpenOrchestratorModuleClient
 {
     private readonly HttpClient _httpClient = httpClient;
     private readonly JsonSerializerOptions _jsonSerializerOptions = SerializerConfiguration.SerializerOptions(caseInsensitive: false, jsonNamingPolicy: null);
@@ -25,6 +25,5 @@ public class OpenOrchestratorModuleClient(HttpClient httpClient)
         {
             return Error.Failure("AddQueueItem.Failure", $"Error creating queue item: {ex.Message}");
         }
-        
     }
 }

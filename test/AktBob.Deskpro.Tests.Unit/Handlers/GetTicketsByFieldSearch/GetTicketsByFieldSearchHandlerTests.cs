@@ -3,7 +3,6 @@ using AAK.Deskpro.Models;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.Deskpro.Handlers.GetTicketsByFieldSearch;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.Types.Deskpro;
 using ErrorOr;
 using FluentAssertions;
 using NSubstitute;
@@ -34,8 +33,8 @@ public class GetTicketsByFieldSearchHandlerTests
         {
             expectedCollection.AddRange(new Collection<TicketDto>
             {
-                new TicketDto { Id = TicketId.Create(field * 1) },
-                new TicketDto { Id = TicketId.Create(field * 2) }
+                new TicketDto { Id = field * 1 },
+                new TicketDto { Id = field * 2 }
             });
 
             _deskproClient
@@ -87,8 +86,8 @@ public class GetTicketsByFieldSearchHandlerTests
         {
             expectedCollection.AddRange(new Collection<TicketDto>
             {
-                new TicketDto { Id = TicketId.Create(field * 1) },
-                new TicketDto { Id = TicketId.Create(field * 2) }
+                new TicketDto { Id = field * 1 },
+                new TicketDto { Id = field * 2 }
             });
             _deskproClient
                 .GetTicketsByFieldValue(Arg.Is(field), Arg.Is(searchValue), Arg.Any<CancellationToken>())
