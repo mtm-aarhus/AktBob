@@ -10,11 +10,11 @@ using AktBob.Shared.ModuleClients.DeskproModule;
 using AktBob.Shared.ModuleClients.OpenOrchestratorModule;
 using AktBob.Shared.Processors;
 using Azure.Messaging.ServiceBus;
+using ErrorOr;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using Ardalis.GuardClauses;
-using ErrorOr;
 using Microsoft.Extensions.Configuration;
+using Ardalis.GuardClauses;
 
 namespace Aktbob.Processors.JournalizeEverything;
 
