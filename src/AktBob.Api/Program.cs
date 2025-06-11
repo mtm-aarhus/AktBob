@@ -100,5 +100,5 @@ app.UseFastEndpoints(c =>
 
 app.MapJobEndpoints();
 app.MapTicketEndpoints();
-
+app.MapDatabaseEndpoints();
 app.Run();
