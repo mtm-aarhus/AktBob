@@ -17,12 +17,12 @@ using OpenApiOperation = Microsoft.OpenApi.Models.OpenApiOperation;
 var builder = WebApplication.CreateBuilder(args);
 
 // Fast Endpoints
-// builder.Services.AddFastEndpoints(options =>
-//     options.Assemblies = [
-//         typeof(Program).Assembly,
-//         typeof(AktBob.Database.ModuleServices).Assembly,
-//         typeof(AktBob.Podio.ModuleServices).Assembly]
-//     );
+builder.Services.AddFastEndpoints(options =>
+    options.Assemblies = [
+        typeof(Program).Assembly,
+        typeof(AktBob.Database.ModuleServices).Assembly,
+        typeof(AktBob.Podio.ModuleServices).Assembly]
+    );
 
 builder.Services
     .AddAuthorization()
@@ -91,14 +91,14 @@ app.UseHangfireDashboard("/hangfire", options);
 app.UseAuthentication();
 app.UseAuthorization();
 
-// app.UseFastEndpoints(c =>
-// {
-//     c.Endpoints.RoutePrefix = "Api";
-//     c.Endpoints.Configurator = ep =>
-//     {
-//         ep.Description(b => b.ClearDefaultProduces());
-//     };
-// });
+app.UseFastEndpoints(c =>
+{
+    c.Endpoints.RoutePrefix = "api";
+    c.Endpoints.Configurator = ep =>
+    {
+        ep.Description(b => b.ClearDefaultProduces());
+    };
+});
 
 var jobs = app.MapGroup("/api/jobs")
     .WithTags("Jobs")
