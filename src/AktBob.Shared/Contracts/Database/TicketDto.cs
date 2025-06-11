@@ -1,4 +1,4 @@
-﻿namespace AktBob.Database.Dtos;
+﻿namespace AktBob.Shared.Contracts.Database;
 public record TicketDto
 {
     public int Id { get; set; }

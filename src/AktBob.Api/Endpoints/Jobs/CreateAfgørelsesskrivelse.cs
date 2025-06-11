@@ -4,11 +4,14 @@ using AktBob.Shared.Extensions;
 using Ardalis.GuardClauses;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AktBob.Api.Endpoints.Jobs.CreateAfgørelsesskrivelse;
+namespace AktBob.Api.Endpoints.Jobs;
+
+public record CreateAfgørelsesskrivelseRequest(int DeskproId);
 
 internal static class CreateAfgørelsesskrivelse
 {
     public static string Description => "Opretter afgørelsesskrivelsesdokument (via proces i OpenOrchestrator).";
+    public static string Summery => "Opret afgørelsesskrivelse";
     
     public static async Task<IResult> Endpoint(
         [FromServices] IConfiguration configuration,

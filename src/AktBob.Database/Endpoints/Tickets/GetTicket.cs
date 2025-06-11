@@ -1,6 +1,7 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Dtos;
 using AktBob.Database.Extensions;
+using AktBob.Shared.Contracts.Database;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 

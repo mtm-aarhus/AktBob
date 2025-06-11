@@ -1,6 +1,5 @@
 using AktBob.Api;
-using AktBob.Api.Endpoints.Jobs.CreateAfgørelsesskrivelse;
-using AktBob.Api.Endpoints.Jobs.JournalizeEverything;
+using AktBob.Api.Endpoints;
 using AktBob.Shared;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -12,7 +11,6 @@ using AktBob.Podio;
 using Hangfire.Dashboard.BasicAuthorization;
 using Ardalis.GuardClauses;
 using Scalar.AspNetCore;
-using OpenApiOperation = Microsoft.OpenApi.Models.OpenApiOperation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -100,11 +98,7 @@ app.UseFastEndpoints(c =>
     };
 });
 
-var jobs = app.MapGroup("/api/jobs")
-    .WithTags("Jobs")
-    .RequireAuthorization();
-
-jobs.MapPost("/journalize-everything", JournalizeEverything.Endpoint).WithSummary("Journalisér alt").WithDescription(JournalizeEverything.Description);
-jobs.MapPost("/create-afgoerelsesskrivelse", CreateAfgørelsesskrivelse.Endpoint).WithSummary("Opret afgørelsesskrivelse").WithDescription(CreateAfgørelsesskrivelse.Description);
+app.MapJobEndpoints();
+app.MapTicketEndpoints();
 
 app.Run();

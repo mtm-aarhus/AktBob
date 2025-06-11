@@ -2,6 +2,7 @@
 using AktBob.Database.Dtos;
 using AktBob.Database.Entities;
 using AktBob.Database.Extensions;
+using AktBob.Shared.Contracts.Database;
 using FastEndpoints;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;

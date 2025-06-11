@@ -1,5 +1,6 @@
 ﻿using AktBob.Database.Dtos;
 using AktBob.Database.Entities;
+using AktBob.Shared.Contracts.Database;
 
 namespace AktBob.Database.Extensions;
 internal static class TicketExtensions

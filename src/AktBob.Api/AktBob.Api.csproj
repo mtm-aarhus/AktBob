@@ -27,9 +27,4 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Endpoints\CreateTicket\" />
-    <Folder Include="Endpoints\Jobs\" />
-  </ItemGroup>
-
 </Project>

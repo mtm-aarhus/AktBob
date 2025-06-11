@@ -1,6 +1,7 @@
 ﻿using AktBob.Database.Dtos;
 using AktBob.Database.Entities;
 using AktBob.Database.Extensions;
+using AktBob.Shared.Contracts.Database;
 using FluentAssertions;
 
 namespace AktBob.Database.Tests.Unit.Extensions;

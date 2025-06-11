@@ -4,11 +4,14 @@ using AktBob.Shared.Extensions;
 using Ardalis.GuardClauses;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AktBob.Api.Endpoints.Jobs.JournalizeEverything;
+namespace AktBob.Api.Endpoints.Jobs;
+
+internal record JournalizeEverythingRequest(int DeskproId);
 
 internal static class JournalizeEverything
 {
     public static string Description => "Journaliserer alle udleverede dokumenter til aktindsigtssagen i GetOrganized (via proces i OpenOrchestrator).";
+    public static string Summery => "Journalisér alt";
     
     public static async Task<IResult> Endpoint(
         [FromServices] IConfiguration configuration,
