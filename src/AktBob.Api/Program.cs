@@ -11,40 +11,43 @@ using AktBob.Database;
 using AktBob.Podio;
 using Hangfire.Dashboard.BasicAuthorization;
 using Ardalis.GuardClauses;
+using Scalar.AspNetCore;
+using OpenApiOperation = Microsoft.OpenApi.Models.OpenApiOperation;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Fast Endpoints
-builder.Services.AddFastEndpoints(options =>
-    options.Assemblies = [
-        typeof(Program).Assembly,
-        typeof(AktBob.Database.ModuleServices).Assembly,
-        typeof(AktBob.Podio.ModuleServices).Assembly]
-    );
+// builder.Services.AddFastEndpoints(options =>
+//     options.Assemblies = [
+//         typeof(Program).Assembly,
+//         typeof(AktBob.Database.ModuleServices).Assembly,
+//         typeof(AktBob.Podio.ModuleServices).Assembly]
+//     );
 
 builder.Services
     .AddAuthorization()
     .AddAuthentication(ApiKeyAuthentication.SchemeName)
     .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthentication>(ApiKeyAuthentication.SchemeName, null);
 
-// Swagger
-builder.Services.SwaggerDocument(o =>
-{
-    o.EnableJWTBearerAuth = false;
-    o.DocumentSettings = s =>
-    {
-        s.AddAuth(ApiKeyAuthentication.SchemeName, new()
-        {
-            Name = ApiKeyAuthentication.HeaderName,
-            In = OpenApiSecurityApiKeyLocation.Header,
-            Type = OpenApiSecuritySchemeType.ApiKey
-        });
-
-        s.Title = "AktBob API";
-    };
-
-    o.AutoTagPathSegmentIndex = 0;
-});
+// OpenAPI
+builder.Services.AddOpenApi();
+// builder.Services.SwaggerDocument(o =>
+// {
+//     o.EnableJWTBearerAuth = false;
+//     o.DocumentSettings = s =>
+//     {
+//         s.AddAuth(ApiKeyAuthentication.SchemeName, new()
+//         {
+//             Name = ApiKeyAuthentication.HeaderName,
+//             In = OpenApiSecurityApiKeyLocation.Header,
+//             Type = OpenApiSecuritySchemeType.ApiKey
+//         });
+//
+//         s.Title = "AktBob API";
+//     };
+//
+//     o.AutoTagPathSegmentIndex = 0;
+// });
 
 // Hangfire
 builder.Services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
@@ -56,6 +59,9 @@ builder.Services.AddPodioModule(builder.Configuration);
 builder.Services.AddSharedModule();
 
 var app = builder.Build();
+
+app.MapOpenApi();
+app.MapScalarApiReference();
 
 var options = new DashboardOptions
 {
@@ -85,17 +91,20 @@ app.UseHangfireDashboard("/hangfire", options);
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseFastEndpoints(c =>
-{
-    c.Endpoints.RoutePrefix = "Api";
-    c.Endpoints.Configurator = ep =>
-    {
-        ep.Description(b => b.ClearDefaultProduces());
-    };
-});
+// app.UseFastEndpoints(c =>
+// {
+//     c.Endpoints.RoutePrefix = "Api";
+//     c.Endpoints.Configurator = ep =>
+//     {
+//         ep.Description(b => b.ClearDefaultProduces());
+//     };
+// });
 
-app.MapCreateAfgørelsesskrivelseEndpoint();
-app.MapJournalizeEverythingEndpoint();
+var jobs = app.MapGroup("/api/jobs")
+    .WithTags("Jobs")
+    .RequireAuthorization();
 
-app.UseSwaggerGen();
+jobs.MapPost("/journalize-everything", JournalizeEverything.Endpoint).WithSummary("Journalisér alt").WithDescription(JournalizeEverything.Description);
+jobs.MapPost("/create-afgoerelsesskrivelse", CreateAfgørelsesskrivelse.Endpoint).WithSummary("Opret afgørelsesskrivelse").WithDescription(CreateAfgørelsesskrivelse.Description);
+
 app.Run();
