@@ -1,10 +1,10 @@
 ﻿using AktBob.Shared;
 using AktBob.Shared.Contracts.Processors;
 using AktBob.Shared.Extensions;
-using Microsoft.AspNetCore.Mvc;
 using Ardalis.GuardClauses;
+using Microsoft.AspNetCore.Mvc;
 
-namespace AktBob.Api.Endpoints.JournalizeEverything;
+namespace AktBob.Api.Endpoints.Jobs.JournalizeEverything;
 
 internal static class JournalizeEverything
 {

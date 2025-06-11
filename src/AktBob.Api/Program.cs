@@ -1,6 +1,6 @@
 using AktBob.Api;
-using AktBob.Api.Endpoints.CreateAfgørelsesskrivelse;
-using AktBob.Api.Endpoints.JournalizeEverything;
+using AktBob.Api.Endpoints.Jobs.CreateAfgørelsesskrivelse;
+using AktBob.Api.Endpoints.Jobs.JournalizeEverything;
 using AktBob.Shared;
 using FastEndpoints;
 using FastEndpoints.Swagger;

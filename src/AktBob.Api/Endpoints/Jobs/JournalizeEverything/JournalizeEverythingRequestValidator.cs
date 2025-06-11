@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
 using FluentValidation;
 
-namespace AktBob.Api.Endpoints.JournalizeEverything;
+namespace AktBob.Api.Endpoints.Jobs.JournalizeEverything;
 
 internal class JournalizeEverythingRequestValidator : Validator<JournalizeEverythingRequest>
 {

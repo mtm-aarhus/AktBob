@@ -4,7 +4,7 @@ using AktBob.Shared.Extensions;
 using Ardalis.GuardClauses;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AktBob.Api.Endpoints.CreateAfgørelsesskrivelse;
+namespace AktBob.Api.Endpoints.Jobs.CreateAfgørelsesskrivelse;
 
 internal static class CreateAfgørelsesskrivelse
 {

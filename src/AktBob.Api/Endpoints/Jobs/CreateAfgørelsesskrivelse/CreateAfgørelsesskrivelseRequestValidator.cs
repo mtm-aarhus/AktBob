@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
 using FluentValidation;
 
-namespace AktBob.Api.Endpoints.CreateAfgørelsesskrivelse;
+namespace AktBob.Api.Endpoints.Jobs.CreateAfgørelsesskrivelse;
 
 public class CreateAfgørelsesskrivelseRequestValidator : Validator<CreateAfgørelsesskrivelseRequest>
 {
