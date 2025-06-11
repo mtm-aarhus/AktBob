@@ -8,8 +8,8 @@ internal record CreateTicketRequest(int DeskproId);
 
 internal static class CreateTicket
 {
-    public static string Description => "Creates a new ticket in the database.";
-    
+    public static string Description => "Registrerer en ny ticket i databasen baseret på et Deskpro ticket ID";
+    public static string Summery => "Registrer ny ticket";
     public static async Task<IResult> Endpoint(
         [FromBody] CreateTicketRequest request,
         [FromServices] ITicketRepository repository,

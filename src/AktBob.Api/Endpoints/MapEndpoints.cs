@@ -23,7 +23,7 @@ internal static class MapEndpoints
             .WithTags("Tickets")
             .RequireAuthorization();
         
-        group.MapPost("", CreateTicket.Endpoint).WithSummary("Create ticket").WithDescription(CreateTicket.Description);
+        group.MapPost("", CreateTicket.Endpoint).WithSummary(CreateTicket.Summery).WithDescription(CreateTicket.Description);
         return endpoints;
     } 
 }
