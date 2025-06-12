@@ -59,7 +59,7 @@ builder.Services.AddSharedModule();
 var app = builder.Build();
 
 app.MapOpenApi();
-app.MapScalarApiReference();
+app.MapScalarApiReference("/");
 
 var options = new DashboardOptions
 {

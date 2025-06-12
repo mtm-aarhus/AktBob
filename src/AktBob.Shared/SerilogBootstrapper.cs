@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.ApplicationInsights.Channel;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
+using Serilog.Parsing;
+using Serilog.Sinks.ApplicationInsights.TelemetryConverters;
 
 namespace AktBob.Shared;
 
@@ -19,10 +22,27 @@ public static class SerilogBootstrapper
         if (!string.IsNullOrEmpty(applicationInsightsConnectionString))
         {
             services.AddApplicationInsightsTelemetry();
-            logger.WriteTo.ApplicationInsights(applicationInsightsConnectionString, TelemetryConverter.Traces);
+            logger.WriteTo.ApplicationInsights(
+                applicationInsightsConnectionString,
+                new TemplateTraceTelemetryConverter());
         }       
             
         Log.Logger = logger.CreateLogger();
         services.AddSerilog();
+    }
+}
+
+public class TemplateTraceTelemetryConverter : TraceTelemetryConverter
+{
+    public override IEnumerable<ITelemetry> Convert(LogEvent logEvent, IFormatProvider formatProvider)
+    {
+        var templateParser = new MessageTemplateParser();
+        LogEvent newLogEvent = new LogEvent(
+            logEvent.Timestamp,
+            logEvent.Level,
+            logEvent.Exception,
+            logEvent.MessageTemplate,
+            logEvent.Properties.Select(p => new LogEventProperty(p.Key, p.Value)));
+        return base.Convert(newLogEvent, formatProvider);
     }
 }
