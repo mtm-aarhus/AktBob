@@ -51,6 +51,7 @@ internal static class MapEndpoints
     
         group.MapGetCaseEndpoint("/{id:int}");
         group.MapGetCasesEndpoint("");
+        group.MapUpdateCaseEndpoint("/{id:int}");
     
         return group;
     }
@@ -77,6 +78,7 @@ internal static class MapEndpoints
         
         group.MapGetCasesEndpoint("/cases");
         group.MapGetCaseEndpoint("/cases/{id:int}");
+        group.MapUpdateCaseEndpoint("/cases/{id:int}");
         
         return endpoints;
     }

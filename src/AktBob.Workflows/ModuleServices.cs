@@ -40,7 +40,6 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<RegisterCleanedUpFilArkivFileJob>, RegisterCleanedUpFilArkivFile>();
         services.AddScoped<IJobHandler<UpdateDeskproSetFærdigbehandletDatoFieldJob>, UpdateDeskproSetFærdigbehandletDatoField>();
         services.AddScoped<IJobHandler<CreateCloseNovaCaseQueueItemJob>, CreateCloseNovaCaseQueueItem>();
-        services.AddScoped<IJobHandler<UpdateDatabaseCaseJob>, UpdateDatabaseCase>();
         services.AddScoped<IJobHandler<UpdateGetOrganizedCaseSetKleValueJob>, UpdateGetOrganizedCaseSetKleValue>();
         services.AddScoped<IJobHandler<EnsureSubmissionRegistrationsJob>, EnsureSubmissionRegistrations>();
         services.AddScoped<IJobHandler<EnsureSubmissionRegistrationJob>, EnsureSubmissionRegistration>();
