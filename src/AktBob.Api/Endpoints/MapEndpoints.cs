@@ -3,8 +3,6 @@ using AktBob.Api.Endpoints.Tickets;
 using AktBob.Api.Endpoints.Jobs;
 using AktBob.Api.Endpoints.Submissions;
 using AktBob.Shared.Contracts.Database;
-using Microsoft.OpenApi.MicrosoftExtensions;
-using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 
 namespace AktBob.Api.Endpoints;
@@ -45,16 +43,17 @@ internal static class MapEndpoints
         return endpoints;
     }
 
-    // public static IEndpointRouteBuilder MapCaseEndpoints(this IEndpointRouteBuilder endpoints)
-    // {
-    //     var group = endpoints.MapGroup("/api/cases")
-    //         .WithTags("Cases")
-    //         .RequireAuthorization();
-    //
-    //     group.MapGet("", GetCases.Endpoint).WithSummary(GetCases.Summery).WithDescription(GetCases.Description).Produces<CaseDto[]>();
-    //
-    //     return group;
-    // }
+    public static IEndpointRouteBuilder MapCaseEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints.MapGroup("/api/cases")
+            .WithTags("Cases")
+            .RequireAuthorization();
+    
+        group.MapGetCaseEndpoint("/{id:int}");
+        group.MapGetCasesEndpoint("");
+    
+        return group;
+    }
 
     public static IEndpointRouteBuilder MapSubmissionEndpoints (this IEndpointRouteBuilder endpoints)
     {
@@ -76,10 +75,8 @@ internal static class MapEndpoints
         group.MapGetTicketEndpoint("/tickets/{id:int}");
         group.MapGetTicketsEndpoint("/tickets");
         
-        group.MapGet("/cases", GetCases.Endpoint)
-            .WithSummary(GetCases.Summery)
-            .WithDescription(GetCases.Description)
-            .Produces<CaseDto[]>();
+        group.MapGetCasesEndpoint("/cases");
+        group.MapGetCaseEndpoint("/cases/{id:int}");
         
         return endpoints;
     }

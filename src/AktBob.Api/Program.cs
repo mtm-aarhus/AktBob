@@ -83,7 +83,7 @@ app.UseFastEndpoints(c =>
 
 app.MapJobEndpoints();
 app.MapTicketEndpoints();
-// app.MapCaseEndpoints();
+app.MapCaseEndpoints();
 app.MapSubmissionEndpoints();
 
 app.MapDatabaseEndpoints();
