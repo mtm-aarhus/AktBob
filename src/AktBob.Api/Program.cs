@@ -85,6 +85,6 @@ app.MapJobEndpoints();
 app.MapTicketEndpoints();
 app.MapCaseEndpoints();
 app.MapSubmissionEndpoints();
-
+app.MapCleanUpQueueEndpoints();
 app.MapDatabaseEndpoints();
 app.Run();

@@ -37,7 +37,6 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<NotitfyAboutUpcomingCleanupJob>, NotifyAboutUpcomingCleanup>();
         services.AddScoped<IJobHandler<CreateCleanupFilArkivQueueItemJob>, CreateCleanupFilArkivQueueItem>();
         services.AddScoped<IJobHandler<CreateCleanupSharepointQueueItemJob>, CreateCleanupSharepointQueueItem>();
-        services.AddScoped<IJobHandler<RegisterCleanedUpFilArkivFileJob>, RegisterCleanedUpFilArkivFile>();
         services.AddScoped<IJobHandler<UpdateDeskproSetFærdigbehandletDatoFieldJob>, UpdateDeskproSetFærdigbehandletDatoField>();
         services.AddScoped<IJobHandler<CreateCloseNovaCaseQueueItemJob>, CreateCloseNovaCaseQueueItem>();
         services.AddScoped<IJobHandler<UpdateGetOrganizedCaseSetKleValueJob>, UpdateGetOrganizedCaseSetKleValue>();

@@ -1,4 +1,5 @@
 ﻿using AktBob.Api.Endpoints.Cases;
+using AktBob.Api.Endpoints.CleanUpQueues.FilArkiv;
 using AktBob.Api.Endpoints.Tickets;
 using AktBob.Api.Endpoints.Jobs;
 using AktBob.Api.Endpoints.Submissions;
@@ -17,13 +18,13 @@ internal static class MapEndpoints
 
         group.MapPost("/journalize-everything", JournalizeEverything.Endpoint)
             .WithSummary(JournalizeEverything.Summery)
-            .WithDescription(JournalizeEverything.Description)
-            .Stable();
+            .WithDescription(JournalizeEverything.Description);
         
         group.MapPost("/create-afgoerelsesskrivelse", CreateAfgørelsesskrivelse.Endpoint)
             .WithSummary(CreateAfgørelsesskrivelse.Summery)
-            .WithDescription(CreateAfgørelsesskrivelse.Description)
-            .Stable();
+            .WithDescription(CreateAfgørelsesskrivelse.Description);
+        
+        group.MapCreateFilArkivFilesEndpoint("/QueueFilArkivFilesForDeletion"); // Temp
 
         return endpoints;
     }
@@ -64,6 +65,17 @@ internal static class MapEndpoints
         
         group.MapSearchSubmissionsEndpoint("");
         return group;
+    }
+
+    public static IEndpointRouteBuilder MapCleanUpQueueEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints.MapGroup("/api/cleanup-queues")
+            .WithTags("Cleanup Queue")
+            .RequireAuthorization();
+        
+        group.MapCreateFilArkivFilesEndpoint("/filarkiv/files");
+        
+        return endpoints;
     }
     
     public static IEndpointRouteBuilder MapDatabaseEndpoints(this IEndpointRouteBuilder endpoints)
