@@ -70,7 +70,7 @@ internal static class MapEndpoints
     public static IEndpointRouteBuilder MapCleanUpQueueEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/cleanup-queues")
-            .WithTags("Cleanup Queue")
+            .WithTags("Cleanup Queues")
             .RequireAuthorization();
         
         group.MapCreateFilArkivFilesEndpoint("/filarkiv/files");
