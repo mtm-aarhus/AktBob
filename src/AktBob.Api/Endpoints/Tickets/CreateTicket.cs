@@ -4,13 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AktBob.Api.Endpoints.Tickets;
 
-internal record CreateTicketRequest(int DeskproId);
-
 internal static class CreateTicket
 {
-    public static string Description => "Registrerer en ny ticket i databasen baseret på et Deskpro ticket ID";
-    public static string Summery => "Registrer ny ticket";
-    public static async Task<IResult> Endpoint(
+    private record CreateTicketRequest(int DeskproId);
+    
+    public static void MapCreateTicketEndpoint(this RouteGroupBuilder builder, string routePattern) => builder
+        .MapPost(routePattern, Endpoint)
+        .WithSummary("Registrer ny ticket")
+        .WithDescription("Registrerer en ny ticket i databasen baseret på et Deskpro ticket ID.")
+        .Produces(StatusCodes.Status204NoContent);
+    
+    private static async Task<IResult> Endpoint(
         [FromBody] CreateTicketRequest request,
         [FromServices] ITicketRepository repository,
         CancellationToken cancellationToken)

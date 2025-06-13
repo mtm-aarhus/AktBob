@@ -29,23 +29,6 @@ builder.Services
 
 // OpenAPI
 builder.Services.AddOpenApi();
-// builder.Services.SwaggerDocument(o =>
-// {
-//     o.EnableJWTBearerAuth = false;
-//     o.DocumentSettings = s =>
-//     {
-//         s.AddAuth(ApiKeyAuthentication.SchemeName, new()
-//         {
-//             Name = ApiKeyAuthentication.HeaderName,
-//             In = OpenApiSecurityApiKeyLocation.Header,
-//             Type = OpenApiSecuritySchemeType.ApiKey
-//         });
-//
-//         s.Title = "AktBob API";
-//     };
-//
-//     o.AutoTagPathSegmentIndex = 0;
-// });
 
 // Hangfire
 builder.Services.AddSingleton<IJobDispatcher, HangfireJobDispatcher>();
@@ -100,5 +83,8 @@ app.UseFastEndpoints(c =>
 
 app.MapJobEndpoints();
 app.MapTicketEndpoints();
+// app.MapCaseEndpoints();
+app.MapSubmissionEndpoints();
+
 app.MapDatabaseEndpoints();
 app.Run();

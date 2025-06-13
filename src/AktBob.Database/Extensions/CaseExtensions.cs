@@ -3,7 +3,7 @@ using AktBob.Database.Dtos;
 using AktBob.Shared.Contracts.Database;
 
 namespace AktBob.Database.Extensions;
-internal static class CaseExtensions
+public static class CaseExtensions
 {
     public static CaseDto ToDto(this Case @case)
     {

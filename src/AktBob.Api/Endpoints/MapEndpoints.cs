@@ -1,5 +1,7 @@
-﻿using AktBob.Api.Endpoints.Tickets;
+﻿using AktBob.Api.Endpoints.Cases;
+using AktBob.Api.Endpoints.Tickets;
 using AktBob.Api.Endpoints.Jobs;
+using AktBob.Api.Endpoints.Submissions;
 using AktBob.Shared.Contracts.Database;
 using Microsoft.OpenApi.MicrosoftExtensions;
 using Microsoft.OpenApi.Models;
@@ -33,26 +35,51 @@ internal static class MapEndpoints
         var group = endpoints.MapGroup("/api/tickets")
             .WithTags("Tickets")
             .RequireAuthorization();
+
+        group.MapGetTicketsEndpoint("");
+        group.MapGetTicketEndpoint("/{id:int}");
+        group.MapCreateTicketEndpoint("");
         
-        group.MapGet("/{id:int}", GetTicket.Endpoint).WithSummary(GetTicket.Summery).WithDescription(GetTicket.Description).Produces<TicketDto>();
-        group.MapGet("", GetTickets.Endpoint).WithSummary(GetTickets.Description).WithSummary(GetTickets.Summery).Produces<TicketDto[]>();
-        
-        group.MapPost("", CreateTicket.Endpoint).WithSummary(CreateTicket.Summery).WithDescription(CreateTicket.Description).Produces(StatusCodes.Status204NoContent);
-        
-        group.MapPatch("/{id:int}", UpdateTicket.Endpoint).WithSummary(UpdateTicket.Summery).WithDescription(UpdateTicket.Description).Produces(StatusCodes.Status204NoContent);
+        group.MapUpdateTicketEndpoint("/{id:int}");
         
         return endpoints;
     }
 
+    // public static IEndpointRouteBuilder MapCaseEndpoints(this IEndpointRouteBuilder endpoints)
+    // {
+    //     var group = endpoints.MapGroup("/api/cases")
+    //         .WithTags("Cases")
+    //         .RequireAuthorization();
+    //
+    //     group.MapGet("", GetCases.Endpoint).WithSummary(GetCases.Summery).WithDescription(GetCases.Description).Produces<CaseDto[]>();
+    //
+    //     return group;
+    // }
+
+    public static IEndpointRouteBuilder MapSubmissionEndpoints (this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints.MapGroup("/api/submissions")
+            .WithTags("Submissions")
+            .RequireAuthorization();
+        
+        group.MapSearchSubmissionsEndpoint("");
+        return group;
+    }
+    
     public static IEndpointRouteBuilder MapDatabaseEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/database")
             .WithTags("Database")
             .RequireAuthorization();
         
-        group.MapPatch("/tickets/{id:int}", UpdateTicket.Endpoint).WithSummary(UpdateTicket.Summery).WithDescription(UpdateTicket.Description);
-        group.MapGet("/tickets/{id:int}", GetTicket.Endpoint).WithSummary(GetTicket.Summery).WithDescription(GetTicket.Description).Produces<TicketDto>(StatusCodes.Status200OK);
-        group.MapGet("/tickets", GetTickets.Endpoint).WithSummary(GetTickets.Description).WithSummary(GetTickets.Summery).Produces<TicketDto[]>();
+        group.MapUpdateTicketEndpoint("/tickets/{id:int}");
+        group.MapGetTicketEndpoint("/tickets/{id:int}");
+        group.MapGetTicketsEndpoint("/tickets");
+        
+        group.MapGet("/cases", GetCases.Endpoint)
+            .WithSummary(GetCases.Summery)
+            .WithDescription(GetCases.Description)
+            .Produces<CaseDto[]>();
         
         return endpoints;
     }

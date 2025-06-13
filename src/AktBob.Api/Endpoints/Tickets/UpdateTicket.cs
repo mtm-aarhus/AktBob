@@ -3,16 +3,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AktBob.Api.Endpoints.Tickets;
 
-internal record UpdateTicketRequest(string? CaseNumber = null, string? CaseUrl = null, string? SharepointFolderName = null);
 
 internal static class UpdateTicket
 {
-    public static string Description => "Opdaterer ticket i databasen. Alle properties i body'en er valgfrie.";
-    public static string Summery => "Opdatér ticket";
+    public static void MapUpdateTicketEndpoint(this RouteGroupBuilder builder, string routePattern) => builder
+        .MapPatch(routePattern, Endpoint)
+        .WithSummary("Opdatér ticket")
+        .WithDescription("Opdaterer ticket i databasen. Alle properties i body'en er valgfrie.")
+        .Produces(StatusCodes.Status204NoContent);
     
-    public static async Task<IResult> Endpoint(
+    private record UpdateTicketRequest(string? CaseNumber = null, string? CaseUrl = null, string? SharepointFolderName = null);
+
+    private static async Task<IResult> Endpoint(
         [FromRoute] int id,
-        [FromBody]  UpdateTicketRequest request,
+        [FromBody] UpdateTicketRequest request,
         [FromServices] ITicketRepository ticketRepository,
         CancellationToken cancellationToken)
     {
