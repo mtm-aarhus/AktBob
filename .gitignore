@@ -13,7 +13,7 @@
 azure-*.md
 azure-*.json
 local.settings.json
-*.development.json
+appsettings.development.json
 
 # Rider
 .idea/
