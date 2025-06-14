@@ -75,6 +75,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.Journaliz
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.Afgoerelsesskrivelse", "src\Processors\Aktbob.Processors.Afgoerelsesskrivelse\Aktbob.Processors.Afgoerelsesskrivelse.csproj", "{4899F592-0446-4C39-BFDF-BC02D95FEC49}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Modules.Podio", "src\Modules\Aktbob.Modules.Podio\Aktbob.Modules.Podio.csproj", "{0166C993-F3D0-4BF5-9C9F-77174A6C05C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -191,6 +193,10 @@ Global
 		{4899F592-0446-4C39-BFDF-BC02D95FEC49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4899F592-0446-4C39-BFDF-BC02D95FEC49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4899F592-0446-4C39-BFDF-BC02D95FEC49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0166C993-F3D0-4BF5-9C9F-77174A6C05C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0166C993-F3D0-4BF5-9C9F-77174A6C05C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0166C993-F3D0-4BF5-9C9F-77174A6C05C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0166C993-F3D0-4BF5-9C9F-77174A6C05C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -228,6 +234,7 @@ Global
 		{0B7C690D-12C8-4A7C-ACCE-E780DFC8DF75} = {C8B73F55-D8C6-403F-B2B4-D4BC645339F5}
 		{4502E542-7113-4926-AE5E-A4453663F119} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
 		{4899F592-0446-4C39-BFDF-BC02D95FEC49} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
+		{0166C993-F3D0-4BF5-9C9F-77174A6C05C0} = {C8B73F55-D8C6-403F-B2B4-D4BC645339F5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}

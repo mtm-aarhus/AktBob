@@ -1,0 +1,6 @@
+@Aktbob.Modules.Podio_HostAddress = http://localhost:5276
+
+GET {{Aktbob.Modules.Podio_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
