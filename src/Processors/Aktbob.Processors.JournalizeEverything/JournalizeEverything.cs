@@ -45,7 +45,7 @@ public class JournalizeEverything(
         
         // Get data
         var databaseTicket = GetDatabaseTicket(job.TicketId, cancellationToken);
-        var agent = GetAgent(job.TicketId, cancellationToken);
+        var agent = DeskproHelpers.GetTicketAgent(deskpro, job.TicketId, cancellationToken);
         await Task.WhenAll([databaseTicket, agent]);
         
         agent.Result.LogResultErrors(logger);
@@ -83,19 +83,7 @@ public class JournalizeEverything(
         {
             logger.LogWarning("GetOrganized aktindsigtssagsnummer not registered for Deskpro Id {id}", ticketId);
         }
-        
+
         return data;
-    }
-
-    private async Task<ErrorOr<PersonDto>> GetAgent(int ticketId, CancellationToken cancellationToken)
-    {
-        var ticket = await deskpro.GetTicket(ticketId, cancellationToken);
-        if (ticket.IsError) return ticket.Errors;
-        
-        var agent = ticket.Value.Agent?.Id != null
-            ? await deskpro.GetPersonById(ticket.Value.Agent.Id, cancellationToken)
-            : Error.NotFound().ToErrorOr<PersonDto>();
-
-        return agent;
     }
 }

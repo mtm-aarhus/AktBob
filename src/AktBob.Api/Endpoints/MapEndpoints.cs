@@ -24,8 +24,10 @@ internal static class MapEndpoints
             .WithSummary(CreateAfgørelsesskrivelse.Summery)
             .WithDescription(CreateAfgørelsesskrivelse.Description);
         
+        group.MapToFilArkivEndpoint("/to-filarkiv");
+        
         group.MapCreateFilArkivFilesEndpoint("/QueueFilArkivFilesForDeletion"); // Temp
-
+        
         return endpoints;
     }
     

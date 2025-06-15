@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace AktBob.Shared.Extensions;
 
@@ -22,5 +23,12 @@ public static class StringExtensions
 
         parsedDateTime = null;
         return false;
+    }
+    
+    public static bool IsNovaCase(this string caseNumber)
+    {
+        string pattern = @"^[A-Za-z]\d{4}-\d{1,10}$";
+        Regex regex = new Regex(pattern);
+        return regex.IsMatch(caseNumber);
     }
 }
