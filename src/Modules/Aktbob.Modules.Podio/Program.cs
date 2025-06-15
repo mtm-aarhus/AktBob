@@ -1,5 +1,18 @@
+using Aktbob.Modules.Podio;
+using Aktbob.Modules.Podio.Endpoints;
+using AktBob.Shared;
+using AktBob.Shared.Middlewares;
+
 var builder = WebApplication.CreateBuilder(args);
 
-var app = builder.Build();
+// Logging
+builder.Services.ConfigureLogging();
 
-app.UseHttpsRedirection();
+// Modules
+builder.Services.AddModuleServices(builder.Configuration);
+
+var app = builder.Build();
+app.UseMiddleware<GlobalExceptionMiddleware>();
+app.MapModuleEndpoints();
+
+app.Run();

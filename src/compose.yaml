@@ -1,10 +1,10 @@
 services:
   
-  mailserver:
-    image: jijiechen/papercut:latest
-    ports:
-      - "25:25"
-      - "37408:37408"
+#  mailserver:
+#    image: jijiechen/papercut:latest
+#    ports:
+#      - "25:25"
+#      - "37408:37408"
   
   
   api:
@@ -54,6 +54,18 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       
+      
+  module-podio:
+    build:
+      dockerfile: Modules/Aktbob.Modules.Podio/Dockerfile
+      args:
+        ENVIRONMENT: "development"
+        APPINSIGHTS_INSTRUMENTATIONKEY: "test"
+    ports:
+      - "5003:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+
 
   ##############
   # Processors #

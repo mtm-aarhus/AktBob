@@ -1,0 +1,21 @@
+@HostAddress = http://localhost:5003
+
+### Get Item
+GET {{HostAddress}}/apps/29527765/items/123
+
+### Post Comment
+POST {{HostAddress}}/apps/29527765/items/123/comment
+Content-Type: application/json
+
+{
+  "value": "hello world"
+}
+
+### Update field value
+PATCH {{HostAddress}}/apps/29527765/items/123
+Content-Type: application/json
+
+{
+  "fieldId": 264622229,
+  "value": "hello world"
+}
