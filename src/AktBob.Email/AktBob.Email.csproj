@@ -16,7 +16,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\AktBob.Email.Contracts\AktBob.Email.Contracts.csproj" />
 		<ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
 	</ItemGroup>
 
