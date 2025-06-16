@@ -35,17 +35,12 @@ public class CreateAfgørelsesskrivelse(
         logger.LogInformation("Message Body: {body}", message.Body);
         logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
         
-        // Deserialize message body to expected job type
-        var job = JsonSerializer.Deserialize<CreateAfgørelsesskrivelseJob>(message.Body, SerializerConfiguration.SerializerOptions());
-        if (job is null)
-        {
-            throw new BusinessException($"{LogSnippets.MessageDeliveryCount(message.MessageId, message.DeliveryCount)}: Body could not be deserialized to type {nameof(CreateAfgørelsesskrivelseJob)}. Body content = {message.Body}");
-        }
-        
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("OpenOrchestratorQueueName"));
         var deskproModtagelsesdatoFieldId = Guard.Against.Null(configuration.GetValue<int>("ModtagelsesdatoFieldId"));
         var deskproLovgivningFieldId = Guard.Against.Null(configuration.GetValue<int>("LovgivningFieldId"));
-    
+        
+        // Deserialize message body to expected job type
+        var job = MessageDeserializer.Deserialize<CreateAfgørelsesskrivelseJob>(message);
         
         // Get data from Deskpro
         var deskproTicket = await deskpro.GetTicket(job.TicketId, cancellationToken);
