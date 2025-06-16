@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using AktBob.Database.Contracts;
 using AktBob.Shared;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
@@ -67,9 +68,14 @@ public class CreateOpenOrchestratorQueueItem(
 
         // Get case number value from Podio module response
         var caseNumber = string.Empty;
-        if (getPodioItem.Result.Value.Fields.FirstOrDefault(x => x.Id == podioCaseNumberFieldId)?.Value is string value)
+        var caseNumberFieldValue = JsonValue.Create(getPodioItem.Result.Value.Fields.FirstOrDefault(x => x.Id == podioCaseNumberFieldId)?.Value);
+        
+        if (caseNumberFieldValue is JsonNode and JsonValue valueNode)
         {
-            caseNumber = value;
+            if (valueNode.TryGetValue<string>(out var value))
+            {
+                caseNumber = value;
+            }
         }
 
         // Case number was not found on the Podio item -> fallback: assign case number from database
