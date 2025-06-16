@@ -1,3 +1,3 @@
 ﻿namespace AktBob.Shared.Contracts.Processors;
 
-public record CreateDocumentListJob(long PodioItemId, int RescheduleCounter);
+public record CreateDocumentListJob(long PodioItemId, int RescheduleCounter = 0);

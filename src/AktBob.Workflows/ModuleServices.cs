@@ -3,7 +3,6 @@ using AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 using AktBob.Workflows.Processes.AddMessageToGetOrganized;
 using AktBob.Workflows.Processes;
 using AktBob.Workflows.Processes.CheckOCRScreeningStatus;
-using AktBob.Workflows.Processes.CreateDocumentListQueueItem;
 using AktBob.Workflows.Processes.Cleanup;
 using AktBob.Workflows.Processes.EnsureSubmissions;
 
@@ -26,7 +25,7 @@ public static class ModuleServices
 
         // Other workflows
         services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
-        services.AddScoped<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItem>();
+        // services.AddScoped<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItem>();
         services.AddScoped<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCase>();
         services.AddScoped<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCase>();
         services.AddScoped<IJobHandler<UpdateDeskproSetGetOrganizedAggregatedCaseNumbersJob>, UpdateDeskproSetGetOrganizedAggregatedCaseNumbers>();

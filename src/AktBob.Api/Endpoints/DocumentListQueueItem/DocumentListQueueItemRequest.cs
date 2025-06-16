@@ -1,3 +1,3 @@
-﻿namespace AktBob.Api.Endpoints.DocumentListQueueItem;
-
-internal record DocumentListQueueItemRequest(long PodioItemId);
+﻿// namespace AktBob.Api.Endpoints.DocumentListQueueItem;
+//
+// internal record DocumentListQueueItemRequest(long PodioItemId);
