@@ -71,34 +71,34 @@ services:
   # Processors #
   ##############
   
-#  processor-create-afgoerelsesskrivelse:
-#    build:
-#      dockerfile: Processors/Aktbob.Processors.Afgoerelsesskrivelse/Dockerfile
-#    env_file:
-#      - Processors/Aktbob.Processors.Afgoerelsesskrivelse/development.env
-#    environment:
-#      ASPNETCORE_ENVIRONMENT: "Development"
-#      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
-#      AzureWebJobsStorage: "UseDevelopmentStorage=true"
-#    depends_on:
-#      - module-deskpro
-#      - module-open-orchestrator
-#      - sql
-#        
-#        
-#  processor-journalize-everything:
-#    build:
-#      dockerfile: Processors/Aktbob.Processors.JournalizeEverything/Dockerfile
-#    env_file:
-#      - Processors/Aktbob.Processors.JournalizeEverything/development.env
-#    environment:
-#      ASPNETCORE_ENVIRONMENT: "Development"
-#      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
-#      AzureWebJobsStorage: "UseDevelopmentStorage=true"
-#    depends_on:
-#      - module-deskpro
-#      - module-open-orchestrator
-#      - sql
+  processor-afgoerelsesskrivelse:
+    build:
+      dockerfile: Processors/Aktbob.Processors.Afgoerelsesskrivelse/Dockerfile
+    env_file:
+      - Processors/Aktbob.Processors.Afgoerelsesskrivelse/development.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+      AzureWebJobsStorage: "UseDevelopmentStorage=true"
+    depends_on:
+      - module-deskpro
+      - module-open-orchestrator
+      - sql
+
+
+  processor-journalize-everything:
+    build:
+      dockerfile: Processors/Aktbob.Processors.JournalizeEverything/Dockerfile
+    env_file:
+      - Processors/Aktbob.Processors.JournalizeEverything/development.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+      AzureWebJobsStorage: "UseDevelopmentStorage=true"
+    depends_on:
+      - module-deskpro
+      - module-open-orchestrator
+      - sql
 
   processor-to-filarkiv:
     build:

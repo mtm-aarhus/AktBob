@@ -18,17 +18,17 @@ using Microsoft.Extensions.Configuration;
 
 namespace Aktbob.Processors.ToFilArkiv;
 
-public class CraeteOpenOrchestratorQueueItem(
+public class CreateOpenOrchestratorQueueItem(
     IConfiguration configuration,
-    ILogger<CraeteOpenOrchestratorQueueItem> logger,
+    ILogger<CreateOpenOrchestratorQueueItem> logger,
     IOpenOrchestratorModuleClient openOrchestrator,
     IDeskproModuleClient deskpro,
     IPodioModuleClient podio,
     IUnitOfWork unitOfWork)
 {
-    [Function(nameof(CraeteOpenOrchestratorQueueItem))]
+    [Function(nameof(CreateOpenOrchestratorQueueItem))]
     public async Task Run(
-        [ServiceBusTrigger("myqueue", Connection = "")]
+        [ServiceBusTrigger("%ServiceBusQueueName%", Connection = "AzureServiceBus")]
         ServiceBusReceivedMessage message,
         ServiceBusMessageActions messageActions,
         CancellationToken cancellationToken)
@@ -45,11 +45,9 @@ public class CraeteOpenOrchestratorQueueItem(
         }
         
         // Get variables from configuration
-        var openOrchestratorQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CreateToFilArkivQueueItemJobHandler:OpenOrchestratorQueueName"));
+        var openOrchestratorQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("OpenOrchestratorQueueName"));
         var podioAppId = Guard.Against.Null(configuration.GetValue<int?>("Podio:AppId"));
-        var podioFields = Guard.Against.Null(Guard.Against.NullOrEmpty(configuration.GetSection("Podio:Fields").GetChildren().ToDictionary(x => int.Parse(x.Key), x => x.Get<PodioFieldConfigurationSection>())));
-        var podioFieldCaseNumber = Guard.Against.Null(podioFields.FirstOrDefault(x => x.Value!.AppId == podioAppId && x.Value.Label == "CaseNumber"));
-        Guard.Against.Null(podioFieldCaseNumber.Value);
+        var podioCaseNumberFieldId = Guard.Against.Null(configuration.GetValue<int?>("Podio:CaseNumberFieldId"));
 
         // Get data
         var getPodioItem = podio.GetItem(podioAppId, job.PodioItemId, cancellationToken);
@@ -69,14 +67,21 @@ public class CraeteOpenOrchestratorQueueItem(
 
         // Get case number value from Podio module response
         var caseNumber = string.Empty;
-        if (getPodioItem.Result.Value.Fields.FirstOrDefault(x => x.Id == podioFieldCaseNumber.Key)?.Value is string value)
+        if (getPodioItem.Result.Value.Fields.FirstOrDefault(x => x.Id == podioCaseNumberFieldId)?.Value is string value)
         {
             caseNumber = value;
         }
 
+        // Case number was not found on the Podio item -> fallback: assign case number from database
         if (string.IsNullOrEmpty(caseNumber))
         {
             logger.LogWarning("Unable to get case number field value from Podio Item {itemId}", job.PodioItemId);
+            caseNumber = getDatabaseCase.Result.FirstOrDefault()?.CaseNumber ?? string.Empty;
+
+            if (string.IsNullOrEmpty(caseNumber))
+            {
+                logger.LogWarning("Unable to get case number from Database");
+            }
         }
 
         // Get data from Deskpro

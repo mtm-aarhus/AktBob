@@ -27,6 +27,7 @@ internal static class MapEndpoints
         group.MapToFilArkivEndpoint("/to-filarkiv");
         
         group.MapCreateFilArkivFilesEndpoint("/QueueFilArkivFilesForDeletion"); // Temp
+        group.MapToFilArkivEndpoint("/ToFilArkivQueueItem"); // Temp
         
         return endpoints;
     }

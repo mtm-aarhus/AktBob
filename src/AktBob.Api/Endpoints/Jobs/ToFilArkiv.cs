@@ -10,6 +10,7 @@ internal static class ToFilArkiv
 {
     public static void MapToFilArkivEndpoint(this RouteGroupBuilder builder, string route) => builder
         .MapPost(route, Endpoint)
+        .DisableAntiforgery()
         .WithSummary("Overfør til FilArkiv")
         .WithDescription("Overfører indhold fra til FilArkiv (via proces i OpenOrchestrator)")
         .Produces(StatusCodes.Status204NoContent);
@@ -19,7 +20,7 @@ internal static class ToFilArkiv
     private static async Task<IResult> Endpoint(
         [FromServices] IConfiguration configuration,
         [FromServices] IMessageBus messageBus,
-        [FromBody] ToFilArkivQueueItemRequest request,
+        [FromForm] ToFilArkivQueueItemRequest request,
         CancellationToken cancellationToken)
     {
         var queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Queues:ToFilArkiv"));

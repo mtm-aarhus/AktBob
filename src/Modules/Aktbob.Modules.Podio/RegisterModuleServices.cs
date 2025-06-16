@@ -8,8 +8,8 @@ public static class RegisterModuleServices
 {
     public static IServiceCollection AddModuleServices(this IServiceCollection services, IConfiguration configuration)
     {
-        var podioAppTokens = Guard.Against.NullOrEmpty(configuration.GetSection("Podio:AppTokens").GetChildren().ToDictionary(x => x.Key, x => x.Value));
-        services.AddPodioFactory(new Uri(Guard.Against.NullOrEmpty(configuration.GetValue<string>("Podio:BaseAddress"))));
+        var podioAppTokens = Guard.Against.NullOrEmpty(configuration.GetSection("AppTokens").GetChildren().ToDictionary(x => x.Key, x => x.Value));
+        services.AddPodioFactory(new Uri(Guard.Against.NullOrEmpty(configuration.GetValue<string>("BaseAddress"))));
 
         // Handlers
         services.AddGetItemHandler();

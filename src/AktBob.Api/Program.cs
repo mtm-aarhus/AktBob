@@ -27,6 +27,8 @@ builder.Services
     .AddAuthentication(ApiKeyAuthentication.SchemeName)
     .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthentication>(ApiKeyAuthentication.SchemeName, null);
 
+builder.Services.AddAntiforgery();
+
 // OpenAPI
 builder.Services.AddOpenApi();
 
@@ -72,6 +74,8 @@ app.UseHangfireDashboard("/hangfire", options);
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseAntiforgery(); 
+    
 app.UseFastEndpoints(c =>
 {
     c.Endpoints.RoutePrefix = "api";
