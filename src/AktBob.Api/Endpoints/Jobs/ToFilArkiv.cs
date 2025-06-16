@@ -10,6 +10,7 @@ internal static class ToFilArkiv
 {
     public static void MapToFilArkivEndpoint(this RouteGroupBuilder builder, string route) => builder
         .MapPost(route, Endpoint)
+        .AllowAnonymous()
         .DisableAntiforgery()
         .WithSummary("Overfør til FilArkiv")
         .WithDescription("Overfører indhold fra til FilArkiv (via proces i OpenOrchestrator)")
