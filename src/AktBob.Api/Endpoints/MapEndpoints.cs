@@ -26,7 +26,6 @@ internal static class MapEndpoints
         
         group.MapToFilArkivEndpoint("/to-filarkiv");
         group.MapToSharepointEndpoint("/to-sharepoint");
-        group.MapToSharepointEndpoint("/ToSharepointQueueItem"); // temp
         return endpoints;
     }
     
