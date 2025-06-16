@@ -25,10 +25,6 @@ internal static class MapEndpoints
             .WithDescription(CreateAfgørelsesskrivelse.Description);
         
         group.MapToFilArkivEndpoint("/to-filarkiv");
-        
-        group.MapCreateFilArkivFilesEndpoint("/QueueFilArkivFilesForDeletion"); // Temp
-        group.MapToFilArkivEndpoint("/ToFilArkivQueueItem"); // Temp
-        
         return endpoints;
     }
     
@@ -41,7 +37,6 @@ internal static class MapEndpoints
         group.MapGetTicketsEndpoint("");
         group.MapGetTicketEndpoint("/{id:int}");
         group.MapCreateTicketEndpoint("");
-        
         group.MapUpdateTicketEndpoint("/{id:int}");
         
         return endpoints;
@@ -87,13 +82,8 @@ internal static class MapEndpoints
             .WithTags("Database")
             .RequireAuthorization();
         
-        group.MapUpdateTicketEndpoint("/tickets/{id:int}");
-        group.MapGetTicketEndpoint("/tickets/{id:int}");
-        group.MapGetTicketsEndpoint("/tickets");
-        
-        group.MapGetCasesEndpoint("/cases");
-        group.MapGetCaseEndpoint("/cases/{id:int}");
-        group.MapUpdateCaseEndpoint("/cases/{id:int}");
+        group.MapGetTicketEndpoint("/tickets/{id:int}"); // Is this still in use?
+        group.MapGetCaseEndpoint("/cases/{id:int}"); // Is this still in use?
         
         return endpoints;
     }
