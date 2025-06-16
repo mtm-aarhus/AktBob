@@ -28,7 +28,6 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
         services.AddScoped<IJobHandler<CreateDocumentListQueueItemJob>, CreateDocumentListQueueItem>();
         services.AddScoped<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCase>();
-        services.AddScoped<IJobHandler<CreateToSharepointQueueItemJob>, CreateToSharepointQueueItem>();
         services.AddScoped<IJobHandler<RegisterPodioCaseJob>, RegisterPodioCase>();
         services.AddScoped<IJobHandler<UpdateDeskproSetGetOrganizedAggregatedCaseNumbersJob>, UpdateDeskproSetGetOrganizedAggregatedCaseNumbers>();
         services.AddScoped<IJobHandler<RegisterOS2FormsSubmissionJob>, RegisterOS2FormsSubmission>();
