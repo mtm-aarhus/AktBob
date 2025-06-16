@@ -25,6 +25,8 @@ internal static class MapEndpoints
             .WithDescription(CreateAfgørelsesskrivelse.Description);
         
         group.MapToFilArkivEndpoint("/to-filarkiv");
+        group.MapToSharepointEndpoint("/to-sharepoint");
+        group.MapToSharepointEndpoint("/ToSharepointQueueItem"); // temp
         return endpoints;
     }
     

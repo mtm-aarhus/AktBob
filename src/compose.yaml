@@ -114,3 +114,18 @@ services:
       - module-open-orchestrator
       - module-podio
       - sql
+        
+  processor-to-sharepoint:
+    build:
+      dockerfile: Processors/Aktbob.Processors.ToSharepoint/Dockerfile
+    env_file:
+      - Processors/Aktbob.Processors.ToSharepoint/development.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+      AzureWebJobsStorage: "UseDevelopmentStorage=true"
+    depends_on:
+      - module-deskpro
+      - module-open-orchestrator
+      - module-podio
+      - sql
