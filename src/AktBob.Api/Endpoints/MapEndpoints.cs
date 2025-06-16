@@ -27,7 +27,6 @@ internal static class MapEndpoints
         group.MapToFilArkivEndpoint("/to-filarkiv");
         group.MapToSharepointEndpoint("/to-sharepoint");
         group.MapCreateDocumentListEndpoint("/create-document-list");
-        group.MapCreateDocumentListEndpoint("/DocumentListQueueItem"); // temp
         
         return endpoints;
     }
