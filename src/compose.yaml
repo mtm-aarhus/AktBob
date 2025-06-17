@@ -146,3 +146,15 @@ services:
       - module-open-orchestrator
       - module-podio
       - sql
+    
+  processor-os2forms-submissions:
+    build:
+      dockerfile: Processors/Aktbob.Processors.OS2FormsSubmissions/Dockerfile
+    env_file:
+      - Processors/Aktbob.Processors.OS2FormsSubmissions/development.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+      AzureWebJobsStorage: "UseDevelopmentStorage=true"
+    depends_on:
+      - sql
