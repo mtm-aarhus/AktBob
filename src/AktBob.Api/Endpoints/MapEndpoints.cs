@@ -51,6 +51,7 @@ internal static class MapEndpoints
             .WithTags("Cases")
             .RequireAuthorization();
     
+        group.MapCreateCaseEndpoint("");
         group.MapGetCaseEndpoint("/{id:int}");
         group.MapGetCasesEndpoint("");
         group.MapUpdateCaseEndpoint("/{id:int}");

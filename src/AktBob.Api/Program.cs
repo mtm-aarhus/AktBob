@@ -1,5 +1,6 @@
 using AktBob.Api;
 using AktBob.Api.Endpoints;
+using AktBob.Api.Endpoints.Cases;
 using AktBob.Shared;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -40,6 +41,9 @@ builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Config
 builder.Services.AddDatabaseModule(builder.Configuration);
 builder.Services.AddPodioModule(builder.Configuration);
 builder.Services.AddSharedModule();
+
+// Transactions
+builder.Services.AddScoped<CreateCaseTransaction>();
 
 var app = builder.Build();
 

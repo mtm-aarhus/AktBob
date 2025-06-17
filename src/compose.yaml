@@ -12,6 +12,8 @@ services:
       dockerfile: AktBob.Api/Dockerfile
       args:
         ENVIRONMENT: "development"
+    env_file:
+      - Aktbob.Api/development.env
     ports:
       - "5000:8080"
     depends_on:
