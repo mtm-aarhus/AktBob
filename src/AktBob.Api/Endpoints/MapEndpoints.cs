@@ -66,6 +66,8 @@ internal static class MapEndpoints
             .RequireAuthorization();
         
         group.MapSearchSubmissionsEndpoint("");
+        group.MapCreateSubmissionEndpoint("");
+        
         return group;
     }
 
