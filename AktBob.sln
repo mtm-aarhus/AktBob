@@ -81,6 +81,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.ToSharepo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.DocumentList", "src\Processors\Aktbob.Processors.DocumentList\Aktbob.Processors.DocumentList.csproj", "{59CC8E3A-3F1D-4C6C-902C-D1580ABA930D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.OS2FormsSubmissions", "src\Processors\Aktbob.Processors.OS2FormsSubmissions\Aktbob.Processors.OS2FormsSubmissions.csproj", "{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -213,6 +215,10 @@ Global
 		{59CC8E3A-3F1D-4C6C-902C-D1580ABA930D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59CC8E3A-3F1D-4C6C-902C-D1580ABA930D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59CC8E3A-3F1D-4C6C-902C-D1580ABA930D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -253,6 +259,7 @@ Global
 		{2F8F09A9-0BC4-46A8-BC83-6AC6865D1EF9} = {F4C64018-0A98-4F30-8B25-201D834C5C3A}
 		{54249B6B-D086-4818-8111-B69F7A982743} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
 		{59CC8E3A-3F1D-4C6C-902C-D1580ABA930D} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
+		{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}
