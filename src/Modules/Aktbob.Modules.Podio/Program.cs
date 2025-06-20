@@ -13,6 +13,8 @@ builder.Services.AddModuleServices(builder.Configuration);
 
 var app = builder.Build();
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<GlobalRequestLoggingMiddleware>();
+
 app.MapModuleEndpoints();
 
 app.Run();

@@ -17,6 +17,8 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<GlobalRequestLoggingMiddleware>();
+
 app.MapModuleEndpoints();
 
 app.Run();
