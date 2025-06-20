@@ -6,6 +6,12 @@ services:
 #      - "25:25"
 #      - "37408:37408"
   
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
   
   api:
     build:
@@ -158,3 +164,5 @@ services:
       AzureWebJobsStorage: "UseDevelopmentStorage=true"
     depends_on:
       - sql
+      - azurite
+      - module-deskpro
