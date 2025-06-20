@@ -32,7 +32,6 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<CreateCleanupFilArkivQueueItemJob>, CreateCleanupFilArkivQueueItem>();
         services.AddScoped<IJobHandler<CreateCleanupSharepointQueueItemJob>, CreateCleanupSharepointQueueItem>();
         services.AddScoped<IJobHandler<UpdateDeskproSetFærdigbehandletDatoFieldJob>, UpdateDeskproSetFærdigbehandletDatoField>();
-        services.AddScoped<IJobHandler<CreateCloseNovaCaseQueueItemJob>, CreateCloseNovaCaseQueueItem>();
         services.AddScoped<IJobHandler<UpdateGetOrganizedCaseSetKleValueJob>, UpdateGetOrganizedCaseSetKleValue>();
         services.AddScoped<IJobHandler<EnsureSubmissionRegistrationsJob>, EnsureSubmissionRegistrations>();
         services.AddScoped<IJobHandler<EnsureSubmissionRegistrationJob>, EnsureSubmissionRegistration>();
