@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication;
 using NSwag;
 using AktBob.Database;
 using AktBob.Podio;
+using AktBob.Shared.Middlewares;
 using Hangfire.Dashboard.BasicAuthorization;
 using Ardalis.GuardClauses;
 using Scalar.AspNetCore;
@@ -79,7 +80,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseAntiforgery(); 
-    
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<GlobalRequestLoggingMiddleware>();
+
 app.UseFastEndpoints(c =>
 {
     c.Endpoints.RoutePrefix = "api";
