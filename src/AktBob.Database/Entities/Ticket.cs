@@ -7,4 +7,5 @@ public class Ticket
     public string? CaseUrl { get; set; }
     public string? SharepointFolderName { get; set; }
     public List<Case> Cases { get; set; } = new List<Case>();
+    public DateTime? CleanUpScheduledAt { get; set; }
 }

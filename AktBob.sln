@@ -83,6 +83,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.DocumentL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.OS2FormsSubmissions", "src\Processors\Aktbob.Processors.OS2FormsSubmissions\Aktbob.Processors.OS2FormsSubmissions.csproj", "{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.Cleanup", "src\Processors\Aktbob.Processors.Cleanup\Aktbob.Processors.Cleanup.csproj", "{11D5FF20-DF5A-40C2-89F1-8BFB466C0264}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -219,6 +221,10 @@ Global
 		{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11D5FF20-DF5A-40C2-89F1-8BFB466C0264}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11D5FF20-DF5A-40C2-89F1-8BFB466C0264}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11D5FF20-DF5A-40C2-89F1-8BFB466C0264}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11D5FF20-DF5A-40C2-89F1-8BFB466C0264}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -260,6 +266,7 @@ Global
 		{54249B6B-D086-4818-8111-B69F7A982743} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
 		{59CC8E3A-3F1D-4C6C-902C-D1580ABA930D} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
 		{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
+		{11D5FF20-DF5A-40C2-89F1-8BFB466C0264} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}

@@ -7,5 +7,6 @@ SELECT
 	,CaseNumber
 	,CaseUrl
 	,SharepointFolderName
+    ,CleanUpScheduledAt
 
 FROM Tickets

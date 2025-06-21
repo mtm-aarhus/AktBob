@@ -165,3 +165,16 @@ services:
       - sql
       - azurite
       - module-deskpro
+  
+  processor-cleanup:
+    build:
+      dockerfile: Processors/Aktbob.Processors.Cleanup/Dockerfile
+    env_file:
+      - Processors/Aktbob.Processors.Cleanup/development.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+    depends_on:
+      - sql
+      - module-deskpro
+      - module-open-orchestrator

@@ -3,7 +3,6 @@ using AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 using AktBob.Workflows.Processes.AddMessageToGetOrganized;
 using AktBob.Workflows.Processes;
 using AktBob.Workflows.Processes.CheckOCRScreeningStatus;
-using AktBob.Workflows.Processes.Cleanup;
 
 namespace AktBob.Workflows;
 public static class ModuleServices
@@ -26,10 +25,6 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
         services.AddScoped<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCase>();
         services.AddScoped<IJobHandler<UpdateDeskproSetGetOrganizedAggregatedCaseNumbersJob>, UpdateDeskproSetGetOrganizedAggregatedCaseNumbers>();
-        services.AddScoped<IJobHandler<DispatchCleanupJobsJob>, DispatchCleanupJobs>();
-        services.AddScoped<IJobHandler<NotitfyAboutUpcomingCleanupJob>, NotifyAboutUpcomingCleanup>();
-        services.AddScoped<IJobHandler<CreateCleanupFilArkivQueueItemJob>, CreateCleanupFilArkivQueueItem>();
-        services.AddScoped<IJobHandler<CreateCleanupSharepointQueueItemJob>, CreateCleanupSharepointQueueItem>();
         services.AddScoped<IJobHandler<UpdateDeskproSetFærdigbehandletDatoFieldJob>, UpdateDeskproSetFærdigbehandletDatoField>();
         services.AddScoped<IJobHandler<UpdateGetOrganizedCaseSetKleValueJob>, UpdateGetOrganizedCaseSetKleValue>();
         

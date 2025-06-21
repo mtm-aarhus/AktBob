@@ -55,14 +55,15 @@ internal class TicketRepository : ITicketRepository
         var validator = new TicketValidator();
         validator.ValidateAndThrow(ticket);
 
-        var sql = """
-            UPDATE Tickets 
-            SET
-            	CaseNumber = @CaseNumber,
-            	SharepointFolderName = @SharepointFolderName,
-            	CaseUrl = @CaseUrl
-            WHERE Id = @Id
-            """;
+        const string sql = """
+                            UPDATE Tickets 
+                            SET
+                                CaseNumber = @CaseNumber,
+                                SharepointFolderName = @SharepointFolderName,
+                                CaseUrl = @CaseUrl,
+                                CleanUpScheduledAt = @CleanUpScheduledAt
+                            WHERE Id = @Id
+                           """;
 
         return await _sqlDataAccess.Execute(sql, ticket) == 1;
     }
@@ -107,7 +108,8 @@ internal class TicketRepository : ITicketRepository
 	                ,t.CaseNumber
 	                ,t.CaseUrl
 	                ,t.SharepointFolderName
-
+                    ,t.CleanUpScheduledAt
+                     
                     ,c.TicketId
                     ,c.Id
                     ,c.PodioItemId
