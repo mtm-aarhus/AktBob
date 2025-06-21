@@ -17,7 +17,7 @@ public class EnsureSubmission(
     IDeskproModuleClient deskpro,
     IMessageBus messageBus)
 {
-    [Function(nameof(EnsureSubmission))]
+    [Function("ensure-submission")]
     public async Task Run(
         [ServiceBusTrigger("%EnsureSubmission:ServiceBusQueueName%", Connection = "AzureServiceBus")]
         ServiceBusReceivedMessage message,

@@ -16,7 +16,7 @@ public class EnsureSubmissions(
     IOS2FormsModule os2Forms,
     IMessageBus messageBus)
 {
-    [Function("EnsureSubmissions")]
+    [Function("ensure-submissions")]
     public async Task Run([TimerTrigger("%EnsureSubmission:TriggerTime%")] TimerInfo timerInfo, CancellationToken cancellationToken)
     {
         logger.LogInformation("Getting list of OS2Forms submissions");

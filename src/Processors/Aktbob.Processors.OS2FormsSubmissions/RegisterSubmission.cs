@@ -18,7 +18,7 @@ public class RegisterSubmission(
     IOS2FormsModule os2Forms,
     IUnitOfWork unitOfWork)
 {
-    [Function(nameof(RegisterSubmission))]
+    [Function("register-submission")]
     public async Task Run(
         [ServiceBusTrigger("%RegisterSubmissionQueueName%", Connection = "AzureServiceBus")]
         ServiceBusReceivedMessage message,
