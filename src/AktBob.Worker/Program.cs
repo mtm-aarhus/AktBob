@@ -14,8 +14,6 @@ using Ardalis.GuardClauses;
 using Serilog.Formatting.Display;
 using AktBob.OS2Forms;
 using AktBob.FilArkiv;
-using AktBob.Shared.Exceptions;
-using AktBob.Workflows.Processes.EnsureSubmissions;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -103,9 +101,5 @@ var host = builder.Build();
 // Register Hangfire filters
 using var scope = host.Services.CreateScope();
 GlobalJobFilters.Filters.Add(scope.ServiceProvider.GetRequiredService<FailedJobLoggingFilter>());
-
-// Register recurring jobs
-var ensureSubmissionRegistrationsJobHandler = scope.ServiceProvider.GetRequiredService<IJobHandler<EnsureSubmissionRegistrationsJob>>();
-RecurringJob.AddOrUpdate(nameof(EnsureSubmissionRegistrationsJob), () => ensureSubmissionRegistrationsJobHandler.Handle(new EnsureSubmissionRegistrationsJob(), CancellationToken.None), "*/30 * * * *");
 
 host.Run();

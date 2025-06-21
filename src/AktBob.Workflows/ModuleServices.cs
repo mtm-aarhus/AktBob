@@ -4,7 +4,6 @@ using AktBob.Workflows.Processes.AddMessageToGetOrganized;
 using AktBob.Workflows.Processes;
 using AktBob.Workflows.Processes.CheckOCRScreeningStatus;
 using AktBob.Workflows.Processes.Cleanup;
-using AktBob.Workflows.Processes.EnsureSubmissions;
 
 namespace AktBob.Workflows;
 public static class ModuleServices
@@ -33,8 +32,6 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<CreateCleanupSharepointQueueItemJob>, CreateCleanupSharepointQueueItem>();
         services.AddScoped<IJobHandler<UpdateDeskproSetFærdigbehandletDatoFieldJob>, UpdateDeskproSetFærdigbehandletDatoField>();
         services.AddScoped<IJobHandler<UpdateGetOrganizedCaseSetKleValueJob>, UpdateGetOrganizedCaseSetKleValue>();
-        services.AddScoped<IJobHandler<EnsureSubmissionRegistrationsJob>, EnsureSubmissionRegistrations>();
-        services.AddScoped<IJobHandler<EnsureSubmissionRegistrationJob>, EnsureSubmissionRegistration>();
         
         return services;
     }
