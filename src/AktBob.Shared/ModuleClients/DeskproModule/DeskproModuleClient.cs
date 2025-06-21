@@ -174,13 +174,13 @@ internal class DeskproModuleClient(HttpClient httpClient) : IDeskproModuleClient
         }
     }
     
-    public async Task<ErrorOr<TicketDto>> SearchTicketsByFields(int[] fields, string searchValue, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<IReadOnlyCollection<TicketDto>>> SearchTicketsByFields(int[] fields, string searchValue, CancellationToken cancellationToken = default)
     {
         try
         {
             var fieldsCombined = string.Join(',', fields);
             var url = new Uri($"search/tickets?fields={fieldsCombined}&searchValue={searchValue}", UriKind.Relative);
-            var result = await _httpClient.GetFromJsonAsync<TicketDto>(url, cancellationToken);
+            var result = await _httpClient.GetFromJsonAsync<IReadOnlyCollection<TicketDto>>(url, cancellationToken);
             return result?.ToErrorOr() ?? Error.Failure($"{nameof(DeskproModuleClient)}.{nameof(SearchTicketsByFields)}", "Search tickets: response value is null");
         }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)

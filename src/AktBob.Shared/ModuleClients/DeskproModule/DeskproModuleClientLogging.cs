@@ -116,13 +116,13 @@ internal class DeskproModuleClientLogging(IDeskproModuleClient next, ILogger<Des
         return result;
     }
 
-    public async Task<ErrorOr<TicketDto>> SearchTicketsByFields(int[] fields, string searchValue, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<IReadOnlyCollection<TicketDto>>> SearchTicketsByFields(int[] fields, string searchValue, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Searching Deskpro tickets by fields {fields} with search value {searchValue}", string.Join(",", fields), searchValue);
         
         var result = await next.SearchTicketsByFields(fields, searchValue, cancellationToken);
         result.Switch(
-            value => logger.LogInformation("Deskpro tickets searched successfully, found ticket {id}", value.Id),
+            value => logger.LogInformation("Deskpro tickets searched successfully, found tickets {id}", string.Join(",", value.Select(x => x.Id))),
             _ => result.LogResultErrors(logger));
         
         return result;

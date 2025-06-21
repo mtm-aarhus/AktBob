@@ -15,6 +15,6 @@ public interface IDeskproModuleClient
     Task<ErrorOr<PersonDto>> GetPersonById(int personId, CancellationToken cancellationToken = default);
     Task<ErrorOr<TeamDto>> GetTeam(int teamId, CancellationToken cancellationToken = default);
     Task<ErrorOr<TicketDto>> GetTicket(int ticketId, CancellationToken cancellationToken = default);
-    Task<ErrorOr<TicketDto>> SearchTicketsByFields(int[] fields, string searchValue, CancellationToken cancellationToken = default);
+    Task<ErrorOr<IReadOnlyCollection<TicketDto>>> SearchTicketsByFields(int[] fields, string searchValue, CancellationToken cancellationToken = default);
     Task<ErrorOr<Success>> InvokeWebhook(string webhookId, JsonDocument? payload, CancellationToken cancellationToken = default);
 }
