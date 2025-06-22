@@ -1,16 +1,12 @@
-﻿using System.Text.Json;
-using AktBob.Database.Contracts;
+﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using AktBob.Shared;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using AktBob.Shared.Contracts.Processors;
-using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.ModuleClients.DeskproModule;
 using AktBob.Shared.ModuleClients.OpenOrchestratorModule;
-using AktBob.Shared.Processors;
 using Azure.Messaging.ServiceBus;
-using ErrorOr;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
@@ -32,21 +28,20 @@ public class JournalizeEverything(
         ServiceBusMessageActions messageActions,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Message ID: {id}", message.MessageId);
-        logger.LogInformation("Message Body: {body}", message.Body);
-        logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
-
-        // Deserialize message body to expected job type
-        var job = JsonSerializer.Deserialize<JournalizeEverythingJob>(message.Body, SerializerConfiguration.SerializerOptions());
-        if (job is null)
-        {
-            throw new BusinessException($"{LogSnippets.MessageDeliveryCount(message.MessageId, message.DeliveryCount)}: Body could not be deserialized to type {nameof(JournalizeEverythingJob)}. Body content = {message.Body}");
-        }
+        logger.LogInformation("Message ID: {id} Body: {body} Content-Type: {contentType}", message.MessageId,  message.Body, message.ContentType);
+        var job = MessageDeserializer.Deserialize<JournalizeEverythingJob>(message);
         
         // Get data
         var databaseTicket = GetDatabaseTicket(job.TicketId, cancellationToken);
         var agent = DeskproHelpers.GetTicketAgent(deskpro, job.TicketId, cancellationToken);
         await Task.WhenAll([databaseTicket, agent]);
+
+        if (databaseTicket.Result is null)
+        {
+            logger.LogError("Database ticket by Deskpro ID {ticketId} not found. Moving message to DLQ.", job.TicketId);
+            await messageActions.DeadLetterMessageAsync(message, deadLetterReason: $"Database ticket by Deskpro ID {job.TicketId} not found", cancellationToken: cancellationToken);
+            return;
+        }
         
         agent.Result.LogResultErrors(logger);
         
@@ -77,9 +72,7 @@ public class JournalizeEverything(
     private async Task<Ticket?> GetDatabaseTicket(int ticketId, CancellationToken cancellationToken)
     {
         var data = await ticketRepository.GetByDeskproTicketId(ticketId);
-        if (data is null) throw new BusinessException("Unable to get ticket from database");
-
-        if (string.IsNullOrEmpty(data.CaseNumber))
+        if (string.IsNullOrEmpty(data?.CaseNumber))
         {
             logger.LogWarning("GetOrganized aktindsigtssagsnummer not registered for Deskpro Id {id}", ticketId);
         }

@@ -19,16 +19,12 @@ public class EnsureSubmissions(
     [Function("ensure-submissions")]
     public async Task Run([TimerTrigger("%EnsureSubmission:TriggerTime%")] TimerInfo timerInfo, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Getting list of OS2Forms submissions");
-     
         var webformId = Guard.Against.NullOrEmpty(configuration.GetValue<string>("WebformId"));
         var ensureSubmissionsQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EnsureSubmission:ServiceBusQueueName"));
         
         // Get submission ids from OS2Forms
         var submissionIds = await os2Forms.GetSubmissions(webformId, cancellationToken);
         if (submissionIds.IsError) throw new BusinessException($"Error getting submissions from OS2Forms: {submissionIds.Errors.ToCommaDelimitedString()}");
-        
-        logger.LogInformation("Currently {count} OS2Forms submissions. Dispatching jobs to check if they have been registered.", submissionIds.Value.Count);
         
         if (submissionIds.Value.Count == 0) return;
         

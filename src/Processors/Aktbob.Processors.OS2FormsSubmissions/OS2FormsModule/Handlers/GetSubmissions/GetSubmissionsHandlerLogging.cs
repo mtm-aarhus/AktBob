@@ -14,7 +14,7 @@ internal class GetSubmissionsHandlerLogging(IGetSubmissionsHandler next, ILogger
         var result = await next.Handle(webformId, cancellationToken);
         
         result.Switch(
-            _ => logger.LogInformation("Webform {webformId} submissions retrived", webformId),
+            value => logger.LogInformation("Webform {webformId} submissions retrived, count: {count}", webformId, value.Count),
             errors => logger.LogWarning("{name}: {errors}", nameof(GetSubmissionsHandler), errors.ToCommaDelimitedString()));
 
         return result;

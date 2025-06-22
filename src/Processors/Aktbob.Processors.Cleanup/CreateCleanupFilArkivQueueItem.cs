@@ -22,10 +22,7 @@ public class CreateCleanupFilArkivQueueItem(
         ServiceBusMessageActions messageActions,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Message ID: {id}", message.MessageId);
-        logger.LogInformation("Message Body: {body}", message.Body);
-        logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
-        
+        logger.LogInformation("Message ID: {id} Body: {body} Content-Type: {contentType}", message.MessageId,  message.Body, message.ContentType);
         var job = MessageDeserializer.Deserialize<CreateCleanupFilArkivQueueItemJob>(message);
         
         // Variables
@@ -35,7 +32,7 @@ public class CreateCleanupFilArkivQueueItem(
         var tickets = await ticketRepository.GetAll(deskproId: job.TicketId, null, null);
         if (tickets.Count == 0)
         {
-            logger.LogError("Deskpro ticket {ticketId} not found in database, moving message to dead letter queue.", job.TicketId);
+            logger.LogError("Deskpro ticket {ticketId} not found in database. Moving message to DLQ.", job.TicketId);
             await messageActions.DeadLetterMessageAsync(message, deadLetterReason: $"Deskpro ticket {job.TicketId} not found in database", cancellationToken: cancellationToken);
             return;
         }

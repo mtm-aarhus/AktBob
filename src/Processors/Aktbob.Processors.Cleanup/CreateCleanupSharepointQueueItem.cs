@@ -22,10 +22,7 @@ public class CreateCleanupSharepointQueueItem(
         ServiceBusMessageActions messageActions,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Message ID: {id}", message.MessageId);
-        logger.LogInformation("Message Body: {body}", message.Body);
-        logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
-        
+        logger.LogInformation("Message ID: {id} Body: {body} Content-Type: {contentType}", message.MessageId,  message.Body, message.ContentType);
         var job = MessageDeserializer.Deserialize<CreateCleanupSharepointQueueItemJob>(message);
         
         // Variables
@@ -35,13 +32,14 @@ public class CreateCleanupSharepointQueueItem(
         var ticket = await ticketRepository.GetByDeskproTicketId(job.TicketId);
         if (ticket == null)
         {
-            logger.LogError("Deskpro ticket {ticketId} not found in database, moving message to dead letter queue.", job.TicketId);
+            logger.LogError("Deskpro ticket {ticketId} not found in database. Moving message to DLQ.", job.TicketId);
             await messageActions.DeadLetterMessageAsync(message, deadLetterReason: $"Deskpro ticket {job.TicketId} not found in database", cancellationToken: cancellationToken);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(ticket.SharepointFolderName))
         {
+            logger.LogError("No Sharepoint folder name registered for Deskpro ticket {ticketId}. Moving message to DLQ.", job.TicketId);
             await messageActions.DeadLetterMessageAsync(message, deadLetterReason: $"No Sharepoint folder name registered for Deskpro ticket {job.TicketId}.", cancellationToken: cancellationToken);
             return;
         }

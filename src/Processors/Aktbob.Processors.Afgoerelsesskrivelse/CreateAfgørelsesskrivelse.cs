@@ -1,12 +1,10 @@
-﻿using System.Text.Json;
-using AktBob.Database.Contracts;
+﻿using AktBob.Database.Contracts;
 using AktBob.Shared;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.ModuleClients.DeskproModule;
 using AktBob.Shared.ModuleClients.OpenOrchestratorModule;
-using AktBob.Shared.Processors;
 using Ardalis.GuardClauses;
 using Azure.Messaging.ServiceBus;
 using ErrorOr;
@@ -31,9 +29,7 @@ public class CreateAfgørelsesskrivelse(
         ServiceBusMessageActions messageActions,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Message ID: {id}", message.MessageId);
-        logger.LogInformation("Message Body: {body}", message.Body);
-        logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
+        logger.LogInformation("Message ID: {id} Body: {body} Content-Type: {contentType}", message.MessageId,  message.Body, message.ContentType);
         
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("OpenOrchestratorQueueName"));
         var deskproModtagelsesdatoFieldId = Guard.Against.Null(configuration.GetValue<int>("ModtagelsesdatoFieldId"));
@@ -50,8 +46,6 @@ public class CreateAfgørelsesskrivelse(
         string lovgivning = GetChoiceFieldValue(deskproTicket.Value, deskproLovgivningFieldId);
         DateTime? modtagelsesdato = GetDateTimeFieldValue(deskproTicket.Value, deskproModtagelsesdatoFieldId);
 
-        logger.LogInformation("Ticket {id} retrieved from Deskpro", job.TicketId);
-        
         // Person
         var getPerson = deskproTicket.Value.Person != null
             ? deskpro.GetPersonById(deskproTicket.Value.Person.Id, cancellationToken)
@@ -80,8 +74,13 @@ public class CreateAfgørelsesskrivelse(
         getAgent.Result.LogResultErrors(logger);
         getTeam.Result.LogResultErrors(logger);
 
-        if (getDatabaseTicket.Result is null) throw new BusinessException($"{LogSnippets.MessageDeliveryCount(message.MessageId, message.DeliveryCount)}: Unable to get ticket from database");
-        
+        if (getDatabaseTicket.Result is null)
+        {
+            logger.LogError("Deskpro ticket {ticketId} not found in database. Moving message to DLQ.", job.TicketId);
+            await messageActions.DeadLetterMessageAsync(message, deadLetterReason: $"Deskpro ticket {job.TicketId} not found in database", cancellationToken: cancellationToken);
+            return;
+        }
+
         var ansøger = getPerson.Result.IsError ? null : getPerson.Result.Value;
         var team = getTeam.Result.IsError ? null : getTeam.Result.Value;
         var agent = getAgent.Result.IsError ? null : getAgent.Result.Value;

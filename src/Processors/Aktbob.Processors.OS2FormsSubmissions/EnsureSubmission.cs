@@ -24,10 +24,7 @@ public class EnsureSubmission(
         ServiceBusMessageActions messageActions,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Message ID: {id}", message.MessageId);
-        logger.LogInformation("Message Body: {body}", message.Body);
-        logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
-        
+        logger.LogInformation("Message ID: {id} Body: {body} Content-Type: {contentType}", message.MessageId,  message.Body, message.ContentType);
         var job = MessageDeserializer.Deserialize<EnsureSubmissionJob>(message);
         
         var maxCount = configuration.GetValue<int?>("EnsureSubmission:MaxRetries") ?? 3;
@@ -61,10 +58,10 @@ public class EnsureSubmission(
         
         var count = job.Count + 1;
         
-        // Max retries -> dead letter message
+        // Max retries -> log critical and exit
         if (count > maxCount)
         {
-            await messageActions.DeadLetterMessageAsync(message, deadLetterReason: $"({job.Count}/{maxCount}) OS2Forms submission {job.SubmissionId} registration status: NOT REGISTERED!", cancellationToken: cancellationToken);
+            logger.LogCritical("OS2Forms submission {submissionId} registration status: NOT REGISTERED!", job.SubmissionId);
             return;
         }
         

@@ -1,15 +1,14 @@
-﻿using System.Text.Json;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using AktBob.Database.Contracts;
+using AktBob.Database.Entities;
 using AktBob.Shared;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
+using AktBob.Shared.Contracts.Modules.Podio;
 using AktBob.Shared.Contracts.Processors;
-using AktBob.Shared.Exceptions;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.ModuleClients.DeskproModule;
 using AktBob.Shared.ModuleClients.OpenOrchestratorModule;
 using AktBob.Shared.ModuleClients.PodioModule;
-using AktBob.Shared.Processors;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -34,18 +33,8 @@ public class CreateOpenOrchestratorQueueItem(
         ServiceBusMessageActions messageActions,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Message ID: {id}", message.MessageId);
-        logger.LogInformation("Message Body: {body}", message.Body);
-        logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
-
-        // Deserialize message body to expected job type
-        var job = JsonSerializer.Deserialize<ToSharepointJob>(message.Body, SerializerConfiguration.SerializerOptions());
-        if (job is null)
-        {
-            throw new BusinessException($"{LogSnippets.MessageDeliveryCount(message.MessageId, message.DeliveryCount)}: Body could not be deserialized to type {nameof(ToSharepointJob)}. Body content = {message.Body}");
-        }
-        
-        Guard.Against.NegativeOrZero(job.PodioItemId);
+        logger.LogInformation("Message ID: {id} Body: {body} Content-Type: {contentType}", message.MessageId,  message.Body, message.ContentType);
+        var job = MessageDeserializer.Deserialize<ToSharepointJob>(message);
 
         // Variables
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("OpenOrchestratorQueueName"));
@@ -61,11 +50,15 @@ public class CreateOpenOrchestratorQueueItem(
             getPodioItem,
             getDatabaseCases,
             getDatabaseTicket]);
-
-        if (getPodioItem.Result.IsError) throw new BusinessException(getPodioItem.Result.Errors.ToCommaDelimitedString());
-        if (getDatabaseCases.Result.FirstOrDefault() is null) throw new BusinessException("Unable to get case from databaase");
-        if (getDatabaseTicket.Result is null) throw new BusinessException("Unable to get ticket from database");
-
+        
+        // Ensure external data requests was successful
+        var dataRequestsSuccess = EnsureExternalRequests(getPodioItem.Result, getDatabaseCases.Result, getDatabaseTicket.Result);
+        if (!dataRequestsSuccess.IsSuccess)
+        {
+            await messageActions.DeadLetterMessageAsync(message, deadLetterReason: dataRequestsSuccess.DeadLetterReason, deadLetterErrorDescription: dataRequestsSuccess.DeadLetterDescription, cancellationToken: cancellationToken);
+            return;
+        }
+        
         var databaseCase = getDatabaseCases.Result.First();
 
         // Get case number value from Podio module response
@@ -79,7 +72,7 @@ public class CreateOpenOrchestratorQueueItem(
             }
         }
         
-        // Case number was not found on the Podio item -> fallback: assign case number from database
+        // Case number was not found on the Podio item -> fallback: try assign case number from database
         if (string.IsNullOrEmpty(caseNumber))
         {
             logger.LogWarning("Unable to get case number field value from Podio Item {itemId}", job.PodioItemId);
@@ -101,7 +94,11 @@ public class CreateOpenOrchestratorQueueItem(
 
         // Get ticket from Deskpro
         var deskproTicketResult = await deskpro.GetTicket(getDatabaseTicket.Result.DeskproId, cancellationToken);
-        if (deskproTicketResult.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
+        if (deskproTicketResult.IsError)
+        {
+            await messageActions.DeadLetterMessageAsync(message, deadLetterReason: $"Unable to get ticket {getDatabaseTicket.Result.DeskproId} from Deskpro", cancellationToken: cancellationToken);
+            return;
+        }
 
         // Get Deskpro agent
         var agent = deskproTicketResult.Value.Agent?.Id != null
@@ -125,5 +122,17 @@ public class CreateOpenOrchestratorQueueItem(
         };
 
         await openOrchestrator.AddQueueItem(openOrchestratorQueueName, $"Podio {job.PodioItemId.ToString()}", payload, cancellationToken);
+    }
+    
+    private static (bool IsSuccess, string DeadLetterReason, string DeadLetterDescription) EnsureExternalRequests(
+        ErrorOr<ItemDto> getPodioItem,
+        IReadOnlyCollection<Case> getDatabaseCases,
+        Ticket? getDatabaseTicket)
+    {
+        if (getPodioItem.IsError) return (false, $"Error getting item from Podio.", getPodioItem.Errors.ToCommaDelimitedString());
+        if (getDatabaseCases.FirstOrDefault() is null) return (false, $"Unable to get case by PodioItemId from database", string.Empty);
+        if (getDatabaseTicket is null) return (false, $"Unable to get ticket by PodioItemId from database", string.Empty);
+        if (string.IsNullOrEmpty(getDatabaseTicket.SharepointFolderName)) return (false, $"SharepointFolderName is null or empty", string.Empty);
+        return (true, string.Empty, string.Empty);
     }
 }

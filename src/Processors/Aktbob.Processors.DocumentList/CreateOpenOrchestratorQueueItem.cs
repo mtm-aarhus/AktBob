@@ -32,12 +32,8 @@ public class CreateOpenOrchestratorQueueItem(
         ServiceBusMessageActions messageActions,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Message ID: {id}", message.MessageId);
-        logger.LogInformation("Message Body: {body}", message.Body);
-        logger.LogInformation("Message Content-Type: {contentType}", message.ContentType);
-
+        logger.LogInformation("Message ID: {id} Body: {body} Content-Type: {contentType}", message.MessageId,  message.Body, message.ContentType);
         var job = MessageDeserializer.Deserialize<CreateDocumentListJob>(message);
-        Guard.Against.NegativeOrZero(job.PodioItemId);
 
         // Variables
         var openOrchestratorQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("OpenOrchestratorQueueName"));
@@ -65,8 +61,13 @@ public class CreateOpenOrchestratorQueueItem(
         if (getDatabaseTicket.Result is null)
         {
             var count = job.RescheduleCounter + 1;
-            if (count > 3) throw new BusinessException($"Reached maximum retries for getting ticket data from database.");
-            
+            if (count > 3)
+            {
+                logger.LogError("Maximum retries reached for getting database ticket by PodioItemId {podioItemId} from database. Moving message to DLQ.", job.PodioItemId);
+                await messageActions.DeadLetterMessageAsync(message, deadLetterReason: $"Maximum retries reached for getting database ticket by PodioItemId {job.PodioItemId} from database", cancellationToken: cancellationToken);
+                return;
+            }
+
             logger.LogWarning("Scheduling retry (count: {count}): ticket data for PodioItem {podioItem} not found in database", count, job.PodioItemId);
                 
             // Reschedule
@@ -76,7 +77,12 @@ public class CreateOpenOrchestratorQueueItem(
         }
         
         var deskproTicket = await deskpro.GetTicket(getDatabaseTicket.Result.DeskproId, cancellationToken);
-        if (deskproTicket.IsError) throw new BusinessException($"Error getting Deskpro ticket {getDatabaseTicket.Result.DeskproId}.");
+        if (deskproTicket.IsError)
+        {
+            logger.LogError("Unable to get Deskpro ticket {ticketId}. Moving message to DLQ.", getDatabaseTicket.Result.DeskproId);
+            await messageActions.DeadLetterMessageAsync(message, deadLetterReason: $"Unable to get Deskpro ticket {getDatabaseTicket.Result.DeskproId}", cancellationToken: cancellationToken);
+            return;
+        }
 
         var agent = deskproTicket.Value?.Agent?.Id != null
             ? await deskpro.GetPersonById(deskproTicket.Value.Agent.Id, cancellationToken) 
