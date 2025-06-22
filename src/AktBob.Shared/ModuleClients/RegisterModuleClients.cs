@@ -1,4 +1,5 @@
 ﻿using AktBob.Shared.ModuleClients.DeskproModule;
+using AktBob.Shared.ModuleClients.FilArkiv;
 using AktBob.Shared.ModuleClients.OpenOrchestratorModule;
 using AktBob.Shared.ModuleClients.PodioModule;
 using Microsoft.Extensions.Configuration;
@@ -75,6 +76,30 @@ public static class RegisterModuleClients
             
             var inner = new PodioModuleClient(httpClient);
             var withLogging = new PodioModuleClientLogging(inner, provider.GetRequiredService<ILogger<PodioModuleClient>>());
+            return withLogging;
+        });
+        
+        return services;
+    }
+    
+    public static IServiceCollection AddFilArkivModule(this IServiceCollection services, IConfiguration configuration)
+    {
+        const string moduleHttpClientName = "filarkiv-module-http-client";
+        
+        var baseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Modules:FilArkiv"));
+        
+        services.AddHttpClient(moduleHttpClientName, client =>
+        {
+            client.BaseAddress = new Uri(baseAddress);
+        });
+        
+        services.AddScoped<IFilArkivModuleClient>(provider =>
+        {
+            var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+            var httpClient = httpClientFactory.CreateClient(moduleHttpClientName);
+            
+            var inner = new FilArkivModuleClient(httpClient);
+            var withLogging = new FilArkivModuleClientLogging(inner, provider.GetRequiredService<ILogger<FilArkivModuleClient>>());
             return withLogging;
         });
         
