@@ -2,15 +2,14 @@
 using AktBob.Api.Endpoints.CleanUpQueues.FilArkiv;
 using AktBob.Api.Endpoints.Tickets;
 using AktBob.Api.Endpoints.Jobs;
+using AktBob.Api.Endpoints.Podio;
 using AktBob.Api.Endpoints.Submissions;
-using AktBob.Shared.Contracts.Database;
-using Scalar.AspNetCore;
 
 namespace AktBob.Api.Endpoints;
 
 internal static class MapEndpoints
 {
-    public static IEndpointRouteBuilder MapJobEndpoints(this IEndpointRouteBuilder endpoints)
+    public static void MapJobEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/jobs")
             .WithTags("Jobs")
@@ -28,11 +27,9 @@ internal static class MapEndpoints
         group.MapToSharepointEndpoint("/to-sharepoint");
         group.MapCreateDocumentListEndpoint("/create-document-list");
         group.MapScheduleCleanupEndpoint("/schedule-cleanup");
-        
-        return endpoints;
     }
     
-    public static IEndpointRouteBuilder MapTicketEndpoints(this IEndpointRouteBuilder endpoints)
+    public static void MapTicketEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/tickets")
             .WithTags("Tickets")
@@ -42,11 +39,9 @@ internal static class MapEndpoints
         group.MapGetTicketEndpoint("/{id:int}");
         group.MapCreateTicketEndpoint("");
         group.MapUpdateTicketEndpoint("/{id:int}");
-        
-        return endpoints;
     }
 
-    public static IEndpointRouteBuilder MapCaseEndpoints(this IEndpointRouteBuilder endpoints)
+    public static void MapCaseEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/cases")
             .WithTags("Cases")
@@ -56,11 +51,9 @@ internal static class MapEndpoints
         group.MapGetCaseEndpoint("/{id:int}");
         group.MapGetCasesEndpoint("");
         group.MapUpdateCaseEndpoint("/{id:int}");
-    
-        return group;
     }
 
-    public static IEndpointRouteBuilder MapSubmissionEndpoints (this IEndpointRouteBuilder endpoints)
+    public static void MapSubmissionEndpoints (this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/submissions")
             .WithTags("Submissions")
@@ -68,22 +61,31 @@ internal static class MapEndpoints
         
         group.MapSearchSubmissionsEndpoint("");
         group.MapCreateSubmissionEndpoint("");
-        
-        return group;
     }
 
-    public static IEndpointRouteBuilder MapCleanUpQueueEndpoints(this IEndpointRouteBuilder endpoints)
+    public static void MapCleanUpQueueEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/cleanup-queues")
             .WithTags("Cleanup Queues")
             .RequireAuthorization();
         
         group.MapCreateFilArkivFilesEndpoint("/filarkiv/files");
+    }
+
+    public static void MapPodioEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints.MapGroup("/api/podio")
+            .WithTags("Podio")
+            .RequireAuthorization();
         
-        return endpoints;
+        group.MapUpdatePodioFieldDocumentListEndpoint("/{itemId}/fields/dokumentliste");
+        group.MapUpdatePodioFieldDocumentListEndpoint("/{itemId}/dokumentlisteField");
+        
+        group.MapUpdatePodioFieldSharepointMappeEndpoint("/{itemId}/fields/sharepointmappe");
+        group.MapUpdatePodioFieldSharepointMappeEndpoint("/{itemId}/sharepointmappeField");
     }
     
-    public static IEndpointRouteBuilder MapDatabaseEndpoints(this IEndpointRouteBuilder endpoints)
+    public static void MapDatabaseEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/database")
             .WithTags("Database")
@@ -91,7 +93,5 @@ internal static class MapEndpoints
         
         group.MapGetTicketEndpoint("/tickets/{id:int}"); // Is this still in use?
         group.MapGetCaseEndpoint("/cases/{id:int}"); // Is this still in use?
-        
-        return endpoints;
     }
 }

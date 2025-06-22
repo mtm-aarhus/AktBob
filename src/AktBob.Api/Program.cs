@@ -3,13 +3,12 @@ using AktBob.Api.Endpoints;
 using AktBob.Api.Endpoints.Cases;
 using AktBob.Shared;
 using FastEndpoints;
-using FastEndpoints.Swagger;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication;
-using NSwag;
 using AktBob.Database;
 using AktBob.Podio;
 using AktBob.Shared.Middlewares;
+using AktBob.Shared.ModuleClients;
 using Hangfire.Dashboard.BasicAuthorization;
 using Ardalis.GuardClauses;
 using Scalar.AspNetCore;
@@ -42,6 +41,9 @@ builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Config
 builder.Services.AddDatabaseModule(builder.Configuration);
 builder.Services.AddPodioModule(builder.Configuration);
 builder.Services.AddSharedModule();
+
+// Module clients
+builder.Services.AddPodioModuleClient(builder.Configuration);
 
 // Transactions
 builder.Services.AddScoped<CreateCaseTransaction>();
@@ -99,4 +101,6 @@ app.MapCaseEndpoints();
 app.MapSubmissionEndpoints();
 app.MapCleanUpQueueEndpoints();
 app.MapDatabaseEndpoints();
+app.MapPodioEndpoints();
+
 app.Run();
