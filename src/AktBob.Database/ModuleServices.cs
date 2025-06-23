@@ -93,6 +93,21 @@ public static class ModuleServices
             return withExceptionHandling;
         });
 
+        services.AddScoped<IOcrScreeningStatusRepository>(provider =>
+        {
+            var inner = new OcrScreeningStatusRepository(provider.GetRequiredService<ISqlDataAccess<IDatabaseSqlConnectionFactory>>());
+
+            var withLogging = new OcrScreeningStatusLoggingDecorator(
+                inner,
+                provider.GetRequiredService<ILogger<OcrScreeningStatusRepository>>());
+
+            var withExceptionHandling = new OcrScreeningStatusExceptionDecorator(
+                withLogging,
+                provider.GetRequiredService<ILogger<OcrScreeningStatusRepository>>());
+                
+            return withExceptionHandling;
+        });
+        
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         
         return services;

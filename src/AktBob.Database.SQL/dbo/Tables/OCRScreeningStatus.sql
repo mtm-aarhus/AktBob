@@ -1,0 +1,10 @@
+﻿CREATE TABLE OCRScreeningStatus (
+    Id int PRIMARY KEY IDENTITY (1,1),
+    PodioItemId BIGINT NOT NULL,
+    FilArkivCaseId UNIQUEIDENTIFIER NOT NULL,
+    FilArkivFileId UNIQUEIDENTIFIER NOT NULL,
+    ProcessedAt DATETIME2 NULL DEFAULT NULL
+)
+
+GO
+CREATE NONCLUSTERED INDEX [IX_OCRScreeningStatus_FileId] ON [dbo].[OCRScreeningStatus]([FilArkivFileId])
