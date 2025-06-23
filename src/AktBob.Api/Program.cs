@@ -39,11 +39,11 @@ builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Config
 
 // Modules
 builder.Services.AddDatabaseModule(builder.Configuration);
-builder.Services.AddPodioModule(builder.Configuration);
+// builder.Services.AddPodioModule(builder.Configuration);
 builder.Services.AddSharedModule();
 
 // Module clients
-builder.Services.AddPodioModuleClient(builder.Configuration);
+builder.Services.AddPodioModuleClient(builder.Configuration);   
 
 // Transactions
 builder.Services.AddScoped<CreateCaseTransaction>();
@@ -95,6 +95,7 @@ app.UseFastEndpoints(c =>
     };
 });
 
+app.MapRootEndpoints();
 app.MapJobEndpoints();
 app.MapTicketEndpoints();
 app.MapCaseEndpoints();

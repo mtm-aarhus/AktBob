@@ -9,6 +9,16 @@ namespace AktBob.Api.Endpoints;
 
 internal static class MapEndpoints
 {
+
+    public static void MapRootEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints.MapGroup("/api/")
+            .WithTags("Root")
+            .RequireAuthorization();
+        
+        group.MapCheckOcrScreeningEndpoint("/CheckOCRScreeningStatus/Case"); // temp
+    }
+    
     public static void MapJobEndpoints(this IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("/api/jobs")
@@ -27,6 +37,8 @@ internal static class MapEndpoints
         group.MapToSharepointEndpoint("/to-sharepoint");
         group.MapCreateDocumentListEndpoint("/create-document-list");
         group.MapScheduleCleanupEndpoint("/schedule-cleanup");
+        group.MapCheckOcrScreeningEndpoint("/check-ocr-screening");
+        group.MapCheckOcrScreeningEndpoint("/CheckOCRScreeningStatus"); // temp
     }
     
     public static void MapTicketEndpoints(this IEndpointRouteBuilder endpoints)
