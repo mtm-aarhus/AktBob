@@ -35,4 +35,56 @@ internal class OcrScreeningStatusExceptionDecorator(
             throw;
         }
     }
+
+    public async Task<OcrScreeningStatus?> Get(Guid filArkivFileId)
+    {
+        try
+        {
+            return await next.Get(filArkivFileId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error in {name}", nameof(Get));
+            throw;
+        }
+    }
+
+    public async Task RemoveByCaseId(Guid filArkivCaseId)
+    {
+        try
+        {
+            await next.RemoveByCaseId(filArkivCaseId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error in {name}", nameof(Get));
+            throw;
+        }
+    }
+
+    public async Task<bool> AnyByCaseId(Guid filarkivCaseId)
+    {
+        try
+        {
+            return await next.AnyByCaseId(filarkivCaseId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error in {name}", nameof(Get));
+            throw;
+        }
+    }
+
+    public async Task<bool> AllFilesAreProcessed(Guid filarkivCaseId)
+    {
+        try
+        {
+            return await next.AllFilesAreProcessed(filarkivCaseId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error in {name}", nameof(Get));
+            throw;
+        }
+    }
 }

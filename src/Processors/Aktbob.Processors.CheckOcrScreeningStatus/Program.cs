@@ -23,4 +23,7 @@ builder.Services.AddSharedModule();
 
 // Module clients
 builder.Services.AddFilArkivModuleClient(builder.Configuration);
+builder.Services.AddPodioModuleClient(builder.Configuration);
+builder.Services.AddDeskproModuleClient(builder.Configuration);
+
 builder.Build().Run();

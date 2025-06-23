@@ -86,6 +86,7 @@
     <None Include="AktBob.Database.SQL.LOCALHOST.publish.xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="dbo\Stored Procedures\spOCRScreeningStatus_RemoveByCaseId" />
     <Content Include="dbo\Tables\OCRScreeningStatus.sql" />
   </ItemGroup>
 </Project>

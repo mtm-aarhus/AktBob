@@ -12,7 +12,7 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace Aktbob.Processors.CheckOcrScreeningStatus;
+namespace Aktbob.Processors.CheckOcrScreeningStatus.Functions;
 
 public class RegisterFiles(
     ILogger<RegisterFiles> logger,
@@ -33,6 +33,7 @@ public class RegisterFiles(
         var job = MessageDeserializer.Deserialize<OcrScreeningStatusRegisterFilesJob>(message);
         var fileIds = new Collection<Guid>();
         var queryFileQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("QueueNames:QueryFile"));
+        var dispatchNotificationQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("QueueNames:DispatchNotification"));
         
         // Get document from FilArkiv
         var documents = await filArkiv.GetDocumentsByCaseId(job.FilArkivCaseId, cancellationToken);
@@ -61,15 +62,21 @@ public class RegisterFiles(
             }
         }
         
+        logger.LogInformation("Case {caseId}: {count} files registered", job.FilArkivCaseId, fileIds.Count);
+        
         // Dispatch message for each files
         await messageBus.SendMessages(queryFileQueueName, fileIds.Select(x => new QueryFileJob(x)).ToArray<object>(), cancellationToken: cancellationToken);
-        logger.LogInformation("Case {caseId}: {count} files registered", job.FilArkivCaseId, fileIds.Count);
 
+        // Dispatch notification message
+        await messageBus.SendMessage(dispatchNotificationQueueName, new DispatchNotificationJob(job.PodioItemId, job.FilArkivCaseId), cancellationToken);
+        
         // Maybe update Podio
         if (Settings.ShouldPodioItemBeUpdatedImmediately(configuration))
         {
             var updatePodioItemQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("QueueNames:UpdatePodioItem"));
-            await messageBus.SendMessage(updatePodioItemQueueName, new UpdatePodioItemJob(job.PodioItemId), cancellationToken: cancellationToken);
+            await messageBus.SendMessage(updatePodioItemQueueName, new UpdatePodioItemJob(job.PodioItemId, job.FilArkivCaseId), cancellationToken: cancellationToken);
         }
+        
+        
     }
 }

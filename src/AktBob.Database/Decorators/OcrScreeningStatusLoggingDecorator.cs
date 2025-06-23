@@ -36,4 +36,35 @@ internal class OcrScreeningStatusLoggingDecorator(
 
         return success;
     }
+
+    public async Task<OcrScreeningStatus?> Get(Guid filArkivFileId)
+    {
+        logger.LogInformation("Getting OcrScreeningStatus by FilArkivFileId {id}", filArkivFileId);
+        
+        var item = await next.Get(filArkivFileId);
+        if (item == null)
+        {
+            logger.LogDebug("OcrScreeningStatus by FilArkivFileId {id} not found", filArkivFileId);
+        }
+
+        return item;
+    }
+
+    public async Task RemoveByCaseId(Guid filArkivCaseId)
+    {
+        logger.LogInformation("Removing all OcrScreeningStatusses by FilArkivCaseId {id}", filArkivCaseId);
+        await next.RemoveByCaseId(filArkivCaseId);
+    }
+
+    public async Task<bool> AnyByCaseId(Guid filarkivCaseId)
+    {
+        logger.LogInformation("Checking if any OcrScreeningStatus exists by FilArkivCaseId {id}", filarkivCaseId);
+        return await next.AnyByCaseId(filarkivCaseId);
+    }
+
+    public async Task<bool> AllFilesAreProcessed(Guid filarkivCaseId)
+    {
+        logger.LogInformation("Checking if all OcrScreeningStatus is processed by FilArkivCaseId {id}", filarkivCaseId);
+        return await next.AllFilesAreProcessed(filarkivCaseId);
+    }
 }
