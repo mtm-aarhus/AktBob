@@ -6,8 +6,16 @@ AS
     BEGIN
         BEGIN TRY
             BEGIN TRAN
-                INSERT INTO OCRScreeningStatus (PodioItemId, FilArkivCaseId, FilArkivFileId)
-                VALUES (@PodioItemId, @FilArkivCaseId, @FilArkivFileId)
+                IF NOT EXISTS(
+                    SELECT 1
+                    FROM OCRScreeningStatus
+                    WHERE
+                        FilArkivFileId = @FilArkivFileId
+                )
+                BEGIN 
+                    INSERT INTO OCRScreeningStatus (PodioItemId, FilArkivCaseId, FilArkivFileId)
+                    VALUES (@PodioItemId, @FilArkivCaseId, @FilArkivFileId)
+                END
             COMMIT
         END TRY
         BEGIN CATCH
