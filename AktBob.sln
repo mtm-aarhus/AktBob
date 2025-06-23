@@ -85,6 +85,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.Cleanup",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Modules.FilArkiv", "src\Modules\Aktbob.Modules.FilArkiv\Aktbob.Modules.FilArkiv.csproj", "{2B1BB6D2-C62F-4B6C-B758-EC3E22F1AC0B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.CheckOcrScreeningStatus", "src\Processors\Aktbob.Processors.CheckOcrScreeningStatus\Aktbob.Processors.CheckOcrScreeningStatus.csproj", "{983D2FF4-5BE7-47C4-BD5F-4A16C536C11F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -225,6 +227,10 @@ Global
 		{2B1BB6D2-C62F-4B6C-B758-EC3E22F1AC0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B1BB6D2-C62F-4B6C-B758-EC3E22F1AC0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B1BB6D2-C62F-4B6C-B758-EC3E22F1AC0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{983D2FF4-5BE7-47C4-BD5F-4A16C536C11F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{983D2FF4-5BE7-47C4-BD5F-4A16C536C11F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{983D2FF4-5BE7-47C4-BD5F-4A16C536C11F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{983D2FF4-5BE7-47C4-BD5F-4A16C536C11F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -267,6 +273,7 @@ Global
 		{4FF2EB1E-55DA-4A25-AA8F-1E244B952B1B} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
 		{11D5FF20-DF5A-40C2-89F1-8BFB466C0264} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
 		{2B1BB6D2-C62F-4B6C-B758-EC3E22F1AC0B} = {C8B73F55-D8C6-403F-B2B4-D4BC645339F5}
+		{983D2FF4-5BE7-47C4-BD5F-4A16C536C11F} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}
