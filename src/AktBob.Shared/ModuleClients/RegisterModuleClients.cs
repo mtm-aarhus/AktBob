@@ -82,7 +82,7 @@ public static class RegisterModuleClients
         return services;
     }
     
-    public static IServiceCollection AddFilArkivModule(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddFilArkivModuleClient(this IServiceCollection services, IConfiguration configuration)
     {
         const string moduleHttpClientName = "filarkiv-module-http-client";
         
