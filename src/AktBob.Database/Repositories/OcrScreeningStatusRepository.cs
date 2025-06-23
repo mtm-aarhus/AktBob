@@ -13,8 +13,8 @@ internal class OcrScreeningStatusRepository(ISqlDataAccess<IDatabaseSqlConnectio
     {
         var parameters = new DynamicParameters();
         parameters.Add("PodioItemId", ocrScreeningStatus.PodioItemId, dbType: DbType.Int64, direction: ParameterDirection.Input);
-        parameters.Add("FilArkivCaseId", ocrScreeningStatus.PodioItemId, dbType: DbType.Guid, direction: ParameterDirection.Input);
-        parameters.Add("FilArkivFileId", ocrScreeningStatus.PodioItemId, dbType: DbType.Guid, direction: ParameterDirection.Input);
+        parameters.Add("FilArkivCaseId", ocrScreeningStatus.FilArkivCaseId, dbType: DbType.Guid, direction: ParameterDirection.Input);
+        parameters.Add("FilArkivFileId", ocrScreeningStatus.FilArkivFileId, dbType: DbType.Guid, direction: ParameterDirection.Input);
         
         var rowsAffected = await _sqlDataAccess.ExecuteProcedure("spOCRScreeningStatus_Create", parameters);
         return rowsAffected == 1;
