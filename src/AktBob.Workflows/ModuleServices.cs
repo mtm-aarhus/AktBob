@@ -13,13 +13,6 @@ public static class ModuleServices
         services.AddScoped<IJobHandler<ProcessMessageAttachmentsJob>, ProcessMessageAttachments>();
         services.AddScoped<IJobHandler<RegisterMessagesJob>, RegisterMessages>();
 
-        // CheckOCRScreeningStatus
-        // services.AddScoped<IJobHandler<CheckOCRScreeningStatusRegisterFilesJob>, CheckOCRScreeningStatusRegisterFiles>();
-        // services.AddScoped<IJobHandler<QueryFileProcessingStatusJob>, QueryFileProcessingStatus>();
-        // services.AddScoped<IJobHandler<ScreeningIsFinishedEmailNotificationJob>, ScreeningIsFinishedEmailNotification>();
-        // services.AddScoped<IJobHandler<ScreeningIsFinishedPodioNotificationJob>, ScreeningIsFinishedPodioNotification>();
-        // services.AddScoped<IJobHandler<UpdatePodioFilArkivFieldsJob>, UpdatePodioFilArkivFields>();
-
         // Other workflows
         services.AddScoped<IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>, AddOrUpdateDeskproTicketToGetOrganized>();
         services.AddScoped<IJobHandler<CreateGetOrganizedCaseJob>, CreateGetOrganizedCase>();
