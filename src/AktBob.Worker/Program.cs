@@ -8,7 +8,6 @@ using AktBob.Workflows;
 using AktBob.GetOrganized;
 using AktBob.Database;
 using AktBob.Worker;
-using AktBob.Email;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Serilog.Formatting.Display;
@@ -88,7 +87,6 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddGetOrganizedModule(hostContext.Configuration);
         services.AddDatabaseModule(hostContext.Configuration);
         services.AddWorkflowJobs(hostContext.Configuration);
-        services.AddEmailModuleServices(hostContext.Configuration);
         services.AddFilArkivModule(hostContext.Configuration);
         services.AddSharedModule();
     });
