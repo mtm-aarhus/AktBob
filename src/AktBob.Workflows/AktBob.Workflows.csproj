@@ -50,4 +50,12 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Extensions\StringExtensions.cs" />
+  </ItemGroup>
+
 </Project>

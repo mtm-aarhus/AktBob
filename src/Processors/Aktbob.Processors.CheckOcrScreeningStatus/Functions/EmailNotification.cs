@@ -91,7 +91,7 @@ public class EmailNotification(
             { "linkFilArkivCase", $"https://aarhus.filarkiv.dk/archives/case/{filArkivCaseId}" }
         };
 
-        const string template = "ocr-screening-finished.html";
+        const string template = "ocr-screening-finished";
         var notificationJob = new NotificationJob(recipient, template, subject, fields);
         await messageBus.SendMessage(notificationQueueName, notificationJob, cancellationToken);
     }

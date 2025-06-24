@@ -1,8 +1,8 @@
-﻿using AktBob.Shared.Extensions;
-using AktBob.Deskpro.Contracts.DTOs;
+﻿using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
+using AktBob.Shared.Extensions;
 
-namespace AktBob.Workflows.Helpers;
-internal static class HtmlHelper
+namespace AktBob.Shared;
+public static class HtmlHelper
 {
     public static string GenerateHtml(Dictionary<string, string> fields, string templatePath)
     {

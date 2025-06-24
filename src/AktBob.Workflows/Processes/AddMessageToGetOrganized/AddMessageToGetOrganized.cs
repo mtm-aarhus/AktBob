@@ -2,7 +2,6 @@
 using AktBob.GetOrganized.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Shared.Extensions;
-using AktBob.Workflows.Helpers;
 using AktBob.Deskpro.Contracts;
 using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.CloudConvert.Contracts;
@@ -174,7 +173,7 @@ internal class AddMessageToGetOrganized(
                                                         bool isAgentNote,
                                                         CancellationToken cancellationToken = default)
     {
-        var html = HtmlHelper.GenerateMessageHtml(
+        var html = AktBob.Workflows.Helpers.HtmlHelper.GenerateMessageHtml(
             isAgentNote: isAgentNote,
             createdAt: createdAt.UtcToDanish(),
             personName: personName,

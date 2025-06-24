@@ -19,4 +19,13 @@
 		<ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="EmailTemplates\ocr-screening-finished.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="EmailTemplates\clean-up-notification.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>

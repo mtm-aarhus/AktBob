@@ -8,6 +8,7 @@ using AktBob.Workflows.Helpers;
 using System.Globalization;
 using AktBob.CloudConvert.Contracts;
 using AktBob.Deskpro.Contracts;
+using HtmlHelper = AktBob.Workflows.Helpers.HtmlHelper;
 
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>

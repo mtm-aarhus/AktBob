@@ -189,3 +189,17 @@ services:
       - sql
       - module-deskpro
       - module-open-orchestrator
+  
+  processor-check-ocr-screening:
+    build:
+      dockerfile: Processors/Aktbob.Processors.CheckOcrScreeningStatus/Dockerfile
+    env_file:
+      - Processors/Aktbob.Processors.CheckOcrScreeningStatus/development.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+    depends_on:
+      - sql
+      - module-deskpro
+      - module-filarkiv
+      - module-podio

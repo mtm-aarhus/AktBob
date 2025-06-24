@@ -16,6 +16,8 @@ public static class ModuleServices
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:From"));
         Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:SmtpUrl"));
 
+        services.AddHostedService<AzureServiceBusReceiver>();
+        
         services.AddTransient<ISendEmailHandler, SendEmailHandler>();
         services.AddTransient<ISmtpClient, SmtpClientWrapper>();
         services.AddScoped<IJobHandler<SendEmailJob>, SendEmailJobHandler>();
