@@ -11,7 +11,6 @@ using AktBob.Worker;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Serilog.Formatting.Display;
-using AktBob.FilArkiv;
 
 var builder = Host.CreateDefaultBuilder(args)
     .UseWindowsService()
@@ -87,7 +86,6 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddGetOrganizedModule(hostContext.Configuration);
         services.AddDatabaseModule(hostContext.Configuration);
         services.AddWorkflowJobs(hostContext.Configuration);
-        services.AddFilArkivModule(hostContext.Configuration);
         services.AddSharedModule();
     });
 
