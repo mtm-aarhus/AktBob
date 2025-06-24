@@ -1,5 +1,4 @@
-﻿using AktBob.Email.Contracts;
-using AktBob.Email.Handler;
+﻿using AktBob.Email.Handler;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;

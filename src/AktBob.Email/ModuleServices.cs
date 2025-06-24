@@ -1,11 +1,10 @@
 ﻿using AktBob.Email.Client;
-using AktBob.Email.Contracts;
 using AktBob.Email.Handler;
-using AktBob.Email.Jobs;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AktBob.Email;
 
@@ -20,11 +19,22 @@ public static class ModuleServices
         
         services.AddTransient<ISendEmailHandler, SendEmailHandler>();
         services.AddTransient<ISmtpClient, SmtpClientWrapper>();
-        services.AddScoped<IJobHandler<SendEmailJob>, SendEmailJobHandler>();
 
-        services.AddSendEmailHandler();
-        services.AddScoped<IEmailModule, EmailModule>();
+        services.AddScoped<ISendEmailHandler>(provider =>
+        {
+            var logger = provider.GetRequiredService<ILogger<SendEmailHandler>>();
+            
+            var inner = new SendEmailHandler(
+                provider.GetRequiredService<IAppConfig>(),
+                provider.GetRequiredService<ISmtpClient>(),
+                logger);
 
+            var withLogging = new SendEmailHandlerLogging(inner, logger);
+            var withException = new SendEmailHandlerException(withLogging, logger);
+            
+            return withException;
+        });
+        
         return services;
     }
 }

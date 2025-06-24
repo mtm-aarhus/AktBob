@@ -6,24 +6,14 @@ using Microsoft.Extensions.Logging;
 using MimeKit;
 
 namespace AktBob.Email.Handler;
-internal class SendEmailHandler : ISendEmailHandler
+internal class SendEmailHandler(
+    IAppConfig appConfig,
+    ISmtpClient smtpClient,
+    ILogger<SendEmailHandler> logger) : ISendEmailHandler
 {
-    private readonly IAppConfig _appConfig;
-    private readonly ISmtpClient _smtpClient;
-    private readonly ILogger<SendEmailHandler> _logger;
-    private readonly string _smtpUrl;
-    private readonly int _smtpPort;
-    private readonly string _from;
-
-    public SendEmailHandler(IAppConfig appConfig, ISmtpClient smtpClient, ILogger<SendEmailHandler> logger)
-    {
-        _appConfig = appConfig;
-        _smtpClient = smtpClient;
-        _logger = logger;
-        _smtpUrl = Guard.Against.NullOrEmpty(_appConfig.GetValue<string>("EmailModule:SmtpUrl"));
-        _smtpPort = _appConfig.GetValue<int>("EmailModule:SmtpPort");
-        _from = Guard.Against.NullOrEmpty(_appConfig.GetValue<string>("EmailModule:From"));
-    }
+    private readonly string _smtpUrl = Guard.Against.NullOrEmpty(appConfig.GetValue<string>("EmailModule:SmtpUrl"));
+    private readonly int _smtpPort = Guard.Against.Null(appConfig.GetValue<int?>("EmailModule:SmtpPort"));
+    private readonly string _from = Guard.Against.NullOrEmpty(appConfig.GetValue<string>("EmailModule:From"));
 
     public void Handle(string to, string subject, string body, bool bodyIsHtml = false)
     {
@@ -32,7 +22,7 @@ internal class SendEmailHandler : ISendEmailHandler
             throw new BusinessException("Email recipient is empty");
         }
 
-        _smtpClient.Connect(_smtpUrl, _smtpPort);
+        smtpClient.Connect(_smtpUrl, _smtpPort);
 
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(_from, _from));
@@ -43,8 +33,8 @@ internal class SendEmailHandler : ISendEmailHandler
             Text = body
         };
 
-        _smtpClient.Send(message);
-        _smtpClient.Disconnect(true);
-        _logger.LogInformation("Email sent to {recipient} with subject: {subject}", to, subject);
+        smtpClient.Send(message);
+        smtpClient.Disconnect(true);
+        logger.LogInformation("Email sent to {recipient} with subject: {subject}", to, subject);
     }
 }

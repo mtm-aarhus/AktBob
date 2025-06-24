@@ -4,7 +4,7 @@ using MimeKit;
 namespace AktBob.Email.Client;
 internal class SmtpClientWrapper : ISmtpClient
 {
-    private readonly SmtpClient _smtpClient = new SmtpClient();
+    private readonly SmtpClient _smtpClient = new();
 
     public void Connect(string host, int port)
     {
