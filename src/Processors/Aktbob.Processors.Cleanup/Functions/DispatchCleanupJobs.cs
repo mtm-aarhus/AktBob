@@ -1,13 +1,14 @@
-﻿using AktBob.Shared;
+﻿using Aktbob.Processors.Cleanup.Jobs;
+using AktBob.Shared;
 using AktBob.Shared.Contracts.Processors;
 using AktBob.Shared.ModuleClients.DeskproModule;
+using Ardalis.GuardClauses;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
-using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
-namespace Aktbob.Processors.Cleanup;
+namespace Aktbob.Processors.Cleanup.Functions;
 
 public class DispatchCleanupJobs(
     ILogger<DispatchCleanupJobs> logger,

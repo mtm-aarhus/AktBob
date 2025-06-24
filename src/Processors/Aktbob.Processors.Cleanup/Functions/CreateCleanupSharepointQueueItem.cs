@@ -1,13 +1,14 @@
 ﻿using AktBob.Database.Contracts;
+using Aktbob.Processors.Cleanup.Jobs;
 using AktBob.Shared;
 using AktBob.Shared.ModuleClients.OpenOrchestratorModule;
+using Ardalis.GuardClauses;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.Logging;
-using Ardalis.GuardClauses;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
-namespace Aktbob.Processors.Cleanup;
+namespace Aktbob.Processors.Cleanup.Functions;
 
 public class CreateCleanupSharepointQueueItem(
     ILogger<CreateCleanupSharepointQueueItem> logger,
