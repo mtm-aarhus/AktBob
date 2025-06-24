@@ -6,7 +6,6 @@ using FastEndpoints;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication;
 using AktBob.Database;
-using AktBob.Podio;
 using AktBob.Shared.Middlewares;
 using AktBob.Shared.ModuleClients;
 using Hangfire.Dashboard.BasicAuthorization;
@@ -19,8 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddFastEndpoints(options =>
     options.Assemblies = [
         typeof(Program).Assembly,
-        typeof(AktBob.Database.ModuleServices).Assembly,
-        typeof(AktBob.Podio.ModuleServices).Assembly]
+        typeof(AktBob.Database.ModuleServices).Assembly]
     );
 
 builder.Services

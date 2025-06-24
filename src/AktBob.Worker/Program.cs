@@ -1,7 +1,5 @@
 using Serilog;
 using AktBob.Deskpro;
-using AktBob.Podio;
-using AktBob.OpenOrchestrator;
 using AktBob.CloudConvert;
 using Hangfire;
 using AktBob.Workflows;
@@ -80,8 +78,6 @@ var builder = Host.CreateDefaultBuilder(args)
 
         // Modules
         services.AddDeskproModule(hostContext.Configuration);
-        services.AddPodioModule(hostContext.Configuration);
-        services.AddOpenOrchestratorModule(hostContext.Configuration);
         services.AddCloudConvertModule(hostContext.Configuration);
         services.AddGetOrganizedModule(hostContext.Configuration);
         services.AddDatabaseModule(hostContext.Configuration);

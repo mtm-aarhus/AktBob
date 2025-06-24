@@ -26,8 +26,6 @@
     <ProjectReference Include="..\AktBob.Database\AktBob.Database.csproj" />
     <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
     <ProjectReference Include="..\AktBob.GetOrganized\AktBob.GetOrganized.csproj" />
-    <ProjectReference Include="..\AktBob.OpenOrchestrator\AktBob.OpenOrchestrator.csproj" />
-    <ProjectReference Include="..\AktBob.Podio\AktBob.Podio.csproj" />
     <ProjectReference Include="..\AktBob.Workflows\AktBob.Workflows.csproj" />
   </ItemGroup>
 
