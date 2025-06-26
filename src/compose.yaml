@@ -20,6 +20,7 @@ services:
         ENVIRONMENT: "development"
     env_file:
       - Aktbob.Api/development.env
+      - shared-configuration.dev.env
     ports:
       - "5000:8080"
     depends_on:
@@ -95,6 +96,7 @@ services:
       dockerfile: Processors/Aktbob.Processors.Afgoerelsesskrivelse/Dockerfile
     env_file:
       - Processors/Aktbob.Processors.Afgoerelsesskrivelse/development.env
+      - shared-configuration.dev.env
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
@@ -110,6 +112,7 @@ services:
       dockerfile: Processors/Aktbob.Processors.JournalizeEverything/Dockerfile
     env_file:
       - Processors/Aktbob.Processors.JournalizeEverything/development.env
+      - shared-configuration.dev.env
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
@@ -124,6 +127,7 @@ services:
       dockerfile: Processors/Aktbob.Processors.ToFilArkiv/Dockerfile
     env_file:
       - Processors/Aktbob.Processors.ToFilArkiv/development.env
+      - shared-configuration.dev.env
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
@@ -139,6 +143,7 @@ services:
       dockerfile: Processors/Aktbob.Processors.ToSharepoint/Dockerfile
     env_file:
       - Processors/Aktbob.Processors.ToSharepoint/development.env
+      - shared-configuration.dev.env
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
@@ -154,6 +159,7 @@ services:
       dockerfile: Processors/Aktbob.Processors.DocumentList/Dockerfile
     env_file:
       - Processors/Aktbob.Processors.DocumentList/development.env
+      - shared-configuration.dev.env
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
@@ -169,6 +175,7 @@ services:
       dockerfile: Processors/Aktbob.Processors.OS2FormsSubmissions/Dockerfile
     env_file:
       - Processors/Aktbob.Processors.OS2FormsSubmissions/development.env
+      - shared-configuration.dev.env
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
@@ -182,6 +189,7 @@ services:
       dockerfile: Processors/Aktbob.Processors.Cleanup/Dockerfile
     env_file:
       - Processors/Aktbob.Processors.Cleanup/development.env
+      - shared-configuration.dev.env
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
@@ -195,6 +203,7 @@ services:
       dockerfile: Processors/Aktbob.Processors.CheckOcrScreeningStatus/Dockerfile
     env_file:
       - Processors/Aktbob.Processors.CheckOcrScreeningStatus/development.env
+      - shared-configuration.dev.env
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
