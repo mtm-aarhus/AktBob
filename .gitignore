@@ -9,7 +9,8 @@
 *.user
 *.userosscache
 *.sln.docstates
-*.env
+shared-configuration.dev.env
+.env
 azure-*.md
 azure-*.json
 local.settings.json
