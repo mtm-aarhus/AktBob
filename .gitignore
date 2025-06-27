@@ -9,7 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-shared-configuration.dev.env
+shared-configuration.*.env
 .env
 azure-*.md
 azure-*.json
