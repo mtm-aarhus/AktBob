@@ -15,6 +15,8 @@ azure-*.md
 azure-*.json
 local.settings.json
 appsettings.development.json
+appsettings.test.json
+README-deployment.*.md
 
 # Rider
 .idea/
@@ -383,4 +385,4 @@ FodyWeavers.xsd
 /src/AktBob.Worker/appsettings.staging.json
 /src/AktBob.Worker/appsettings.test.json
 /src/Modules/Aktbob.Modules.Deskpro/appsettings.development.json
-/README-deployment.md
+
