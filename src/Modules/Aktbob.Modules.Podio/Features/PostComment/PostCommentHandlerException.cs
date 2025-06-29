@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using AktBob.Shared.Types.Podio;
+using Microsoft.Extensions.Logging;
 
 namespace Aktbob.Modules.Podio.Features.PostComment;
 

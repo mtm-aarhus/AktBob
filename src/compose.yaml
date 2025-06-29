@@ -66,7 +66,7 @@ services:
       
   module-podio:
     build:
-      dockerfile: Modules/Aktbob.Modules.Podio/Dockerfile
+      dockerfile: Modules/Aktbob.Modules.Podio.Api/Dockerfile
       args:
         ENVIRONMENT: "development"
         APPINSIGHTS_INSTRUMENTATIONKEY: "test"

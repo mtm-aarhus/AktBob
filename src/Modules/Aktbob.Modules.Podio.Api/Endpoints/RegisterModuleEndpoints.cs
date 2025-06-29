@@ -1,4 +1,4 @@
-namespace Aktbob.Modules.Podio.Endpoints;
+namespace Aktbob.Modules.Podio.Api.Endpoints;
 
 internal static class RegisterModuleEndpoints
 {

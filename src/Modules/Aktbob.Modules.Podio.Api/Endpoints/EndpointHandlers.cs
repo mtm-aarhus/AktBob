@@ -6,7 +6,7 @@ using AktBob.Shared.Extensions;
 using AktBob.Shared.Types.Podio;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Aktbob.Modules.Podio.Endpoints;
+namespace Aktbob.Modules.Podio.Api.Endpoints;
 
 internal static class EndpointHandlers
 {

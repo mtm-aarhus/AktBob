@@ -1,5 +1,5 @@
 using Aktbob.Modules.Podio;
-using Aktbob.Modules.Podio.Endpoints;
+using Aktbob.Modules.Podio.Api.Endpoints;
 using AktBob.Shared;
 using AktBob.Shared.Middlewares;
 
