@@ -1,10 +1,10 @@
 services:
   
-#  mailserver:
-#    image: jijiechen/papercut:latest
-#    ports:
-#      - "25:25"
-#      - "37408:37408"
+  mailserver:
+    image: jijiechen/papercut:latest
+    ports:
+      - "25:25"
+      - "37408:37408"
   
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
@@ -72,18 +72,6 @@ services:
         APPINSIGHTS_INSTRUMENTATIONKEY: "test"
     ports:
       - "5003:8080"
-    environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
-
-
-  module-filarkiv:
-    build:
-      dockerfile: Modules/Aktbob.Modules.FilArkiv/Dockerfile
-      args:
-        ENVIRONMENT: "development"
-        APPINSIGHTS_INSTRUMENTATIONKEY: "test"
-    ports:
-      - "5004:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
       
@@ -197,18 +185,3 @@ services:
       - sql
       - module-deskpro
       - module-open-orchestrator
-  
-  processor-check-ocr-screening:
-    build:
-      dockerfile: Processors/Aktbob.Processors.CheckOcrScreeningStatus/Dockerfile
-    env_file:
-      - Processors/Aktbob.Processors.CheckOcrScreeningStatus/development.env
-      - shared-configuration.dev.env
-    environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
-      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
-    depends_on:
-      - sql
-      - module-deskpro
-      - module-filarkiv
-      - module-podio
