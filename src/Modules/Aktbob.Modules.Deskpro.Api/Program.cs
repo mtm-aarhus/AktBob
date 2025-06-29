@@ -1,5 +1,5 @@
 using Aktbob.Modules.Deskpro;
-using Aktbob.Modules.Deskpro.Endpoints;
+using Aktbob.Modules.Deskpro.Api.Endpoints;
 using AktBob.Shared;
 using AktBob.Shared.Middlewares;
 

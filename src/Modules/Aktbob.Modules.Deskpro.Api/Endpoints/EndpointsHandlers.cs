@@ -13,7 +13,7 @@ using Aktbob.Modules.Deskpro.Features.InvokeWebhook;
 using AktBob.Shared.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Aktbob.Modules.Deskpro.Endpoints;
+namespace Aktbob.Modules.Deskpro.Api.Endpoints;
 
 internal static class EndpointsHandlers
 {

@@ -11,8 +11,9 @@ using Aktbob.Modules.Deskpro.Features.GetTicket;
 using Aktbob.Modules.Deskpro.Features.GetTicketsByFieldSearch;
 using Aktbob.Modules.Deskpro.Features.InvokeWebhook;
 using AktBob.Shared;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Aktbob.Modules.Deskpro;
+namespace Aktbob.Modules.Deskpro.Features;
 
 internal static class RegisterHandlers
 {

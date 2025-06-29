@@ -42,7 +42,7 @@ services:
   
   module-deskpro:
     build:
-      dockerfile: Modules/Aktbob.Modules.Deskpro/Dockerfile
+      dockerfile: Modules/Aktbob.Modules.Deskpro.Api/Dockerfile
       args:
         ENVIRONMENT: "development"
         APPINSIGHTS_INSTRUMENTATIONKEY: "test"
