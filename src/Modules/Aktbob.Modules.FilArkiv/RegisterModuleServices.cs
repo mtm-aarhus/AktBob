@@ -1,17 +1,18 @@
 ﻿using AAK.FilArkiv;
 using Aktbob.Modules.FilArkiv.Features;
 using Ardalis.GuardClauses;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Aktbob.Modules.FilArkiv;
 
-internal static class RegisterModuleServices
+public static class RegisterModuleServices
 {
-    public static IServiceCollection AddModuleServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddFilArkivModule(this IServiceCollection services, string baseAddress, string clientId, string clientSecret, string tokenEndpoint)
     {
-        var baseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:BaseAddress"));
-        var clientId = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientId"));
-        var clientSecret = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:ClientSecret"));
-        var tokenEndpoint = Guard.Against.NullOrEmpty(configuration.GetValue<string>("FilArkiv:TokenEndpoint"));
+        Guard.Against.NullOrEmpty(baseAddress);
+        Guard.Against.NullOrEmpty(clientId);
+        Guard.Against.NullOrEmpty(clientSecret);
+        Guard.Against.NullOrEmpty(tokenEndpoint);
 
         var filArkivOptions = new FilArkivOptions(baseAddress, clientId, clientSecret, tokenEndpoint);
         services.AddFilArkiv(filArkivOptions);

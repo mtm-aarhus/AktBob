@@ -1,11 +1,16 @@
-﻿using Ardalis.GuardClauses;
+﻿namespace Aktbob.Modules.Podio;
 
-namespace Aktbob.Modules.Podio;
-internal static class ConfigurationHelper
+public interface IConfigurationHelper
 {
-    public static string GetClientId(IConfiguration configuration) => Guard.Against.NullOrEmpty(configuration.GetValue<string>("ClientId"));
+    string ClientId { get; }
+    string GetClientSecret { get; }
+    string GetAppToken(int appId);
+}
 
-    public static string GetClientSecret(IConfiguration configuration) => Guard.Against.NullOrEmpty(configuration.GetValue<string>("ClientSecret"));
+internal class ConfigurationHelper(Dictionary<int, string> appTokens, string clientId, string clientSecret) : IConfigurationHelper
+{
+    public string ClientId { get; } = clientId;
+    public string GetClientSecret { get; } = clientSecret;
 
-    public static string GetAppToken(IConfiguration configuration, int appId) => Guard.Against.NullOrEmpty(configuration.GetValue<string>($"AppTokens:{appId}"));
+    public string GetAppToken(int appId) => appTokens.TryGetValue(appId, out var value) ? value : string.Empty;
 }

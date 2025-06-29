@@ -1,47 +1,40 @@
 ﻿using System.Collections.ObjectModel;
 using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
-using Aktbob.Processors.CheckOcrScreeningStatus.Jobs;
+using Aktbob.Modules.FilArkiv.Features.GetDocumentsByCaseId;
+using Aktbob.Processors.CheckOcrScreeningStatus.Features.NotificationDispatcher;
+using Aktbob.Processors.CheckOcrScreeningStatus.Features.QueryFile;
+using Aktbob.Processors.CheckOcrScreeningStatus.Features.UpdatePodioItem;
 using AktBob.Shared;
 using AktBob.Shared.Contracts.Processors;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.ModuleClients.FilArkiv;
 using Ardalis.GuardClauses;
-using Azure.Messaging.ServiceBus;
-using Microsoft.Azure.Functions.Worker;
+using ErrorOr;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace Aktbob.Processors.CheckOcrScreeningStatus.Functions;
+namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.RegisterFiles;
 
-public class RegisterFiles(
-    ILogger<RegisterFiles> logger,
-    IFilArkivModuleClient filArkiv,
+public class RegisterFilesHandler(
+    ILogger<RegisterFilesHandler> logger,
+    IGetDocumentsByCaseIdHandler filArkivGetDocumentsByCaseIdHandler,
     IOcrScreeningStatusRepository repository,
     IConfiguration configuration,
     IMessageBus messageBus)
 {
 
-    [Function("register-files")]
-    public async Task Run(
-        [ServiceBusTrigger("%QueueNames:RegisterFiles%", Connection = "AzureServiceBus")]
-        ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions,
-        CancellationToken cancellationToken)
+    public async Task<ErrorOr<Success>> Run(OcrScreeningStatusRegisterFilesJob job, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Message ID: {id} Body: {body} Content-Type: {contentType}", message.MessageId,  message.Body, message.ContentType);
-        var job = MessageDeserializer.Deserialize<OcrScreeningStatusRegisterFilesJob>(message);
         var fileIds = new Collection<Guid>();
-        var queryFileQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("QueueNames:QueryFile"));
-        var dispatchNotificationQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("QueueNames:DispatchNotification"));
+        var queryFileQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:QueryFile"));
+        var dispatchNotificationQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:DispatchNotification"));
         
         // Get document from FilArkiv
-        var documents = await filArkiv.GetDocumentsByCaseId(job.FilArkivCaseId, cancellationToken);
+        var documents = await filArkivGetDocumentsByCaseIdHandler.Handle(job.FilArkivCaseId, cancellationToken);
         if (documents.IsError)
         {
             logger.LogError("Error getting documents for case {filArkivCaseId} from FilArkiv. Moving to DLQ.", job.FilArkivCaseId);
-            await messageActions.DeadLetterMessageAsync(message, deadLetterReason: $"Error getting documents for case {job.FilArkivCaseId} from FilArkiv", deadLetterErrorDescription: documents.Errors.ToCommaDelimitedString(), cancellationToken: cancellationToken);
-            return;
+            return Error.Failure($"Error getting documents for case {job.FilArkivCaseId} from FilArkiv", documents.Errors.ToCommaDelimitedString());
         }
         
         // Persist each file in database
@@ -57,8 +50,10 @@ public class RegisterFiles(
                     FilArkivCaseId = job.FilArkivCaseId,
                     FilArkivFileId = documentFileId
                 };
-                
-                await repository.Add(file);
+
+                var existing = await repository.Get(file.FilArkivFileId);
+                if (existing == null) await repository.Add(file);
+                else await repository.Update(file);
             }
         }
         
@@ -73,10 +68,10 @@ public class RegisterFiles(
         // Maybe update Podio
         if (Settings.ShouldPodioItemBeUpdatedImmediately(configuration))
         {
-            var updatePodioItemQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("QueueNames:UpdatePodioItem"));
+            var updatePodioItemQueueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:UpdatePodioItem"));
             await messageBus.SendMessage(updatePodioItemQueueName, new UpdatePodioItemJob(job.PodioItemId, job.FilArkivCaseId), cancellationToken: cancellationToken);
         }
-        
-        
+
+        return Result.Success;
     }
 }

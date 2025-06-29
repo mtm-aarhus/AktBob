@@ -1,6 +1,7 @@
 ﻿using AktBob.Shared.Contracts.Modules.FilArkiv.Contracts.DTOs;
 using AktBob.Shared.Extensions;
 using ErrorOr;
+using Microsoft.Extensions.Logging;
 
 namespace Aktbob.Modules.FilArkiv.Features.GetDocumentsByCaseId;
 

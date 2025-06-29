@@ -5,6 +5,10 @@ using Hangfire;
 using AktBob.Workflows;
 using AktBob.GetOrganized;
 using AktBob.Database;
+using Aktbob.Modules.Deskpro;
+using Aktbob.Modules.FilArkiv;
+using Aktbob.Modules.Podio;
+using Aktbob.Processors.CheckOcrScreeningStatus;
 using AktBob.Worker;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
@@ -77,12 +81,19 @@ var builder = Host.CreateDefaultBuilder(args)
         });
 
         // Modules
-        services.AddDeskproModule(hostContext.Configuration);
+        services.AddOldDeskproModule(hostContext.Configuration);
         services.AddCloudConvertModule(hostContext.Configuration);
         services.AddGetOrganizedModule(hostContext.Configuration);
         services.AddDatabaseModule(hostContext.Configuration);
         services.AddWorkflowJobs(hostContext.Configuration);
         services.AddSharedModule();
+
+        AddFilArkivModule(configuration, services);
+        AddPodioModule(configuration, services);
+        AddDeskproModule(configuration, services);
+
+        // Processors
+        services.AddCheckOcrScreeningStatusProcessor(configuration);
     });
 
 
@@ -93,3 +104,30 @@ using var scope = host.Services.CreateScope();
 GlobalJobFilters.Filters.Add(scope.ServiceProvider.GetRequiredService<FailedJobLoggingFilter>());
 
 host.Run();
+return;
+
+
+static void AddFilArkivModule(IConfiguration configuration, IServiceCollection serviceCollection)
+{
+    var baseAddress = configuration.GetValue<string>("FilArkiv:BaseAddress") ?? string.Empty;
+    var clientId = configuration.GetValue<string>("FilArkiv:ClientId") ?? string.Empty;
+    var clientSecret = configuration.GetValue<string>("FilArkiv:ClientSecret") ?? string.Empty;
+    var tokenEndpoint = configuration.GetValue<string>("FilArkiv:TokenEndpoint") ?? string.Empty;
+    serviceCollection.AddFilArkivModule(baseAddress, clientId, clientSecret,  tokenEndpoint);
+}
+
+void AddPodioModule(IConfiguration configuration, IServiceCollection serviceCollection)
+{
+    var baseAddress = configuration.GetValue<string>("Podio:BaseAddress") ?? string.Empty;
+    var clientId = configuration.GetValue<string>("Podio:ClientId") ?? string.Empty;
+    var clientSecret = configuration.GetValue<string>("Podio:ClientSecret") ?? string.Empty;
+    var appTokens = configuration.GetSection("Podio:AppTokens").Get<Dictionary<int, string>>() ?? new Dictionary<int, string>(); 
+    serviceCollection.AddPodioModule(baseAddress, appTokens, clientId, clientSecret);
+}
+
+void AddDeskproModule(IConfiguration configuration1, IServiceCollection serviceCollection)
+{
+    var baseAddress = configuration1.GetValue<string>("Deskpro:BaseAddress") ?? string.Empty;
+    var key = configuration1.GetValue<string>("Deskpro:AuthorizationKey") ?? string.Empty;
+    serviceCollection.AddDeskproModule(baseAddress, key);
+}

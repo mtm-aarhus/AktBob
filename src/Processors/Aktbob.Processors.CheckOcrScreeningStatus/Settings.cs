@@ -4,5 +4,5 @@ namespace Aktbob.Processors.CheckOcrScreeningStatus;
 
 internal static class Settings
 {
-    public static bool ShouldPodioItemBeUpdatedImmediately(IConfiguration configuration) => configuration.GetValue<bool?>("UpdatePodioItemSetFilArkivUrlImmediately") ?? false;
+    public static bool ShouldPodioItemBeUpdatedImmediately(IConfiguration configuration) => configuration.GetValue<bool?>("CheckOcrScreeningStatus:UpdatePodioItemSetFilArkivUrlImmediately") ?? false;
 }

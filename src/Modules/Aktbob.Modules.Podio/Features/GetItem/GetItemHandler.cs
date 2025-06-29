@@ -4,15 +4,15 @@ using AktBob.Shared.Contracts.Modules.Podio;
 using AktBob.Shared.Types.Podio;
 
 namespace Aktbob.Modules.Podio.Features.GetItem;
-internal class GetItemHandler(IPodioFactory podioFactory, IConfiguration configuration) : IGetItemHandler
+internal class GetItemHandler(IPodioFactory podioFactory, IConfigurationHelper configurationHelper) : IGetItemHandler
 {
     public async Task<ErrorOr<ItemDto>> Handle(ItemId itemId, CancellationToken cancellationToken)
     {
         var podio = podioFactory.Create(
             appId: itemId.AppId, 
-            appToken: ConfigurationHelper.GetAppToken(configuration, itemId.AppId), 
-            clientId: ConfigurationHelper.GetClientId(configuration),
-            clientSecret: ConfigurationHelper.GetClientSecret(configuration));
+            appToken: configurationHelper.GetAppToken(itemId.AppId), 
+            clientId: configurationHelper.ClientId,
+            clientSecret: configurationHelper.GetClientSecret);
 
         var item = await podio.GetItem(itemId.AppId, itemId.Id, cancellationToken);
         if (item == null)

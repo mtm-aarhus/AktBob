@@ -6,10 +6,14 @@ namespace Aktbob.Modules.Podio;
 
 public static class RegisterModuleServices
 {
-    public static IServiceCollection AddModuleServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddPodioModule(this IServiceCollection services, string baseAddress, Dictionary<int, string> appTokens, string clientId, string clientSecret)
     {
-        var podioAppTokens = Guard.Against.NullOrEmpty(configuration.GetSection("AppTokens").GetChildren().ToDictionary(x => x.Key, x => x.Value));
-        services.AddPodioFactory(new Uri(Guard.Against.NullOrEmpty(configuration.GetValue<string>("BaseAddress"))));
+        services.AddSingleton<IConfigurationHelper>(_ => new ConfigurationHelper(
+            Guard.Against.Null(appTokens),
+            Guard.Against.NullOrEmpty(clientId),
+            Guard.Against.NullOrEmpty(clientSecret)));
+        
+        services.AddPodioFactory(new Uri(Guard.Against.NullOrEmpty(baseAddress)));
 
         // Handlers
         services.AddGetItemHandler();

@@ -2,7 +2,7 @@
 using AktBob.Shared.Types.Podio;
 
 namespace Aktbob.Modules.Podio.Features.GetItem;
-internal interface IGetItemHandler
+public interface IGetItemHandler
 {
     Task<ErrorOr<ItemDto>> Handle(ItemId itemId, CancellationToken cancellationToken);
 }

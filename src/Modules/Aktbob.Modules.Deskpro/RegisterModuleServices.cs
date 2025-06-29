@@ -3,15 +3,15 @@ using Ardalis.GuardClauses;
 
 namespace Aktbob.Modules.Deskpro;
 
-internal static class RegisterModuleServices
+public static class RegisterModuleServices
 {
-    public static IServiceCollection AddModuleServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDeskproModule(this IServiceCollection services, string baseAddress, string key)
     {
         // Add Deskpro client
         var deskproOptions = new DeskproOptions
         {
-            BaseAddress = Guard.Against.NullOrEmpty(configuration.GetValue<string>("BaseAddress")),
-            AuthorizationKey = Guard.Against.NullOrEmpty(configuration.GetValue<string>("AuthorizationKey"))
+            BaseAddress = Guard.Against.NullOrEmpty(baseAddress),
+            AuthorizationKey = Guard.Against.NullOrEmpty(key)
         };
 
         services.AddDeskpro(deskproOptions);

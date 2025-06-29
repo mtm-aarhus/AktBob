@@ -15,7 +15,7 @@ internal static class RegisterHandlers
 
             var inner = new GetItemHandler(
                 provider.GetRequiredService<IPodioFactory>(),
-                provider.GetRequiredService<IConfiguration>());
+                provider.GetRequiredService<IConfigurationHelper>());
 
             var withLogging = new GetItemHandlerLogging(inner, logger);
             var withException = new GetItemHandlerException(withLogging, logger);
@@ -34,7 +34,7 @@ internal static class RegisterHandlers
             
             var inner = new PostCommentHandler(
                 provider.GetRequiredService<IPodioFactory>(),
-                provider.GetRequiredService<IConfiguration>());
+                provider.GetRequiredService<IConfigurationHelper>());
 
             var withLogging = new PostCommentHandlerLogging(inner, logger);
             var withException = new PostCommentHandlerException(withLogging, logger);
@@ -53,7 +53,7 @@ internal static class RegisterHandlers
             
             var inner = new UpdateTextFieldHandler(
                 provider.GetRequiredService<IPodioFactory>(),
-                provider.GetRequiredService<IConfiguration>());
+                provider.GetRequiredService<IConfigurationHelper>());
 
             var withLogging = new UpdateTextFieldHandlerLogging(inner, logger);
             var withException = new UpdateTextFieldHandlerException(withLogging, logger);

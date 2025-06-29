@@ -1,39 +1,29 @@
-﻿using Aktbob.Processors.CheckOcrScreeningStatus.Jobs;
+﻿using Aktbob.Modules.Deskpro.Features.GetTicket;
+using Aktbob.Modules.Podio.Features.GetItem;
 using AktBob.Shared;
 using AktBob.Shared.Contracts.Processors;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.ModuleClients.DeskproModule;
-using AktBob.Shared.ModuleClients.PodioModule;
+using AktBob.Shared.Types.Podio;
 using Ardalis.GuardClauses;
-using Azure.Messaging.ServiceBus;
-using Microsoft.Azure.Functions.Worker;
+using ErrorOr;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace Aktbob.Processors.CheckOcrScreeningStatus.Functions;
+namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.EmailNotification;
 
-public class EmailNotification(
-    ILogger<EmailNotification> logger,
+internal class EmailNotificationHandler(
+    ILogger<EmailNotificationHandler> logger,
     IConfiguration configuration,
-    IPodioModuleClient podio,
-    IDeskproModuleClient deskpro,
+    IGetItemHandler podioGetItemHandler,
+    IGetTicketHandler deskproGetTicketHandler,
     IMessageBus messageBus)
 {
-    [Function("email-notification")]
-    public async Task Run(
-        [ServiceBusTrigger("%QueueNames:EmailNotification%", Connection = "AzureServiceBus")]
-        ServiceBusReceivedMessage message,
-        ServiceBusMessageActions messageActions,
-        CancellationToken cancellationToken)
+    public async Task<ErrorOr<Success>> Run(EmailNotificationJob job, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Message ID: {id} Body: {body} Content-Type: {contentType}", message.MessageId,  message.Body, message.ContentType);
-        var job = MessageDeserializer.Deserialize<EmailNotificationJob>(message);
-
-        var (success, deadLetterReason, deadLetterDescription, recipient, caseNumber, ticketId) = await GetPodioFieldValues(job.PodioItemId, cancellationToken);
+        var (success, errorReason, errorDescription, recipient, caseNumber, ticketId) = await GetPodioFieldValues(job.PodioItemId, cancellationToken);
         if (!success)
         {
-            await messageActions.DeadLetterMessageAsync(message, deadLetterReason: deadLetterReason, deadLetterErrorDescription: deadLetterDescription, cancellationToken: cancellationToken);
-            return;
+            return Error.Failure(errorReason, errorDescription);
         }
         
         // Get Deskpro ticket
@@ -41,20 +31,22 @@ public class EmailNotification(
 
         // Notify
         await EnqueueNotification(caseNumber, ticketSubject, ticketId, job.FilArkivCaseId, recipient!, cancellationToken);
+
+        return Result.Success;
     }
 
-    private async Task<(bool success, string deadLetterReason, string deadLetterDescription, string? recipient, string caseNumber, string ticketId)> GetPodioFieldValues(long podioItemId, CancellationToken cancellationToken)
+    private async Task<(bool success, string errorReason, string errorDescription, string? recipient, string caseNumber, string ticketId)> GetPodioFieldValues(long podioItemId, CancellationToken cancellationToken)
     {
         var podioAppId = Guard.Against.Null(configuration.GetValue<int?>("Podio:AppId"));
         var sagsansvarligEmailFieldId = Guard.Against.Null(configuration.GetValue<int?>("Podio:Fields:Sagsansvarlig"));
         var caseNumberFieldId = Guard.Against.Null(configuration.GetValue<int?>("Podio:Fields:CaseNumber"));
         var deskproIdFieldId = Guard.Against.Null(configuration.GetValue<int?>("Podio:Fields:DeskproId"));
         
-        var podioItemResult = await podio.GetItem(podioAppId, podioItemId, cancellationToken);
+        var podioItemResult = await podioGetItemHandler.Handle(ItemId.Create(podioAppId, podioItemId), cancellationToken);
         if (podioItemResult.IsError)
         {
             logger.LogError("Error getting Podio item {podioItemId}: {errors}. Moving message to DLQ.", podioItemId, podioItemResult.Errors.ToCommaDelimitedString());
-            return (success: false, deadLetterReason: $"Error getting Podio item {podioItemId}", deadLetterDescription: podioItemResult.Errors.ToCommaDelimitedString(), recipient: string.Empty, caseNumber: string.Empty, ticketId: string.Empty);
+            return (success: false, errorReason: $"Error getting Podio item {podioItemId}", errorDescription: podioItemResult.Errors.ToCommaDelimitedString(), recipient: string.Empty, caseNumber: string.Empty, ticketId: string.Empty);
         }
 
         var recipient = podioItemResult.Value.Fields.GetValue<string>(sagsansvarligEmailFieldId);
@@ -64,17 +56,17 @@ public class EmailNotification(
         if (string.IsNullOrEmpty(recipient))
         {
             logger.LogError("Recipient could not be found from Podio item {podioItemId}. Moving message to DLQ.", podioItemId);
-            return (success: false, deadLetterReason: $"Error getting Podio item {podioItemId}", deadLetterDescription: string.Empty, recipient: string.Empty, caseNumber: string.Empty, ticketId: string.Empty);
+            return (success: false, errorReason: $"Error getting Podio item {podioItemId}", errorDescription: string.Empty, recipient: string.Empty, caseNumber: string.Empty, ticketId: string.Empty);
 
         }
 
-        return (success: true, deadLetterReason: string.Empty, deadLetterDescription: string.Empty, recipient, caseNumber, ticketId);
+        return (success: true, errorReason: string.Empty, errorDescription: string.Empty, recipient, caseNumber, ticketId);
     }
 
     private async Task<string> GetDeskproSubject(string ticketId, CancellationToken cancellationToken)
     {
         if (!int.TryParse(ticketId, default, out var deskproTicketId)) return string.Empty;
-        var getDeskproTicket = await deskpro.GetTicket(deskproTicketId, cancellationToken);
+        var getDeskproTicket = await deskproGetTicketHandler.Handle(deskproTicketId, cancellationToken);
         return !getDeskproTicket.IsError ? getDeskproTicket.Value.Subject : string.Empty;
     }
 

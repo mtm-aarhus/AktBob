@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using AktBob.Shared.Contracts.Modules.FilArkiv.Contracts.DTOs;
 using ErrorOr;
+using Microsoft.Extensions.Logging;
 
 namespace Aktbob.Modules.FilArkiv.Features.GetFileProcessStatus;
 

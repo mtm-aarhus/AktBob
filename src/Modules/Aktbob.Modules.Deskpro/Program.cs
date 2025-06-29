@@ -2,7 +2,6 @@ using Aktbob.Modules.Deskpro;
 using Aktbob.Modules.Deskpro.Endpoints;
 using AktBob.Shared;
 using AktBob.Shared.Middlewares;
-using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +10,10 @@ builder.Services.ConfigureLogging();
 
 // Modules
 builder.Services.AddSharedModule();
-builder.Services.AddModuleServices(builder.Configuration);
+
+var deskproBaseAddress = builder.Configuration.GetValue<string>("BaseAddress") ?? string.Empty;
+var deskproKey = builder.Configuration.GetValue<string>("AuthorizationKey") ?? string.Empty;
+builder.Services.AddDeskproModule(deskproBaseAddress, deskproKey);
 
 var app = builder.Build();
 
