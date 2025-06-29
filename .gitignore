@@ -17,6 +17,7 @@ local.settings.json
 appsettings.development.json
 appsettings.test.json
 README-deployment.*.md
+*.log
 
 # Rider
 .idea/
