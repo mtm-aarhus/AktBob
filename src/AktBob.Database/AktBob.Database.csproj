@@ -16,7 +16,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\AktBob.Shared.Jobs\AktBob.Shared.Jobs.csproj" />
         <ProjectReference Include="..\AktBob.Shared\AktBob.Shared.csproj" />
     </ItemGroup>
 

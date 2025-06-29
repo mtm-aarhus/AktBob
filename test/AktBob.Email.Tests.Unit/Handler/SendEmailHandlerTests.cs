@@ -24,7 +24,7 @@ public class SendEmailHandlerTests
         _appConfig.GetValue<string>("EmailModule:SmtpUrl").Returns(_smtpUrl);
         _appConfig.GetValue<int>("EmailModule:SmtpPort").Returns(_smtpPort);
         _appConfig.GetValue<string>("EmailModule:From").Returns(_from);
-        _sut = new SendEmailHandler(_appConfig, _smtpClient, _logger);
+        _sut = new SendEmailHandler(_appConfig, _smtpClient, _logger, _from, _smtpUrl, _smtpPort);
     }
 
     [Fact]
