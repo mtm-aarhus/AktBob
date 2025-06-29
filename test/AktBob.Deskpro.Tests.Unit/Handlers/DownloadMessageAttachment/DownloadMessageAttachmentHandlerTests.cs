@@ -1,10 +1,10 @@
 ﻿using AAK.Deskpro;
-using AktBob.Deskpro.Handlers.DownloadMessageAttachment;
-using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using NSubstitute.ReturnsExtensions;
 using System.Text;
+using Aktbob.Modules.Deskpro.Features.DownloadMessageAttachment;
+using FluentAssertions;
 
 namespace AktBob.Deskpro.Tests.Unit.Handlers.DownloadMessageAttachment;
 public class DownloadMessageAttachmentHandlerTests

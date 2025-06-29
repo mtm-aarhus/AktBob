@@ -82,7 +82,6 @@ var builder = Host.CreateDefaultBuilder(args)
         });
 
         // Modules
-        services.AddOldDeskproModule(hostContext.Configuration);
         services.AddCloudConvertModule(hostContext.Configuration);
         services.AddGetOrganizedModule(hostContext.Configuration);
         services.AddDatabaseModule(hostContext.Configuration);

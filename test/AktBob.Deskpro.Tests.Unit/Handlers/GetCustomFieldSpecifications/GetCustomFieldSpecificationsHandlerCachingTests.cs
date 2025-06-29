@@ -1,11 +1,11 @@
 ﻿using AktBob.Shared;
 using NSubstitute;
-using AktBob.Deskpro.Handlers.GetCustomFieldSpecifications;
 using NSubstitute.ReturnsExtensions;
 using System.Collections.ObjectModel;
-using FluentAssertions;
+using Aktbob.Modules.Deskpro.Features.GetCustomFieldSpecifications;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using ErrorOr;
-using AktBob.Deskpro.Contracts.DTOs;
+using FluentAssertions;
 
 namespace AktBob.Deskpro.Tests.Unit.Handlers.GetCustomFieldSpecifications;
 public class GetCustomFieldSpecificationsHandlerCachingTests

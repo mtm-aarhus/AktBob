@@ -1,12 +1,12 @@
-﻿using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Deskpro.Handlers.GetTicketsByFieldSearch;
-using ErrorOr;
+﻿using ErrorOr;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Collections.ObjectModel;
+using Aktbob.Modules.Deskpro.Features.GetTicketsByFieldSearch;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 
 namespace AktBob.Deskpro.Tests.Unit.Handlers.GetTicketsByFieldSearch;
 public class GetTicketsByFieldSearchHandlerExceptionTests

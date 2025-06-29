@@ -1,11 +1,10 @@
 ﻿using AktBob.Shared;
 using NSubstitute;
 using ErrorOr;
-using AktBob.Deskpro.Handlers.GetPersonById;
 using FluentAssertions;
-using AktBob.Deskpro.Contracts;
 using NSubstitute.ReturnsExtensions;
-using AktBob.Deskpro.Contracts.DTOs;
+using Aktbob.Modules.Deskpro.Features.GetPersonById;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 
 namespace AktBob.Deskpro.Tests.Unit.Handlers.GetPersonById;
 public class GetPersonByIdHandlerCachingTests

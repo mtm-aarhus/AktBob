@@ -4,48 +4,39 @@ using AktBob.Database.Contracts;
 using System.Text.Json;
 using Hangfire;
 using AktBob.Shared.Extensions;
-using AktBob.Deskpro.Contracts;
-using AktBob.Deskpro.Contracts.DTOs;
+using Aktbob.Modules.Deskpro.Features.GetTicket;
+using Aktbob.Modules.Deskpro.Features.InvokeWebhook;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 
 namespace AktBob.Workflows.Processes;
-internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
+internal class CreateGetOrganizedCase(
+    IConfiguration configuration,
+    ILogger<CreateGetOrganizedCase> logger,
+    IServiceScopeFactory serviceScopeFactory)
+    : IJobHandler<CreateGetOrganizedCaseJob>
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<CreateGetOrganizedCase> _logger;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
-    public CreateGetOrganizedCase(
-        IConfiguration configuration,
-        ILogger<CreateGetOrganizedCase> logger,
-        IServiceScopeFactory serviceScopeFactory)
-    {
-        _configuration = configuration;
-        _logger = logger;
-        _serviceScopeFactory = serviceScopeFactory;
-    }
-
     [AutomaticRetry(Attempts = 3)]
     public async Task Handle(CreateGetOrganizedCaseJob job, CancellationToken cancellationToken = default)
     {
         Guard.Against.NegativeOrZero(job.TicketId);
 
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
-        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var deskproGetTicketHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetTicketHandler>();
         var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
         var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
 
         // Get subject from Deskpro
-        var deskproTicketResult = await deskpro.GetTicket(job.TicketId, cancellationToken);
+        var deskproTicketResult = await deskproGetTicketHandler.Handle(job.TicketId, cancellationToken);
         if (deskproTicketResult.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
 
         // Create GO-case
         var caseTitle = deskproTicketResult.Value.Subject ?? "Uden titel";
-        var caseProfile = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseProfile"));
-        var status = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseStatus"));
-        var access = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:CaseAccess"));
+        var caseProfile = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CreateGetOrganizedCase:CaseProfile"));
+        var status = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CreateGetOrganizedCase:CaseStatus"));
+        var access = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CreateGetOrganizedCase:CaseAccess"));
         var department = MapDepartment(deskproTicketResult.Value.Fields);
-        var facet = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("CreateGetOrganizedCase:Facet"));
+        var facet = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CreateGetOrganizedCase:Facet"));
         var kle = MapKle(deskproTicketResult.Value.Fields);
 
         var createCaseResult = await getOrganized.CreateCase(caseTitle, caseProfile, status, access, department, facet, kle, cancellationToken: cancellationToken);
@@ -54,9 +45,9 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         var caseId = createCaseResult.Value.CaseId;
         var caseUrl = createCaseResult.Value.CaseUrl.Replace("ad.", "");
 
-        _logger.LogInformation("GetOrganized case {caseId} created", caseId);
+        logger.LogInformation("GetOrganized case {caseId} created", caseId);
 
-        UpdateDeskproSetGetOrganizedCaseId(deskpro, job.TicketId, caseId, caseUrl);
+        UpdateDeskproSetGetOrganizedCaseId(scope, job.TicketId, caseId, caseUrl, cancellationToken);
         await UpdateDatabaseSetGetOrganizedCaseId(job.TicketId, unitOfWork, caseId, caseUrl);
         jobDispatcher.Dispatch(new RegisterMessagesJob(job.TicketId), TimeSpan.FromMinutes(1)); // Add Deskpro messages to the just created GO-case
     }
@@ -64,8 +55,8 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
     // Map Deskpro field "afdeling" to GetOrganized department
     private string MapDepartment(IEnumerable<FieldDto> fields)
     {
-        var mapping = _configuration.GetSection("CreateGetOrganizedCase:DepartmentMapping").GetChildren().ToDictionary(x => x.Key, x => x.Value);
-        var fieldId = _configuration.GetValue<int?>("Deskpro:Fields:Afdeling");
+        var mapping = configuration.GetSection("CreateGetOrganizedCase:DepartmentMapping").GetChildren().ToDictionary(x => x.Key, x => x.Value);
+        var fieldId = configuration.GetValue<int?>("Deskpro:Fields:Afdeling");
         var fieldChoices = fields.FirstOrDefault(x => x.Id == fieldId)?.Values ?? [];
 
         if (!fieldChoices.Any() || mapping.Count() == 0)
@@ -79,8 +70,8 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
     // Determine from Deskpro field "afdeling" if we can set the KLE
     private string MapKle(IEnumerable<FieldDto> fields)
     {
-        var mapping = _configuration.GetSection("CreateGetOrganizedCase:KleMapping").GetChildren().ToDictionary(x => x.Key, x => x.Value);
-        var fieldId = _configuration.GetValue<int?>("Deskpro:Fields:Afdeling");
+        var mapping = configuration.GetSection("CreateGetOrganizedCase:KleMapping").GetChildren().ToDictionary(x => x.Key, x => x.Value);
+        var fieldId = configuration.GetValue<int?>("Deskpro:Fields:Afdeling");
         var fieldChoices = fields.FirstOrDefault(x => x.Id == fieldId)?.Values ?? [];
 
         if (!fieldChoices.Any() || mapping.Count() == 0)
@@ -105,9 +96,11 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         await unitOfWork.Tickets.Update(ticket);
     }
 
-    private void UpdateDeskproSetGetOrganizedCaseId(IDeskproModule deskproModule, int ticketId, string caseId, string caseUrl)
+    private void UpdateDeskproSetGetOrganizedCaseId(IServiceScope scope, int ticketId, string caseId, string caseUrl, CancellationToken cancellationToken)
     {
-        var deskproWebhookId = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("Deskpro:Webhooks:UpdateTicketSetGoCaseId"));
+        var deskproInvokeWebhookHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IInvokeWebhookHandler>();
+        
+        var deskproWebhookId = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Deskpro:Webhooks:UpdateTicketSetGoCaseId"));
         var payload = new
         {
             GetOrganizedCaseId = caseId,
@@ -116,6 +109,6 @@ internal class CreateGetOrganizedCase : IJobHandler<CreateGetOrganizedCaseJob>
         };
 
         var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-        deskproModule.InvokeWebhook(deskproWebhookId, json);
+        deskproInvokeWebhookHandler.Handle(deskproWebhookId, json, cancellationToken);
     }
 }

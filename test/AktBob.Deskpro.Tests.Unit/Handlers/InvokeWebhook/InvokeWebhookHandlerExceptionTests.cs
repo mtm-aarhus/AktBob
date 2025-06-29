@@ -1,9 +1,8 @@
-﻿using AktBob.Deskpro.Handlers.InvokeWebhook;
+﻿using Aktbob.Modules.Deskpro.Features.InvokeWebhook;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 
 namespace AktBob.Deskpro.Tests.Unit.Handlers.InvokeWebhook;
 public class InvokeWebhookHandlerExceptionTests

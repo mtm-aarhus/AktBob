@@ -1,8 +1,8 @@
 ﻿using AAK.Deskpro;
 using AAK.Deskpro.Models;
-using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Deskpro.Handlers.GetPersonByEmail;
+using Aktbob.Modules.Deskpro.Features.GetPersonByEmail;
 using AktBob.Shared;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;

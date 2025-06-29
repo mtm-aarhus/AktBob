@@ -1,6 +1,5 @@
-﻿using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Deskpro.Handlers.GetPerson;
-using AktBob.Deskpro.Handlers.GetPersonByEmail;
+﻿using Aktbob.Modules.Deskpro.Features.GetPersonByEmail;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using ErrorOr;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;

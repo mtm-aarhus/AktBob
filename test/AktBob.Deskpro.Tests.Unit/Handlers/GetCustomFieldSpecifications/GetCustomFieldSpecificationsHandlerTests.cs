@@ -1,7 +1,7 @@
-﻿using AAK.Deskpro;
-using AAK.Deskpro.Models;
-using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Deskpro.Handlers.GetCustomFieldSpecifications;
+﻿using AAK.Deskpro.Models;
+using AAK.Deskpro;
+using Aktbob.Modules.Deskpro.Features.GetCustomFieldSpecifications;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;

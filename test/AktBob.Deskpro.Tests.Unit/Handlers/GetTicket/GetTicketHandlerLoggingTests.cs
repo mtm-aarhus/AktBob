@@ -1,5 +1,5 @@
-﻿using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Deskpro.Handlers.GetTicket;
+﻿using Aktbob.Modules.Deskpro.Features.GetTicket;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using ErrorOr;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;

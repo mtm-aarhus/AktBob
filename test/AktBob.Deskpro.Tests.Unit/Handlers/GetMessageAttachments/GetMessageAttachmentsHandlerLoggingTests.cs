@@ -1,5 +1,5 @@
-﻿using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Deskpro.Handlers.GetMessageAttachments;
+﻿using Aktbob.Modules.Deskpro.Features.GetMessageAttachments;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using ErrorOr;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;

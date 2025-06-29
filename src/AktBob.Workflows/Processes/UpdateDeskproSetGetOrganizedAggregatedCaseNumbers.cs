@@ -1,16 +1,13 @@
 ﻿using AktBob.GetOrganized.Contracts;
-using AktBob.Deskpro.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text.Json;
+using Aktbob.Modules.Deskpro.Features.InvokeWebhook;
 
 namespace AktBob.Workflows.Processes;
 
 internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFactory serviceScopeFactory, IConfiguration configuration) : IJobHandler<UpdateDeskproSetGetOrganizedAggregatedCaseNumbersJob>
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-    private readonly IConfiguration _configuration = configuration;
-
     public async Task Handle(UpdateDeskproSetGetOrganizedAggregatedCaseNumbersJob job, CancellationToken cancellationToken = default)
     {
         if (job.AggregatedCaseIds.Length == 0)
@@ -20,11 +17,11 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
 
         Guard.Against.NegativeOrZero(job.TicketId);
 
-        using var scope = _serviceScopeFactory.CreateScope();
+        using var scope = serviceScopeFactory.CreateScope();
         var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
-        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var deskproInvokeWebhookHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IInvokeWebhookHandler>();
 
-        var deskproWebhook = Guard.Against.NullOrEmpty(_configuration.GetValue<string>("Deskpro:Webhooks:SetGetOrganizedAggregatedCaseIds"));
+        var deskproWebhook = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Deskpro:Webhooks:SetGetOrganizedAggregatedCaseIds"));
         
         var caseIds = new List<string>();
                 
@@ -49,6 +46,6 @@ internal class UpdateDeskproSetGetOrganizedAggregatedCaseNumbers(IServiceScopeFa
         };
 
         var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-        deskpro.InvokeWebhook(deskproWebhook, json);
+        await deskproInvokeWebhookHandler.Handle(deskproWebhook, json, cancellationToken);
     }
 }

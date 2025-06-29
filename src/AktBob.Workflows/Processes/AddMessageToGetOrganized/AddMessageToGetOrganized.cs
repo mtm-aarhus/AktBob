@@ -2,9 +2,13 @@
 using AktBob.GetOrganized.Contracts;
 using AktBob.Database.Contracts;
 using AktBob.Shared.Extensions;
-using AktBob.Deskpro.Contracts;
-using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.CloudConvert.Contracts;
+using Aktbob.Modules.Deskpro.Features.GetMessage;
+using Aktbob.Modules.Deskpro.Features.GetMessageAttachments;
+using Aktbob.Modules.Deskpro.Features.GetPersonByEmail;
+using Aktbob.Modules.Deskpro.Features.GetPersonById;
+using Aktbob.Modules.Deskpro.Features.GetTicket;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
@@ -24,7 +28,12 @@ internal class AddMessageToGetOrganized(
         _logger.LogInformation("Adding document to GetOrganized for ticket {ticket} message {message}.", job.TicketId, job.MessageId);
         
         using var scope = _serviceScopeFactory.CreateScope();
-        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var deskproGetTicketHandler = scope.ServiceProvider.GetRequiredService<IGetTicketHandler>();
+        var deskproGetMessageHandler = scope.ServiceProvider.GetRequiredService<IGetMessageHandler>();
+        var deskproGetPersonByIdHandler = scope.ServiceProvider.GetRequiredService<IGetPersonByIdHandler>();
+        var deskproGetPersonByEmailHandler = scope.ServiceProvider.GetRequiredService<IGetPersonByEmailHandler>();
+        var deskproGetMessageAttachmentsHandler = scope.ServiceProvider.GetRequiredService<IGetMessageAttachmentsHandler>();
+        
         var cloudConvert = scope.ServiceProvider.GetRequiredServiceOrThrow<ICloudConvertModule>();
         var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
@@ -44,29 +53,29 @@ internal class AddMessageToGetOrganized(
         if (databaseTicket is null) throw new BusinessException($"Error adding document to GetOrganized: Unable to get ticket {databaseMessage.TicketId} from database.");
 
         // Get Deskpro ticket (we need the deskpro ticket id to query the message ifself)
-        var deskproTicketResult = await deskpro.GetTicket(databaseTicket.DeskproId, cancellationToken);
+        var deskproTicketResult = await deskproGetTicketHandler.Handle(databaseTicket.DeskproId, cancellationToken);
         if (deskproTicketResult.IsError) throw new BusinessException($"Error adding document to GetOrganized: Unable to get ticket {databaseTicket.DeskproId} from Deskpro.");
         var deskproTicket = deskproTicketResult.Value;
 
         // Get Deskpro message
-        var getDeskproMessageResult = await deskpro.GetMessage(job.TicketId, job.MessageId, cancellationToken);
+        var getDeskproMessageResult = await deskproGetMessageHandler.Handle(job.TicketId, job.MessageId, cancellationToken);
         if (getDeskproMessageResult.IsError) throw new BusinessException("rror adding document to GetOrganized: Unable to get message from Deskpro. Mark message in database as deleted to avoid future failures.");
         var deskproMessage = getDeskproMessageResult.Value;
 
         // Get Deskpro person
-        var personResult = await deskpro.GetPersonById(deskproMessage.Person.Id, cancellationToken);
+        var personResult = await deskproGetPersonByIdHandler.Handle(deskproMessage.Person.Id, cancellationToken);
         var person = personResult.Value;
 
         // Get recipient
         var recipient = deskproMessage.Recipients.FirstOrDefault() != null && !deskproMessage.CreationSystem.Equals("web.api")
-            ? await deskpro.GetPersonByEmail(deskproMessage.Recipients.First(), cancellationToken)
+            ? await deskproGetPersonByEmailHandler.Handle(deskproMessage.Recipients.First(), cancellationToken)
             : Error.NotFound().ToErrorOr<PersonDto>();
 
         // Get attachments
         var attachments = Enumerable.Empty<AttachmentDto>();
         if (getDeskproMessageResult.Value.AttachmentIds.Any())
         {
-            var getAttachmentsResult = await deskpro.GetMessageAttachments(job.TicketId, job.MessageId, cancellationToken);
+            var getAttachmentsResult = await deskproGetMessageAttachmentsHandler.Handle(job.TicketId, job.MessageId, cancellationToken);
             attachments = getAttachmentsResult.Value ?? Enumerable.Empty<AttachmentDto>();
         }
 
@@ -173,7 +182,7 @@ internal class AddMessageToGetOrganized(
                                                         bool isAgentNote,
                                                         CancellationToken cancellationToken = default)
     {
-        var html = AktBob.Workflows.Helpers.HtmlHelper.GenerateMessageHtml(
+        var html = HtmlHelper.GenerateMessageHtml(
             isAgentNote: isAgentNote,
             createdAt: createdAt.UtcToDanish(),
             personName: personName,

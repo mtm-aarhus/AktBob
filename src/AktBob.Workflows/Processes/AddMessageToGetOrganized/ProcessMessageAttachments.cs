@@ -1,8 +1,8 @@
-﻿using AktBob.Deskpro.Contracts;
-using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.GetOrganized.Contracts;
+﻿using AktBob.GetOrganized.Contracts;
 using AktBob.Shared.Extensions;
 using System.Collections.ObjectModel;
+using Aktbob.Modules.Deskpro.Features.DownloadMessageAttachment;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 
@@ -22,7 +22,9 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
         _logger.LogInformation("Handling attachments for GetOrganized case {caseNumber} document {id}", job.CaseNumber, job.ParentDocumentId);
         
         using var scope = _serviceScopeFactory.CreateScope();
-        var deskproModule = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var deskproDownloadMessageAttachmentHandler = scope.ServiceProvider.GetRequiredService<IDownloadMessageAttachmentHandler>();
+        
+        // var deskproModule = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
         var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
 
         DateTime createdAtDanishTime = job.Timestamp.UtcToDanish();
@@ -35,7 +37,7 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
             using var stream = new MemoryStream();
 
             // Get the individual attachments from Deskpro
-            var getAttachmentStreamResult = await deskproModule.DownloadMessageAttachment(attachment.DownloadUrl, cancellationToken);
+            var getAttachmentStreamResult = await deskproDownloadMessageAttachmentHandler.Handle(attachment.DownloadUrl, cancellationToken);
             if (getAttachmentStreamResult.IsError) throw new BusinessException($"Unable to download message attachment '{attachment.FileName}' from Deskpro message {attachment.MessageId}");
 
             getAttachmentStreamResult.Value.CopyTo(stream);

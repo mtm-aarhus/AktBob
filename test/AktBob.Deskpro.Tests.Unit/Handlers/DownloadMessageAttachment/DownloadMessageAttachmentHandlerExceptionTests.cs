@@ -1,4 +1,4 @@
-﻿using AktBob.Deskpro.Handlers.DownloadMessageAttachment;
+﻿using Aktbob.Modules.Deskpro.Features.DownloadMessageAttachment;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;

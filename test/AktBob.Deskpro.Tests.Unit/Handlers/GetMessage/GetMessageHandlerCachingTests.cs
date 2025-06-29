@@ -1,10 +1,10 @@
-﻿using AktBob.Shared;
-using NSubstitute;
-using AktBob.Deskpro.Handlers.GetMessage;
+﻿using NSubstitute;
+using AktBob.Shared;
 using ErrorOr;
 using FluentAssertions;
+using Aktbob.Modules.Deskpro.Features.GetMessage;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using NSubstitute.ReturnsExtensions;
-using AktBob.Deskpro.Contracts.DTOs;
 
 namespace AktBob.Deskpro.Tests.Unit.Handlers.GetMessage;
 public class GetMessageHandlerCachingTests

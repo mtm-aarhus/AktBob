@@ -1,5 +1,5 @@
-﻿using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Deskpro.Handlers.GetTicket;
+﻿using Aktbob.Modules.Deskpro.Features.GetTicket;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 using ErrorOr;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -24,7 +24,11 @@ public class GetTicketHandlerExceptionTests
     {
         // Arrange
         var ticketId = 1;
-        var ticketDto = new TicketDto { Id = ticketId };
+        var ticketDto = new TicketDto
+        {
+            Id = ticketId
+        };
+
         var innerResult = ErrorOrFactory.From(ticketDto);
         var expectedResult = ErrorOrFactory.From(ticketDto);
         _inner.Handle(ticketId, Arg.Any<CancellationToken>()).Returns(innerResult);

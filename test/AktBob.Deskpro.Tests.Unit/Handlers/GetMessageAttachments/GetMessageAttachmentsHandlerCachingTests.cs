@@ -1,11 +1,11 @@
 ﻿using AktBob.Shared;
 using NSubstitute;
-using AktBob.Deskpro.Handlers.GetMessageAttachments;
 using NSubstitute.ReturnsExtensions;
 using System.Collections.ObjectModel;
 using ErrorOr;
 using FluentAssertions;
-using AktBob.Deskpro.Contracts.DTOs;
+using Aktbob.Modules.Deskpro.Features.GetMessageAttachments;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 
 namespace AktBob.Deskpro.Tests.Unit.Handlers.GetMessageAttachments;
 public class GetMessageAttachmentsHandlerCachingTests

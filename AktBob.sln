@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Deskpro", "src\AktBob.Deskpro\AktBob.Deskpro.csproj", "{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{68E05508-A190-4AA6-A41E-E0F77C3FF68A}"
 	ProjectSection(SolutionItems) = preProject
 		src\compose.yaml = src\compose.yaml
@@ -83,10 +81,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5B795FD1-81A1-4878-8802-1AF87DEBC4D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5B795FD1-81A1-4878-8802-1AF87DEBC4D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B795FD1-81A1-4878-8802-1AF87DEBC4D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -206,7 +200,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC} = {C8B73F55-D8C6-403F-B2B4-D4BC645339F5}
 		{68E05508-A190-4AA6-A41E-E0F77C3FF68A} = {F4C64018-0A98-4F30-8B25-201D834C5C3A}
 		{5B795FD1-81A1-4878-8802-1AF87DEBC4D7} = {F4C64018-0A98-4F30-8B25-201D834C5C3A}
 		{CB2CA8BD-C3DD-481A-9CC0-0F15C493799A} = {C8B73F55-D8C6-403F-B2B4-D4BC645339F5}

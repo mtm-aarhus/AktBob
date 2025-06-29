@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AktBob.Deskpro\AktBob.Deskpro.csproj" />
-  </ItemGroup>
-
 </Project>

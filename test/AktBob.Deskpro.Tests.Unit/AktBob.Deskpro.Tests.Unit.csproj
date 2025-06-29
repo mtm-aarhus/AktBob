@@ -15,16 +15,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AktBob.Deskpro\AktBob.Deskpro.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Aktbob.Modules.Deskpro\Aktbob.Modules.Deskpro.csproj" />
     <ProjectReference Include="..\AktBob.Tests.Shared\AktBob.Tests.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Handlers\GetTeam\" />
   </ItemGroup>
 
 </Project>

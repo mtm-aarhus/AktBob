@@ -1,11 +1,10 @@
 ﻿using AktBob.Shared;
 using NSubstitute;
-using AktBob.Deskpro.Handlers.GetPersonByEmail;
-using AktBob.Deskpro.Handlers.GetPerson;
 using ErrorOr;
 using FluentAssertions;
 using NSubstitute.ReturnsExtensions;
-using AktBob.Deskpro.Contracts.DTOs;
+using Aktbob.Modules.Deskpro.Features.GetPersonByEmail;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 
 namespace AktBob.Deskpro.Tests.Unit.Handlers.GetPersonByEmail;
 public class GetPersonByEmailHandlerCachingTests

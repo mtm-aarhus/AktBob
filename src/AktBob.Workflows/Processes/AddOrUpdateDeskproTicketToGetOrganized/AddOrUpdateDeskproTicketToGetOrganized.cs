@@ -1,13 +1,17 @@
 ﻿using AktBob.Database.Contracts;
-using AktBob.Deskpro.Contracts.DTOs;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 using System.Text;
 using System.Globalization;
 using AktBob.CloudConvert.Contracts;
-using AktBob.Deskpro.Contracts;
-using HtmlHelper = AktBob.Workflows.Helpers.HtmlHelper;
+using Aktbob.Modules.Deskpro.Features.GetCustomFieldSpecifications;
+using Aktbob.Modules.Deskpro.Features.GetMessageAttachments;
+using Aktbob.Modules.Deskpro.Features.GetMessages;
+using Aktbob.Modules.Deskpro.Features.GetPersonByEmail;
+using Aktbob.Modules.Deskpro.Features.GetPersonById;
+using Aktbob.Modules.Deskpro.Features.GetTicket;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>
@@ -30,7 +34,6 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         using var scope = _serviceScopeFactory.CreateScope();
         var pendingTickets = PendingsTickets.Instance;
 
-        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
         var messageRepository = scope.ServiceProvider.GetRequiredServiceOrThrow<IMessageRepository>();
         var cloudConvertModule = scope.ServiceProvider.GetRequiredServiceOrThrow<ICloudConvertModule>();
         var getOrganized = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetOrganizedModule>();
@@ -45,7 +48,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         }
 
         // Get data
-        var (ticket, getTicketCustomFields, getAgent, getUser) = await GetData(job.TicketId, deskpro, cancellationToken);
+        var (ticket, getTicketCustomFields, getAgent, getUser) = await GetData(job.TicketId, scope, cancellationToken);
         if (getTicketCustomFields.IsError) throw new BusinessException("Unable to get Deskpro custom field specifications");
 
         // Map ticket fields
@@ -70,7 +73,7 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         var ticketHtml = HtmlHelper.GenerateHtml(ticketDictionary, HtmlTemplateTicket);
         contentElements.Add(new ContentElement(DateTime.MaxValue, Encoding.UTF8.GetBytes(ticketHtml)));
         
-        await GetMessagesContent(job.GOCaseNumber, deskpro, messageRepository, ticket.Value, cancellationToken)
+        await GetMessagesContent(job.GOCaseNumber, scope, messageRepository, ticket.Value, cancellationToken)
             .Switch(
                 value => contentElements.AddRange(value),
                 errors => throw new BusinessException($"Error handling messages: {errors.ToCommaDelimitedString()}"));
@@ -99,9 +102,6 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         _logger.LogInformation("Deskpro ticket {ticketId} document on GetOrganized case {case} added/updated", job.TicketId, job.GOCaseNumber);
     }
 
-    /// <summary>
-    /// Get data from Deskpro
-    /// </summary>
     private static async Task<(
         ErrorOr<TicketDto> ticket,
         ErrorOr<IReadOnlyCollection<CustomFieldSpecificationDto>> getTicketCustomFields,
@@ -109,20 +109,24 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         ErrorOr<PersonDto> getUser)> 
         GetData(
             int ticketId,
-            IDeskproModule deskpro,
+            IServiceScope scope,
             CancellationToken cancellationToken)
     {
-        var ticketResult = await deskpro.GetTicket(ticketId, cancellationToken);
+        var deskproGetTicketHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetTicketHandler>();
+        var deskproGetCustomFieldSpecificationsHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetCustomFieldSpecificationsHandler>();
+        var deskproGetPersonByIdHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetPersonByIdHandler>();
+        
+        var ticketResult = await deskproGetTicketHandler.Handle(ticketId, cancellationToken);
         if (ticketResult.IsError) throw new BusinessException("Unable to get ticket from Deskpro");
 
-        var getTicketCustomFields = deskpro.GetCustomFieldSpecifications(cancellationToken);
+        var getTicketCustomFields = deskproGetCustomFieldSpecificationsHandler.Handle(cancellationToken);
 
         var getAgent = ticketResult.Value.Agent != null
-            ? deskpro.GetPersonById(ticketResult.Value.Agent.Id, cancellationToken)
+            ? deskproGetPersonByIdHandler.Handle(ticketResult.Value.Agent.Id, cancellationToken)
             : Task.FromResult(Error.NotFound().ToErrorOr<PersonDto>());
 
         var getUser = ticketResult.Value.Person != null
-            ? deskpro.GetPersonById(ticketResult.Value.Person.Id, cancellationToken)
+            ? deskproGetPersonByIdHandler.Handle(ticketResult.Value.Person.Id, cancellationToken)
             : Task.FromResult(Error.NotFound().ToErrorOr<PersonDto>());
 
         await Task.WhenAll([
@@ -133,23 +137,25 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
         return (ticketResult, getTicketCustomFields.Result, getAgent.Result, getUser.Result);
     }
 
-    /// <summary>
-    /// Returns the HTML elements representing the ticket messages 
-    /// </summary>
-    private async Task<ErrorOr<ContentElement[]>> GetMessagesContent(string caseNumber, IDeskproModule deskpro, IMessageRepository messageRepository, TicketDto ticket, CancellationToken cancellationToken)
+    
+    private async Task<ErrorOr<ContentElement[]>> GetMessagesContent(string caseNumber, IServiceScope scope, IMessageRepository messageRepository, TicketDto ticket, CancellationToken cancellationToken)
     {
+        var deskproGetMessagesHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetMessagesHandler>();
+        var deskproGetPersonByIdHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetPersonByIdHandler>();
+        var deskproGetPersonByEmailHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetPersonByEmailHandler>();
+        
         return await
-            deskpro.GetMessages(ticket.Id, cancellationToken)
+            deskproGetMessagesHandler.Handle(ticket.Id, cancellationToken)
                 .Then(value => value.OrderByDescending(x => x.CreatedAt))
                 .ThenAsync(value => Task.WhenAll(value.Select(async message =>
                 {
-                    var agent = await deskpro.GetPersonById(message.Person.Id, cancellationToken);
+                    var agent = await deskproGetPersonByIdHandler.Handle(message.Person.Id, cancellationToken);
                     
                     var recipient = message.Recipients.FirstOrDefault() != null
-                        ? await deskpro.GetPersonByEmail(message.Recipients.First(), cancellationToken)
+                        ? await deskproGetPersonByEmailHandler.Handle(message.Recipients.First(), cancellationToken)
                         : Error.NotFound().ToErrorOr<PersonDto>();
 
-                    var attachments = await GetAttachments(message, deskpro, cancellationToken);
+                    var attachments = await GetAttachments(message, scope, cancellationToken);
 
                     var messageHtml = HtmlHelper.GenerateMessageHtml(
                         message.IsAgentNote, 
@@ -171,23 +177,19 @@ internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskpro
     }
 
     
-    /// <summary>
-    /// Get attachments metadata for a specific message
-    /// </summary>
-    private static async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> GetAttachments(MessageDto message, IDeskproModule deskpro, CancellationToken cancellationToken)
+    private static async Task<ErrorOr<IReadOnlyCollection<AttachmentDto>>> GetAttachments(MessageDto message, IServiceScope scope, CancellationToken cancellationToken)
     {
+        var deskproGetMessageAttachmentsHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetMessageAttachmentsHandler>();
+        
         if (!message.AttachmentIds.Any())
         {
             return Array.Empty<AttachmentDto>().ToErrorOr<IReadOnlyCollection<AttachmentDto>>();
         }
 
-        return await deskpro.GetMessageAttachments(message.TicketId, message.Id, cancellationToken);
+        return await deskproGetMessageAttachmentsHandler.Handle(message.TicketId, message.Id, cancellationToken);
     }
 
     
-    /// <summary>
-    /// Get the user-friendly message number for a specific message
-    /// </summary>
     private async Task<int> GetMessageNumber(IMessageRepository messageRepository, int ticketId, int messageId)
     {
         var databaseMessage = await messageRepository.GetByDeskproMessageId(messageId);

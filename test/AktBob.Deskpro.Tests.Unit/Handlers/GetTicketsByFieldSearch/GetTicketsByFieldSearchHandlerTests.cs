@@ -1,13 +1,13 @@
 ﻿using AAK.Deskpro;
 using AAK.Deskpro.Models;
-using AktBob.Deskpro.Contracts.DTOs;
-using AktBob.Deskpro.Handlers.GetTicketsByFieldSearch;
 using AktBob.Shared.Extensions;
 using ErrorOr;
 using FluentAssertions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using System.Collections.ObjectModel;
+using Aktbob.Modules.Deskpro.Features.GetTicketsByFieldSearch;
+using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
 
 namespace AktBob.Deskpro.Tests.Unit.Handlers.GetTicketsByFieldSearch;
 public class GetTicketsByFieldSearchHandlerTests

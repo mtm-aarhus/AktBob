@@ -1,6 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
-using AktBob.Deskpro.Contracts;
+using Aktbob.Modules.Deskpro.Features.GetMessages;
 using AktBob.Shared.Extensions;
 using AktBob.Shared.Jobs;
 
@@ -15,12 +15,12 @@ internal class RegisterMessages(IServiceScopeFactory serviceScopeFactory, ILogge
         var scope = _serviceScopeFactory.CreateScope();
         var jobDispatcher = scope.ServiceProvider.GetRequiredServiceOrThrow<IJobDispatcher>();
         var unitOfWork = scope.ServiceProvider.GetRequiredServiceOrThrow<IUnitOfWork>();
-        var deskpro = scope.ServiceProvider.GetRequiredServiceOrThrow<IDeskproModule>();
+        var deskproGetMessagesHandler = scope.ServiceProvider.GetRequiredServiceOrThrow<IGetMessagesHandler>();
         
         _logger.LogInformation("Registering messages for Deskpro ticket {id}", job.TicketId);
         
         // Get message from Deskpro
-        var getDeskproMessagesResult = await deskpro.GetMessages(job.TicketId, cancellationToken);
+        var getDeskproMessagesResult = await deskproGetMessagesHandler.Handle(job.TicketId, cancellationToken);
         if (getDeskproMessagesResult.IsError) throw new BusinessException("Unable to get messages from Deskpro.");
 
         // Persist the Deskpro ticket ID and message ID in the database
