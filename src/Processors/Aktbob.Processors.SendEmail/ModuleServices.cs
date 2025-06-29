@@ -18,9 +18,7 @@ public static class ModuleServices
 
         services.AddHostedService<SendEmailBackgroundService>();
         
-        services.AddTransient<ISendEmailHandler, SendEmailHandler>();
         services.AddTransient<ISmtpClient, SmtpClientWrapper>();
-
         services.AddScoped<ISendEmailHandler>(provider =>
         {
             var logger = provider.GetRequiredService<ILogger<SendEmailHandler>>();
