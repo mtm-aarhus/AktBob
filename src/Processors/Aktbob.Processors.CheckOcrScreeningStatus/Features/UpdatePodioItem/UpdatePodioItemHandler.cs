@@ -19,8 +19,8 @@ internal class UpdatePodioItemHandler(
         var filArkivLinkFieldId = Guard.Against.Null(configuration.GetValue<int>("Podio:Fields:FilArkivLink"));
 
         await Task.WhenAll([
-            podioUpdateTextFieldHandler.Handle(ItemId.Create(podioAppId, job.PodioItemId), filArkivLinkFieldId, job.FilArkivCaseId.ToString(), cancellationToken),
-            podioUpdateTextFieldHandler.Handle(ItemId.Create(podioAppId, job.PodioItemId), filArkivCaseIdFieldId, $"https://aarhus.filarkiv.dk/archives/case/{job.FilArkivCaseId}", cancellationToken)
+            podioUpdateTextFieldHandler.Handle(ItemId.Create(podioAppId, job.PodioItemId), filArkivCaseIdFieldId, job.FilArkivCaseId.ToString(), cancellationToken),
+            podioUpdateTextFieldHandler.Handle(ItemId.Create(podioAppId, job.PodioItemId), filArkivLinkFieldId, $"https://aarhus.filarkiv.dk/archives/case/{job.FilArkivCaseId}", cancellationToken)
         ]);
 
         return Result.Success;

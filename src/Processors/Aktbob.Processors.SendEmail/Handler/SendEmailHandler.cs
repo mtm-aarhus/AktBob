@@ -9,12 +9,11 @@ namespace Aktbob.Processors.SendEmail.Handler;
 internal class SendEmailHandler(
     IAppConfig appConfig,
     ISmtpClient smtpClient,
-    ILogger<SendEmailHandler> logger) : ISendEmailHandler
+    ILogger<SendEmailHandler> logger,
+    string from,
+    string smtp,
+    int port) : ISendEmailHandler
 {
-    private readonly string _smtpUrl = Guard.Against.NullOrEmpty(appConfig.GetValue<string>("EmailModule:SmtpUrl"));
-    private readonly int _smtpPort = Guard.Against.Null(appConfig.GetValue<int?>("EmailModule:SmtpPort"));
-    private readonly string _from = Guard.Against.NullOrEmpty(appConfig.GetValue<string>("EmailModule:From"));
-
     public void Handle(string to, string subject, string body, bool bodyIsHtml = false)
     {
         if (string.IsNullOrWhiteSpace(to))
@@ -22,10 +21,10 @@ internal class SendEmailHandler(
             throw new BusinessException("Email recipient is empty");
         }
 
-        smtpClient.Connect(_smtpUrl, _smtpPort);
+        smtpClient.Connect(smtp, port);
 
         var message = new MimeMessage();
-        message.From.Add(new MailboxAddress(_from, _from));
+        message.From.Add(new MailboxAddress(from, from));
         message.To.Add(new MailboxAddress(to, to));
         message.Subject = subject;
         message.Body = new TextPart(bodyIsHtml ? "html" : "plain")

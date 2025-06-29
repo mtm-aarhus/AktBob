@@ -25,11 +25,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddSerilog(config =>
         {
             config.Enrich.FromLogContext();
-
-            if (hostContext.HostingEnvironment.IsDevelopment())
-            {
-                config.WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{SourceContext}] {Message:j} {NewLine}{Exception}");
-            }
+            config.WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss.fff} [{Level:u3}] [{SourceContext}] {Message:j} {NewLine}{Exception}");
             
             if (hostContext.HostingEnvironment.IsProduction())
             {
@@ -94,7 +90,7 @@ var builder = Host.CreateDefaultBuilder(args)
 
         // Processors
         services.AddCheckOcrScreeningStatusProcessor(configuration);
-        services.AddSendEmailProcessor(configuration);
+        AddSendEmailProcessor(configuration, services);
     });
 
 
@@ -108,27 +104,35 @@ host.Run();
 return;
 
 
-static void AddFilArkivModule(IConfiguration configuration, IServiceCollection serviceCollection)
+static void AddFilArkivModule(IConfiguration configuration, IServiceCollection services)
 {
     var baseAddress = configuration.GetValue<string>("FilArkiv:BaseAddress") ?? string.Empty;
     var clientId = configuration.GetValue<string>("FilArkiv:ClientId") ?? string.Empty;
     var clientSecret = configuration.GetValue<string>("FilArkiv:ClientSecret") ?? string.Empty;
     var tokenEndpoint = configuration.GetValue<string>("FilArkiv:TokenEndpoint") ?? string.Empty;
-    serviceCollection.AddFilArkivModule(baseAddress, clientId, clientSecret,  tokenEndpoint);
+    services.AddFilArkivModule(baseAddress, clientId, clientSecret,  tokenEndpoint);
 }
 
-void AddPodioModule(IConfiguration configuration, IServiceCollection serviceCollection)
+void AddPodioModule(IConfiguration configuration, IServiceCollection services)
 {
     var baseAddress = configuration.GetValue<string>("Podio:BaseAddress") ?? string.Empty;
     var clientId = configuration.GetValue<string>("Podio:ClientId") ?? string.Empty;
     var clientSecret = configuration.GetValue<string>("Podio:ClientSecret") ?? string.Empty;
     var appTokens = configuration.GetSection("Podio:AppTokens").Get<Dictionary<int, string>>() ?? new Dictionary<int, string>(); 
-    serviceCollection.AddPodioModule(baseAddress, appTokens, clientId, clientSecret);
+    services.AddPodioModule(baseAddress, appTokens, clientId, clientSecret);
 }
 
-void AddDeskproModule(IConfiguration configuration1, IServiceCollection serviceCollection)
+void AddDeskproModule(IConfiguration configuration, IServiceCollection services)
 {
-    var baseAddress = configuration1.GetValue<string>("Deskpro:BaseAddress") ?? string.Empty;
-    var key = configuration1.GetValue<string>("Deskpro:AuthorizationKey") ?? string.Empty;
-    serviceCollection.AddDeskproModule(baseAddress, key);
+    var baseAddress = configuration.GetValue<string>("Deskpro:BaseAddress") ?? string.Empty;
+    var key = configuration.GetValue<string>("Deskpro:AuthorizationKey") ?? string.Empty;
+    services.AddDeskproModule(baseAddress, key);
+}
+
+void AddSendEmailProcessor(IConfiguration configuration, IServiceCollection services)
+{
+    var from = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:From"));
+    var smtp = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:SmtpUrl"));
+    var port = Guard.Against.Null(configuration.GetValue<int>("EmailModule:Port"));
+    services.AddSendEmailProcessor(from, smtp, port);
 }

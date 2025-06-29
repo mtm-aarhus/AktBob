@@ -10,10 +10,11 @@ namespace Aktbob.Processors.SendEmail;
 
 public static class ModuleServices
 {
-    public static IServiceCollection AddSendEmailProcessor(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddSendEmailProcessor(this IServiceCollection services, string from, string smtp, int port)
     {
-        Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:From"));
-        Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:SmtpUrl"));
+        Guard.Against.NullOrEmpty(from);
+        Guard.Against.NullOrEmpty(smtp);
+        Guard.Against.Zero(port);
 
         services.AddHostedService<SendEmailBackgroundService>();
         
@@ -27,7 +28,10 @@ public static class ModuleServices
             var inner = new SendEmailHandler(
                 provider.GetRequiredService<IAppConfig>(),
                 provider.GetRequiredService<ISmtpClient>(),
-                logger);
+                logger,
+                from,
+                smtp,
+                port);
 
             var withLogging = new SendEmailHandlerLogging(inner, logger);
             var withException = new SendEmailHandlerException(withLogging, logger);
