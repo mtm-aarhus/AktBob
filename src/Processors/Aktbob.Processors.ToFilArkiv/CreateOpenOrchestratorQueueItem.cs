@@ -26,7 +26,7 @@ public class CreateOpenOrchestratorQueueItem(
     IPodioModuleClient podio,
     IUnitOfWork unitOfWork)
 {
-    [Function(nameof(CreateOpenOrchestratorQueueItem))]
+    [Function("create-open-orchestrator-queue-item")]
     public async Task Run(
         [ServiceBusTrigger("%ServiceBusQueueName%", Connection = "AzureServiceBus")]
         ServiceBusReceivedMessage message,

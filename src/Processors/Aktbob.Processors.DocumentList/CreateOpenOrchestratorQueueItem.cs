@@ -25,7 +25,7 @@ public class CreateOpenOrchestratorQueueItem(
     IUnitOfWork unitOfWork,
     IMessageBus messageBus)
 {
-    [Function(nameof(CreateOpenOrchestratorQueueItem))]
+    [Function("create-open-orchestrator-queue-item")]
     public async Task Run(
         [ServiceBusTrigger("%ServiceBusQueueName%", Connection = "AzureServiceBus")]
         ServiceBusReceivedMessage message,
