@@ -21,7 +21,7 @@ namespace AktBob.Deskpro;
 
 public static class ModuleServices
 {
-    public static IServiceCollection AddDeskproModule(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddOldDeskproModule(this IServiceCollection services, IConfiguration configuration)
     {
         // Add Deskpro client
         var deskproOptions = new DeskproOptions
