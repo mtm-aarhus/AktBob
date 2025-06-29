@@ -12,7 +12,7 @@ internal static class MapEndpoints
 
     public static void MapRootEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        var group = endpoints.MapGroup("/api/")
+        var group = endpoints.MapGroup("/")
             .WithTags("Root")
             .RequireAuthorization();
         

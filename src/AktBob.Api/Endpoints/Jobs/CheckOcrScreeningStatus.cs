@@ -23,8 +23,7 @@ internal static class CheckOcrScreeningStatus
         [FromServices] ICaseRepository repository,
         CancellationToken cancellationToken)
     {
-        var appId = Guard.Against.Null(configuration.GetValue<int?>("Podio:AktindsigtApp:Id"));
-        var queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Queues:CheckOcrScreeningStatus"));
+        var queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("Queues:CheckOcrScreeningStatusRegisterFiles"));
         var job = new OcrScreeningStatusRegisterFilesJob(request.FilArkivCaseId, request.PodioItemId);
         
         await messageBus.SendMessage(queueName, job, cancellationToken);
