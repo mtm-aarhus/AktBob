@@ -28,6 +28,7 @@
     <ProjectReference Include="..\AktBob.GetOrganized\AktBob.GetOrganized.csproj" />
     <ProjectReference Include="..\AktBob.Workflows\AktBob.Workflows.csproj" />
     <ProjectReference Include="..\Processors\Aktbob.Processors.CheckOcrScreeningStatus\Aktbob.Processors.CheckOcrScreeningStatus.csproj" />
+    <ProjectReference Include="..\Processors\Aktbob.Processors.SendEmail\Aktbob.Processors.SendEmail.csproj" />
   </ItemGroup>
 
   <ItemGroup>

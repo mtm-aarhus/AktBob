@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AktBob.Email\AktBob.Email.csproj" />
+    <ProjectReference Include="..\..\src\Processors\Aktbob.Processors.SendEmail\Aktbob.Processors.SendEmail.csproj" />
     <ProjectReference Include="..\AktBob.Tests.Shared\AktBob.Tests.Shared.csproj" />
   </ItemGroup>
 

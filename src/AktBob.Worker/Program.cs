@@ -9,6 +9,7 @@ using Aktbob.Modules.Deskpro;
 using Aktbob.Modules.FilArkiv;
 using Aktbob.Modules.Podio;
 using Aktbob.Processors.CheckOcrScreeningStatus;
+using Aktbob.Processors.SendEmail;
 using AktBob.Worker;
 using AktBob.Shared;
 using Ardalis.GuardClauses;
@@ -94,6 +95,7 @@ var builder = Host.CreateDefaultBuilder(args)
 
         // Processors
         services.AddCheckOcrScreeningStatusProcessor(configuration);
+        services.AddSendEmailProcessor(configuration);
     });
 
 

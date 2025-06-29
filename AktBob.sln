@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Email", "src\AktBob.Email\AktBob.Email.csproj", "{57215D5C-7983-4A89-B722-307B8A354BC1}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AktBob.Deskpro", "src\AktBob.Deskpro\AktBob.Deskpro.csproj", "{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{68E05508-A190-4AA6-A41E-E0F77C3FF68A}"
@@ -77,16 +75,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.CheckOcrS
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{2A87FB96-3337-4C1B-976A-A6876D23B11E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aktbob.Processors.SendEmail", "src\Processors\Aktbob.Processors.SendEmail\Aktbob.Processors.SendEmail.csproj", "{07DC38C3-CA91-44AA-A4BF-C4C28117467E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{57215D5C-7983-4A89-B722-307B8A354BC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{57215D5C-7983-4A89-B722-307B8A354BC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{57215D5C-7983-4A89-B722-307B8A354BC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{57215D5C-7983-4A89-B722-307B8A354BC1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFBF76D1-F040-4ED7-8575-EA02043CE4BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -201,6 +197,10 @@ Global
 		{983D2FF4-5BE7-47C4-BD5F-4A16C536C11F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{983D2FF4-5BE7-47C4-BD5F-4A16C536C11F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{983D2FF4-5BE7-47C4-BD5F-4A16C536C11F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07DC38C3-CA91-44AA-A4BF-C4C28117467E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07DC38C3-CA91-44AA-A4BF-C4C28117467E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07DC38C3-CA91-44AA-A4BF-C4C28117467E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07DC38C3-CA91-44AA-A4BF-C4C28117467E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -235,10 +235,10 @@ Global
 		{11D5FF20-DF5A-40C2-89F1-8BFB466C0264} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
 		{2B1BB6D2-C62F-4B6C-B758-EC3E22F1AC0B} = {C8B73F55-D8C6-403F-B2B4-D4BC645339F5}
 		{983D2FF4-5BE7-47C4-BD5F-4A16C536C11F} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
-		{57215D5C-7983-4A89-B722-307B8A354BC1} = {F4C64018-0A98-4F30-8B25-201D834C5C3A}
 		{2A87FB96-3337-4C1B-976A-A6876D23B11E} = {F4C64018-0A98-4F30-8B25-201D834C5C3A}
 		{7F0C73FF-3D2A-4906-BA15-E6FE62746527} = {2A87FB96-3337-4C1B-976A-A6876D23B11E}
 		{2F8F09A9-0BC4-46A8-BC83-6AC6865D1EF9} = {2A87FB96-3337-4C1B-976A-A6876D23B11E}
+		{07DC38C3-CA91-44AA-A4BF-C4C28117467E} = {7B9E63DC-4996-45A9-8449-A241D79B3FD3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DBB2F06B-94A3-444E-875A-BA6E8CA925B3}

@@ -1,4 +1,4 @@
-﻿using AktBob.Email.Handler;
+﻿using Aktbob.Processors.SendEmail.Handler;
 using AktBob.Shared;
 using AktBob.Shared.Contracts.Processors;
 using Ardalis.GuardClauses;
@@ -8,13 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace AktBob.Email;
+namespace Aktbob.Processors.SendEmail;
 
-internal class AzureServiceBusReceiver(IConfiguration configuration, IServiceScopeFactory scopeFactory, ILogger<AzureServiceBusReceiver> logger) : BackgroundService
+internal class SendEmailBackgroundService(IConfiguration configuration, IServiceScopeFactory scopeFactory, ILogger<SendEmailBackgroundService> logger) : BackgroundService
 {
     private ServiceBusProcessor? _processor;
     private ServiceBusClient? _client;
-
+    private readonly string _connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureServiceBus"));
+    private readonly string _queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:ServiceBusQueueName"));
     private readonly ServiceBusClientOptions _serviceBusClientOptions = new ServiceBusClientOptions
     {
         TransportType = ServiceBusTransportType.AmqpWebSockets
@@ -41,11 +42,8 @@ internal class AzureServiceBusReceiver(IConfiguration configuration, IServiceSco
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureServiceBus"));
-        var queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("EmailModule:ServiceBusQueueName"));
-        
-        _client = new ServiceBusClient(connectionString, _serviceBusClientOptions);
-        _processor = _client.CreateProcessor(queueName, new ServiceBusProcessorOptions());
+        _client = new ServiceBusClient(_connectionString, _serviceBusClientOptions);
+        _processor = _client.CreateProcessor(_queueName, new ServiceBusProcessorOptions());
         
         _processor.ProcessMessageAsync += MessageHandler; // Add handler to process messages
         _processor.ProcessErrorAsync += ErrorHandler; // Add handler to process any errors

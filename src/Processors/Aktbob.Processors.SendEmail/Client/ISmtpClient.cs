@@ -1,6 +1,6 @@
 ﻿using MimeKit;
 
-namespace AktBob.Email.Client;
+namespace Aktbob.Processors.SendEmail.Client;
 internal interface ISmtpClient : IDisposable
 {
     void Connect(string host, int port);

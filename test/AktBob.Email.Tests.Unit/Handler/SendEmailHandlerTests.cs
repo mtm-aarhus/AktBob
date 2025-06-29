@@ -1,5 +1,5 @@
-﻿using AktBob.Email.Client;
-using AktBob.Email.Handler;
+﻿using Aktbob.Processors.SendEmail.Client;
+using Aktbob.Processors.SendEmail.Handler;
 using AktBob.Shared;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;

@@ -1,7 +1,7 @@
 ﻿using MailKit.Net.Smtp;
 using MimeKit;
 
-namespace AktBob.Email.Client;
+namespace Aktbob.Processors.SendEmail.Client;
 internal class SmtpClientWrapper : ISmtpClient
 {
     private readonly SmtpClient _smtpClient = new();

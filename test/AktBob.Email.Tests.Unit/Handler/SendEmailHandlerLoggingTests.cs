@@ -1,4 +1,4 @@
-﻿using AktBob.Email.Handler;
+﻿using Aktbob.Processors.SendEmail.Handler;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Testing;
 using NSubstitute;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace AktBob.Email.Handler;
+namespace Aktbob.Processors.SendEmail.Handler;
 
 internal class SendEmailHandlerException(ISendEmailHandler next, ILogger<SendEmailHandler> logger) : ISendEmailHandler
 {

@@ -1,11 +1,11 @@
-﻿using AktBob.Email.Client;
+﻿using Aktbob.Processors.SendEmail.Client;
 using AktBob.Shared;
 using AktBob.Shared.Exceptions;
 using Ardalis.GuardClauses;
 using Microsoft.Extensions.Logging;
 using MimeKit;
 
-namespace AktBob.Email.Handler;
+namespace Aktbob.Processors.SendEmail.Handler;
 internal class SendEmailHandler(
     IAppConfig appConfig,
     ISmtpClient smtpClient,
