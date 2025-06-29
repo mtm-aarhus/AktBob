@@ -6,17 +6,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.QueryFile;
+namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.UpdatePodioItem;
 
-internal class QueryFileBackgroundJob(
-    ILogger<QueryFileBackgroundJob> logger,
+internal class UpdatePodioItemBackgroundService(
+    ILogger<UpdatePodioItemBackgroundService> logger,
     IConfiguration configuration,
     IServiceScopeFactory scopeFactory) : BackgroundService
 {
     private ServiceBusProcessor? _processor;
     private ServiceBusClient? _client;
     private readonly string _connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureServiceBus"));
-    private readonly string _queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:QueryFile"));
+    private readonly string _queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:UpdatePodioItem"));
 
     private readonly ServiceBusClientOptions _serviceBusClientOptions = new()
     {
@@ -39,10 +39,10 @@ internal class QueryFileBackgroundJob(
         try
         {
             using var scope =  scopeFactory.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<QueryFileHandler>();
+            var handler = scope.ServiceProvider.GetRequiredService<UpdatePodioItemHandler>();
             logger.LogInformation("Received: {body}", args.Message.Body.ToString());
         
-            var job = MessageDeserializer.Deserialize<QueryFileJob>(args.Message);
+            var job = MessageDeserializer.Deserialize<UpdatePodioItemJob>(args.Message);
             var result = await handler.Run(job, args.CancellationToken);
             if (result.IsError)
             {
@@ -61,13 +61,19 @@ internal class QueryFileBackgroundJob(
 
     private Task ErrorHandler(ProcessErrorEventArgs args)
     {
-        logger.LogError("Error handling {namespace}.{job}: {error}", nameof(CheckOcrScreeningStatus), nameof(QueryFileBackgroundJob), args.Exception.ToString());
+        logger.LogError("Error handling {namespace}.{job}: {error}", nameof(CheckOcrScreeningStatus), nameof(UpdatePodioItemBackgroundService), args.Exception.ToString());
         return Task.CompletedTask;
+    }
+    
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Starting {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(UpdatePodioItemBackgroundService));
+        return base.StartAsync(cancellationToken);
     }
     
     public override async Task StopAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Stopping {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(QueryFileBackgroundJob));
+        logger.LogInformation("Stopping {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(UpdatePodioItemBackgroundService));
 
         if (_processor is not null)
         {
@@ -77,11 +83,11 @@ internal class QueryFileBackgroundJob(
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to stop the {namespace}.{job} processor cleanly.", nameof(CheckOcrScreeningStatus), nameof(QueryFileBackgroundJob));
+                logger.LogWarning(ex, "Failed to stop the {namespace}.{job} processor cleanly.", nameof(CheckOcrScreeningStatus), nameof(UpdatePodioItemBackgroundService));
             }
         }
 
-        logger.LogInformation("{namespace}.{job} stopped.", nameof(CheckOcrScreeningStatus), nameof(QueryFileBackgroundJob));
+        logger.LogInformation("{namespace}.{job} stopped.", nameof(CheckOcrScreeningStatus), nameof(UpdatePodioItemBackgroundService));
         await base.StopAsync(stoppingToken);
     }
     

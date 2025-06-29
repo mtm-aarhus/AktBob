@@ -51,7 +51,13 @@ internal class SendEmailBackgroundService(IConfiguration configuration, IService
         // Start processing
         await _processor.StartProcessingAsync(stoppingToken);
     }
-
+    
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Starting {namespace}.{job} processor...", nameof(SendEmail), nameof(SendEmailBackgroundService));
+        return base.StartAsync(cancellationToken);
+    }
+    
     public override async Task StopAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Stopping email message processor...");

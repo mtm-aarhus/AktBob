@@ -1,5 +1,4 @@
 ﻿using AktBob.Shared;
-using AktBob.Shared.Contracts.Processors;
 using Ardalis.GuardClauses;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
@@ -7,17 +6,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.RegisterFiles;
+namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.QueryFile;
 
-internal class RegisterFilesBackgroundJob(
-    ILogger<RegisterFilesBackgroundJob> logger,
+internal class QueryFileBackgroundService(
+    ILogger<QueryFileBackgroundService> logger,
     IConfiguration configuration,
     IServiceScopeFactory scopeFactory) : BackgroundService
 {
     private ServiceBusProcessor? _processor;
     private ServiceBusClient? _client;
     private readonly string _connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureServiceBus"));
-    private readonly string _queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:RegisterFiles"));
+    private readonly string _queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:QueryFile"));
 
     private readonly ServiceBusClientOptions _serviceBusClientOptions = new()
     {
@@ -40,10 +39,10 @@ internal class RegisterFilesBackgroundJob(
         try
         {
             using var scope =  scopeFactory.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<RegisterFilesHandler>();
+            var handler = scope.ServiceProvider.GetRequiredService<QueryFileHandler>();
             logger.LogInformation("Received: {body}", args.Message.Body.ToString());
         
-            var job = MessageDeserializer.Deserialize<OcrScreeningStatusRegisterFilesJob>(args.Message);
+            var job = MessageDeserializer.Deserialize<QueryFileJob>(args.Message);
             var result = await handler.Run(job, args.CancellationToken);
             if (result.IsError)
             {
@@ -62,13 +61,19 @@ internal class RegisterFilesBackgroundJob(
 
     private Task ErrorHandler(ProcessErrorEventArgs args)
     {
-        logger.LogError("Error handling {namespace}.{job}: {error}", nameof(CheckOcrScreeningStatus), nameof(RegisterFilesBackgroundJob), args.Exception.ToString());
+        logger.LogError("Error handling {namespace}.{job}: {error}", nameof(CheckOcrScreeningStatus), nameof(QueryFileBackgroundService), args.Exception.ToString());
         return Task.CompletedTask;
+    }
+    
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Starting {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(QueryFileBackgroundService));
+        return base.StartAsync(cancellationToken);
     }
     
     public override async Task StopAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Stopping {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(RegisterFilesBackgroundJob));
+        logger.LogInformation("Stopping {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(QueryFileBackgroundService));
 
         if (_processor is not null)
         {
@@ -78,11 +83,11 @@ internal class RegisterFilesBackgroundJob(
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to stop the {namespace}.{job} processor cleanly.", nameof(CheckOcrScreeningStatus), nameof(RegisterFilesBackgroundJob));
+                logger.LogWarning(ex, "Failed to stop the {namespace}.{job} processor cleanly.", nameof(CheckOcrScreeningStatus), nameof(QueryFileBackgroundService));
             }
         }
 
-        logger.LogInformation("{namespace}.{job} stopped.", nameof(CheckOcrScreeningStatus), nameof(RegisterFilesBackgroundJob));
+        logger.LogInformation("{namespace}.{job} stopped.", nameof(CheckOcrScreeningStatus), nameof(QueryFileBackgroundService));
         await base.StopAsync(stoppingToken);
     }
     

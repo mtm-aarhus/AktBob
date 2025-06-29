@@ -13,12 +13,12 @@ public static class RegisterServices
 {
     public static IServiceCollection AddCheckOcrScreeningStatusProcessor(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHostedService<EmailNotificationBackgroundJob>();
-        services.AddHostedService<NotificationDispatcherBackgroundJob>();
-        services.AddHostedService<PodioNotificationBackgroundJob>();
-        services.AddHostedService<QueryFileBackgroundJob>();
-        services.AddHostedService<UpdatePodioItemBackgroundJob>();
-        services.AddHostedService<RegisterFilesBackgroundJob>();
+        services.AddHostedService<EmailNotificationBackgroundService>();
+        services.AddHostedService<NotificationDispatcherBackgroundService>();
+        services.AddHostedService<PodioNotificationBackgroundService>();
+        services.AddHostedService<QueryFileBackgroundService>();
+        services.AddHostedService<UpdatePodioItemBackgroundService>();
+        services.AddHostedService<RegisterFilesBackgroundService>();
         
         services.AddScoped<EmailNotificationHandler>();
         services.AddScoped<NotificationDispatcherHandler>();

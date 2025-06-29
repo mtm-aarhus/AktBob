@@ -1,5 +1,5 @@
-﻿using Aktbob.Processors.CheckOcrScreeningStatus.Features.EmailNotification;
-using AktBob.Shared;
+﻿using AktBob.Shared;
+using AktBob.Shared.Contracts.Processors;
 using Ardalis.GuardClauses;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
@@ -7,17 +7,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.NotificationDispatcher;
+namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.RegisterFiles;
 
-internal class NotificationDispatcherBackgroundJob(
-    ILogger<NotificationDispatcherBackgroundJob> logger,
+internal class RegisterFilesBackgroundService(
+    ILogger<RegisterFilesBackgroundService> logger,
     IConfiguration configuration,
     IServiceScopeFactory scopeFactory) : BackgroundService
 {
     private ServiceBusProcessor? _processor;
     private ServiceBusClient? _client;
     private readonly string _connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureServiceBus"));
-    private readonly string _queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:DispatchNotification"));
+    private readonly string _queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:RegisterFiles"));
 
     private readonly ServiceBusClientOptions _serviceBusClientOptions = new()
     {
@@ -40,10 +40,10 @@ internal class NotificationDispatcherBackgroundJob(
         try
         {
             using var scope =  scopeFactory.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<NotificationDispatcherHandler>();
+            var handler = scope.ServiceProvider.GetRequiredService<RegisterFilesHandler>();
             logger.LogInformation("Received: {body}", args.Message.Body.ToString());
         
-            var job = MessageDeserializer.Deserialize<DispatchNotificationJob>(args.Message);
+            var job = MessageDeserializer.Deserialize<OcrScreeningStatusRegisterFilesJob>(args.Message);
             var result = await handler.Run(job, args.CancellationToken);
             if (result.IsError)
             {
@@ -62,13 +62,19 @@ internal class NotificationDispatcherBackgroundJob(
 
     private Task ErrorHandler(ProcessErrorEventArgs args)
     {
-        logger.LogError("Error handling {namespace}.{job}: {error}", nameof(CheckOcrScreeningStatus), nameof(NotificationDispatcherBackgroundJob), args.Exception.ToString());
+        logger.LogError("Error handling {namespace}.{job}: {error}", nameof(CheckOcrScreeningStatus), nameof(RegisterFilesBackgroundService), args.Exception.ToString());
         return Task.CompletedTask;
+    }
+    
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Starting {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(RegisterFilesBackgroundService));
+        return base.StartAsync(cancellationToken);
     }
     
     public override async Task StopAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Stopping {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(NotificationDispatcherBackgroundJob));
+        logger.LogInformation("Stopping {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(RegisterFilesBackgroundService));
 
         if (_processor is not null)
         {
@@ -78,11 +84,11 @@ internal class NotificationDispatcherBackgroundJob(
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to stop the {namespace}.{job} processor cleanly.", nameof(CheckOcrScreeningStatus), nameof(NotificationDispatcherBackgroundJob));
+                logger.LogWarning(ex, "Failed to stop the {namespace}.{job} processor cleanly.", nameof(CheckOcrScreeningStatus), nameof(RegisterFilesBackgroundService));
             }
         }
 
-        logger.LogInformation("{namespace}.{job} stopped.", nameof(CheckOcrScreeningStatus), nameof(NotificationDispatcherBackgroundJob));
+        logger.LogInformation("{namespace}.{job} stopped.", nameof(CheckOcrScreeningStatus), nameof(RegisterFilesBackgroundService));
         await base.StopAsync(stoppingToken);
     }
     

@@ -1,4 +1,5 @@
-﻿using AktBob.Shared;
+﻿using Aktbob.Processors.CheckOcrScreeningStatus.Features.EmailNotification;
+using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
@@ -6,17 +7,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.UpdatePodioItem;
+namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.NotificationDispatcher;
 
-internal class UpdatePodioItemBackgroundJob(
-    ILogger<UpdatePodioItemBackgroundJob> logger,
+internal class NotificationDispatcherBackgroundService(
+    ILogger<NotificationDispatcherBackgroundService> logger,
     IConfiguration configuration,
     IServiceScopeFactory scopeFactory) : BackgroundService
 {
     private ServiceBusProcessor? _processor;
     private ServiceBusClient? _client;
     private readonly string _connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureServiceBus"));
-    private readonly string _queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:UpdatePodioItem"));
+    private readonly string _queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:DispatchNotification"));
 
     private readonly ServiceBusClientOptions _serviceBusClientOptions = new()
     {
@@ -39,10 +40,10 @@ internal class UpdatePodioItemBackgroundJob(
         try
         {
             using var scope =  scopeFactory.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<UpdatePodioItemHandler>();
+            var handler = scope.ServiceProvider.GetRequiredService<NotificationDispatcherHandler>();
             logger.LogInformation("Received: {body}", args.Message.Body.ToString());
         
-            var job = MessageDeserializer.Deserialize<UpdatePodioItemJob>(args.Message);
+            var job = MessageDeserializer.Deserialize<DispatchNotificationJob>(args.Message);
             var result = await handler.Run(job, args.CancellationToken);
             if (result.IsError)
             {
@@ -61,13 +62,19 @@ internal class UpdatePodioItemBackgroundJob(
 
     private Task ErrorHandler(ProcessErrorEventArgs args)
     {
-        logger.LogError("Error handling {namespace}.{job}: {error}", nameof(CheckOcrScreeningStatus), nameof(UpdatePodioItemBackgroundJob), args.Exception.ToString());
+        logger.LogError("Error handling {namespace}.{job}: {error}", nameof(CheckOcrScreeningStatus), nameof(NotificationDispatcherBackgroundService), args.Exception.ToString());
         return Task.CompletedTask;
+    }
+    
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Starting {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(NotificationDispatcherBackgroundService));
+        return base.StartAsync(cancellationToken);
     }
     
     public override async Task StopAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Stopping {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(UpdatePodioItemBackgroundJob));
+        logger.LogInformation("Stopping {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(NotificationDispatcherBackgroundService));
 
         if (_processor is not null)
         {
@@ -77,11 +84,11 @@ internal class UpdatePodioItemBackgroundJob(
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to stop the {namespace}.{job} processor cleanly.", nameof(CheckOcrScreeningStatus), nameof(UpdatePodioItemBackgroundJob));
+                logger.LogWarning(ex, "Failed to stop the {namespace}.{job} processor cleanly.", nameof(CheckOcrScreeningStatus), nameof(NotificationDispatcherBackgroundService));
             }
         }
 
-        logger.LogInformation("{namespace}.{job} stopped.", nameof(CheckOcrScreeningStatus), nameof(UpdatePodioItemBackgroundJob));
+        logger.LogInformation("{namespace}.{job} stopped.", nameof(CheckOcrScreeningStatus), nameof(NotificationDispatcherBackgroundService));
         await base.StopAsync(stoppingToken);
     }
     

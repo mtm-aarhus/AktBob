@@ -1,4 +1,6 @@
-﻿using AktBob.Shared;
+﻿using Aktbob.Processors.CheckOcrScreeningStatus.Contracts;
+using Aktbob.Processors.CheckOcrScreeningStatus.Features.NotificationDispatcher;
+using AktBob.Shared;
 using Ardalis.GuardClauses;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
@@ -6,18 +8,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.EmailNotification;
+namespace Aktbob.Processors.CheckOcrScreeningStatus.Features.PodioNotification;
 
-internal class EmailNotificationBackgroundJob(
-    ILogger<EmailNotificationBackgroundJob> logger,
+internal class PodioNotificationBackgroundService(
+    ILogger<PodioNotificationBackgroundService> logger,
     IConfiguration configuration,
     IServiceScopeFactory scopeFactory) : BackgroundService
 {
     private ServiceBusProcessor? _processor;
     private ServiceBusClient? _client;
     private readonly string _connectionString = Guard.Against.NullOrEmpty(configuration.GetConnectionString("AzureServiceBus"));
-    private readonly string _queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:EmailNotification"));
-    
+    private readonly string _queueName = Guard.Against.NullOrEmpty(configuration.GetValue<string>("CheckOcrScreeningStatus:ServiceBusQueueNames:PodioNotification"));
 
     private readonly ServiceBusClientOptions _serviceBusClientOptions = new()
     {
@@ -40,10 +41,10 @@ internal class EmailNotificationBackgroundJob(
         try
         {
             using var scope =  scopeFactory.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<EmailNotificationHandler>();
+            var handler = scope.ServiceProvider.GetRequiredService<PodioNotificationHandler>();
             logger.LogInformation("Received: {body}", args.Message.Body.ToString());
         
-            var job = MessageDeserializer.Deserialize<EmailNotificationJob>(args.Message);
+            var job = MessageDeserializer.Deserialize<PodioNotificationJob>(args.Message);
             var result = await handler.Run(job, args.CancellationToken);
             if (result.IsError)
             {
@@ -62,13 +63,19 @@ internal class EmailNotificationBackgroundJob(
 
     private Task ErrorHandler(ProcessErrorEventArgs args)
     {
-        logger.LogError("Error handling {namespace}.{job}: {error}", nameof(CheckOcrScreeningStatus), nameof(EmailNotificationBackgroundJob), args.Exception.ToString());
+        logger.LogError("Error handling {namespace}.{job}: {error}", nameof(CheckOcrScreeningStatus), nameof(PodioNotificationBackgroundService), args.Exception.ToString());
         return Task.CompletedTask;
+    }
+    
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Starting {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(PodioNotificationBackgroundService));
+        return base.StartAsync(cancellationToken);
     }
     
     public override async Task StopAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Stopping {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(EmailNotificationBackgroundJob));
+        logger.LogInformation("Stopping {namespace}.{job} processor...", nameof(CheckOcrScreeningStatus), nameof(PodioNotificationBackgroundService));
 
         if (_processor is not null)
         {
@@ -78,11 +85,11 @@ internal class EmailNotificationBackgroundJob(
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, "Failed to stop the {namespace}.{job} processor cleanly.", nameof(CheckOcrScreeningStatus), nameof(EmailNotificationBackgroundJob));
+                logger.LogWarning(ex, "Failed to stop the {namespace}.{job} processor cleanly.", nameof(CheckOcrScreeningStatus), nameof(PodioNotificationBackgroundService));
             }
         }
 
-        logger.LogInformation("{namespace}.{job} stopped.", nameof(CheckOcrScreeningStatus), nameof(EmailNotificationBackgroundJob));
+        logger.LogInformation("{namespace}.{job} stopped.", nameof(CheckOcrScreeningStatus), nameof(PodioNotificationBackgroundService));
         await base.StopAsync(stoppingToken);
     }
     
