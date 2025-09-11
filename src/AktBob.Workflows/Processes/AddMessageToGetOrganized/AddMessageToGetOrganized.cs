@@ -124,11 +124,11 @@ internal class AddMessageToGetOrganized(
             // Note: the attachments handler also finalizing the parent document
             jobDispatcher.Dispatch(new ProcessMessageAttachmentsJob(uploadedDocumentIdResult.Value, job.CaseNumber, deskproMessage.CreatedAt, documentCategory, attachments));
         }
-        else
-        {
-            // Finalize the parent document
-            getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value, false);
-        }
+        // else
+        // {
+        //     // Finalize the parent document
+        //     getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value, false);
+        // }
         
         _logger.LogInformation("Document added to GetOrganized for ticket {ticket} message {message}.", job.TicketId, job.MessageId);
     }

@@ -1,9 +1,9 @@
-﻿namespace AktBob.Shared.Jobs;
+﻿namespace AktBob.Shared.Contracts.Processors.GetOrganized;
 public record AddOrUpdateDeskproTicketToGetOrganizedJob
 {
     public DateTime SubmittedAt { get; } = DateTime.UtcNow;
-    public int TicketId { get; set; }
-    public string GOCaseNumber { get; set; } = string.Empty;
-    public int[] CustomFieldIds { get; set; } = Array.Empty<int>();
-    public int[] CaseNumberFieldIds { get; set; } = Array.Empty<int>();
+    public int TicketId { get; init; }
+    public string GOCaseNumber { get; init; } = string.Empty;
+    public int[] CustomFieldIds { get; init; } = [];
+    public int[] CaseNumberFieldIds { get; init; } = [];
 }

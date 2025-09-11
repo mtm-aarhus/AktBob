@@ -4,17 +4,9 @@ using Microsoft.Extensions.Logging;
 
 namespace AktBob.GetOrganized.Handlers.UploadDocument;
 
-internal class UploadDocumentHandlerException : IUploadDocumentHandler
+internal class UploadDocumentHandlerException(IUploadDocumentHandler next, ILogger<UploadDocumentHandler> logger)
+    : IUploadDocumentHandler
 {
-    private readonly IUploadDocumentHandler _next;
-    private readonly ILogger<UploadDocumentHandler> _logger;
-
-    public UploadDocumentHandlerException(IUploadDocumentHandler next, ILogger<UploadDocumentHandler> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task<ErrorOr<int>> Handle(
         byte[] bytes,
         string caseNumber,
@@ -27,7 +19,7 @@ internal class UploadDocumentHandlerException : IUploadDocumentHandler
     {
         try
         {
-            return await _next.Handle(
+            return await next.Handle(
                 bytes,
                 caseNumber,
                 fileName,
@@ -39,7 +31,7 @@ internal class UploadDocumentHandlerException : IUploadDocumentHandler
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in {name}", nameof(GetCaseMetadata));
+            logger.LogError(ex, "Error in {name}", nameof(UploadDocumentHandler));
             return Error.Failure("GetOrganized.UpdateCaseMetadataHandler", $"Failed to upload document {fileName} to case {caseNumber}.");
         }
     }

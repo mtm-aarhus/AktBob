@@ -1,6 +1,6 @@
 ﻿using AktBob.GetOrganized.Contracts;
+using AktBob.Shared.Contracts.Processors.GetOrganized;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.Jobs;
 
 namespace AktBob.Workflows.Processes;
 internal class UpdateGetOrganizedCaseSetKleValue(IServiceScopeFactory scopeFactory, IConfiguration configuration) : IJobHandler<UpdateGetOrganizedCaseSetKleValueJob>

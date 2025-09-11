@@ -1,7 +1,6 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.GetOrganized.Contracts;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.Jobs;
 using System.Text;
 using System.Globalization;
 using AktBob.CloudConvert.Contracts;
@@ -12,6 +11,7 @@ using Aktbob.Modules.Deskpro.Features.GetPersonByEmail;
 using Aktbob.Modules.Deskpro.Features.GetPersonById;
 using Aktbob.Modules.Deskpro.Features.GetTicket;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
+using AktBob.Shared.Contracts.Processors.GetOrganized;
 
 namespace AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 internal class AddOrUpdateDeskproTicketToGetOrganized(ILogger<AddOrUpdateDeskproTicketToGetOrganized> logger, IServiceScopeFactory serviceScopeFactory) : IJobHandler<AddOrUpdateDeskproTicketToGetOrganizedJob>

@@ -1,8 +1,8 @@
 ﻿using AktBob.Database.Contracts;
 using AktBob.Database.Entities;
 using Aktbob.Modules.Deskpro.Features.GetMessages;
+using AktBob.Shared.Contracts.Processors.GetOrganized;
 using AktBob.Shared.Extensions;
-using AktBob.Shared.Jobs;
 
 namespace AktBob.Workflows.Processes.AddMessageToGetOrganized;
 internal class RegisterMessages(IServiceScopeFactory serviceScopeFactory, ILogger<RegisterMessages> logger) : IJobHandler<RegisterMessagesJob>

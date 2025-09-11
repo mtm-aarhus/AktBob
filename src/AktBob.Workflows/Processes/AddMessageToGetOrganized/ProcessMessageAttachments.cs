@@ -63,9 +63,9 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
             childrenDocumentIds.Add(uploadedDocumentIdResult.Value);
 
             // Finalize the attachment
-            getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value, false);
+            // getOrganized.FinalizeDocument(uploadedDocumentIdResult.Value, false);
             
-            _logger.LogInformation("Attachmenta added for GetOrganized case {caseNumber} document {documentId}: {filename}", job.CaseNumber, job.ParentDocumentId, attachment.FileName);
+            _logger.LogInformation("Attachment added for GetOrganized case {caseNumber} document {documentId}: {filename}", job.CaseNumber, job.ParentDocumentId, attachment.FileName);
         }
 
         if (childrenDocumentIds.Count > 0)
@@ -78,6 +78,6 @@ internal class ProcessMessageAttachments(IServiceScopeFactory serviceScopeFactor
 
         // Finalize the parent document
         // The parent document must not be finalized before the attachments has been set as children
-        getOrganized.FinalizeDocument(job.ParentDocumentId, false);
+        // getOrganized.FinalizeDocument(job.ParentDocumentId, false);
     }
 }

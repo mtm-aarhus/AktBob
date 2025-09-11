@@ -1,5 +1,4 @@
-﻿using AktBob.Shared.Jobs;
-using AktBob.GetOrganized.Contracts;
+﻿using AktBob.GetOrganized.Contracts;
 using AktBob.Database.Contracts;
 using System.Text.Json;
 using Hangfire;
@@ -7,6 +6,7 @@ using AktBob.Shared.Extensions;
 using Aktbob.Modules.Deskpro.Features.GetTicket;
 using Aktbob.Modules.Deskpro.Features.InvokeWebhook;
 using AktBob.Shared.Contracts.Modules.Deskpro.DTOs;
+using AktBob.Shared.Contracts.Processors.GetOrganized;
 
 namespace AktBob.Workflows.Processes;
 internal class CreateGetOrganizedCase(

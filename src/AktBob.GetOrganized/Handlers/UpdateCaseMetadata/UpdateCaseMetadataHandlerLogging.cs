@@ -3,26 +3,20 @@ using Microsoft.Extensions.Logging;
 
 namespace AktBob.GetOrganized.Handlers.UpdateCaseMetadata;
 
-internal class UpdateCaseMetadataHandlerLogging : IUpdateCaseMetadataHandler
+internal class UpdateCaseMetadataHandlerLogging(
+    IUpdateCaseMetadataHandler next,
+    ILogger<UpdateCaseMetadataHandler> logger)
+    : IUpdateCaseMetadataHandler
 {
-    private readonly IUpdateCaseMetadataHandler _next;
-    private readonly ILogger<UpdateCaseMetadataHandler> _logger;
-
-    public UpdateCaseMetadataHandlerLogging(IUpdateCaseMetadataHandler next, ILogger<UpdateCaseMetadataHandler> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-    
     public async Task<ErrorOr<Success>> Handle(string caseId, Guid kleId, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Update GetOrganized case {id} metadata: Kle = {kle}", caseId, kleId);
+        logger.LogInformation("Update GetOrganized case {id} metadata: Kle = {kle}", caseId, kleId);
 
-        var result = await _next.Handle(caseId, kleId, cancellationToken);
+        var result = await next.Handle(caseId, kleId, cancellationToken);
 
         result.Switch(
-            _ => _logger.LogInformation("GetOrganized case {id} metadata updated", caseId),
-            errors => _logger.LogError("Error updating GetOrganized case {id} metadata", caseId));
+            _ => logger.LogInformation("GetOrganized case {id} metadata updated", caseId),
+            errors => logger.LogError("Error updating GetOrganized case {id} metadata", caseId));
 
         return result;
     }

@@ -1,5 +1,5 @@
 ﻿using AktBob.Shared;
-using AktBob.Shared.Jobs;
+using AktBob.Shared.Contracts.Processors.GetOrganized;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 

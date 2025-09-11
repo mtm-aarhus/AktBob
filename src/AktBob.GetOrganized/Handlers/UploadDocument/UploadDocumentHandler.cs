@@ -1,11 +1,10 @@
 ﻿using AAK.GetOrganized;
 using AAK.GetOrganized.UploadDocument;
 using AktBob.GetOrganized.Contracts;
-using AktBob.GetOrganized.Handlers.UploadDocument;
 using ErrorOr;
 using Microsoft.Extensions.Configuration;
 
-namespace AktBob.GetOrganized.Handlers;
+namespace AktBob.GetOrganized.Handlers.UploadDocument;
 internal class UploadDocumentHandler(IConfiguration configuration, IGetOrganizedClient getOrganizedClient) : IUploadDocumentHandler
 {
     public async Task<ErrorOr<int>> Handle(

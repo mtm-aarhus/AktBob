@@ -5,17 +5,8 @@ using Microsoft.Extensions.Logging;
 
 namespace AktBob.GetOrganized.Handlers.CreateCase;
 
-internal class CreateCaseHandlerLogging : ICreateCaseHandler
+internal class CreateCaseHandlerLogging(ICreateCaseHandler next, ILogger<CreateCaseHandler> logger) : ICreateCaseHandler
 {
-    private readonly ICreateCaseHandler _next;
-    private readonly ILogger<CreateCaseHandler> _logger;
-
-    public CreateCaseHandlerLogging(ICreateCaseHandler next, ILogger<CreateCaseHandler> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-    
     public async Task<ErrorOr<CreateCaseResponse>> Handle(
         string caseTitle,
         string caseProfile,
@@ -26,9 +17,9 @@ internal class CreateCaseHandlerLogging : ICreateCaseHandler
         string kle,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Creating GetOrganized case: {title}", caseTitle);
+        logger.LogInformation("Creating GetOrganized case: {title}", caseTitle);
 
-        var result = await _next.Handle(
+        var result = await next.Handle(
             caseTitle,
             caseProfile,
             status,
@@ -39,8 +30,8 @@ internal class CreateCaseHandlerLogging : ICreateCaseHandler
             cancellationToken);
         
         result.Switch(
-            _ => _logger.LogInformation("GetOrganized case {caseId} created ({caseTitle})", result.Value.CaseId, caseTitle),
-            errors =>  _logger.LogDebug("{name}: {errors}", nameof(CreateCase), errors.ToCommaDelimitedString()));
+            _ => logger.LogInformation("GetOrganized case {caseId} created ({caseTitle})", result.Value.CaseId, caseTitle),
+            errors =>  logger.LogDebug("{name}: {errors}", nameof(CreateCase), errors.ToCommaDelimitedString()));
 
         return result;
     }

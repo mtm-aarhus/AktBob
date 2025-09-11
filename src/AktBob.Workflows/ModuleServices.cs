@@ -1,4 +1,5 @@
-﻿using AktBob.Shared.Jobs;
+﻿using AktBob.Shared.Contracts.Processors;
+using AktBob.Shared.Contracts.Processors.GetOrganized;
 using AktBob.Workflows.Processes.AddOrUpdateDeskproTicketToGetOrganized;
 using AktBob.Workflows.Processes.AddMessageToGetOrganized;
 using AktBob.Workflows.Processes;

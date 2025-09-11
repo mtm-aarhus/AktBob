@@ -5,17 +5,8 @@ using Microsoft.Extensions.Logging;
 
 namespace  AktBob.GetOrganized.Handlers.UploadDocument;
 
-internal class UploadDocumentHandlerLogging : IUploadDocumentHandler
+internal class UploadDocumentHandlerLogging(IUploadDocumentHandler next, ILogger<UploadDocumentHandler> logger) : IUploadDocumentHandler
 {
-    private readonly IUploadDocumentHandler _next;
-    private readonly ILogger<UploadDocumentHandler> _logger;
-
-    public UploadDocumentHandlerLogging(IUploadDocumentHandler next, ILogger<UploadDocumentHandler> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-    
     public async Task<ErrorOr<int>> Handle(
         byte[] bytes,
         string caseNumber,
@@ -26,9 +17,9 @@ internal class UploadDocumentHandlerLogging : IUploadDocumentHandler
         bool overwriteExisting,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Uploading document to GetOrganized case. CaseId = {caseId}, Filename = {filename}", caseNumber, fileName);
+        logger.LogInformation("Uploading document to GetOrganized case. CaseId = {caseId}, Filename = {filename}", caseNumber, fileName);
 
-        var result = await _next.Handle(
+        var result = await next.Handle(
             bytes,
             caseNumber,
             fileName,
@@ -39,8 +30,8 @@ internal class UploadDocumentHandlerLogging : IUploadDocumentHandler
             cancellationToken);
         
         result.Switch(
-            _ => _logger.LogInformation("Document uploaded to GetOrganized case {caseId}, DocumentId: {id}, Filename = {filename}", caseNumber, result.Value, fileName),
-            errors => _logger.LogWarning("{name}: {errors}", nameof(UploadDocument), result.Errors.ToCommaDelimitedString()));
+            _ => logger.LogInformation("Document uploaded to GetOrganized case {caseId}, DocumentId: {id}, Filename = {filename}", caseNumber, result.Value, fileName),
+            errors => logger.LogWarning("{name}: {errors}", nameof(UploadDocumentHandler), result.Errors.ToCommaDelimitedString()));
 
         return result;
     }

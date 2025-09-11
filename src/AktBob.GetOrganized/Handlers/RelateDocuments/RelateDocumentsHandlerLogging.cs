@@ -2,20 +2,12 @@
 
 namespace AktBob.GetOrganized.Handlers.RelateDocuments;
 
-internal class RelateDocumentsHandlerLogging : IRelateDocumentsHandler
+internal class RelateDocumentsHandlerLogging(IRelateDocumentsHandler next, ILogger<RelateDocumentsHandler> logger)
+    : IRelateDocumentsHandler
 {
-    private readonly IRelateDocumentsHandler _next;
-    private readonly ILogger<RelateDocumentsHandler> _logger;
-
-    public RelateDocumentsHandlerLogging(IRelateDocumentsHandler next, ILogger<RelateDocumentsHandler> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-    
     public async Task Handle(int parentDocumentId, int[] childrenDocumentsIds, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Relating GetOrganized documents. Parent: {parentId}. Children: {children}", parentDocumentId, childrenDocumentsIds);
-        await _next.Handle(parentDocumentId, childrenDocumentsIds, cancellationToken);
+        logger.LogInformation("Relating GetOrganized documents. Parent: {parentId}. Children: {children}", parentDocumentId, childrenDocumentsIds);
+        await next.Handle(parentDocumentId, childrenDocumentsIds, cancellationToken);
     }
 }

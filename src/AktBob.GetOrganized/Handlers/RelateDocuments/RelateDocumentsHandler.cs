@@ -6,7 +6,7 @@ internal class RelateDocumentsHandler(IGetOrganizedClient getOrganizedClient) : 
 {
     public async Task Handle(int parentDocumentId, int[] childrenDocumentsIds, CancellationToken cancellationToken = default)
     {
-        if (childrenDocumentsIds.Any())
+        if (childrenDocumentsIds.Length != 0)
         {
             await getOrganizedClient.RelateDocuments(parentDocumentId, childrenDocumentsIds, RelationType.Bilag, cancellationToken);
         }
