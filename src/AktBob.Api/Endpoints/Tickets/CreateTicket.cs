@@ -19,6 +19,14 @@ internal static class CreateTicket
         [FromServices] ITicketRepository repository,
         CancellationToken cancellationToken)
     {
+        // Check if ticket already has been registered
+        var existingTicket = await repository.GetByDeskproTicketId(request.DeskproId);
+        if (existingTicket is not null)
+        {
+            return Results.NoContent();
+        }
+        
+        // Register new ticket
         var ticket = new Ticket
         {
             DeskproId = request.DeskproId
